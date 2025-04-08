@@ -12,6 +12,7 @@
         "resolveJsonModule": true,
         "isolatedModules": true,
         "jsx": "preserve",
+        "jsxImportSource": "@emotion/react",
         "incremental": true,
         "plugins": [
             {
@@ -31,7 +32,7 @@
         "**/*.tsx",
         ".next/types/**/*.ts",
         "contentlayer.config.ts",
-        "next.config.js"
+        "next.config.mjs"
     ],
     "exclude": ["node_modules"]
 }
