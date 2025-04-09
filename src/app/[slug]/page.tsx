@@ -14,15 +14,16 @@ export async function generateStaticParams() {
 
 export default async function PostPage(props: Props) {
     const { slug } = await props.params;
-
     const post = allPosts.find((post) => post.slug === slug);
     if (!post) return notFound();
 
     return (
-        <article className="prose mx-auto p-8">
-            <h1 className="text-2xl font-bold mb-4">{post.title}</h1>
-            <p>{post.description}</p>
-            <MDXRenderer code={post.body.code} />
-        </article>
+        <MDXRenderer
+            title={post.title}
+            date={post.date}
+            description={post.description}
+            tags={post.tags}
+            code={post.body.code}
+        />
     );
 }
