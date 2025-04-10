@@ -131,7 +131,7 @@ const Wrapper = styled.header<{ scrollRatio: number }>`
         height: 3rem;
 
         &:hover {
-            background-color: lightgray;
+            background-color: #eeeeee;
             transition: 0.1s ease-in-out;
         }
     }
