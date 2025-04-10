@@ -21,11 +21,23 @@ export default function MDXRenderer({ title, date, description, tags, code }: Pr
     return (
         <Article>
             <h1>{title}</h1>
-            <div className="article-header">
-                <Image src="/icons/calendar.svg" alt="달력 아이콘" width={18} height={18} className="header-icon" />
+            <div className="article-detail">
+                <Image
+                    src="/icons/calendar.svg"
+                    alt="달력 아이콘"
+                    width={18}
+                    height={18}
+                    className="article-detail-icon"
+                />
                 <p>{formattedDate}</p>
                 <ul>
-                    <Image src="/icons/tag.svg" alt="달력 아이콘" width={18} height={18} className="header-icon" />
+                    <Image
+                        src="/icons/tag.svg"
+                        alt="달력 아이콘"
+                        width={18}
+                        height={18}
+                        className="article-detail-icon"
+                    />
                     {tags?.map((tag) => (
                         <li key={tag}>
                             <Link href={`/?tag=${tag}`}>{"#" + tag}</Link>

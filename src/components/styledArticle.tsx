@@ -10,13 +10,13 @@ export const Article = styled.article`
     line-height: 2;
     color: #1a1a1a;
 
-    .article-header {
+    .article-detail {
         display: flex;
         align-items: center;
         margin-bottom: 2rem;
         gap: 0.5rem;
 
-        .header-icon {
+        .article-detail-icon {
             border-radius: 0;
             margin-right: 0.2rem;
         }
