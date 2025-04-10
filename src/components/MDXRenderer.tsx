@@ -24,20 +24,14 @@ export default function MDXRenderer({ title, date, description, tags, code }: Pr
             <div className="article-detail">
                 <Image
                     src="/icons/calendar.svg"
-                    alt="달력 아이콘"
+                    alt="calendar icon"
                     width={18}
                     height={18}
                     className="article-detail-icon"
                 />
                 <p>{formattedDate}</p>
                 <ul>
-                    <Image
-                        src="/icons/tag.svg"
-                        alt="달력 아이콘"
-                        width={18}
-                        height={18}
-                        className="article-detail-icon"
-                    />
+                    <Image src="/icons/tag.svg" alt="tag icon" width={18} height={18} className="article-detail-icon" />
                     {tags?.map((tag) => (
                         <li key={tag}>
                             <Link href={`/?tag=${tag}`}>{"#" + tag}</Link>
