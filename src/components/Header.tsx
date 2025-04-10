@@ -40,21 +40,21 @@ export default function Header() {
                         <Link href={`/`}>
                             {" "}
                             <Image
-                                src="/icons/tag.svg"
-                                alt="hamburger icon"
-                                width={24}
-                                height={24}
+                                src="/icons/mublog.svg"
+                                alt="mublog icon"
+                                width={32}
+                                height={32}
                                 className="article-detail-icon"
                             />
                         </Link>
                         <DiagonalLine />
-                        <Link href={`/`}>
+                        <Link href={`https://github.com/Muring`}>
                             {" "}
                             <Image
-                                src="/icons/tag.svg"
-                                alt="hamburger icon"
-                                width={24}
-                                height={24}
+                                src="/icons/github.svg"
+                                alt="github icon"
+                                width={32}
+                                height={32}
                                 className="article-detail-icon"
                             />
                         </Link>
@@ -97,7 +97,7 @@ const Wrapper = styled.header<{ scrollRatio: number }>`
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 0.5rem;
+            gap: 1rem;
         }
 
         /* 밑줄 효과 */
@@ -126,8 +126,9 @@ const Wrapper = styled.header<{ scrollRatio: number }>`
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 1rem;
         border-radius: 0.5rem;
+        width: 3rem;
+        height: 3rem;
 
         &:hover {
             background-color: lightgray;
