@@ -3,6 +3,9 @@
 
 import { useEffect, useState } from "react";
 import styled from "@emotion/styled";
+import Image from "next/image";
+import Link from "next/link";
+import DiagonalLine from "./Diagonalline";
 
 export default function Header() {
     const [scrollRatio, setScrollRatio] = useState(0);
@@ -22,7 +25,41 @@ export default function Header() {
     return (
         <Wrapper scrollRatio={scrollRatio}>
             <nav>
-                <h1>My Blog</h1>
+                <div className="menu">
+                    <Link href={`/`}>
+                        <Image
+                            src="/icons/hamburger-menu.svg"
+                            alt="hamburger icon"
+                            width={24}
+                            height={24}
+                            className="article-detail-icon"
+                        />
+                    </Link>
+
+                    <div className="fast-route-container">
+                        <Link href={`/`}>
+                            {" "}
+                            <Image
+                                src="/icons/tag.svg"
+                                alt="hamburger icon"
+                                width={24}
+                                height={24}
+                                className="article-detail-icon"
+                            />
+                        </Link>
+                        <DiagonalLine />
+                        <Link href={`/`}>
+                            {" "}
+                            <Image
+                                src="/icons/tag.svg"
+                                alt="hamburger icon"
+                                width={24}
+                                height={24}
+                                className="article-detail-icon"
+                            />
+                        </Link>
+                    </div>
+                </div>
             </nav>
         </Wrapper>
     );
@@ -48,6 +85,21 @@ const Wrapper = styled.header<{ scrollRatio: number }>`
         height: 64px;
         margin: 0 auto;
 
+        .menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+            padding: 0.5rem;
+        }
+
+        .fast-route-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         /* 밑줄 효과 */
         &::after {
             content: "";
@@ -68,5 +120,18 @@ const Wrapper = styled.header<{ scrollRatio: number }>`
     h1 {
         font-size: 1.25rem;
         font-weight: bold;
+    }
+
+    a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 0.5rem;
+
+        &:hover {
+            background-color: lightgray;
+            transition: 0.1s ease-in-out;
+        }
     }
 `;
