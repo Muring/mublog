@@ -11,24 +11,50 @@ export const Article = styled.article`
     color: #1a1a1a;
 
     .article-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 0.5rem;
+
+        .header-icon {
+            border-radius: 0;
+            margin-right: 0.2rem;
+        }
+
+        p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        ul {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
         li {
+            display: flex;
+            align-items: center;
             color: black;
             list-style-type: none;
+            margin: 0;
         }
 
         a {
             background-color: lightgray;
             border-radius: 8px;
-            padding: 0.2rem 0.4rem;
+            padding: 0 0.4rem;
             font-size: 0.8rem;
-            color: #525252 !important;
+            color: #5e5e5e !important;
             text-decoration: none;
             font-weight: bold;
 
             &:hover {
                 text-decoration: none !important;
                 background-color: #c5c5c5 !important;
-                transition-duration: 0.3s;
+                transition-duration: 0.2s;
             }
         }
     }

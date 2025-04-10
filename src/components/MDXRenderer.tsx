@@ -2,6 +2,7 @@
 
 import { useMDXComponent } from "next-contentlayer/hooks";
 import { Article } from "./styledArticle";
+import Image from "next/image";
 import Link from "next/link";
 import dayjs from "dayjs";
 
@@ -21,11 +22,13 @@ export default function MDXRenderer({ title, date, description, tags, code }: Pr
         <Article>
             <h1>{title}</h1>
             <div className="article-header">
+                <Image src="/icons/calendar.svg" alt="달력 아이콘" width={18} height={18} className="header-icon" />
                 <p>{formattedDate}</p>
                 <ul>
+                    <Image src="/icons/tag.svg" alt="달력 아이콘" width={18} height={18} className="header-icon" />
                     {tags?.map((tag) => (
                         <li key={tag}>
-                            <Link href={`/`}>{tag}</Link>
+                            <Link href={`/?tag=${tag}`}>{"#" + tag}</Link>
                         </li>
                     ))}
                 </ul>
