@@ -10,11 +10,16 @@ export const Article = styled.article`
     line-height: 2;
     color: #1a1a1a;
 
+    .desc {
+        color: gray;
+    }
+
     .article-detail {
         display: flex;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
         gap: 0.5rem;
+        height: 2rem;
 
         .article-detail-icon {
             border-radius: 0;
@@ -62,7 +67,7 @@ export const Article = styled.article`
     h1 {
         font-size: 2rem;
         font-weight: 700;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .description {

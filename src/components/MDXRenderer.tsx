@@ -21,6 +21,7 @@ export default function MDXRenderer({ title, date, description, tags, code }: Pr
     return (
         <Article>
             <h1>{title}</h1>
+            <p className="desc">{description}</p>
             <div className="article-detail">
                 <Image
                     src="/icons/calendar.svg"
@@ -39,7 +40,6 @@ export default function MDXRenderer({ title, date, description, tags, code }: Pr
                     ))}
                 </ul>
             </div>
-            <p>{description}</p>
             <MDXContent />
         </Article>
     );
