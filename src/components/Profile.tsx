@@ -60,5 +60,9 @@ const Wrapper = styled.div`
         justify-content: baseline;
         align-items: center;
         gap: 0.3rem;
+
+        &:hover {
+            text-decoration-line: underline;
+        }
     }
 `;
