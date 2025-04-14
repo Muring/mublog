@@ -5,7 +5,7 @@ import styled from "@emotion/styled";
 export const Article = styled.article`
     max-width: 720px;
     margin: 0 auto;
-    padding: 4rem 1rem;
+    padding: 4rem 2rem;
     font-family: "Noto Sans KR", "Pretendard", sans-serif;
     line-height: 2;
     color: #1a1a1a;

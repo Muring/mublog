@@ -66,17 +66,19 @@ export default function Header() {
 }
 
 const Wrapper = styled.header<{ scrollRatio: number }>`
-    position: fixed;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    top: 0;
-    width: 100%;
-    z-index: 50;
+    width: 100vw;
     background-color: white;
 
     nav {
         display: flex;
+        position: relative;
         justify-content: space-between;
         align-items: center;
         width: 100%;
