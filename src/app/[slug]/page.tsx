@@ -1,6 +1,6 @@
 import { allPosts } from "contentlayer/generated";
 import { notFound } from "next/navigation";
-import MDXRenderer from "@/components/MDXRenderer";
+import PostContent from "@/components/PostContent/PostContent";
 
 type Props = {
     params: Promise<{ slug: string }>;
@@ -18,12 +18,14 @@ export default async function PostPage(props: Props) {
     if (!post) return notFound();
 
     return (
-        <MDXRenderer
-            title={post.title}
-            date={post.date}
-            description={post.description}
-            tags={post.tags}
-            code={post.body.code}
-        />
+        <div>
+            <PostContent
+                title={post.title}
+                date={post.date}
+                description={post.description}
+                tags={post.tags}
+                code={post.body.code}
+            />
+        </div>
     );
 }

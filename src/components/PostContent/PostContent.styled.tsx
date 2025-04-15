@@ -5,8 +5,7 @@ import styled from "@emotion/styled";
 export const Article = styled.article`
     max-width: 720px;
     margin: 0 auto;
-    padding: 4rem 1rem;
-    font-family: "Noto Sans KR", "Pretendard", sans-serif;
+    padding: 4rem 2rem;
     line-height: 2;
     color: #1a1a1a;
 
@@ -152,7 +151,7 @@ export const Article = styled.article`
 
     hr {
         border: none;
-        border-top: 1px solid #e2e2e2; /* 원하는 색상으로 변경 */
+        border-top: 1px solid #e9e9e9; /* 원하는 색상으로 변경 */
         margin: 2rem 0;
     }
 `;

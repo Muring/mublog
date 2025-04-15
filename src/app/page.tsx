@@ -1,11 +1,12 @@
 // src/app/blog/page.tsx
+import Profile from "@/components/Profile/Profile";
 import { allPosts } from "contentlayer/generated";
 import Link from "next/link";
 
-export default function BlogPage() {
+export default function Home() {
     return (
-        <div className="p-8">
-            <h1 className="text-2xl font-bold">Blog Posts</h1>
+        <div>
+            <Profile />
             <ul>
                 {allPosts.map((post) => (
                     <li key={post._id}>
