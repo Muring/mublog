@@ -6,13 +6,13 @@ export const CardWrapper = styled.article`
     border-radius: 12px;
     overflow: hidden;
     background-color: white;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0px 3px 5px -2px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease;
     cursor: pointer;
 
     &:hover {
         transform: translateY(-4px);
-        box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+        box-shadow: 0px 6px 5px -2px rgba(0, 0, 0, 0.1);
         transition: 0.2s ease-in-out;
     }
 
