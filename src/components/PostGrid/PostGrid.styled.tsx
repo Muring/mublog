@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 
 export const PostGridWrapper = styled.div`
     max-width: 1200px;
+    min-height: 80vh;
     margin: 0 auto;
     padding: 0 1rem;
 `;

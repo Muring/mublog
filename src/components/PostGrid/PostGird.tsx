@@ -11,11 +11,7 @@ export default function PostGrid() {
     const searchParams = useSearchParams();
     const selectedTag = searchParams.get("tag");
 
-    const tags = [
-        "all",
-        ...Array.from(new Set(allPosts.flatMap((post) => post.tags ?? []))).sort(),
-    ];
-
+    const tags = Array.from(new Set(allPosts.flatMap((post) => post.tags ?? []))).sort();
     const filteredPosts =
         !selectedTag || selectedTag === "all"
             ? allPosts

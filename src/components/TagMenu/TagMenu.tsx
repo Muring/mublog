@@ -11,6 +11,12 @@ type TagMenuProps = {
 export default function TagMenu({ tags, selectedTag }: TagMenuProps) {
     return (
         <TagWrapper>
+            {/* All 태그 */}
+            <Link href="/" className={!selectedTag ? "active" : ""}>
+                all
+            </Link>
+
+            {/* 실제 태그 리스트 */}
             {tags.map((tag) => (
                 <Link
                     key={tag}

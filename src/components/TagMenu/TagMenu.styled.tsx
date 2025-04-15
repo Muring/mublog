@@ -8,14 +8,14 @@ export const TagWrapper = styled.div`
     padding: 1rem;
 
     a {
-        padding: 0.3rem 0.5rem;
+        padding: 0.3rem 0.6rem;
         border-radius: 0.5rem;
         font-size: 0.9rem;
         font-weight: 600;
     }
 
     a:hover {
-        background-color: #eeeeee;
+        background-color: #f8f8f8;
         transition: 0.1s ease-in-out;
     }
 
