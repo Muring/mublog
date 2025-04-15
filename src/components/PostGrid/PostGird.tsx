@@ -1,10 +1,11 @@
 "use client";
 
-import { PostGridWrapper, GirdList } from "./PostGrid.styled";
+import { PostGridWrapper, GridList } from "./PostGrid.styled";
 import { useSearchParams } from "next/navigation";
 import { allPosts } from "contentlayer/generated";
 import TagMenu from "@/components/TagMenu/TagMenu";
 import Link from "next/link";
+import PostCard from "../PostCard/PostCard";
 
 export default function PostGrid() {
     const searchParams = useSearchParams();
@@ -23,13 +24,15 @@ export default function PostGrid() {
     return (
         <PostGridWrapper>
             <TagMenu tags={tags} selectedTag={selectedTag} />
-            <GirdList>
+            <GridList>
                 {filteredPosts.map((post) => (
                     <li key={post._id}>
-                        <Link href={`/${post.slug}`}>{post.title}</Link>
+                        <Link href={`/${post.slug}`}>
+                            <PostCard post={post} />
+                        </Link>
                     </li>
                 ))}
-            </GirdList>
+            </GridList>
         </PostGridWrapper>
     );
 }
