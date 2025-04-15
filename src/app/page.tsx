@@ -1,19 +1,13 @@
-// src/app/blog/page.tsx
+// src/app/page.tsx
+
 import Profile from "@/components/Profile/Profile";
-import { allPosts } from "contentlayer/generated";
-import Link from "next/link";
+import PostGrid from "@/components/PostGrid/PostGird";
 
 export default function Home() {
     return (
-        <div>
+        <div className="home">
             <Profile />
-            <ul>
-                {allPosts.map((post) => (
-                    <li key={post._id}>
-                        <Link href={`/${post.slug}`}>{post.title}</Link>
-                    </li>
-                ))}
-            </ul>
+            <PostGrid />
         </div>
     );
 }
