@@ -48,3 +48,14 @@ a {
         color-scheme: dark;
     }
 }
+
+li {
+    list-style-type: none;
+}
+
+.home {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}

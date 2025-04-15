@@ -42,7 +42,7 @@ export const Article = styled.article`
             display: flex;
             align-items: center;
             color: black;
-            list-style-type: none;
+
             margin: 0;
         }
 
