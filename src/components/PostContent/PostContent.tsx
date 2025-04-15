@@ -1,7 +1,7 @@
 "use client";
 
 import { useMDXComponent } from "next-contentlayer/hooks";
-import { Article } from "./styledArticle";
+import { Article } from "./PostContent.styled";
 import Image from "next/image";
 import Link from "next/link";
 import dayjs from "dayjs";
@@ -14,7 +14,7 @@ type Props = {
     code: string;
 };
 
-export default function MDXRenderer({ title, date, description, tags, code }: Props) {
+export default function PostContent({ title, date, description, tags, code }: Props) {
     const MDXContent = useMDXComponent(code);
     const formattedDate = dayjs(date).format("YYYY년 M월 D일");
 

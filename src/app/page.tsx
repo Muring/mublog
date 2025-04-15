@@ -1,5 +1,5 @@
 // src/app/blog/page.tsx
-import Profile from "@/components/Profile";
+import Profile from "@/components/Profile/Profile";
 import { allPosts } from "contentlayer/generated";
 import Link from "next/link";
 
