@@ -11,9 +11,11 @@ export default function Header() {
 
     useEffect(() => {
         const handleScroll = () => {
-            const scrolled = window.scrollY;
-            const maxScroll = document.body.scrollHeight - window.innerHeight;
-            const ratio = Math.min(scrolled / maxScroll, 1);
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight;
+            const maxScroll = scrollHeight - clientHeight;
+            const ratio = Math.min(scrollTop / maxScroll, 1);
             setScrollRatio(ratio);
         };
 

@@ -32,7 +32,13 @@ export default function PostContent({ title, date, description, tags, code }: Pr
                 />
                 <p>{formattedDate}</p>
                 <ul>
-                    <Image src="/icons/tag.svg" alt="tag icon" width={18} height={18} className="article-detail-icon" />
+                    <Image
+                        src="/icons/tag.svg"
+                        alt="tag icon"
+                        width={18}
+                        height={18}
+                        className="article-detail-icon"
+                    />
                     {tags?.map((tag) => (
                         <li key={tag}>
                             <Link href={`/?tag=${tag}`}>{"#" + tag}</Link>

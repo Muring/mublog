@@ -1,19 +1,16 @@
 import styled from "@emotion/styled";
 
 export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
-    position: sticky;
+    position: fixed;
     top: 0;
     z-index: 50;
-    overflow: hidden;
-    display: flex;
     justify-content: center;
     align-items: center;
-    width: 100vw;
+    width: 100%;
     background-color: white;
 
     nav {
         display: flex;
-        position: relative;
         justify-content: space-between;
         align-items: center;
         width: 100%;
