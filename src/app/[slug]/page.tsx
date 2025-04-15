@@ -18,12 +18,14 @@ export default async function PostPage(props: Props) {
     if (!post) return notFound();
 
     return (
-        <PostContent
-            title={post.title}
-            date={post.date}
-            description={post.description}
-            tags={post.tags}
-            code={post.body.code}
-        />
+        <div>
+            <PostContent
+                title={post.title}
+                date={post.date}
+                description={post.description}
+                tags={post.tags}
+                code={post.body.code}
+            />
+        </div>
     );
 }

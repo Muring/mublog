@@ -2,7 +2,6 @@ import styled from "@emotion/styled";
 
 export const ProfileWrapper = styled.div`
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 1rem;
     padding: 2rem 0;

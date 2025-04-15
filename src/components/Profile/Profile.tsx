@@ -16,7 +16,7 @@ export default function Profile() {
                 className="article-detail-icon"
             />
             <div className="text-container">
-                <h3>무블로그</h3>
+                <h3>무링의 개발 블로그</h3>
                 <div className="contact">
                     {/* <p>010-2478-2335</p>
                     <p>esh5218@gmail.com</p> */}
