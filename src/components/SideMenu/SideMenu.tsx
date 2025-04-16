@@ -38,14 +38,14 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
                 </ButtonWrapper>
             </div>
 
-            <Link href={"/"} onClick={handleClose} className="side-menu-link">
+            <Link href="/" onClick={handleClose} className="side-menu-link">
                 Post
             </Link>
-            <Link href={"/about"} onClick={handleClose} className="side-menu-link">
+            <Link href="/about" onClick={handleClose} className="side-menu-link">
                 About me
             </Link>
 
-            <SideList title="Latest posts" />
+            <SideList title="Latest posts" onLinkClick={handleClose} />
         </MenuWrapper>
     );
 }

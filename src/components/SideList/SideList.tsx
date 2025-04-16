@@ -1,4 +1,4 @@
-// SideMenu.tsx
+// SideList.tsx
 "use client";
 
 import { allPosts } from "contentlayer/generated";
@@ -9,9 +9,10 @@ import dayjs from "dayjs";
 
 type Props = {
     title: string;
+    onLinkClick?: () => void;
 };
 
-export default function SideList({ title }: Props) {
+export default function SideList({ title, onLinkClick }: Props) {
     const latestPosts = allPosts
         .slice() // 원본 변경 방지
         .sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf())
@@ -26,7 +27,12 @@ export default function SideList({ title }: Props) {
                 </div>
                 <div className="side-list-content">
                     {latestPosts.map((post) => (
-                        <Link key={post._id} href={`/${post.slug}`} className="side-link">
+                        <Link
+                            key={post._id}
+                            href={`/${post.slug}`}
+                            className="side-link"
+                            onClick={onLinkClick}
+                        >
                             <SidePost
                                 title={post.title}
                                 desc={post.description}
