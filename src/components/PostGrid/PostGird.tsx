@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { PostGridWrapper, GridList } from "./PostGrid.styled";
 import { useSearchParams } from "next/navigation";
 import { allPosts } from "contentlayer/generated";
@@ -7,28 +8,47 @@ import TagMenu from "@/components/TagMenu/TagMenu";
 import Link from "next/link";
 import PostCard from "../PostCard/PostCard";
 
+const BATCH_SIZE = 6;
+
 export default function PostGrid() {
     const searchParams = useSearchParams();
     const selectedTag = searchParams.get("tag");
 
-    // 태그 etc 마지막 정렬
     const tags = Array.from(new Set(allPosts.flatMap((post) => post.tags ?? []))).sort((a, b) => {
         if (a === "etc") return 1;
         if (b === "etc") return -1;
         return a.localeCompare(b);
     });
 
-    // 태그 선택에 따른 포스트 불러오기
     const filteredPosts =
         !selectedTag || selectedTag === "all"
             ? allPosts
             : allPosts.filter((post) => post.tags?.includes(selectedTag));
 
+    const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+    const observerRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setVisibleCount((prev) => prev + BATCH_SIZE);
+                }
+            },
+            { threshold: 1 }
+        );
+
+        if (observerRef.current) observer.observe(observerRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    const visiblePosts = filteredPosts.slice(0, visibleCount);
+
     return (
         <PostGridWrapper>
             <TagMenu tags={tags} selectedTag={selectedTag} />
             <GridList>
-                {filteredPosts.map((post) => (
+                {visiblePosts.map((post) => (
                     <li key={post._id}>
                         <Link href={`/${post.slug}`}>
                             <PostCard post={post} />
@@ -36,6 +56,7 @@ export default function PostGrid() {
                     </li>
                 ))}
             </GridList>
+            <div ref={observerRef} style={{ height: "1px" }} />
         </PostGridWrapper>
     );
 }
