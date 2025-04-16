@@ -4,7 +4,7 @@ export const FooterWrapper = styled.footer`
     display: flex;
     flex-direction: column;
     padding: 1rem 2rem;
-    background-color: #f8f9fa;
+    background-color: #fdfdfd;
     border-top: 1px solid #ddd;
     text-align: center;
     font-size: 0.875rem;

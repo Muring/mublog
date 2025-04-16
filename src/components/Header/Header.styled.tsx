@@ -81,3 +81,29 @@ export const DiagonalLine = styled.div`
         background-color: #3f3f46;
     }
 `;
+
+export const Overlay = styled.div`
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.4); // 반투명 검정색
+    z-index: 99;
+`;
+
+export const ButtonWrapper = styled.div`
+    .menu-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.5rem;
+
+        &:hover {
+            background-color: #eeeeee;
+            transition: 0.1s ease-in-out;
+        }
+    }
+`;

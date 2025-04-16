@@ -1,3 +1,43 @@
 import styled from "@emotion/styled";
 
-const SideMenuWrapper = styled.div``;
+export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 340px;
+    height: 100%;
+    background-color: white;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    z-index: 100;
+    padding: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+    animation: ${({ isClosing }) => (isClosing ? "slideOut" : "slideIn")} 0.3s ease-out forwards;
+
+    .side-header {
+        display: flex;
+        justify-content: space-between;
+
+        .main-icon {
+            margin: 0.5rem 0 0 0.5rem;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+        }
+        to {
+            transform: translateX(-100%);
+        }
+    }
+`;
