@@ -12,7 +12,14 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
     padding: 0.5rem;
     border-top-right-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
+    transition: 0.3s ease-in-out;
     animation: ${({ isClosing }) => (isClosing ? "slideOut" : "slideIn")} 0.3s ease-out forwards;
+
+    @media (max-width: 640px) {
+        width: 100% !important;
+        border-radius: 0;
+        transition: 0.3s ease-in-out;
+    }
 
     a:hover {
         background-color: #f8f8f8;
