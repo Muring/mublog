@@ -2,12 +2,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HeaderWrapper, DiagonalLine } from "./Header.styled";
+import { HeaderWrapper, DiagonalLine, Overlay, ButtonWrapper } from "./Header.styled";
 import Image from "next/image";
 import Link from "next/link";
+import SideMenu from "../SideMenu/SideMenu";
 
 export default function Header() {
     const [scrollRatio, setScrollRatio] = useState(0);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -27,15 +29,23 @@ export default function Header() {
         <HeaderWrapper scrollRatio={scrollRatio}>
             <nav>
                 <div className="menu">
-                    <Link href={`/`}>
-                        <Image
-                            src="/icons/hamburger-menu.svg"
-                            alt="hamburger icon"
-                            width={24}
-                            height={24}
-                            className="article-detail-icon"
-                        />
-                    </Link>
+                    <ButtonWrapper>
+                        <button onClick={() => setMenuOpen(!menuOpen)} className="menu-button">
+                            <Image
+                                src="/icons/hamburger-menu.svg"
+                                alt="hamburger icon"
+                                width={22}
+                                height={22}
+                            />
+                        </button>
+                    </ButtonWrapper>
+
+                    {menuOpen && (
+                        <>
+                            <Overlay onClick={() => setMenuOpen(false)} />
+                            <SideMenu onClose={() => setMenuOpen(false)} />
+                        </>
+                    )}
 
                     <div className="fast-route-container">
                         <Link href={`/`}>
@@ -43,8 +53,8 @@ export default function Header() {
                             <Image
                                 src="/icons/mublog.svg"
                                 alt="mublog icon"
-                                width={32}
-                                height={32}
+                                width={24}
+                                height={24}
                                 className="article-detail-icon"
                             />
                         </Link>
@@ -54,8 +64,8 @@ export default function Header() {
                             <Image
                                 src="/icons/github.svg"
                                 alt="github icon"
-                                width={32}
-                                height={32}
+                                width={24}
+                                height={24}
                                 className="article-detail-icon"
                             />
                         </Link>

@@ -9,16 +9,29 @@ type PostCardProps = {
 
 export default function PostCard({ post }: PostCardProps) {
     const formattedDate = dayjs(post.date).format("YY년 MM월 DD일");
+    const thumbnailSrc =
+        post.thumbnail && post.thumbnail.trim() !== "" ? post.thumbnail : "/thumbnails/default.svg";
 
     return (
         <CardWrapper>
             {/* 이미지 */}
             <div className="image-wrapper">
+                {/* {post.thumbnail && (
+                    <Image
+                        src={post.thumbnail}
+                        alt="thumbnail"
+                        width={600}
+                        height={200}
+                        quality={100}
+                        className="thumbnail"
+                    />
+                )} */}
                 <Image
-                    src="/icons/next.svg"
+                    src={post.thumbnail ?? "/thumbnails/page-not-found.svg"}
                     alt="thumbnail"
                     width={600}
-                    height={600}
+                    height={250}
+                    quality={100}
                     className="thumbnail"
                 />
             </div>
