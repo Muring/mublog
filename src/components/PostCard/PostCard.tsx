@@ -16,15 +16,24 @@ export default function PostCard({ post }: PostCardProps) {
         <CardWrapper>
             {/* 이미지 */}
             <div className="image-wrapper">
-                {post.thumbnail && (
+                {/* {post.thumbnail && (
                     <Image
                         src={post.thumbnail}
                         alt="thumbnail"
-                        width={200}
+                        width={600}
                         height={200}
+                        quality={100}
                         className="thumbnail"
                     />
-                )}
+                )} */}
+                <Image
+                    src={post.thumbnail ?? "/thumbnails/page-not-found.svg"}
+                    alt="thumbnail"
+                    width={600}
+                    height={250}
+                    quality={100}
+                    className="thumbnail"
+                />
             </div>
 
             {/* 텍스트 영역 */}
