@@ -1,82 +1,95 @@
-# Next.js basic starter
+# 📝 Mublog 
 
-The most simple format of how to start Next.js project in Typescript with Emotion.
+**프론트엔드를 꿈꾸는 세일즈포스 개발자의 기술 블로그**
 
-## Directory example
+
+## ✨ 소개
+
+Mublog는 **Next.js App Router 기반의 정적 기술 블로그**입니다.  
+Contentlayer와 MDX를 통해 콘텐츠를 관리하며, Emotion과 커스텀 CSS로 정돈된 UI/UX를 제공합니다.
+
+프론트엔드 기술에 대한 실험과 학습을 기록하기 위한 용도로 제작되었으며,  
+**Toss 프론트엔드 채용 문화를 기준으로 스택을 구성**하였습니다.
+
+
+## 🔧 기술 스택
+
+| 분야             | 기술                     |
+|------------------|--------------------------|
+| 프레임워크       | Next.js 15 (App Router)  |
+| 언어             | TypeScript               |
+| 스타일링         | Emotion, Global CSS      |
+| 콘텐츠 관리      | MDX + Contentlayer       |
+| 상태관리         | React Hook (간단 용도)   |
+| 이미지 최적화    | `next/image`             |
+| 배포             | Vercel                   |
+
+
+## 📁 주요 기능
+
+- [x] 📚 **정적 블로그 구성** (SSG)
+- [x] 🏷 **태그 필터링 기능**
+- [ ] 🎨 **다크모드 대응**
+- [x] 💅 **Emotion 기반 스타일링**
+- [x] 🧱 **컴포넌트 단위 구조 관리**
+- [x] 📷 **썸네일 이미지 지원 (예외처리 포함)**
+- [x] 🧭 **사이드바 메뉴 & 애니메이션**
+- [x] 🐢 **Lazy Loading (그리드 콘텐츠)**
+- [x] 🚀 **Vercel 자동 배포**
+
+
+## 🗂 프로젝트 구조
 
 ```
-mublog/
-├── public/
-│   └── images/
-│       └── profile.jpg
-│
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx                  # 공통 레이아웃
-│   │   ├── page.tsx                    # 홈 페이지
-│   │   ├── about/page.tsx              # About 페이지
-│   │   ├── projects/page.tsx           # 프로젝트 목록
-│   │   ├── projects/[slug]/page.tsx    # 동적 라우팅
-│   │   └── not-found.tsx               # 404 페이지
-│   │
-│   ├── components/
-│   │   ├── Header.tsx
-│   │   ├── Footer.tsx
-│   │   ├── ProjectCard.tsx
-│   │   └── ThemeToggle.tsx
-│   │
-│   ├── styles/
-│   │   ├── global.ts              # Emotion 글로벌 스타일
-│   │   └── theme.ts               # 다크/라이트 테마 정의
-│   │
-│   ├── content/                   # 정적 콘텐츠 (MDX 등)
-│   │   └── projects/
-│   │       └── my-project.mdx
-│   │
-│   ├── lib/                       # 유틸 함수, 데이터 처리 등
-│   │   └── getProjects.ts
-│   │
-│   └── types/                     # 공통 타입 정의
-│       └── project.ts
-│
-├── contentlayer.config.ts        # Contentlayer 설정 (사용 시)
-├── next.config.js
-├── tsconfig.json
-├── .eslintrc.js
-└── package.json
+src/
+├── app/                  # App Router 기반 라우팅
+│   └── [slug]/           # 동적 포스트 페이지
+├── components/           # 재사용 가능한 컴포넌트
+│   ├── Header/
+│   ├── Footer/
+│   ├── SideMenu/
+│   ├── PostCard/
+│   └── ...
+├── contents/posts/       # MDX 포스트 모음
+├── public/               # 정적 파일 (icons, thumbnails 등)
+└── styles/               # 글로벌 스타일 (globals.css 등)
 ```
 
-## Getting Started
 
-First, run the development server:
+## 🖥️ 로컬 실행
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. 의존성 설치
+$ yarn install
+
+# 2. contentlayer 초기화 및 dev 서버 실행
+$ yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> ✅ `contentlayer.config.ts`와 `posts/*.mdx` 경로가 일치해야 합니다.  
+> ✅ Windows에서는 CRLF 문제로 인한 Contentlayer YAML 파싱 에러가 발생할 수 있으니 주의하세요.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Learn More
+## 📦 배포
 
-To learn more about Next.js, take a look at the following resources:
+- [Vercel 링크 바로가기](https://muring-blog.vercel.app/)  
 
--   [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
--   [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📬 개선 예정
 
-## Deploy on Vercel
+- [ ] 검색 기능 (Full-text search)
+- [ ] 카테고리 기반 라우팅
+- [ ] 포스트별 댓글 시스템
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 라이선스
+
+본 프로젝트는 MIT License로 자유롭게 사용하실 수 있습니다.
+
+
+## 🙋🏻‍♂️ 만든 사람
+
+- **Muring (무링무링)**
+- GitHub: [@Muring](https://github.com/Muring)
+- Email: esh5218@gmail.com
