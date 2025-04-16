@@ -2,6 +2,7 @@
 
 **프론트엔드를 꿈꾸는 세일즈포스 개발자의 기술 블로그**
 
+<br>
 
 ## ✨ 소개
 
@@ -11,6 +12,13 @@ Contentlayer와 MDX를 통해 콘텐츠를 관리하며, Emotion과 커스텀 CS
 프론트엔드 기술에 대한 실험과 학습을 기록하기 위한 용도로 제작되었으며,  
 **Toss 프론트엔드 채용 문화를 기준으로 스택을 구성**하였습니다.
 
+<br>
+
+## 📦 배포
+
+- [mublog 링크 바로가기](https://muring-blog.vercel.app/)  
+
+<br>
 
 ## 🔧 기술 스택
 
@@ -24,6 +32,7 @@ Contentlayer와 MDX를 통해 콘텐츠를 관리하며, Emotion과 커스텀 CS
 | 이미지 최적화    | `next/image`             |
 | 배포             | Vercel                   |
 
+<br>
 
 ## 📁 주요 기능
 
@@ -36,6 +45,7 @@ Contentlayer와 MDX를 통해 콘텐츠를 관리하며, Emotion과 커스텀 CS
 - [x] 🐢 **Lazy Loading (그리드 콘텐츠)**
 - [x] 🚀 **Vercel 자동 배포**
 
+<br>
 
 ## 🗂 프로젝트 구조
 
@@ -54,6 +64,7 @@ src/
 └── styles/               # 글로벌 스타일 (globals.css 등)
 ```
 
+<br>
 
 ## 🖥️ 로컬 실행
 
@@ -68,12 +79,7 @@ $ yarn dev
 > ✅ `contentlayer.config.ts`와 `posts/*.mdx` 경로가 일치해야 합니다.  
 > ✅ Windows에서는 CRLF 문제로 인한 Contentlayer YAML 파싱 에러가 발생할 수 있으니 주의하세요.
 
-
-
-## 📦 배포
-
-- [Vercel 링크 바로가기](https://muring-blog.vercel.app/)  
-
+<br>
 
 ## 📬 개선 예정
 
@@ -83,11 +89,13 @@ $ yarn dev
 - [ ] 포스트별 댓글 시스템
 - [ ] 블로그 템플릿화
 
+<br>
 
 ## 📄 라이선스
 
 본 프로젝트는 MIT License로 자유롭게 사용하실 수 있습니다.
 
+<br>
 
 ## 🙋🏻‍♂️ 만든 사람
 
