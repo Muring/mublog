@@ -3,29 +3,15 @@ import { Post } from "contentlayer/generated";
 import dayjs from "dayjs";
 import Image from "next/image";
 
-type PostCardProps = {
-    post: Post;
-};
-
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({ post, style }: { post: Post; style?: React.CSSProperties }) {
     const formattedDate = dayjs(post.date).format("YY년 MM월 DD일");
     const thumbnailSrc =
         post.thumbnail && post.thumbnail.trim() !== "" ? post.thumbnail : "/thumbnails/default.svg";
 
     return (
-        <CardWrapper>
+        <CardWrapper style={style}>
             {/* 이미지 */}
-            <div className="image-wrapper">
-                {/* {post.thumbnail && (
-                    <Image
-                        src={post.thumbnail}
-                        alt="thumbnail"
-                        width={600}
-                        height={200}
-                        quality={100}
-                        className="thumbnail"
-                    />
-                )} */}
+            <div className="image-wrapper ">
                 <Image
                     src={post.thumbnail ?? "/thumbnails/page-not-found.svg"}
                     alt="thumbnail"

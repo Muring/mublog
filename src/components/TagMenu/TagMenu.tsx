@@ -13,7 +13,7 @@ export default function TagMenu({ tags, selectedTag }: TagMenuProps) {
         <TagWrapper>
             {/* All 태그 */}
             <Link href="/" className={!selectedTag ? "active" : ""}>
-                all
+                <h5>all</h5>
             </Link>
 
             {/* 실제 태그 리스트 */}
@@ -23,7 +23,7 @@ export default function TagMenu({ tags, selectedTag }: TagMenuProps) {
                     href={`?tag=${encodeURIComponent(tag)}`}
                     className={selectedTag === tag ? "active" : ""}
                 >
-                    {tag}
+                    <h5>{tag}</h5>
                 </Link>
             ))}
         </TagWrapper>

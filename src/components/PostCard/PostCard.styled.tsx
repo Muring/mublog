@@ -7,13 +7,26 @@ export const CardWrapper = styled.article`
     overflow: hidden;
     background-color: white;
     box-shadow: 0px 3px 5px -2px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
     cursor: pointer;
 
-    &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0px 6px 5px -2px rgba(0, 0, 0, 0.1);
-        transition: 0.2s ease-in-out;
+    /* 초기 상태 */
+    opacity: 0;
+    transform: translateY(20px);
+
+    /* 애니메이션 */
+    animation: fadeInUp 0.5s ease forwards;
+    animation-fill-mode: forwards;
+
+    /* keyframes */
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .image-wrapper {

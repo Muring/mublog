@@ -16,6 +16,16 @@ export const GridList = styled.div`
     gap: 1rem;
     padding: 1rem 0 4rem;
 
+    li {
+        border-radius: 12px;
+        transition: 0.2s ease-in-out;
+
+        &:hover {
+            transform: translateY(-4px) !important;
+            box-shadow: 0px 6px 5px -2px rgba(0, 0, 0, 0.15);
+        }
+    }
+
     @media (max-width: 828px) {
         grid-template-columns: repeat(2, 1fr);
     }
