@@ -60,6 +60,6 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
         width: 100%;
         height: 2rem;
         padding: 0 1rem;
-        font-weight: 600;
+        font-weight: bold !important;
     }
 `;

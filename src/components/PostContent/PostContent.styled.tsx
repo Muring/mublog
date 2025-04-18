@@ -1,108 +1,100 @@
-"use client";
-
 import styled from "@emotion/styled";
 
 export const Article = styled.article`
     max-width: 720px;
     margin: 0 auto;
     padding: 4rem 2rem;
-    line-height: 2;
     color: #1a1a1a;
+    line-height: 2.5;
 
-    .desc {
-        color: gray;
+    /* 기본 텍스트 구조 */
+    h1 {
+        margin-bottom: 0.5rem;
     }
 
+    h2 {
+        margin: 2rem 0 1rem;
+    }
+
+    h3 {
+        margin: 1rem 0;
+    }
+
+    p {
+        margin-top: 1rem;
+    }
+
+    li {
+        margin-left: 1rem;
+        font-size: 0.95rem;
+        list-style-type: circle;
+    }
+
+    a {
+        color: #0070f3;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    /* 세부 정보 헤더 */
     .article-detail {
         display: flex;
         align-items: center;
-        margin-bottom: 2.5rem;
         gap: 0.5rem;
-        height: 2rem;
+        margin-top: 1rem;
 
         .article-detail-icon {
             border-radius: 0;
             margin-right: 0.2rem;
         }
 
-        p {
-            font-size: 0.9rem;
+        .desc {
+            padding-top: 0.1rem;
+            font-size: 0.8rem;
             margin: 0;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            height: 100%;
+            line-height: 2;
         }
 
         ul {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             gap: 0.5rem;
             margin: 0;
+            padding-left: 1.5rem;
         }
 
         li {
             display: flex;
             align-items: center;
             color: black;
-
             margin: 0;
         }
 
         a {
             background-color: lightgray;
-            border-radius: 8px;
-            padding: 0 0.4rem;
+            border-radius: 12px;
+            padding: 0 0.5rem;
             font-size: 0.8rem;
-            color: #5e5e5e !important;
-            text-decoration: none;
+            color: #494949;
             font-weight: bold;
 
             &:hover {
-                text-decoration: none !important;
-                background-color: #c5c5c5 !important;
+                background-color: #c5c5c5;
                 transition-duration: 0.2s;
+                text-decoration: none;
             }
         }
     }
 
-    h1 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .description {
-        font-size: 1.125rem;
-        color: #666;
-        margin-bottom: 2rem;
-    }
-
-    h2 {
-        font-size: 1.75rem;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-    }
-
-    h3 {
-        font-size: 1.4rem;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    p {
-        font-size: 0.95rem;
-        margin-bottom: 1rem;
-    }
-
-    ul,
-    ol {
-        padding-left: 1.5rem;
-        margin-bottom: 1.25rem;
-        font-size: 0.95rem;
-    }
-
-    li {
-        margin-bottom: 0.5rem;
-    }
-
+    /* 블록 요소 */
     blockquote {
         border-left: 4px solid #888888;
         padding: 0.2rem 0 0.2rem 1rem;
@@ -116,15 +108,6 @@ export const Article = styled.article`
         }
     }
 
-    /* pre {
-        background: #f4f4f4;
-        padding: 1rem;
-        border-radius: 8px;
-        overflow-x: auto;
-        font-size: 1rem;
-        margin: 1.5rem 0;
-    } */
-
     code {
         background: #f4f4f4;
         padding: 0.1rem 0.3em;
@@ -134,24 +117,9 @@ export const Article = styled.article`
         color: #ff7b00;
     }
 
-    img {
-        max-width: 100%;
-        margin: 2rem 0;
-        border-radius: 6px;
-    }
-
-    a {
-        color: #0070f3;
-        text-decoration: none;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-
     hr {
         border: none;
-        border-top: 1px solid #e9e9e9; /* 원하는 색상으로 변경 */
+        border-top: 1px solid #e9e9e9;
         margin: 2rem 0;
     }
 `;

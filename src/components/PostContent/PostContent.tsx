@@ -21,31 +21,34 @@ export default function PostContent({ title, date, description, tags, code }: Pr
     return (
         <Article>
             <h1>{title}</h1>
-            <p className="desc">{description}</p>
+            <h5>{description}</h5>
             <div className="article-detail">
                 <Image
                     src="/icons/calendar.svg"
                     alt="calendar icon"
-                    width={18}
-                    height={18}
+                    width={16}
+                    height={16}
                     className="article-detail-icon"
                 />
-                <p>{formattedDate}</p>
+                <p className="desc">{formattedDate}</p>
                 <ul>
                     <Image
                         src="/icons/tag.svg"
                         alt="tag icon"
-                        width={18}
-                        height={18}
+                        width={16}
+                        height={16}
                         className="article-detail-icon"
                     />
                     {tags?.map((tag) => (
                         <li key={tag}>
-                            <Link href={`/?tag=${tag}`}>{"#" + tag}</Link>
+                            <Link href={`/?tag=${tag}`}>
+                                <h4 className=" tag">{"#" + tag}</h4>
+                            </Link>
                         </li>
                     ))}
                 </ul>
             </div>
+            <hr />
             <MDXContent />
         </Article>
     );

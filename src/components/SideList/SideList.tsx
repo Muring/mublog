@@ -22,7 +22,7 @@ export default function SideList({ title, onLinkClick }: Props) {
         <SideListWrapper>
             <div className="side-list-container">
                 <div className="side-list-title">
-                    {title}
+                    <h4>{title}</h4>
                     <hr />
                 </div>
                 <div className="side-list-content">
