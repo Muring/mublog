@@ -46,15 +46,12 @@ export const CardWrapper = styled.article`
         padding: 1rem;
 
         .title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.6rem;
             color: #111;
         }
 
         .description {
             height: 4rem;
-            font-size: 0.875rem;
             color: #666;
             margin-bottom: 0.8rem;
         }

@@ -92,10 +92,14 @@ h3 {
     font-weight: 700;
 }
 h4 {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     font-weight: 800;
 }
 h5 {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+h6 {
     font-size: 1rem;
     font-weight: 700;
 }
@@ -119,4 +123,14 @@ li {
     justify-content: center;
     align-items: center;
     margin-top: 4rem;
+}
+
+/* keyframes */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }

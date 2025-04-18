@@ -20,7 +20,7 @@ export default function SidePost({ title, desc, thumbnail }: SidePostProps) {
                 className="thumbnail"
             />
             <div className="text-container">
-                <h5 className="side-title">{title}</h5>
+                <h6 className="side-title">{title}</h6>
                 <p className="side-desc">{desc}</p>
             </div>
         </SidePostWrapper>

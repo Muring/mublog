@@ -24,7 +24,7 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
 
             {/* 텍스트 영역 */}
             <div className="card-body">
-                <h3 className="title">{post.title}</h3>
+                <h5 className="title">{post.title}</h5>
                 <p className="description">{post.description}</p>
 
                 <div className="footer">
