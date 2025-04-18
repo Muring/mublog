@@ -6,6 +6,8 @@ export const TagWrapper = styled.div`
     align-items: center;
     gap: 2rem;
     padding: 1rem;
+    animation: fadeIn 1s ease forwards;
+    animation-fill-mode: forwards;
 
     a {
         padding: 0.3rem 0.6rem;

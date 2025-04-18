@@ -13,20 +13,22 @@ export const SidePostWrapper = styled.div`
 
     .text-container {
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
         flex-direction: column;
+        height: 100%;
         padding-left: 1rem;
         overflow: hidden;
         flex: 1;
     }
 
     .side-title {
-        font-size: 0.9rem;
+        height: 55%;
         padding: 0 !important;
         overflow: hidden;
     }
 
     .side-desc {
+        height: 45%;
         font-size: 0.8rem;
         color: gray;
         font-weight: 400;

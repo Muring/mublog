@@ -14,7 +14,7 @@ export const SideListWrapper = styled.div<{ isClosing?: boolean }>`
             width: 100%;
             gap: 1rem;
             padding: 0 1rem;
-            margin-bottom: 0.3rem;
+            margin: 0.4rem 0;
         }
 
         hr {

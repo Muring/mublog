@@ -47,11 +47,11 @@ export default function PostGrid() {
     return (
         <PostGridWrapper>
             <TagMenu tags={tags} selectedTag={selectedTag} />
-            <GridList>
-                {visiblePosts.map((post) => (
+            <GridList key={selectedTag}>
+                {visiblePosts.map((post, index) => (
                     <li key={post._id}>
                         <Link href={`/${post.slug}`}>
-                            <PostCard post={post} />
+                            <PostCard post={post} style={{ animationDelay: `${index * 0.05}s` }} />
                         </Link>
                     </li>
                 ))}

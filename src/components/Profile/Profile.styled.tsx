@@ -5,6 +5,8 @@ export const ProfileWrapper = styled.div`
     align-items: center;
     gap: 1rem;
     padding: 2rem 0;
+    animation: fadeIn 1s ease forwards;
+    animation-fill-mode: forwards;
 
     .text-container {
         display: flex;
@@ -18,14 +20,8 @@ export const ProfileWrapper = styled.div`
         color: #777;
     }
 
-    a {
-        display: flex;
-        justify-content: baseline;
-        align-items: center;
-        gap: 0.3rem;
-
-        &:hover {
-            text-decoration-line: underline;
-        }
+    p {
+        font-size: 0.8rem;
+        font-weight: 500;
     }
 `;
