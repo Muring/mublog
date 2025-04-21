@@ -13,7 +13,10 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
     border-top-right-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
     transition: 0.1s ease-in-out;
-    animation: ${({ isClosing }) => (isClosing ? "slideOut" : "slideIn")} 0.3s ease-out forwards;
+    animation: ${({ isClosing }) =>
+        isClosing
+            ? "slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"
+            : "slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"};
 
     @media (max-width: 640px) {
         width: 100% !important;
@@ -36,18 +39,22 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
 
     @keyframes slideIn {
         from {
+            opacity: 0;
             transform: translateX(-100%);
         }
         to {
+            opacity: 1;
             transform: translateX(0);
         }
     }
 
     @keyframes slideOut {
         from {
+            opacity: 1;
             transform: translateX(0);
         }
         to {
+            opacity: 0;
             transform: translateX(-100%);
         }
     }
