@@ -3,20 +3,30 @@
 
 import { allPosts } from "contentlayer/generated";
 import { SideListWrapper } from "./SideList.styled";
+import { useRecentPosts } from "@/hooks/useRecentPosts";
 import SidePost from "../SidePost/SidePost";
 import Link from "next/link";
-import dayjs from "dayjs";
 
 type Props = {
-    title: string;
+    type?: string; // 기본값 없음, recent일 때만 최근 포스트
     onLinkClick?: () => void;
 };
 
-export default function SideList({ title, onLinkClick }: Props) {
-    const latestPosts = allPosts
-        .slice() // 원본 변경 방지
-        .sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf())
-        .slice(0, 5);
+export default function SideList({ type, onLinkClick }: Props) {
+    const isRecent = type === "recent";
+    const title = isRecent ? "Recently viewed" : "Latest posts";
+
+    const { recentPosts, isLoading } = useRecentPosts();
+
+    // 렌더링할 포스트 목록 결정
+    const postsToRender = isRecent
+        ? recentPosts
+              .map((slug) => allPosts.find((post) => post.slug === slug))
+              .filter((post): post is NonNullable<typeof post> => Boolean(post))
+        : allPosts
+              .slice()
+              .sort((a, b) => b.date.localeCompare(a.date))
+              .slice(0, 5);
 
     return (
         <SideListWrapper>
@@ -26,20 +36,28 @@ export default function SideList({ title, onLinkClick }: Props) {
                     <hr />
                 </div>
                 <div className="side-list-content">
-                    {latestPosts.map((post) => (
-                        <Link
-                            key={post._id}
-                            href={`/${post.slug}`}
-                            className="side-link"
-                            onClick={onLinkClick}
-                        >
-                            <SidePost
-                                title={post.title}
-                                desc={post.description}
-                                thumbnail={post.thumbnail}
-                            />
-                        </Link>
-                    ))}
+                    {isLoading ? (
+                        <p style={{ fontSize: "0.85rem", color: "gray" }}>불러오는 중...</p>
+                    ) : postsToRender.length === 0 ? (
+                        <p style={{ fontSize: "0.85rem", color: "gray" }}>
+                            표시할 포스트가 없습니다.
+                        </p>
+                    ) : (
+                        postsToRender.map((post) => (
+                            <Link
+                                key={post._id}
+                                href={`/${post.slug}`}
+                                className="side-link"
+                                onClick={onLinkClick}
+                            >
+                                <SidePost
+                                    title={post.title}
+                                    desc={post.description}
+                                    thumbnail={post.thumbnail}
+                                />
+                            </Link>
+                        ))
+                    )}
                 </div>
             </div>
         </SideListWrapper>

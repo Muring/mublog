@@ -46,8 +46,8 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
                 <h5>About me</h5>
             </Link>
 
-            <SideList title="Latest posts" onLinkClick={handleClose} />
-            <SideList title="Recently viewed" onLinkClick={handleClose} />
+            <SideList type="latest" onLinkClick={handleClose} />
+            <SideList type="recent" onLinkClick={handleClose} />
             <div className="side-footer">
                 <p>© {new Date().getFullYear()}. MuRing all rights reserved.</p>
                 <ThemeSwitcher />
