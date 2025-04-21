@@ -2,25 +2,28 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { ToggleBall, ToggleContainer } from "./ThemeSwitcher.styled";
 
 export default function ThemeSwitcher() {
-    const { theme, setTheme } = useTheme();
+    const { setTheme, resolvedTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
-    // hydration 이슈 방지
     useEffect(() => {
-        setMounted(true);
+        setMounted(true); // hydration mismatch 방지
     }, []);
 
     if (!mounted) return null;
 
-    const toggleTheme = () => {
-        setTheme(theme === "dark" ? "light" : "dark");
-    };
+    const isDark = resolvedTheme === "dark";
 
     return (
-        <button onClick={toggleTheme}>
-            {theme === "dark" ? "🌞 라이트 모드" : "🌙 다크 모드"}
-        </button>
+        <ToggleContainer
+            role="button"
+            aria-label="Toggle Dark Mode"
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+            isDark={isDark}
+        >
+            <ToggleBall isDark={isDark} />
+        </ToggleContainer>
     );
 }
