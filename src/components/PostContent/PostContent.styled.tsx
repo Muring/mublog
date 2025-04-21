@@ -1,6 +1,14 @@
 import styled from "@emotion/styled";
 
 export const Article = styled.article`
+    background-color: var(--background);
+    color: var(--foreground);
+
+    @media (prefers-color-scheme: dark) {
+        background-color: var(--background);
+        color: var(--foreground);
+    }
+
     max-width: 720px;
     margin: 0 auto;
     padding: 4rem 2rem;
@@ -98,12 +106,13 @@ export const Article = styled.article`
 
     /* 블록 요소 */
     blockquote {
-        border-left: 4px solid #888888;
+        border-left: 0.5rem solid #888888;
         padding: 0.2rem 0 0.2rem 1rem;
         background: #fdfdfd;
         font-style: italic;
         color: #424242;
         margin: 1.5rem 0;
+        border-radius: 0.5rem;
 
         p {
             margin: 0;
