@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { SidePostWrapper } from "./SidePost.styled";
-import Link from "next/link";
 
 type SidePostProps = {
     title: string;
