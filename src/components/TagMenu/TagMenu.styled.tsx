@@ -10,7 +10,7 @@ export const TagWrapper = styled.div`
     animation-fill-mode: forwards;
 
     a {
-        padding: 0.3rem 0.6rem;
+        padding: 0.4rem 0.6rem;
         border-radius: 0.5rem;
         font-size: 0.9rem;
         font-weight: 600;

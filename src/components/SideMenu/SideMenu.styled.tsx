@@ -4,11 +4,6 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
     background-color: var(--background);
     color: var(--foreground);
 
-    @media (prefers-color-scheme: dark) {
-        background-color: var(--background);
-        color: var(--foreground);
-    }
-
     position: fixed;
     top: 0;
     left: 0;
@@ -75,5 +70,16 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
         height: 2rem;
         padding: 0 1rem;
         font-weight: bold !important;
+    }
+
+    .side-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+
+        p {
+            font-size: 0.7rem;
+        }
     }
 `;

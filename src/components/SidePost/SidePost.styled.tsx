@@ -15,10 +15,8 @@ export const SidePostWrapper = styled.div`
         display: flex;
         justify-content: space-evenly;
         flex-direction: column;
-        height: 100%;
         padding-left: 1rem;
         overflow: hidden;
-        flex: 1;
     }
 
     .side-title {
