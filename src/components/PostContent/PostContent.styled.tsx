@@ -6,6 +6,8 @@ export const Article = styled.article`
     padding: 4rem 2rem;
     color: #1a1a1a;
     line-height: 2.5;
+    animation: fadeIn 1s ease forwards;
+    animation-fill-mode: forwards;
 
     /* 기본 텍스트 구조 */
     h1 {
