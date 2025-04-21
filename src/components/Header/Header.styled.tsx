@@ -1,6 +1,14 @@
 import styled from "@emotion/styled";
 
 export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
+    background-color: var(--background);
+    color: var(--foreground);
+
+    @media (prefers-color-scheme: dark) {
+        background-color: var(--background);
+        color: var(--foreground);
+    }
+
     position: fixed;
     top: 0;
     z-index: 50;
@@ -45,7 +53,7 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
             width: 100%;
             max-width: 1280px;
             height: 2px;
-            background-color: black;
+            background-color: var(--foreground);
             transition: transform 0.2s ease-out;
             pointer-events: none;
         }
@@ -65,7 +73,7 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
         height: 3rem;
 
         &:hover {
-            background-color: #eeeeee;
+            background-color: var(--hovercolor);
             transition: 0.1s ease-in-out;
         }
     }
@@ -102,7 +110,7 @@ export const ButtonWrapper = styled.div`
         border-radius: 0.5rem;
 
         &:hover {
-            background-color: #eeeeee;
+            background-color: var(--hovercolor);
             transition: 0.1s ease-in-out;
         }
     }

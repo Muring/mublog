@@ -17,12 +17,13 @@ export const TagWrapper = styled.div`
     }
 
     a:hover {
-        background-color: #f8f8f8;
+        background-color: var(--hovercolor);
+        color: var(--hoverfontcolor);
         transition: 0.1s ease-in-out;
     }
 
     .active {
-        background-color: black !important;
-        color: white !important;
+        background-color: var(--activecolor) !important;
+        color: var(--activefontcolor) !important;
     }
 `;

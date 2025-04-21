@@ -1,12 +1,19 @@
 import styled from "@emotion/styled";
 
 export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
+    background-color: var(--background);
+    color: var(--foreground);
+
+    @media (prefers-color-scheme: dark) {
+        background-color: var(--background);
+        color: var(--foreground);
+    }
+
     position: fixed;
     top: 0;
     left: 0;
     width: 420px;
     height: 100%;
-    background-color: white;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
     z-index: 100;
     padding: 0.5rem;
@@ -24,7 +31,8 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
     }
 
     a:hover {
-        background-color: #f8f8f8;
+        background-color: var(--hovercolor);
+        color: var(--hoverfontcolor);
     }
 
     .side-header {

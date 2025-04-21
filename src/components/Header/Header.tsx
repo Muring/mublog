@@ -30,7 +30,10 @@ export default function Header() {
             <nav>
                 <div className="menu">
                     <ButtonWrapper>
-                        <button onClick={() => setMenuOpen(!menuOpen)} className="menu-button">
+                        <button
+                            onClick={() => setMenuOpen(!menuOpen)}
+                            className="menu-button auto-dark"
+                        >
                             <Image
                                 src="/icons/hamburger-menu.svg"
                                 alt="hamburger icon"
@@ -48,7 +51,7 @@ export default function Header() {
                     )}
 
                     <div className="fast-route-container">
-                        <Link href={`/`}>
+                        <Link href={`/`} className="auto-dark">
                             {" "}
                             <Image
                                 src="/icons/mublog.svg"
@@ -59,7 +62,7 @@ export default function Header() {
                             />
                         </Link>
                         <DiagonalLine />
-                        <Link href={`https://github.com/Muring`}>
+                        <Link href={`https://github.com/Muring`} className="auto-dark">
                             {" "}
                             <Image
                                 src="/icons/github.svg"

@@ -22,7 +22,7 @@ export const SideListWrapper = styled.div<{ isClosing?: boolean }>`
             height: 1px;
             flex-direction: row;
             margin-top: 0.2rem;
-            background-color: rgba(0, 0, 0, 0.2); /* 연하게 */
+            background-color: var(--bordercolor);
             border: none;
         }
 

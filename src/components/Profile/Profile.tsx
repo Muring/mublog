@@ -8,7 +8,13 @@ import { ProfileWrapper } from "./Profile.styled";
 export default function Profile() {
     return (
         <ProfileWrapper>
-            <Image src="/icons/mublog.svg" alt="hamburger icon" width={72} height={72} />
+            <Image
+                src="/icons/mublog.svg"
+                className="auto-dark"
+                alt="hamburger icon"
+                width={72}
+                height={72}
+            />
             <div className="text-container">
                 <h4>무링의 개발 블로그</h4>
                 <p>Frontend Developer</p>

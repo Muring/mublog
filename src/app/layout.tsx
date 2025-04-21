@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
+import ThemeProviderWrapper from "@/components/ThemeProvider/ThemeProvider";
 
 export const metadata: Metadata = {
     title: "Mublog",
@@ -20,7 +21,9 @@ export default function RootLayout({
         <html lang="en">
             <body>
                 <Header />
-                <main>{children}</main>
+                <ThemeProviderWrapper>
+                    <main>{children}</main>
+                </ThemeProviderWrapper>
                 <Footer />
             </body>
         </html>
