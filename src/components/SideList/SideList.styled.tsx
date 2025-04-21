@@ -5,7 +5,7 @@ export const SideListWrapper = styled.div<{ isClosing?: boolean }>`
         width: 100%;
         padding: 0.5rem 0;
         font-weight: 600;
-        height: 19rem;
+        height: 100%;
 
         .side-list-title {
             display: flex;
@@ -22,13 +22,14 @@ export const SideListWrapper = styled.div<{ isClosing?: boolean }>`
             height: 1px;
             flex-direction: row;
             margin-top: 0.2rem;
-            background-color: rgba(0, 0, 0, 0.2); /* 연하게 */
+            background-color: var(--bordercolor);
             border: none;
         }
 
         .side-list-content {
             display: flex;
             flex-direction: column;
+            gap: 0.5rem;
             height: 100%;
             padding: 0 0.5rem;
         }

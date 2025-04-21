@@ -28,8 +28,14 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
                 <p className="description">{post.description}</p>
 
                 <div className="footer">
-                    <div className="tags">
-                        <Image src="/icons/tag.svg" alt="tag icon" width={14} height={14} />
+                    <div className="tags ">
+                        <Image
+                            src="/icons/tag.svg"
+                            alt="tag icon"
+                            className="auto-dark"
+                            width={14}
+                            height={14}
+                        />
                         {post.tags?.map((tag) => (
                             <div key={tag}>#{tag}</div>
                         ))}
@@ -38,6 +44,7 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
                         <Image
                             src="/icons/calendar.svg"
                             alt="calendar icon"
+                            className="auto-dark"
                             width={14}
                             height={14}
                         />

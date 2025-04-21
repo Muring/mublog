@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
+import ThemeProviders from "@/components/ThemeProvider/ThemeProvider";
 
 export const metadata: Metadata = {
     title: "Mublog",
@@ -17,11 +18,13 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body>
-                <Header />
-                <main>{children}</main>
-                <Footer />
+                <ThemeProviders>
+                    <Header />
+                    <main>{children}</main>
+                    <Footer />
+                </ThemeProviders>
             </body>
         </html>
     );

@@ -1,13 +1,40 @@
 :root {
     --background: #ffffff;
     --foreground: #171717;
+    --hovercolor: #f4f4f4;
+    --hoverfontcolor: black;
+    --activecolor: black;
+    --activefontcolor: white;
+    --codefontbgcolor: #f4f4f4;
+    --bordercolor: #e6e6e6;
+    --cardbackground: #ffffff;
+    --shawdowcolor: rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
+html.dark {
+    --background: #101010;
+    --foreground: #dadada;
+    --hovercolor: #dadada;
+    --hoverfontcolor: black;
+    --activecolor: #dadada;
+    --activefontcolor: black;
+    --codefontbgcolor: #303030;
+    --bordercolor: #5c5c5c;
+    --cardbackground: #27272a;
+
+    a.auto-dark:hover,
+    button.auto-dark:hover {
+        filter: invert(0) brightness(1) !important;
     }
+}
+
+.dark .auto-dark {
+    filter: invert(1) brightness(1) !important;
+}
+
+.dark a.auto-dark:hover,
+button.auto-dark:hover {
+    filter: invert(0) brightness(1) !important;
 }
 
 @font-face {
@@ -67,6 +94,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 body::-webkit-scrollbar {

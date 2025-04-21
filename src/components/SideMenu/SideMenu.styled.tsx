@@ -1,19 +1,24 @@
 import styled from "@emotion/styled";
 
 export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
+    background-color: var(--background);
+    color: var(--foreground);
+
     position: fixed;
     top: 0;
     left: 0;
     width: 420px;
     height: 100%;
-    background-color: white;
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
     z-index: 100;
     padding: 0.5rem;
     border-top-right-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
     transition: 0.1s ease-in-out;
-    animation: ${({ isClosing }) => (isClosing ? "slideOut" : "slideIn")} 0.3s ease-out forwards;
+    animation: ${({ isClosing }) =>
+        isClosing
+            ? "slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"
+            : "slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"};
 
     @media (max-width: 640px) {
         width: 100% !important;
@@ -21,7 +26,8 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
     }
 
     a:hover {
-        background-color: #f8f8f8;
+        background-color: var(--hovercolor);
+        color: var(--hoverfontcolor);
     }
 
     .side-header {
@@ -36,18 +42,22 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
 
     @keyframes slideIn {
         from {
+            opacity: 0;
             transform: translateX(-100%);
         }
         to {
+            opacity: 1;
             transform: translateX(0);
         }
     }
 
     @keyframes slideOut {
         from {
+            opacity: 1;
             transform: translateX(0);
         }
         to {
+            opacity: 0;
             transform: translateX(-100%);
         }
     }
@@ -60,5 +70,16 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
         height: 2rem;
         padding: 0 1rem;
         font-weight: bold !important;
+    }
+
+    .side-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+
+        p {
+            font-size: 0.7rem;
+        }
     }
 `;

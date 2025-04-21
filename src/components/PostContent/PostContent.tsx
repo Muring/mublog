@@ -28,7 +28,7 @@ export default function PostContent({ title, date, description, tags, code }: Pr
                     alt="calendar icon"
                     width={16}
                     height={16}
-                    className="article-detail-icon"
+                    className="article-detail-icon auto-dark"
                 />
                 <p className="desc">{formattedDate}</p>
                 <ul>
@@ -37,7 +37,7 @@ export default function PostContent({ title, date, description, tags, code }: Pr
                         alt="tag icon"
                         width={16}
                         height={16}
-                        className="article-detail-icon"
+                        className="article-detail-icon auto-dark"
                     />
                     {tags?.map((tag) => (
                         <li key={tag}>

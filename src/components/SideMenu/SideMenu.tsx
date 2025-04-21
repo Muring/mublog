@@ -7,6 +7,7 @@ import { MenuWrapper } from "./SideMenu.styled";
 import Image from "next/image";
 import Link from "next/link";
 import SideList from "../SideList/SideList";
+import ThemeSwitcher from "../ThemeSwitcher/ThemeSwithcer";
 
 export default function SideMenu({ onClose }: { onClose: () => void }) {
     const [isClosing, setIsClosing] = useState(false);
@@ -29,10 +30,10 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
                     alt="hamburger icon"
                     width={48}
                     height={48}
-                    className="main-icon"
+                    className="main-icon auto-dark"
                 />
                 <ButtonWrapper>
-                    <button onClick={handleClose} className="menu-button">
+                    <button onClick={handleClose} className="menu-button auto-dark">
                         <Image src="/icons/cancel.svg" alt="cancel icon" width={22} height={22} />
                     </button>
                 </ButtonWrapper>
@@ -46,6 +47,11 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
             </Link>
 
             <SideList title="Latest posts" onLinkClick={handleClose} />
+            <SideList title="Recently viewed" onLinkClick={handleClose} />
+            <div className="side-footer">
+                <p>© {new Date().getFullYear()}. MuRing all rights reserved.</p>
+                <ThemeSwitcher />
+            </div>
         </MenuWrapper>
     );
 }

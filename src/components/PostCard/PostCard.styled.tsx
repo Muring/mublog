@@ -2,11 +2,10 @@ import styled from "@emotion/styled";
 
 export const CardWrapper = styled.article`
     width: 100%;
-    border: 1px solid #e6e6e6;
+    border: 1px solid var(--bordercolor);
     border-radius: 12px;
     overflow: hidden;
-    background-color: white;
-    box-shadow: 0px 3px 5px -2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 3px 5px -2px var(--shawdowcolor);
     cursor: pointer;
 
     /* 초기 상태 */
@@ -44,15 +43,16 @@ export const CardWrapper = styled.article`
 
     .card-body {
         padding: 1rem;
+        background-color: var(--cardbackground);
 
         .title {
             margin-bottom: 0.6rem;
-            color: #111;
+            color: var(--foreground);
         }
 
         .description {
             height: 4rem;
-            color: #666;
+            color: gray;
             margin-bottom: 0.8rem;
         }
 
@@ -61,7 +61,7 @@ export const CardWrapper = styled.article`
             justify-content: space-between;
             align-items: center;
             font-size: 0.75rem;
-            color: #999;
+            color: gray;
 
             .tags {
                 display: flex;
@@ -71,11 +71,6 @@ export const CardWrapper = styled.article`
                 img {
                     filter: grayscale(100%);
                     opacity: 0.6;
-                }
-
-                span {
-                    font-size: 0.75rem;
-                    color: #888;
                 }
             }
 
