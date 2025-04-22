@@ -35,6 +35,11 @@ export const SideListWrapper = styled.div<{ isClosing?: boolean }>`
             padding: 0 0.5rem;
         }
 
+        .status-text {
+            padding: 0.5rem;
+            color: gray;
+        }
+
         .side-link {
             display: flex;
             justify-content: center;

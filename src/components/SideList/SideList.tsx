@@ -37,11 +37,9 @@ export default function SideList({ type, onLinkClick }: Props) {
                 </div>
                 <div className="side-list-content">
                     {isLoading ? (
-                        <p style={{ fontSize: "0.85rem", color: "gray" }}>불러오는 중...</p>
+                        <p className="status-text desc">불러오는 중...</p>
                     ) : postsToRender.length === 0 ? (
-                        <p style={{ fontSize: "0.85rem", color: "gray" }}>
-                            표시할 포스트가 없습니다.
-                        </p>
+                        <p className="status-text">표시할 포스트가 없습니다.</p>
                     ) : (
                         postsToRender.map((post) => (
                             <Link
