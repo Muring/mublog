@@ -6,7 +6,7 @@ export const SideListWrapper = styled.div<{ isClosing?: boolean }>`
         padding: 0.5rem 0;
         font-weight: 600;
         height: 100%;
-        min-height: 22.5rem;
+        max-height: 22.5rem;
 
         .side-list-title {
             display: flex;
