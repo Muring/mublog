@@ -13,7 +13,6 @@ export const Article = styled.article`
     min-height: 85vh;
     margin: 0 auto;
     padding: 4rem 2rem;
-    color: #1a1a1a;
     line-height: 2.5;
     animation: fadeIn 1s ease forwards;
     animation-fill-mode: forwards;
@@ -52,6 +51,7 @@ export const Article = styled.article`
 
     p img {
         display: block;
+        width: 100%;
         max-width: 656px;
         border: 1px solid var(--bordercolor);
         margin: 2rem auto 0 auto; /* 상-하 간격 조절 */
@@ -127,7 +127,7 @@ export const Article = styled.article`
     /* 블록 요소 */
     blockquote {
         border-left: 0.5rem solid var(--bordercolor);
-        padding: 0.2rem 0 0.2rem 1rem;
+        padding: 0.2rem 1rem;
         background: var(--codefontbgcolor);
         font-style: italic;
         color: var(--foreground);

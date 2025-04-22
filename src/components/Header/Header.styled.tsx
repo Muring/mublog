@@ -15,7 +15,6 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
     justify-content: center;
     align-items: center;
     width: 100%;
-    background-color: white;
 
     nav {
         display: flex;
