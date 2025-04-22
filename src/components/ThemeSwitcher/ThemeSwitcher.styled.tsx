@@ -29,7 +29,7 @@ export const ToggleLabel = styled.span`
     left: 50%;
     transform: translateX(-50%);
     font-size: 0.6rem;
-    font-weight: 600;
+    font-weight: 800;
     color: var(--background);
     pointer-events: none;
 `;
