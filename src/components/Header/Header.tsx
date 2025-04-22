@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HeaderWrapper, DiagonalLine, Overlay, ButtonWrapper } from "./Header.styled";
+import { HeaderWrapper, DiagonalLine, ButtonWrapper } from "./Header.styled";
 import Image from "next/image";
 import Link from "next/link";
 import SideMenu from "../SideMenu/SideMenu";
@@ -19,6 +19,7 @@ export default function Header() {
             const maxScroll = scrollHeight - clientHeight;
             const ratio = Math.min(scrollTop / maxScroll, 1);
             setScrollRatio(ratio);
+            console.log("scroll: " + ratio);
         };
 
         window.addEventListener("scroll", handleScroll, { passive: true });

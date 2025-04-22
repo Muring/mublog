@@ -25,16 +25,12 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
 
         // 스크롤 완전 차단
         document.body.style.overflow = "hidden";
-        document.body.style.height = "100%";
         document.documentElement.style.overflow = "hidden";
-        document.documentElement.style.height = "100%";
 
         return () => {
             // 복원
             document.body.style.overflow = originalBodyStyle.overflow;
-            document.body.style.height = originalBodyStyle.height;
             document.documentElement.style.overflow = originalHtmlStyle.overflow;
-            document.documentElement.style.height = originalHtmlStyle.height;
         };
     }, []);
 
