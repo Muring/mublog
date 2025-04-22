@@ -11,6 +11,9 @@ export const FooterWrapper = styled.footer`
 
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
     padding: 1rem 2rem;
     border-top: 1px solid var(--bordercolor);
     text-align: center;
@@ -20,8 +23,8 @@ export const FooterWrapper = styled.footer`
 
     .stack {
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
         align-items: center;
-        gap: 2rem;
+        min-width: 25rem;
     }
 `;
