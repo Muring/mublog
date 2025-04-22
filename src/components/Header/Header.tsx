@@ -43,12 +43,7 @@ export default function Header() {
                         </button>
                     </ButtonWrapper>
 
-                    {menuOpen && (
-                        <>
-                            <Overlay onClick={() => setMenuOpen(false)} />
-                            <SideMenu onClose={() => setMenuOpen(false)} />
-                        </>
-                    )}
+                    {menuOpen && <SideMenu onClose={() => setMenuOpen(false)} />}
 
                     <div className="fast-route-container">
                         <Link href={`/`} className="auto-dark">

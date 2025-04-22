@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ButtonWrapper } from "../Header/Header.styled";
+import { ButtonWrapper, Overlay } from "../Header/Header.styled";
 import { MenuWrapper } from "./SideMenu.styled";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,36 +49,44 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
     };
 
     return (
-        <MenuWrapper isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>
-            <div className="side-header">
-                <Image
-                    src="/icons/mublog.svg"
-                    alt="hamburger icon"
-                    width={48}
-                    height={48}
-                    className="main-icon auto-dark"
-                />
-                <ButtonWrapper>
-                    <button onClick={handleClose} className="menu-button auto-dark">
-                        <Image src="/icons/cancel.svg" alt="cancel icon" width={22} height={22} />
-                    </button>
-                </ButtonWrapper>
-            </div>
-            <div className="side-content">
-                <Link href="/" onClick={handleClose} className="side-menu-link">
-                    <h5>Post</h5>
-                </Link>
-                <Link href="/about" onClick={handleClose} className="side-menu-link">
-                    <h5>About me</h5>
-                </Link>
-                <SideList type="latest" onLinkClick={handleClose} />
-                <SideList type="recent" onLinkClick={handleClose} />
-            </div>
+        <>
+            <Overlay onClick={handleClose} />
+            <MenuWrapper isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>
+                <div className="side-header">
+                    <Image
+                        src="/icons/mublog.svg"
+                        alt="hamburger icon"
+                        width={48}
+                        height={48}
+                        className="main-icon auto-dark"
+                    />
+                    <ButtonWrapper>
+                        <button onClick={handleClose} className="menu-button auto-dark">
+                            <Image
+                                src="/icons/cancel.svg"
+                                alt="cancel icon"
+                                width={22}
+                                height={22}
+                            />
+                        </button>
+                    </ButtonWrapper>
+                </div>
+                <div className="side-content">
+                    <Link href="/" onClick={handleClose} className="side-menu-link">
+                        <h5>Post</h5>
+                    </Link>
+                    <Link href="/about" onClick={handleClose} className="side-menu-link">
+                        <h5>About me</h5>
+                    </Link>
+                    <SideList type="latest" onLinkClick={handleClose} />
+                    <SideList type="recent" onLinkClick={handleClose} />
+                </div>
 
-            <div className="side-footer">
-                <p>© {new Date().getFullYear()}. MuRing all rights reserved.</p>
-                <ThemeSwitcher />
-            </div>
-        </MenuWrapper>
+                <div className="side-footer">
+                    <p>© {new Date().getFullYear()}. MuRing all rights reserved.</p>
+                    <ThemeSwitcher />
+                </div>
+            </MenuWrapper>
+        </>
     );
 }
