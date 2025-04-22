@@ -8,7 +8,8 @@
     --codefontbgcolor: #f4f4f4;
     --bordercolor: #e6e6e6;
     --cardbackground: #ffffff;
-    --shawdowcolor: rgba(0, 0, 0, 0.1);
+    --shadowcolor: rgba(0, 0, 0, 0.1);
+    --desccolor: #888888;
 }
 
 html.dark {
@@ -21,11 +22,7 @@ html.dark {
     --codefontbgcolor: #303030;
     --bordercolor: #5c5c5c;
     --cardbackground: #27272a;
-
-    a.auto-dark:hover,
-    button.auto-dark:hover {
-        filter: invert(0) brightness(1) !important;
-    }
+    --shadowcolor: rgba(255, 255, 255, 0.1);
 }
 
 .dark .auto-dark {

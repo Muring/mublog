@@ -5,7 +5,7 @@ export const CardWrapper = styled.article`
     border: 1px solid var(--bordercolor);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0px 3px 5px -2px var(--shawdowcolor);
+    box-shadow: 0px 3px 5px -2px var(--shadowcolor);
     cursor: pointer;
 
     /* 초기 상태 */
@@ -42,6 +42,9 @@ export const CardWrapper = styled.article`
     }
 
     .card-body {
+        display: flex;
+        flex-direction: column;
+        height: 10rem;
         padding: 1rem;
         background-color: var(--cardbackground);
 
@@ -51,33 +54,50 @@ export const CardWrapper = styled.article`
         }
 
         .description {
-            height: 4rem;
-            color: gray;
+            color: var(--desccolor);
             margin-bottom: 0.8rem;
         }
 
         .footer {
+            width: 100%;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            bottom: 0;
+            margin-top: auto;
             font-size: 0.75rem;
-            color: gray;
+            color: var(--desccolor);
+            gap: 1rem;
 
-            .tags {
+            p {
+                font-size: 0.8rem;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            .tag-container {
                 display: flex;
-                align-items: end;
+                align-items: center;
                 gap: 0.4rem;
 
                 img {
                     filter: grayscale(100%);
                     opacity: 0.6;
                 }
+
+                .tags {
+                    width: 100%;
+                }
             }
 
             .date {
                 display: flex;
+                justify-content: space-evenly;
                 align-items: center;
                 gap: 0.3rem;
+                flex-wrap: nowrap;
 
                 img {
                     opacity: 0.6;

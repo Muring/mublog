@@ -12,7 +12,7 @@ import ThemeSwitcher from "../ThemeSwitcher/ThemeSwithcer";
 export default function SideMenu({ onClose }: { onClose: () => void }) {
     const [isClosing, setIsClosing] = useState(false);
 
-    // ✅ 사이드 메뉴 열렸을 때 body 스크롤 방지
+    // 사이드 메뉴 열렸을 때 body 스크롤 방지
     useEffect(() => {
         const originalBodyStyle = {
             overflow: document.body.style.overflow,

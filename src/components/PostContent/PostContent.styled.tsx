@@ -72,9 +72,17 @@ export const Article = styled.article`
     /* 세부 정보 헤더 */
     .article-detail {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        flex-direction: column;
+        flex-wrap: wrap;
+        gap: 1rem;
         margin-top: 1rem;
+
+        .article-item {
+            display: flex;
+            align-items: center;
+            min-width: 8rem;
+            gap: 0.5rem;
+        }
 
         .article-detail-icon {
             border-radius: 0;
@@ -96,9 +104,9 @@ export const Article = styled.article`
         ul {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 0.5rem;
             margin: 0;
-            padding-left: 1.5rem;
         }
 
         li {

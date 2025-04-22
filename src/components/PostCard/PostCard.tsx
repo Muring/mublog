@@ -5,8 +5,6 @@ import Image from "next/image";
 
 export default function PostCard({ post, style }: { post: Post; style?: React.CSSProperties }) {
     const formattedDate = dayjs(post.date).format("YY년 MM월 DD일");
-    const thumbnailSrc =
-        post.thumbnail && post.thumbnail.trim() !== "" ? post.thumbnail : "/thumbnails/default.svg";
 
     return (
         <CardWrapper style={style}>
@@ -28,7 +26,7 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
                 <p className="description">{post.description}</p>
 
                 <div className="footer">
-                    <div className="tags ">
+                    <div className="tag-container">
                         <Image
                             src="/icons/tag.svg"
                             alt="tag icon"
@@ -36,9 +34,9 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
                             width={14}
                             height={14}
                         />
-                        {post.tags?.map((tag) => (
-                            <div key={tag}>#{tag}</div>
-                        ))}
+                        <div className="tags">
+                            <p>{post.tags?.map((tag) => `#${tag}`).join(" ")}</p>
+                        </div>
                     </div>
                     <div className="date">
                         <Image
@@ -48,7 +46,7 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
                             width={14}
                             height={14}
                         />
-                        <div>{formattedDate}</div>
+                        <p>{formattedDate}</p>
                     </div>
                 </div>
             </div>

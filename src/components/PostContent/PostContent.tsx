@@ -23,15 +23,18 @@ export default function PostContent({ title, date, description, tags, code }: Pr
             <h1>{title}</h1>
             <h5>{description}</h5>
             <div className="article-detail">
-                <Image
-                    src="/icons/calendar.svg"
-                    alt="calendar icon"
-                    width={16}
-                    height={16}
-                    className="article-detail-icon auto-dark"
-                />
-                <p className="desc">{formattedDate}</p>
-                <ul>
+                <div className="article-item">
+                    <Image
+                        src="/icons/calendar.svg"
+                        alt="calendar icon"
+                        width={16}
+                        height={16}
+                        className="article-detail-icon auto-dark"
+                    />
+                    <p className="desc">{formattedDate}</p>
+                </div>
+
+                <div className="article-item">
                     <Image
                         src="/icons/tag.svg"
                         alt="tag icon"
@@ -39,14 +42,16 @@ export default function PostContent({ title, date, description, tags, code }: Pr
                         height={16}
                         className="article-detail-icon auto-dark"
                     />
-                    {tags?.map((tag) => (
-                        <li key={tag}>
-                            <Link href={`/?tag=${tag}`}>
-                                <h4 className=" tag">{"#" + tag}</h4>
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+                    <ul>
+                        {tags?.map((tag) => (
+                            <li key={tag}>
+                                <Link href={`/?tag=${tag}`}>
+                                    <h4 className=" tag">{"#" + tag}</h4>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
             <hr />
             <MDXContent />

@@ -14,7 +14,7 @@ export default function PostGrid() {
     const searchParams = useSearchParams();
     const selectedTag = searchParams.get("tag");
 
-    // 태그 정렬렬
+    // 태그 정렬
     const tags = Array.from(new Set(allPosts.flatMap((post) => post.tags ?? []))).sort((a, b) => {
         if (a === "etc") return 1;
         if (b === "etc") return -1;
