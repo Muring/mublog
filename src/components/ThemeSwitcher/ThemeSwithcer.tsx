@@ -2,28 +2,34 @@
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { ToggleBall, ToggleContainer } from "./ThemeSwitcher.styled";
+import { ToggleBall, ToggleContainer, ToggleLabel } from "./ThemeSwitcher.styled";
 
 export default function ThemeSwitcher() {
-    const { setTheme, resolvedTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // localStorage 값 없으면 강제 system 설정
+        const stored = localStorage.getItem("theme");
+        if (!stored) {
+            setTheme("system");
+        }
+
         setMounted(true); // hydration mismatch 방지
     }, []);
 
     if (!mounted) return null;
 
-    const isDark = resolvedTheme === "dark";
+    const nextTheme = () => {
+        if (theme === "light") setTheme("dark");
+        else if (theme === "dark") setTheme("system");
+        else setTheme("light");
+    };
 
     return (
-        <ToggleContainer
-            role="button"
-            aria-label="Toggle Dark Mode"
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-            isDark={isDark}
-        >
-            <ToggleBall isDark={isDark} />
+        <ToggleContainer themeMode={theme} onClick={nextTheme}>
+            <ToggleBall themeMode={theme} />
+            {theme === "system" && <ToggleLabel>System</ToggleLabel>}
         </ToggleContainer>
     );
 }
