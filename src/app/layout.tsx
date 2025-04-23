@@ -3,7 +3,7 @@ import "./globals.css";
 import "@/styles/prism-notion-theme.css";
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
-import Providers from "@/components/Providers/Providers";
+import RootProvider from "@/Providers/RootProvider";
 
 export const metadata: Metadata = {
     title: "Mublog",
@@ -21,11 +21,11 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body>
-                <Providers>
+                <RootProvider>
                     <Header />
                     <main>{children}</main>
                     <Footer />
-                </Providers>
+                </RootProvider>
             </body>
         </html>
     );

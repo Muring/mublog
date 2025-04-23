@@ -71,7 +71,6 @@ export const Article = styled.article`
 
     p img {
         display: block;
-        width: 100%;
         max-width: 656px;
         border: 1px solid var(--bordercolor);
         margin: 2rem auto 0 auto; /* 상-하 간격 조절 */
