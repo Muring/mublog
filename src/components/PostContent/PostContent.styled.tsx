@@ -49,6 +49,26 @@ export const Article = styled.article`
         }
     }
 
+    table {
+        width: 100%;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        border-collapse: collapse;
+    }
+
+    table td,
+    table th {
+        border: 1px solid var(--bordercolor);
+    }
+
+    table th {
+        background-color: var(--codefontbgcolor);
+    }
+
+    table td {
+        padding: 0 0.5rem;
+    }
+
     p img {
         display: block;
         width: 100%;
