@@ -1,0 +1,239 @@
+---
+
+title: "블로그 개발기 3 (다크 모드 편)"
+date: "2025-04-22"
+description: "프론트엔드를 꿈꾸는 세일즈포스 개발자의 블로그 개발기 - “다크 모드 적용"
+tags:
+
+- frontend
+- etc
+
+thumbnail: "/thumbnails/blog-development-1.jpg"
+
+---
+
+이전 편에서 전반적인 디자인을 마치고 마주한 다크 모드 문제는 생각보다 심각했다. 사실상 포스트를 읽는 것은 거의 불가능 했고, 헤더, 사이드 메뉴, 카드 배경색 등, 그냥 80% 이상이 박살난 상태였다. 
+
+솔직히 다크 모드를 신경써서 개발을 해 본적은 없어서 전혀 예상하지 못했었다. 이왕 이렇게 된 김에 이번에 다크 모드에 대해서 공부하고 이를 내 블로그에 녹여내야겠다고 생각했다.
+
+## 내가 원하는 다크 모드
+
+현재 사용자의 다크 모드의 사용 여부를 확인해서 자동으로 이를 감지해주는 것도 좋지만, 역시 나는 다크 모드 토글 버튼을 만들고 싶었다. 가끔 어떤 사이트는 밝은게 잘 보일때도 있고, 다크 모드가 잘 보일 때도 있었던 데다가 개인적으로도 다크 모드는 어떤지, 어떤 점이 다른지 눌러보면서 호기심을 충족하는 편이기 때문이다. 
+
+자 그럼, 어떻게 다크 모드를 적용할지 생각했으니 본격적으로 개발을 들어가보자.
+
+### 사용자 다크 모드 자동 감지
+
+우선 다크 모드를 적용할 수 있는 방법이 무엇이 있는지 찾아보았다. 찾아보니 앞서 생각했던 두 가지 방법인 자동 감지, 토글이 가장 대표적이었다. 
+
+여기서 자동 감지는 구현하기 매우 쉬웠다.
+
+```css
+@media (prefers-color-scheme: dark) {
+    background-color: var(--background);
+    color: var(--foreground);
+}
+```
+
+해당 코드를 색깔이 바뀌지 않은 각 컴포넌트의 스타일에 붙여넣어 주면 해결이 됐다. 물론 설정을 바꿔주는게 배경이랑 글자색 뿐이라 그렇게까지 이쁘게 고쳐지진 않았었지만, 그래도 볼만한 수준으로 해결이 됐었다. 하지만 이것 만으로는 토글 버튼을 사용할 수 없기 때문에 추가적인 설정이 필요했다. 이제 하나씩 뜯어보도록 하자.
+
+### 다크 모드 토글
+
+먼저 `Next.js` 환경에서는 토글 방식의 다크 모드를 설정하기 위한 방법이 두 가지 존재한다.
+
+- `next-theme`을 이용한 방식
+- `Local storage`를 사용하여 다크 모드의 상태를 저장하고 전환하는 방식
+
+여기서 나는 이왕 `Next.js`를 활용하여 개발하는 김에 존재하는 라이브러리인 `next-theme`을 이용하여 개발하자는 생각이 들어서 `next-theme`을 사용한 방식을 채택했다.
+
+> *“좋은게 좋은거잖아~”*
+> 
+
+아무튼, 이제 본격적으로 시작해보자.
+
+나는 사이드 메뉴의 최하단에 토글 버튼을 생성하고 해당 버튼을 눌렀을 때, 사이트의 테마가 바뀌기를 원한다. 이를 위해서는 토글 버튼을 눌렀을 때, 어떤 값을 전송해서 이를 감지하고 전체 `body` 혹은 `html`의 클래스가 바뀌도록 유도해서 각각 다른 스타일이 적용되게 할 것이다.
+
+**[ Provider.tsx ]**
+
+가장 먼저 작성한 파일이다. 해당 파일에서 나는 `ThemeProvider`를 선언해서 넘겨주는 layout 구조를 만들었다. `ThemeProvider`는 `next-themes`에서 제공하는 **전역 컨텍스트(Context)**로 하는 역할은 아래와 같다.
+
+| 기능 | 설명 |
+| --- | --- |
+| `context` 제공 | 하위 모든 컴포넌트가 `useTheme()`를 사용할 수 있게 만듬 |
+| `class="dark"` 자동 부여 | `html` 태그에 class를 동적으로 추가 (`html.dark`) |
+| 시스템 테마 자동 감지 | `prefers-color-scheme: dark` 를 따를 수 있음 |
+| 상태 저장 | 현재 테마(`light`, `dark`, `system`)를 `localStorage`에 저장 (`theme` 키) |
+| 초기 hydration 처리 | SSR과 CSR에서 UI 깜빡임 방지 (Hydration mismatch 해결) |
+
+즉, 가장 기본적인 테마 초기 설정이다.
+
+**[ ThemeSwitcher ]**
+
+이제 전역 설정을 해줬으니 이를 가져다가 토글 컴포넌트를 만들어보자.
+
+가장 중요한 포인트는 두 가지다.
+
+- 테마 정보를 가져오고 설정하기 위한 `useTheme()`선언
+- 버튼 토그 시 theme의 변경
+
+추가로 사용자 경험을 위해 현재 사이트의 시스템 테마의 정보를 가져오거나, 이미 방문해서 Local storage에 값이 있는 사용자의 경우에는 Local storage에서 테마의 정보를 가져오도록 해야한다. 왜냐고? 그래야 사용자 경험이 향상되기 때문이다. 
+
+위의 조건을 사용하지 않았을 경우를 예로 들어보자. 시스템 테마는 블랙이지만, 해당 사이트에서는 항상 흰색으로 보고 싶어하는 사용자가 있다고 가정하자. 해당 사용자는 매번 들어오면 다시 테마를 토글해야하는 최악의 사용자 경험을 마주하게 될 것이다.
+
+아무튼 위의 내용을 바탕으로 코드를 작성하면 아래와 같다.
+
+추가적으로 [hydration](https://muring-blog.vercel.app/blog-development-2)에서 오류가 발생하지 않도록 하기 위해서 이를 검증하는 로직도 추가해줬다. 
+
+```tsx
+"use client";
+
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { ToggleBall, ToggleContainer, ToggleLabel } from "./ThemeSwitcher.styled";
+
+export default function ThemeSwitcher() {
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        // localStorage 값 없으면 강제 system 설정
+        const stored = localStorage.getItem("theme");
+        if (!stored) {
+            setTheme("system");
+        }
+
+        setMounted(true); // hydration mismatch 방지
+    }, []);
+
+    if (!mounted) return null;
+
+    const nextTheme = () => {
+        if (theme === "light") setTheme("dark");
+        else if (theme === "dark") setTheme("system");
+        else setTheme("light");
+    };
+
+    return (
+        <ToggleContainer themeMode={theme} onClick={nextTheme}>
+            <ToggleBall themeMode={theme} />
+            {theme === "system" && <ToggleLabel>System</ToggleLabel>}
+        </ToggleContainer>
+    );
+}
+```
+
+다음은 토글 버튼 디자인이다. 뭔가 복잡하고 멋있게 하기 보다는 기본에 충실하자는 의미로 가장 기본적인 토글 볼 버튼을 만들었다. 이때, System 설정을 따라갈 때는 중앙에, light는 왼쪽, dark는 오른쪽으로 볼이 오도록 디자인하였다.
+
+![*“토글 버튼 디자인”*](/images/blogDevelopment2/image.png)
+
+*“토글 버튼 디자인”*
+
+```css
+import styled from "@emotion/styled";
+
+export const ToggleContainer = styled.div<{ themeMode: string | undefined }>`
+    width: 48px;
+    height: 24px;
+    border-radius: 9999px;
+    background-color: var(--foreground);
+    display: flex;
+    align-items: center;
+    justify-content: ${({ themeMode }) =>
+        themeMode === "light" ? "flex-start" : themeMode === "dark" ? "flex-end" : "center"};
+    padding: 3px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s ease;
+`;
+
+export const ToggleBall = styled.div<{ themeMode: string | undefined }>`
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--background);
+    opacity: ${({ themeMode }) => (themeMode === "system" ? 0.3 : 1)};
+    transition: transform 0.3s ease, opacity 0.3s ease;
+`;
+
+export const ToggleLabel = styled.span`
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--background);
+    pointer-events: none;
+`;
+```
+
+개인적으로 이번에 Emotion을 이용해서 스타일링을 진행하면서 신세계를 맛보고 있다. 초반에는 왜 굳이 이런 번거로운 방식으로 스타일링을 하는지 이해가 안갔지만, 해당 코드만을 예제로도 왜 Emotion이 편리한가를 바로 이해할 수 있을 것이다.
+
+단순히 봐도 일반 css랑은 많은 차이점이 보인다. 해당 글은 Emotion을 다루는 글이 아니기 때문에 자세한 이야기는 생략하겠지만 간략히 나의 느낀점을 말하자면, 변수 값을 코드에서 받아와 css 내부에서 사용하여 스타일링을 할 수 있다는 점이 말도 안되는 장점인 것 같다. 
+
+논리 연산자, 삼항 연산자, 단순 변수 값 홀용 등 가능성이 무궁무진하다. 일반 css로는 하지 못하거나 매우 어려웠던 로직들을 덕분에 십게 구현할 수 있는 것 같다.
+
+**[ layout.tsx ]**
+
+아무튼 다시 돌아와서 그럼 이제 해당 토글 버튼을 클릭했을 때 바뀌는 테마의 값을 전체 사이트에 적용시켜야 한다. 전체 사이트라 하면 가장 먼저 떠오르는 것이 있을 것이다. 바로 가장 디폴트, 홈 페이지의 `layout`이다.
+
+여기서는 단순히 해당 기능이 동작할 수 있도록 사이트에 연결만 해주면 되기 때문에 전체 사이트의 요소를 `Provider`로 감싸주면 끝난다.
+
+```tsx
+<html lang="en" suppressHydrationWarning>
+    <body>
+        <Providers>
+            <Header />
+            <main>{children}</main>
+            <Footer />
+        </Providers>
+    </body>
+</html>
+```
+
+**[ globals.css ]**
+
+자, 이렇게 하면 이제 버튼을 누르면 테마가 바뀔걸 기대하고 눌러보겠지만!! 전혀 기대에 부응하지 못할 것이다. 왜 그럴까? 
+
+우리가 현재 작성한 코드는 dark 테마로 바꾸기 위해 토글 버튼을 누르면 html에 dark라는 클래스를 추가하고, light 테마로 바꾸기 위해서는 dark를 지우고, system 테마를 위해서는 system 클래스를 적용해주는 코드이다. 이떄, 우리는 dark에 대해서 아무런 스타일링을 지정하지 않았기 때문에 별 다른 반응이 없거나 바뀌어도 배경과 텍스트만 바뀌고, 내가 따로 만든 컴포넌트에는 적용이 안되는 해괴망측한 상황이 올 것이다.
+
+![*“해괴망측한 상황”*](/images/blogDevelopment2/image_1.png)
+
+*“해괴망측한 상황”*
+
+나는 심지어 사이드 메뉴 최하단에 토글 버튼을 생성했는데, 포스트 리스트 컴포넌트의 높이를 고정으로 줘서 화면을 줄이면 보이지도 않는 상황에 놓였었다. 결국 사이드 메뉴도 모두 flex로 전부 다이나믹하게 다시 만들고, dark 모드에 대한 색깔을 따로 전부 지정하고 난 뒤에야 화면이 제대로 나올 수 있었다.
+
+![*“수정이 끝난 모습”*](/images/blogDevelopment2/image_2.png)
+
+*“수정이 끝난 모습”*
+
+드디어 완성이다. 정말 자잘한 수정사항이 끊임없이 나와서 이틀 동안 수정하고 수정하고를 반복했던 것 같다. 그래도 이번에 다크 모드 토글 버튼을 개발하면서 많은 점을 배울 수 있었다. 슬슬 글이 길어지는 것 같으니 간단하게 요약하고 마무리하도록 하겠다.
+
+## 느낀점
+
+- 색깔 전역 변수 활용
+- Emotion의 장점
+- margin: auto의 활용성
+- 테마 클래스 적용 방법
+
+이 외에도 자잘하게 많지만 그러면 너무 구질구질하니 패스하겠다.
+
+색깔 전역 변수 같은 경우에는 scss를 사용할 때는 사용해본 적이 있지만 기본 css로도 가능한 줄은 몰랐다. 덕분에 일관성 있게 색깔을 유지할 수 있었다. (~~쓸데없이 색깔을 너무 많이 지정해놓은게 아닌가 싶긴 하지만~~)
+
+이걸 여태까지 2년 넘게 공부하면서 몰랐다는게 참 기가차고 어이가 없지만 이제라도 알았으니 유용하게 써먹어야겠다.
+
+![*“색깔 전역 변수 + 다크 모드 스타일링”*](/images/blogDevelopment2/image_3.png)
+
+*“색깔 전역 변수 + 다크 모드 스타일링”*
+
+그리고 flex를 사용할 때 margin: auto의 활용성이 생각보다 좋다는 것을 알았다. 이것을 알게 된 것은 내가 레퍼런스로 삼고 있는 “덕업일치 개발자”님의 블로그 css를 뜯어보다가 알게된 부분인데, display:flex를 선언해 준 상태에서 width나 height을 100%로 주었을 때, 내부 요소가 전체 공간을 차지하지 못하는 경우에 margin: auto를 주면 해당 공간을 margin으로 꽉 채워 버리는 것을 알 수 있었다. 
+
+이게 단순히 요소의 크기를 늘려서 사이즈를 강제로 맞추는 것과 다르게 좋은 점이 요소 내부의 컨텐츠가 늘어나서 사이즈가 커져도 알아서 margin이 줄으면서 크기은 커지고 점유하고 있는 공간의 위치나 정렬을 망가뜨리지 않는다는 것이다. 
+
+> *“정말 많이 배워갑니다.”*
+> 
+
+다크 모드 토글 버튼은 언젠가 다시 만들 일이 있을 수 있을 것 같으니 좀 자세히 정리해보았다. 그리고 추후에 가능하다면 별도의 컴포넌트로 git에도 등록해보도록 하겠다.
+
+이것으로 블로그 개발기는 마치도록 하겠다. 추후에 뭔가 빠뜨린 부분이 있다면 쓰도록 하겠다.
+
+솔직히 글을 잘 쓰는 편도 아닌데 여기까지 읽어주었다면 정말 감사한 마음을 담아 더 열심히 쓰도록 하겠다.

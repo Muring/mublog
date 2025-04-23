@@ -1,6 +1,7 @@
 // contentlayer.config.ts
 import { defineDocumentType, makeSource } from "contentlayer/source-files";
 import remarkGfm from "remark-gfm";
+import rehypePrism from "rehype-prism-plus";
 
 export const Post = defineDocumentType(() => ({
     name: "Post",
@@ -30,5 +31,6 @@ export default makeSource({
     documentTypes: [Post],
     mdx: {
         remarkPlugins: [remarkGfm],
+        rehypePlugins: [[rehypePrism, { ignoreMissing: true }]],
     },
 });

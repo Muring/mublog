@@ -1,0 +1,159 @@
+/* ============================
+   📦 코드 블럭 기본 설정
+============================ */
+pre code,
+code[class*="language-"],
+pre[class*="language-"] {
+    background: var(--codefontbgcolor);
+    color: var(--foreground);
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 2;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+    display: block;
+    white-space: pre;
+}
+
+/* ============================
+   💡 라이트 모드 Prism 토큰 색상
+============================ */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #6a737d;
+    font-style: italic;
+}
+
+.token.punctuation {
+    color: #999999;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #d73a49;
+}
+
+.token.number {
+    color: #005cc5;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #032f62;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #d73a49;
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #22863a;
+}
+
+.token.function {
+    color: #6f42c1;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e36209;
+}
+
+.token.bold {
+    font-weight: bold;
+}
+
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+/* ============================
+   🌙 다크 모드 Prism 토큰 색상
+============================ */
+html.dark pre code,
+html.dark code[class*="language-"],
+html.dark pre[class*="language-"] {
+    background: var(--codefontbgcolor);
+    color: var(--foreground);
+}
+
+html.dark .token.comment,
+html.dark .token.prolog,
+html.dark .token.doctype,
+html.dark .token.cdata {
+    color: #999999;
+}
+
+html.dark .token.punctuation {
+    color: #bbbbbb;
+}
+
+html.dark .token.property,
+html.dark .token.tag,
+html.dark .token.boolean,
+html.dark .token.constant,
+html.dark .token.symbol,
+html.dark .token.deleted {
+    color: #ff7b72;
+}
+
+html.dark .token.number {
+    color: #6cb6ff;
+}
+
+html.dark .token.selector,
+html.dark .token.attr-name,
+html.dark .token.string,
+html.dark .token.char,
+html.dark .token.builtin,
+html.dark .token.inserted {
+    color: #a5d6ff;
+}
+
+html.dark .token.operator,
+html.dark .token.entity,
+html.dark .token.url {
+    color: #ffab70;
+}
+
+html.dark .token.atrule,
+html.dark .token.attr-value,
+html.dark .token.keyword {
+    color: #d2a8ff;
+}
+
+html.dark .token.function {
+    color: #71d6ff;
+}
+
+html.dark .token.regex,
+html.dark .token.important,
+html.dark .token.variable {
+    color: #ffa657;
+}
+
+.code-line {
+    color: var(--foreground);
+}
