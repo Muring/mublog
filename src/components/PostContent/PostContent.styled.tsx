@@ -23,13 +23,13 @@ export const Article = styled.article`
         margin-bottom: 0.5rem;
     }
     h2 {
-        margin: 2rem 0 1rem;
+        margin-top: 2rem;
     }
     h3 {
-        margin: 1rem 0;
+        margin-top: 1.5rem;
     }
     p {
-        margin-top: 1rem;
+        margin-top: 0.5rem;
     }
     li {
         margin-left: 1rem;
@@ -152,6 +152,9 @@ export const Article = styled.article`
         line-height: 1.6;
         overflow-x: auto;
     }
+    aside h3 {
+        margin-bottom: 1rem;
+    }
     aside blockquote {
         border-left: 0.3rem solid var(--foreground);
         border-radius: 0;
@@ -170,7 +173,6 @@ export const Article = styled.article`
         border-left: 0.5rem solid var(--bordercolor);
         border-radius: 0.5rem;
         padding: 0.2rem 1rem;
-        background: var(--codefontbgcolor);
         font-style: italic;
         color: var(--foreground);
         margin: 1.5rem 0;
@@ -187,6 +189,10 @@ export const Article = styled.article`
         font-size: 0.85rem;
         font-family: "Consolas";
         color: #ff7b00;
+    }
+
+    .code-highlight {
+        padding: none !important;
     }
 
     /* 구분선 */
