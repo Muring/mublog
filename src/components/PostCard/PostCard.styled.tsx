@@ -45,7 +45,7 @@ export const CardWrapper = styled.article`
         display: flex;
         flex-direction: column;
         width: 100% !important;
-        height: 10rem;
+        height: 9.5rem;
         padding: 1rem;
         background-color: var(--cardbackground);
 
@@ -57,6 +57,7 @@ export const CardWrapper = styled.article`
         .description {
             color: var(--desccolor);
             margin-bottom: 0.8rem;
+            line-height: 1.4;
         }
 
         .footer {
