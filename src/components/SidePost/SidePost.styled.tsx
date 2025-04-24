@@ -9,6 +9,7 @@ export const SidePostWrapper = styled.div`
         border-radius: 0.5rem;
         width: 40px;
         height: 40px;
+        object-fit: cover;
     }
 
     .text-container {
