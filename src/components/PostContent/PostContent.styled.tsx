@@ -151,6 +151,27 @@ export const Article = styled.article`
         }
     }
 
+    aside {
+        gap: 0.75rem;
+        background-color: #f9f9f9;
+        border-left: 4px solid #ffd700;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin: 2rem 0;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #333;
+        overflow-x: auto;
+    }
+
+    /* 이모지 아이콘 위치 조정 */
+    aside > :first-of-type {
+        font-size: 1.3rem;
+        line-height: 1;
+        margin-top: 0.2rem;
+        position: relative;
+    }
+
     /* 블록 요소 */
     blockquote {
         border-left: 0.5rem solid var(--bordercolor);

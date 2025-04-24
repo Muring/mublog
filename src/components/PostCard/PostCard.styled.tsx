@@ -1,7 +1,7 @@
 import styled from "@emotion/styled";
 
 export const CardWrapper = styled.article`
-    width: 100%;
+    width: 100% !important;
     border: 1px solid var(--bordercolor);
     border-radius: 12px;
     overflow: hidden;
@@ -29,7 +29,7 @@ export const CardWrapper = styled.article`
     }
 
     .image-wrapper {
-        width: 100%;
+        width: 100% !important;
         min-height: 150px;
         max-height: 15rem;
         overflow: hidden;
@@ -44,6 +44,7 @@ export const CardWrapper = styled.article`
     .card-body {
         display: flex;
         flex-direction: column;
+        width: 100% !important;
         height: 10rem;
         padding: 1rem;
         background-color: var(--cardbackground);

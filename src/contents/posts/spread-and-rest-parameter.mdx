@@ -1,0 +1,233 @@
+---
+title: "전개 & 나머지 연산자 (…)"
+date: "2025-04-24"
+description: "React + TS - 연산자"
+tags:
+  - frontend
+  - react
+  - typescript
+thumbnail: "/thumbnails/blog-development-1.jpg"
+---
+ 
+
+`...`은 JavaScript에서 **전개 연산자(Spread Operator)** 또는 **나머지 매개변수(Rest Parameter)**로 사용된다.
+
+비슷해 보이지만 **사용 위치**에 따라 의미가 완전히 달라지므로 정확하게 구분하는 것이 중요하다.
+
+---
+
+## 🧩 1. Spread Operator (전개 연산자)
+
+### 🔹 개념
+
+기존 객체나 배열을 **펼쳐서 복사하거나 합치는 역할**을 한다.
+
+즉, `…prev`를 먼저 선언하고 그 뒤에 나오는 키 값을 `prev`가 보유하고 있다면, 해당 값을 **덮어쓴다**는 의미다.
+
+### 1️⃣ 먼저, 상태 구조 정의 (TypeScript 사용)
+
+```tsx
+type State = {
+  query: string;
+  type: string;
+  flag: boolean;
+};
+
+const [searchState, setSearchState] = useState<State>({
+  query: '',
+  type: '',
+  flag: false,
+});
+```
+
+- 예시로 `query`, `type`, `flag`라는 세 가지 속성을 가진 상태 객체를 사용해보자.
+- 초기값은 모두 빈 문자열(`''`) 혹은 `false`로 설정해두었다.
+
+---
+
+### 2️⃣ 상태 업데이트 시 – 전체를 갈아치우면 위험!
+
+```tsx
+setSearchState({
+  type: 'updated',
+});
+```
+
+이렇게 하면 **`query`와 `flag`는 사라지고** `type`만 남게 된다.
+
+왜냐하면 `React.useState`가 객체 병합을 자동으로 하지 않기 때문이다.
+
+---
+
+### 3️⃣ 안전한 업데이트 방식 – Spread Operator 사용
+
+```tsx
+setSearchState(prev => ({
+  ...prev,             // 기존의 query, flag, type 모두 복사
+  type: 'updated',     // type만 새로운 값으로 덮어쓰기
+  flag: changedFlagValue ?? '';
+}));
+```
+
+그렇다고 모든 키 값을 전부 적는 것은 너무 비효율적이다. 특히, 지금은 키가 3개 밖에 없지만 10개, 20개가 되면 쓸데없이 코드가 길어질 수 있다. 그래서 **Spread Operator**를 사용하는 것이다.
+
+이 코드는 `changedFlagValue`값이 `null`혹은 `undefiend`라고 가정한다면 `prev` 상태에서 모든 키를 복사하고, 그 중 `type`만 새로운 값으로 덮어쓰게 된다.
+
+<aside>
+
+
+### 💡 ?? 연산자의 의미
+
+`A ?? B` 는
+
+> A가 null 또는 undefined일 경우에만 B를 사용한다
+> 
+> 
+> 는 의미입니다.
+> 
+
+즉, `A`가 `null`도 아니고 `undefined`도 아니면 **그 값을 그대로 사용**하고, 그렇지 않으면 **기본값 `B`를 사용**합니다.
+
+</aside>
+
+결과적으로 아래와 같은 결과를 얻을 수 있다.
+
+```tsx
+{
+  query: '',     // 유지
+  type: 'updated', // 변경됨
+  flag: false    // 유지
+}
+```
+
+---
+
+## 🧩 2. Rest Parameter (구조 분해 할당에서의 나머지 추출)
+
+### 🔹 개념
+
+`...rest`는 구조 분해 할당 시 **객체에서 일부 속성만 분리하고 나머지 속성은 한 객체로 묶어** 다시 사용할 수 있게 해준다.
+
+---
+
+## 1️⃣ 커스텀 훅에서 반환값을 분해할 때
+
+```tsx
+const { searchState, setSearchState, ...searchHandlers } = useSearch(...);
+```
+
+### 💡 이 코드는 무슨 의미일까?
+
+`useSearch()`라는 커스텀 훅이 아래와 같은 객체를 반환한다고 가정해보자:
+
+```tsx
+{
+  searchState: ...,
+  setSearchState: ...,
+  runSearch: ...,
+  resetSearch: ...,
+  toggleSearchOptions: ...,
+}
+```
+
+위 구조에서 `searchState`와 `setSearchState`는 **직접 변수로 꺼내서 사용하고**,
+
+그 외의 함수들(`runSearch`, `resetSearch`, `toggleSearchOptions`)은 **`searchHandlers`라는 이름으로 하나로 묶는 것**이다.
+
+결과적으로:
+
+```tsx
+// Interface 선언 후 활용
+searchHandlers = {
+  runSearch: ...,
+  resetSearch: ...,
+  toggleSearchOptions: ...,
+}
+```
+
+이렇게 **핵심 상태는 분리**하고, **나머지 기능은 묶어서 핸들러로 관리**할 수 있다.
+
+---
+
+## 2️⃣ 컴포넌트의 Props를 정리해서 넘길 때
+
+```tsx
+function CustomInput({ label, ...inputProps }: { label: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <label>
+      {label}
+      <input {...inputProps} />
+    </label>
+  );
+}
+```
+
+### 💡 여기서 `...inputProps`는 무엇을 의미할까?
+
+이 컴포넌트를 사용할 때 다음과 같이 작성할 수 있다:
+
+```tsx
+<CustomInput label="이름" type="text" placeholder="이름을 입력하세요" required />
+```
+
+위 props는 다음과 같이 전달된다:
+
+```tsx
+{
+  label: "이름",
+  type: "text",
+  placeholder: "이름을 입력하세요",
+  required: true
+}
+```
+
+이 중에서 `label`만 따로 분리하고, 나머지(`type`, `placeholder`, `required`)는 모두 `inputProps`로 묶어서 `<input {...inputProps} />`에 넘기는 구조이다.
+
+즉, 결과적으로:
+
+```tsx
+<input
+  type="text"
+  placeholder="이름을 입력하세요"
+  required
+/>
+```
+
+이렇게 모든 나머지 속성이 그대로 전달된다.
+
+---
+
+## ✅ 비교 요약
+
+| 형태 | 정식 명칭 | 사용 위치 | 기능 | 예시 |
+| --- | --- | --- | --- | --- |
+| `...prev` | Spread Operator | 객체 내부 | 객체 복사 및 덮어쓰기 | `setState(prev => ({ ...prev, key: val }))` |
+| `...rest` | Rest Parameter | 구조 분해 할당 | 남은 속성 모아서 객체 생성 | `const { a, ...rest } = obj` |
+
+---
+
+## 🧩 추가 사용 사례
+
+### 🔸 배열 전개
+
+```
+const a = [1, 2];
+const b = [...a, 3]; // [1, 2, 3]
+```
+
+### 🔸 함수 인자에서 나머지 추출
+
+```
+function logAll(first: string, ...rest: string[]) {
+  console.log(first);
+  console.log(rest); // 나머지 인자들
+}
+```
+
+---
+
+## ✅ 결론
+
+- `...`는 문맥에 따라 의미가 달라지며, **객체나 배열을 다룰 때 매우 유용한 문법**
+- React + TypeScript 환경에서도 **타입 추론 및 안전성 확보**에 유리하게 활용 가능
+- 상태 업데이트, props 전달, 훅 응답 정리 등에서 자주 사용
