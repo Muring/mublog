@@ -7,7 +7,7 @@ export const Article = styled.article`
     max-width: 720px;
     min-height: 85vh;
     margin: 0 auto;
-    padding: 4rem 2rem;
+    padding: 4rem 1rem;
     line-height: 2.5;
     animation: fadeIn 1s ease forwards;
     animation-fill-mode: forwards;
