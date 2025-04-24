@@ -10,6 +10,7 @@
     --cardbackground: #ffffff;
     --shadowcolor: rgba(0, 0, 0, 0.1);
     --desccolor: #888888;
+    --calloutborder: #ffd700;
 }
 
 html.dark {
@@ -23,6 +24,7 @@ html.dark {
     --bordercolor: #5c5c5c;
     --cardbackground: #27272a;
     --shadowcolor: rgba(255, 255, 255, 0.1);
+    --calloutborder: #685800;
 }
 
 .dark .auto-dark {

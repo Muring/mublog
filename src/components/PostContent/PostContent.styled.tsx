@@ -1,14 +1,9 @@
 import styled from "@emotion/styled";
 
 export const Article = styled.article`
+    /* 기본 레이아웃 설정 */
     background-color: var(--background);
     color: var(--foreground);
-
-    @media (prefers-color-scheme: dark) {
-        background-color: var(--background);
-        color: var(--foreground);
-    }
-
     max-width: 720px;
     min-height: 85vh;
     margin: 0 auto;
@@ -17,67 +12,66 @@ export const Article = styled.article`
     animation: fadeIn 1s ease forwards;
     animation-fill-mode: forwards;
 
-    /* 기본 텍스트 구조 */
+    /* 미디어 쿼리로 다크모드 대응 */
+    @media (prefers-color-scheme: dark) {
+        background-color: var(--background);
+        color: var(--foreground);
+    }
+
+    /* 타이포그래피 기본 구조 */
     h1 {
         margin-bottom: 0.5rem;
     }
-
     h2 {
         margin: 2rem 0 1rem;
     }
-
     h3 {
         margin: 1rem 0;
     }
-
     p {
         margin-top: 1rem;
     }
-
     li {
         margin-left: 1rem;
         font-size: 0.95rem;
         list-style-type: circle;
     }
-
     a {
         color: #0070f3;
         text-decoration: none;
-
         &:hover {
             text-decoration: underline;
         }
     }
 
+    /* 테이블 스타일 */
     table {
         width: 100%;
         border-radius: 0.5rem;
         font-size: 0.9rem;
         border-collapse: collapse;
     }
-
     table td,
     table th {
         border: 1px solid var(--bordercolor);
     }
-
     table th {
         background-color: var(--codefontbgcolor);
     }
-
     table td {
         padding: 0 0.5rem;
     }
 
+    /* 이미지 스타일 */
     p img {
         display: block;
         max-width: 656px;
         border: 1px solid var(--bordercolor);
-        margin: 2rem auto 0 auto; /* 상-하 간격 조절 */
+        margin: 2rem auto 0 auto;
         border-radius: 6px;
     }
 
-    /* 이미지 다음 p 요소 중, 이탤릭체인 것만 캡션으로 처리 */
+    /* 이미지 캡션 스타일 */
     p + em,
     p + p > em {
         display: block;
@@ -102,24 +96,20 @@ export const Article = styled.article`
             min-width: 8rem;
             gap: 0.5rem;
         }
-
         .article-detail-icon {
             border-radius: 0;
             margin-right: 0.2rem;
         }
-
         .desc {
             padding-top: 0.1rem;
             font-size: 0.8rem;
             margin: 0;
         }
-
         .tag {
             font-size: 0.75rem;
             height: 100%;
             line-height: 2;
         }
-
         ul {
             display: flex;
             align-items: center;
@@ -127,14 +117,12 @@ export const Article = styled.article`
             gap: 0.5rem;
             margin: 0;
         }
-
         li {
             display: flex;
             align-items: center;
             color: black;
             margin: 0;
         }
-
         a {
             background-color: lightgray;
             border-radius: 12px;
@@ -142,7 +130,6 @@ export const Article = styled.article`
             font-size: 0.8rem;
             color: #494949;
             font-weight: bold;
-
             &:hover {
                 background-color: #afafaf;
                 transition-duration: 0.2s;
@@ -151,20 +138,26 @@ export const Article = styled.article`
         }
     }
 
+    /* Notion 스타일의 callout 블록 */
     aside {
         gap: 0.75rem;
-        background-color: #f9f9f9;
-        border-left: 4px solid #ffd700;
+        border-left: 0.5rem solid #ffd700;
+        border-right: 1px solid var(--calloutborder);
+        border-top: 1px solid var(--calloutborder);
+        border-bottom: 1px solid var(--calloutborder);
         border-radius: 0.75rem;
         padding: 1rem;
         margin: 2rem 0;
         font-size: 0.95rem;
         line-height: 1.6;
-        color: #333;
         overflow-x: auto;
     }
-
-    /* 이모지 아이콘 위치 조정 */
+    aside blockquote {
+        border-left: 0.3rem solid var(--foreground);
+        border-radius: 0;
+        font-style: normal;
+        padding: 0.5rem;
+    }
     aside > :first-of-type {
         font-size: 1.3rem;
         line-height: 1;
@@ -172,21 +165,21 @@ export const Article = styled.article`
         position: relative;
     }
 
-    /* 블록 요소 */
+    /* 일반 blockquote */
     blockquote {
         border-left: 0.5rem solid var(--bordercolor);
+        border-radius: 0.5rem;
         padding: 0.2rem 1rem;
         background: var(--codefontbgcolor);
         font-style: italic;
         color: var(--foreground);
         margin: 1.5rem 0;
-        border-radius: 0.5rem;
-
         p {
             margin: 0;
         }
     }
 
+    /* 인라인 코드 */
     code {
         background: var(--codefontbgcolor);
         padding: 0.1rem 0.3em;
@@ -196,6 +189,7 @@ export const Article = styled.article`
         color: #ff7b00;
     }
 
+    /* 구분선 */
     hr {
         border: none;
         border-top: 1px solid var(--bordercolor);
