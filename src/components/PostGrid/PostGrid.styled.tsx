@@ -26,7 +26,7 @@ export const GridList = styled.div`
         }
     }
 
-    @media (max-width: 828px) {
+    @media (max-width: 928px) {
         grid-template-columns: repeat(2, 1fr);
     }
 
