@@ -1,0 +1,178 @@
+---
+title: "Docker 기본: 요약 및 비유"
+date: "2025-04-28"
+description: "CD와 CD플레이어 비유로 배우는 Docker"
+tags:
+  - infra
+  - docker
+thumbnail: "/thumbnails/docker.png"
+---
+
+# CD와 CD플레이어 비유로 배우는 Docker
+
+Docker는 개발자와 운영자 모두에게 빠르고 효율적인 애플리케이션 실행 환경을 제공하는 컨테이너 기반 가상화 플랫폼이다. 하지만 처음 Docker를 접하는 이들에게는 "컨테이너? 이미지? Dockerfile?" 용어 자체가 생소할 수 있다.
+
+그래서 오늘은 누구나 익숙한 **CD와 CD플레이어**라는 실생활 비유를 활용해 Docker의 개념과 동작 원리를 쉽게 풀어보려 한다.
+
+---
+
+## 1️⃣ CD와 플레이어: 비유의 전제
+
+우리가 익히 아는 **CD(CD-ROM)**에는 음악이 들어 있고, **CD 플레이어**에 넣으면 그 음악을 재생할 수 있다. 그 CD는 정적인 데이터이며, 직접 실행되거나 작동하지는 않는다. 반드시 CD 플레이어라는 장치가 필요하다. 그리고 그 플레이어가 작동하려면 전원이 들어오는 **본체**가 필요하다.
+
+CD는 필요하면 복제할 수 있고, 원하는 사람에게 배포도 가능하다. 여러 장의 CD를 모아놓는 **수납장**이 있다면, 수시로 꺼내어 플레이할 수 있다.
+
+위의 개념을 Docker의 개념에 빗대면, 모든 개념이 한눈에 들어온다.
+
+---
+
+## 2️⃣ 비유로 본 Docker 구성 요소 정리
+
+| 실물 비유 | Docker 개념 | 역할 설명 |
+| --- | --- | --- |
+| **CD** | Docker Image | 애플리케이션과 환경이 담긴 정적인 패키지 (실행 불가) |
+| **CD 플레이어** | Docker Container | 이미지를 실행한 인스턴스 (음악이 재생됨) |
+| **CD 플레이어 본체** | Docker Engine | 컨테이너를 실행·관리하는 실제 런타임 시스템 |
+| **CD 설계도** | Dockerfile | 어떤 내용을 담은 CD를 만들지 정의한 파일 (설계도) |
+| **CD 수납장** | Docker Hub (Registry) | 다양한 이미지(CD)를 저장하고 공유하는 저장소 |
+
+---
+
+## 3️⃣ 전체 실행 흐름 요약: 음악 재생 비유
+
+### 📄 1단계: Dockerfile 작성 → CD 제작 설계도 만들기
+
+Dockerfile은 어떤 베이스 이미지로 시작해 어떤 코드를 복사하고, 어떤 명령어를 실행하고, 어떤 실행 명령으로 시작할지를 정의하는 일종의 제작 설계도이다.
+
+```sql
+FROM node:18
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD ["npm", "start"]
+```
+
+### 💿 2단계: docker build → 실제 CD를 굽는다
+
+설계도(Dockerfile)를 바탕으로 실제 이미지(Docker Image)를 생성한다. 이건 실행 가능한 형태는 아니지만, 필요한 모든 내용을 담고 있는 정적인 파일이다.
+
+```bash
+docker build -t my-app .
+```
+
+### ▶️ 3단계: docker run → CD를 플레이어에 삽입하고 음악을 재생한다
+
+CD(Image)를 플레이어(Container)에 삽입하고 재생을 시작한다. 이때 실제 애플리케이션이 실행된다.
+
+```bash
+docker run -p 3000:3000 my-app
+```
+
+### 📦 4단계: docker push / pull → 수납장에 CD 저장 또는 꺼내기
+
+Docker Hub에 이미지를 올리면 팀원이나 다른 시스템에서 쉽게 가져다 쓸 수 있다.
+
+```bash
+docker push yourname/my-app:latest
+docker pull yourname/my-app:latest
+```
+
+---
+
+## 4️⃣ 왜 이 비유가 효과적인가?
+
+- **정적인 것과 동적인 것을 구분**할 수 있습니다.
+    - Docker Image는 정적 (CD), Container는 실행 중인 동적 인스턴스 (재생 중인 CD)
+- **Dockerfile → Image → Container**의 흐름이 명확해집니다.
+- **Docker의 아키텍처**를 본체-플레이어-CD 구조로 쉽게 이해할 수 있습니다.
+- **Docker Hub를 저장소로 인식**하여 팀 간 협업 구조가 자연스럽게 이해됩니다.
+
+---
+
+## 5️⃣ 실전: 이 비유대로 따라 해보는 Docker 실습
+
+### ✍️ Dockerfile 예시 (Node.js 앱)
+
+```sql
+FROM node:18
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD ["npm", "start"]
+```
+
+### 🔨 이미지 생성 (CD 굽기)
+
+```bash
+docker build -t cd-demo .
+```
+
+### ▶️ 컨테이너 실행 (CD 재생)
+
+```bash
+docker run -p 3000:3000 cd-demo
+```
+
+### 📦 이미지 업로드 (CD 수납장 보관)
+
+```bash
+docker tag cd-demo yourid/cd-demo:v1
+docker push yourid/cd-demo:v1
+```
+
+### 🔁 다른 환경에서 재생
+
+```bash
+docker pull yourid/cd-demo:v1
+docker run -p 3000:3000 yourid/cd-demo:v1
+```
+
+---
+
+## 6️⃣ 확장: 이 비유를 통해 배우는 고급 개념
+
+### 🔁 여러 곡이 있는 CD → Docker Compose
+
+- `docker-compose.yml` 파일은 여러 컨테이너를 한 번에 실행하는 **믹스 CD**와 같다.
+- 웹 + DB + 캐시 서비스를 한 번에 정의할 수 있다.
+
+### 🔐 잠긴 CD 플레이어 → 컨테이너 보안
+
+- 루트 권한 제한, 네트워크 제한, 이미지 취약점 스캔 등은 **재생 권한 제한**과 같다.
+
+### 🖥️ CD 플레이어가 여러 개 있는 스튜디오 → Kubernetes
+
+- 컨테이너를 수십~수백 개 운영하고, 자동으로 관리하고, 오토스케일링하는 **프로덕션 환경 운영 체제**이다.
+
+---
+
+## ✅ 마무리 정리
+
+| Docker 개념 | 비유 | 요약 설명 |
+| --- | --- | --- |
+| Dockerfile | CD 설계도 | 어떤 내용을 담을지 설계 |
+| Docker Image | CD | 애플리케이션과 환경을 포함한 정적 실행 패키지 |
+| Docker Container | CD 플레이어 | 실제로 실행되는 환경 (프로세스 단위) |
+| Docker Engine | CD 본체 | 컨테이너를 실행·관리하는 시스템 |
+| Docker Hub | CD 수납장 | 여러 이미지를 저장하고 공유하는 중앙 창고 |
+
+---
+
+## 🎁 결론: “음악처럼 앱을 실행하세요”
+
+Docker는 어렵고 복잡한 기술처럼 느껴질 수 있지만, 본질적으로는 **정의된 환경을 일정한 방식으로 실행한다는 매우 단순한 원리**이다.
+
+CD와 플레이어의 비유를 기억하자:
+
+- 이미지는 CD이고,
+- 컨테이너는 그걸 재생하는 플레이어이며,
+- Docker Engine은 본체이고,
+- Dockerfile은 설계도,
+- Docker Hub는 전 세계가 공유하는 수납장이다.
+
+이제 여러분도 이 구조를 기반으로 나만의 앱을 만들어 배포할 수 있고, 팀원과 공유할 수 있으며, 클라우드에서도 손쉽게 운영할 수 있다.
+
+> “Build once, Run anywhere.”
+> 
+
+Docker의 이 핵심 철학을, **CD 한 장에서 시작된 음악 재생의 여정**으로 생각해보자.
