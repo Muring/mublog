@@ -29,6 +29,7 @@ export const Article = styled.article`
   }
   h3 {
     margin-top: 1.5rem;
+    line-height: 1.5;
   }
   p {
     margin-top: 0.5rem;
