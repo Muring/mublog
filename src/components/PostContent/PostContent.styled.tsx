@@ -21,9 +21,11 @@ export const Article = styled.article`
   /* 타이포그래피 기본 구조 */
   h1 {
     margin-bottom: 0.5rem;
+    line-height: 1.5;
   }
   h2 {
     margin-top: 2rem;
+    line-height: 1.5;
   }
   h3 {
     margin-top: 1.5rem;
@@ -65,7 +67,8 @@ export const Article = styled.article`
   /* 이미지 스타일 */
   p img {
     display: block;
-    max-width: 656px;
+    /* max-width: 656px; */
+    max-width: 100%;
     border: 1px solid var(--bordercolor);
     margin: 2rem auto 0 auto;
     border-radius: 6px;
@@ -149,14 +152,13 @@ export const Article = styled.article`
     padding: 1rem;
     margin: 2rem 0;
     font-size: 0.95rem;
-    line-height: 1.6;
     overflow-x: auto;
   }
   aside h3 {
     margin-bottom: 1rem;
   }
   aside li {
-    margin-bottom: 0.5rem;
+    line-height: 2;
   }
   aside blockquote {
     border-left: 0.3rem solid var(--foreground);
@@ -166,10 +168,10 @@ export const Article = styled.article`
     margin: auto;
   }
   aside p {
-    line-height: 1.6;
+    line-height: 2;
   }
   aside > :first-of-type {
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     line-height: 1;
     margin-top: 0.2rem;
     position: relative;
