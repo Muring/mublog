@@ -24,7 +24,6 @@ export default function TagMenu({ tags, selectedTag }: TagMenuProps) {
           className={selectedTag === tag ? "active" : ""}
         >
           <h6>{tag}</h6>
-          <p>( {tags.length} )</p>
         </Link>
       ))}
     </TagWrapper>
