@@ -1,0 +1,213 @@
+---
+title: "Docker 응용: GCP VM에 Docker 빌드"
+date: "2025-05-02"
+description: "GCP VM을 활용한 Docker 응용 3편"
+tags:
+  - docker
+  - GCP
+  - devOps
+thumbnail: "/thumbnails/docker-gcp.png"
+---
+
+[서버에 Docker의 설치](https://muring-blog.vercel.app/docker-gcp-02-docker-installation)까지 모두 끝냈다면 이제 배포를 하기 위한 파일을 가져와 빌드해야 한다. 왜냐하면 현재는 단순히 환경 설치만 끝난거지, 파일을 가지고 있는게 아니기 때문이다. ~~(멍청하게 바로 배포하려고 한 쓴이였다.)~~
+
+Docker에 파일을 빌드하는 방법은 크게 3가지로 나눌 수 있다.
+
+1. 서버에서 모든 파일을 올려 서버에서 직접 빌드하는 방법
+2. Git으로 소스를 보내고 이를 서버 도커에서 Clone하여 빌드하는 방법
+3. 로컬에서 Docker 이미지를 빌드하고 해당 이미지를 서버로 올려 빌드하는 방법
+
+각 방법은 각각의 장단점을 가지고 있다. 이제 이에 대해서 알아보도록 하자.
+
+---
+
+## 1️⃣ 서버에서 직접 빌드하는 방법
+
+가장 먼저 서버에 모든 파일을 직접 적재하여 빌드하는 방법이다.
+
+### 흐름
+
+```
+GCP 서버에 접속 → Dockerfile과 소스 파일 전송 → GCP 서버 터미널에서 docker build
+```
+
+### 서버에 소스와 Dockerfile 전송
+
+로컬에서 **scp로 파일 복사 (간단)**:
+
+```bash
+scp -r /path/to/your/project username@server_ip:~/project
+```
+
+- `r`: 디렉토리 통째로 복사
+- `/path/to/your/project`: Dockerfile과 소스가 있는 로컬 경로
+- `username@server_ip:~/project`: 서버에 복사할 경로
+
+서버에서:
+
+```bash
+cd ~/project
+docker build -t myimage:latest .
+```
+
+이러면 서버 내부에 Docker 이미지 생성이 완료되고 배포할 준비가 끝난다.
+
+### 장점
+
+- 별도 복잡한 과정 없이 바로 실행 가능
+- GCP VM 안에서 직접 실행되니 속도 빠름 (서버 성능에 따라 다름)
+
+### 단점
+
+- 소스 파일을 서버로 먼저 전송해야 함
+- 서버 보안상 코드 유출 관리에 신경 써야 함
+- 회사 보안 사항으로 파일마다 보안 검사를 진행할 경우 엄청 오랜 시간이 소요됨
+
+---
+
+## 2️⃣ Git으로 소스를 보내고 서버에서 빌드하는 방법
+
+1번과 비슷한 방법이지만, Git에 있는 코드를 즉시 받아와서 빌드하는 방법이다.
+
+### 흐름
+
+```
+로컬 PC에서 GitHub에 소스 Push → 서버에서 Git Pull → 서버에서 docker build
+```
+
+### 단계별 설명
+
+1. 로컬 PC에서 Git 저장소에 소스 Push (Dockerfile 포함)
+2. GCP 서버에 접속 후 clone
+
+```bash
+git clone https://github.com/your-repo/project.git
+cd project
+```
+
+<br />
+
+1. GCP 서버 터미널에서 빌드
+
+```bash
+docker build -t myimage:latest .
+```
+
+### 장점
+
+- 소스 버전 관리 가능 (Git 기반)
+- 여러 서버에 동일한 소스, 동일한 방법으로 배포 가능
+
+### 단점
+
+- Git 설정 필요
+- 서버에 git client 설치 필요
+- 소스 관리에 약간 복잡성 추가
+
+---
+
+## 3️⃣ 로컬에서 Docker 이미지를 빌드하고, 이미지 파일 자체를 서버로 전송해서 등록하는 방법
+
+이제 직접적인 소스 파일을 서버에 업로드하는 대신, 미리 로컬에서 이미지로 빌드 과정을 마치고 업로드 하는 과정이다.
+
+### 흐름
+
+```
+로컬에서 docker build → docker save로 이미지 저장 → scp로 서버에 업로드 → docker load로 등록
+```
+
+### 단계별 설명
+
+1. 로컬 PC에서 Dockerfile 기준으로 빌드
+
+```bash
+docker build -t [이미지명:태그] .
+```
+
+<br />
+
+1. Docker 이미지를 tar 파일로 저장
+
+```bash
+docker save -o [저장할파일명.tar] [이미지명:태그]
+```
+
+예시:
+
+```bash
+docker save -o mynext-latest.tar mynext:latest
+```
+
+<br />
+
+1. 이 tar 파일을 GCP 서버로 전송
+
+```bash
+scp mynext-latest.tar username@server_ip:~/
+```
+
+<br />
+
+1. GCP 서버에서 tar 파일을 Docker 이미지로 복원
+
+```bash
+docker load -i mynext-latest.tar
+```
+
+<br />
+
+1. 이제 서버에서 바로 실행 가능
+
+```bash
+docker run -d --name my-container -p 8080:80 mynext:latest
+```
+
+### 장점
+
+- **Dockerfile이나 소스 없이** 단순히 이미지 파일 하나만 서버로 보내서 바로 실행 가능
+- 소스 유출 없이 컨테이너 실행 가능 (이미지는 바이너리)
+- 로컬 개발 환경에서 빌드된 상태 그대로 가져갈 수 있음
+
+### 단점
+
+- 이미지 파일 크기가 크면 전송 속도 느림
+- 이미지 버전 관리가 힘듦 (버전 태그 명확히 해야 함)
+- 서버 자원 많이 먹을 수 있음 (tar 파일 저장 + load 필요)
+
+---
+
+## 이미지 목록 확인
+
+위 과정을 통해 이미지를 성공적으로 생성을 했다면 아래 명령어를 통해 생성된 이미지의 목록을 확인할 수 있을 것이다.
+
+```bash
+docker images
+```
+
+예시 출력:
+
+```bash
+REPOSITORY   TAG       IMAGE ID       CREATED          SIZE
+myapp        latest    123abc456def    10 minutes ago   250MB
+```
+
+---
+
+## 📚 요약
+
+| 방법 | 특징 | 장점 | 단점 |
+| --- | --- | --- | --- |
+| 서버에서 직접 빌드 | SSH 접속 → 서버 터미널에서 build | 빠르고 단순 | 소스 전송 필요 |
+| Git으로 소스만 보내고 서버 빌드 | Git push → 서버 git pull 후 build | 버전 관리 좋음 | Git 설정 필요 |
+| 로컬 빌드 후 이미지 전송 | docker save → 서버 docker load | 소스 없이 이미지만 배포 가능 | 이미지 전송 속도 느림 |
+
+---
+
+## 🎯 결론
+
+> **상황에 따라 가장 적절한 방법을 선택**하자.
+> 
+
+이로서 배포하기 위한 빌드 과정을 성공적으로 마쳤다. 빌드하는 방법은 어느 방법이 정답이라고 정해져있지 않다. 각 상황에 맞는 가장 효율적인 방법을 유기적으로 선택해 사용하도록 하자.
+
+이제 파일 빌드까지 끝났으니 마지막으로 [**Docker 응용: GCP VM에 Docker 배포**](https://muring-blog.vercel.app/docker-gcp-02-docker-deployment)를 마지막으로 Docker 응용 시리즈를 마무리하도록 하겠다.
