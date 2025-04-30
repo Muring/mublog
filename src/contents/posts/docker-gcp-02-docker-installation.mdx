@@ -1,0 +1,139 @@
+---
+title: "Docker 응용: GCP VM에 Docker 설치"
+date: "2025-05-01"
+description: "GCP VM을 활용한 Docker 응용"
+tags:
+  - docker
+  - GCP
+  - devOps
+thumbnail: "/thumbnails/docker-gcp.png"
+---
+
+[서버 생성 및 접속 과정](https://muring-blog.vercel.app/docker-gcp-01-vm-creation)을 잘 거쳐왔다면, 현재 성공적으로 서버에 접속이 되어있을 것이다.
+
+그럼 이제 우리는 무엇을 해야할까? 당연히 Docker를 서버에 **설치**해야 한다.
+
+## ✅ Docker 설치
+
+왜 Docker를 서버에 설치해야 하는가? 사실 당연한 소리다. 서버에는 현재 아무것도 존재하지 않기 때문에 아무런 동작을 수행할 수 없다. 컴퓨터 본체를 새로 구매하고 윈도우를 설치하지 않으면 아무런 기능을 동작할 수 없는 것과 비슷하다고 보면 된다.
+
+그럼 이제 본격적으로 설치해보자. 
+
+VM 인스턴스를 생성할 때, 운영체제를 **Ubuntu**로 선택하고 설치했었다면 해당 서버 내에서 Ubuntu 명령어를 사용할 수 있을 것이다. 이를 활용해 Docker를 설치해보자.
+
+해당 명령어들을 순서대로 입력하면 설치가 완료된다. 각 코드 줄마다의 설명을 묶어서 추가로 설명해주겠다.
+
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+```
+
+- **현재 서버가 알고 있는 패키지 목록을 최신 상태로 동기화**한다.
+    - 서버를 처음 생성하고 연결하면, 말 그대로 완전 초기 상태이다. 해당 OS를 개발해서 배포했을 당시의 낙후된 버전이라는 의미이다. 즉, 우리가 쓰려는 어떤 패키지도 인덱싱 되어있지 않다는 말이다.
+    - 따라서, update를 통해서 인덱스를 최신 상태로 갱신하여 docker와 같은 패키지를 설치할 수 있도록 업데이트 하는 것이다.
+    - 비유하자면, 책방에 가기 전에 최신 책 목록을 받아오는 것과 마찬가지다.
+- 필요한 패키지를 한번에 설치하는 부분이다. 필요하거니 불필요한 것들은 사용자가 수정하면 된다.
+    - `apt-transport-https`: APT가 HTTPS를 통해 리포지토리에 접근할 수 있게 함
+    - `ca-certificates`: SSL 인증서를 검증하는 데 필요
+    - `curl`: URL에서 파일 다운로드용 툴
+    - `gnupg`: GPG 키 관리를 위한 툴
+    - `lsb-release`: 배포판 정보 조회용 툴 (`lsb_release -cs` 명령어용)
+
+여기서 문득 드는 생각은, *“왜 Docker는 설치를 안하는가?”* 이다.
+
+<aside>
+💡 **왜 Docker는 동시에 설치를 안하는가?**
+
+Ubuntu 리눅스는 기본적으로`/etc/apt/sources.list`에 정의된 **공식 Ubuntu 저장소**(Main Repository)만 사용한다.
+
+이 기본 저장소는:
+
+- OS에 필요한 기본 패키지들
+- 오래되고 검증된 버전들
+- Ubuntu가 관리하는 안전한 버전
+
+만 제공한다.
+
+**문제는:**
+
+> Docker 같은 외부 프로그램은 Ubuntu 기본 저장소에 최신 버전이 올라오지 않기 때문에  Ubuntu 기본 저장소에 있는 Docker 버전은 **너무 오래된 버전**일 수 있다.
+> 
+
+(예: Ubuntu 20.04에는 Docker 19.xx가 있는데, 실제 최신은 Docker 24.xx)
+
+그래서:
+
+> Docker Inc.가 직접 관리하는 최신 전용 저장소를 따로 등록하고 거기서 설치를 받아야 최신 버전 Docker를 쓸 수 있는 것이다.
+> 
+
+그리고 위에서 설치한 5가지의 패키지의 설명을 잘 살펴보면 어딘가에 접근하고, 인증하고, 다운로드하고 조회 및 관리하는 것들이다. 즉, **외부 저장소의 패키지(Docker)를 받아오기 위한 사전 작업**으로 설치하는 패키지들이 위의 5가지의 패키지인 것이다.
+
+</aside>
+
+
+
+이제 Docker의 설치 준비가 끝났으니 본격적으로 설치를 진행해보자.
+
+```bash
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+```
+
+
+- **Docker GPG 키를 저장할 디렉토리**를 만든다.
+    - `p` 옵션 덕분에 중간 디렉토리가 없어도 자동 생성
+- Docker 공식 GPG 키를 다운로드한다.
+    - `gpg --dearmor`로 **ASCII 키를 바이너리 형태로 변환**해서 `/usr/share/keyrings/`에 저장
+    - 이 키는 Docker 패키지의 서명을 검증하는 데 사용
+
+<br />
+
+```bash
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+- **Docker 패키지 저장소 주소**를 추가한다.
+    - `$(dpkg --print-architecture)`: 현재 시스템 아키텍처(예: amd64) 자동 삽입
+    - `$(lsb_release -cs)`: 현재 Ubuntu 버전 코드명(예: focal, jammy) 자동 삽입
+    - `/etc/apt/sources.list.d/docker.list` 파일에 이 저장소 정보를 저장
+
+<br />
+
+```bash
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+- Docker 저장소가 추가됐으므로 다시 **패키지 인덱스 목록을 갱신**한다.
+    - 이제 apt가 Docker 관련 최신 패키지를 인식할 수 있게 된다.
+- 실제 Docker 관련 패키지들을 설치한다:
+    - `docker-ce`: Docker Engine (Community Edition)
+    - `docker-ce-cli`: Docker 커맨드라인 툴
+    - `containerd.io`: Docker 내부에서 컨테이너를 관리하는 런타임
+    - `docker-buildx-plugin`: 멀티플랫폼 빌드 도구
+    - `docker-compose-plugin`: Docker Compose V2 (CLI 플러그인)
+
+<br />
+
+```bash
+docker --version
+docker compose version
+```
+
+- 설치된 **Docker Compose 플러그인** 버전을 확인한다.
+    - 예시 출력: `Docker Compose version v2.20.2`
+
+![*“성공적으로 설치된 결과 화면”*](/images/docker-gcp/02/image.png)
+
+*“성공적으로 설치된 결과 화면”*
+
+---
+
+이렇게 성공적으로 서버에 Docker의 설치를 완료했다. 이제 설치한 Docker를 배포하기 전, 파일을 적재하는 방법으로 [Docker 응용: GCP VM에 파일 빌드](https://muring-blog.vercel.app/docker-gcp-02-docker-installation)로 이어서 작성하도록 하겠다.
