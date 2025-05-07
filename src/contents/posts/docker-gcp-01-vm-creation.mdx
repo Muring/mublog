@@ -126,7 +126,7 @@ thumbnail: "/thumbnails/docker-gcp.png"
 
 VS Code의 터미널을 통해서 접근을 하기 위해서는 SSH 키, 즉 공개, 비공개 키를 생성해야 한다. 이미 생성한 이력이 있는 사람들이라면 굳이 생성하지 않고 해당 키를 다시 등록해주면 된다.
 
-해당 키를 생성하지 않은 사람들을 위한 생성 방법은 [여기](https://www.notion.so/SSH-1e3fcbf1b92480b08e11c689ad1f7349?pvs=21)를 통해 생성해서 돌아오도록 하자.
+해당 키를 생성하지 않은 사람들을 위한 생성 방법은 [여기](https://muring-blog.vercel.app/create-ssh-key)를 통해 생성해서 돌아오도록 하자.
 
 그럼 이제 생성한 SSH키를 VM 인스턴스에 등록하자.
 
@@ -163,4 +163,4 @@ ssh -i ~/.ssh/my-gcp-key [USERNAME]@[EXTERNAL_IP]
 
 과정을 잘 따라왔다면 이제 Docker를 심기 위한 서버 생성 및 연결까지 성공하였다. 하지만 이제 시작점에 도달 했을 뿐이다..
 
-Docker를 서버에 설치하고 배포하는 과정은 다음 편, [**Docker 응용: GCP VM에 Docker 설치**](https://www.notion.so/Docker-GCP-VM-Docker-1e3fcbf1b924808a9375e4c1d7d43280?pvs=21)에서 이어 하도록 하겠다.
+Docker를 서버에 설치하고 배포하는 과정은 다음 편, [**Docker 응용: GCP VM에 Docker 설치**](http://localhost:3001/docker-gcp-02-docker-installation)에서 이어 하도록 하겠다.
