@@ -2,7 +2,7 @@ import styled from "@emotion/styled";
 
 export const CardWrapper = styled.article`
   width: 100% !important;
-  min-width: 316px;
+  min-width: 290px;
   border: 1px solid var(--bordercolor);
   border-radius: 12px;
   overflow: hidden;
