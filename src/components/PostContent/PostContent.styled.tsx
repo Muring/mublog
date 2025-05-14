@@ -4,7 +4,7 @@ export const Article = styled.article`
   /* 기본 레이아웃 설정 */
   background-color: var(--background);
   color: var(--foreground);
-  max-width: 720px;
+  max-width: 900px;
   min-height: 85vh;
   margin: 0 auto;
   padding: 4rem 1rem;

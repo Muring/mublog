@@ -15,12 +15,12 @@ const TimelineItem = styled.div``;
 
 const Date = styled.div`
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   margin-bottom: 4px;
 `;
 
 const Title = styled.div`
-  font-style: italic;
+  font-weight: bold;
   margin-bottom: 4px;
 `;
 
