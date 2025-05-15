@@ -127,7 +127,7 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
       >
         &gt;
       </ArrowButton>
-      <Dots>
+      {/* <Dots>
         {relatedPosts.map((_, idx) => (
           <Dot
             key={idx}
@@ -135,7 +135,7 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
             onClick={() => setCurrentIndex(idx + visibleCount)}
           />
         ))}
-      </Dots>
+      </Dots> */}
     </CarouselContainer>
   );
 }
@@ -160,6 +160,7 @@ const CarouselWrapper = styled.div`
 const CarouselTrack = styled.div`
   display: flex;
   gap: ${cardGap}px;
+  padding-top: 0.5rem;
 `;
 
 const CarouselSlide = styled.div`
@@ -198,22 +199,22 @@ const ArrowButton = styled.button`
   }
 `;
 
-const Dots = styled.div`
-  text-align: center;
-  margin-top: 10px;
-`;
+// const Dots = styled.div`
+//   text-align: center;
+//   margin-top: 10px;
+// `;
 
-const Dot = styled.button`
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  background: #ccc;
-  border-radius: 50%;
-  margin: 0 5px;
-  border: none;
-  cursor: pointer;
+// const Dot = styled.button`
+//   display: inline-block;
+//   width: 10px;
+//   height: 10px;
+//   background: #ccc;
+//   border-radius: 50%;
+//   margin: 0 5px;
+//   border: none;
+//   cursor: pointer;
 
-  &.active {
-    background: #333;
-  }
-`;
+//   &.active {
+//     background: #333;
+//   }
+// `;
