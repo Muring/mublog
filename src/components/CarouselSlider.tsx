@@ -9,13 +9,14 @@ import PostCard from "./PostCard/PostCard";
 interface CarouselSliderProps {
   posts: Post[];
   tags?: string[];
+  currentSlug: string;
 }
 
 const visibleCount = 3;
 const cardWidth = 330;
 const cardGap = 20;
 
-export default function CarouselSlider({ posts, tags }: CarouselSliderProps) {
+export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(visibleCount);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
@@ -23,11 +24,26 @@ export default function CarouselSlider({ posts, tags }: CarouselSliderProps) {
   const autoSlideRef = useRef<NodeJS.Timeout | null>(null);
 
   const relatedPosts = useMemo(() => {
-    return posts
-      .filter((post) => post.tags?.some((tag: string) => tags?.includes(tag)))
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 5);
-  }, [posts, tags]);
+    // 현재글 제외된 최신글 (중복 제거용으로도 사용)
+    const latestPosts = posts
+      .filter((post) => post.slug !== currentSlug)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    // 태그 일치 + 현재글 제외
+    const taggedPosts = latestPosts.filter((post) => post.tags?.some((tag) => tags?.includes(tag)));
+
+    // taggedPosts에서 최대 5개 확보, 부족하면 latestPosts로 보완
+    const result: Post[] = [...taggedPosts];
+
+    for (const post of latestPosts) {
+      if (result.length >= 5) break;
+      if (!result.some((p) => p._id === post._id)) {
+        result.push(post);
+      }
+    }
+
+    return result.slice(0, 5);
+  }, [posts, tags, currentSlug]);
 
   const duplicatedPosts = useMemo(() => {
     return [
@@ -162,7 +178,8 @@ const ArrowButton = styled.button`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: #fff;
+  transition: 0.2s all ease-in;
+  background: transparent;
   border: none;
   font-size: 36px;
   cursor: pointer;
@@ -174,6 +191,10 @@ const ArrowButton = styled.button`
 
   &.right {
     right: 0;
+  }
+
+  &:hover {
+    transform: translateY(-50%) scale(1.2);
   }
 `;
 

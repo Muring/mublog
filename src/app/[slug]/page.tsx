@@ -18,6 +18,7 @@ export async function generateStaticParams() {
 export default async function PostPage(props: Props) {
   const { slug } = await props.params;
   const post = allPosts.find((post) => post.slug === slug);
+
   if (!post) return notFound();
 
   return (
@@ -31,7 +32,7 @@ export default async function PostPage(props: Props) {
         code={post.body.code}
       />
       <RelatedContent />
-      <CarouselSlider posts={allPosts} tags={post.tags} />
+      <CarouselSlider posts={allPosts} tags={post.tags} currentSlug={post.slug} />
     </div>
   );
 }
