@@ -4,6 +4,7 @@ export const TimelineWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
+  padding: 0 0.5rem;
 
   .timeline-item {
     display: flex;
@@ -37,7 +38,7 @@ export const TimelineWrapper = styled.div`
   .circle {
     width: 1.2rem;
     height: 1.2rem;
-    background-color: black;
+    background-color: var(--foreground);
     border-radius: 50%;
     z-index: 1;
   }
@@ -45,7 +46,7 @@ export const TimelineWrapper = styled.div`
   .line-top,
   .line-bottom {
     width: 0.4rem;
-    background-color: black;
+    background-color: var(--foreground);
     position: absolute;
     left: 50%;
     transform: translateX(-50%);

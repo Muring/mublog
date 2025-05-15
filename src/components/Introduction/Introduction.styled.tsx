@@ -65,10 +65,9 @@ export const IntroductionWrapper = styled.div`
   }
 
   blockquote {
-    border-left: 8px solid #888888;
-    padding: 0.2rem 0 0.2rem 1rem;
-    background: #fdfdfd;
-    color: #424242;
+    border-left: 0.5rem solid var(--bordercolor);
+    padding: 0.2rem 1rem;
+    color: var(--foreground);
     margin: 1.5rem 0;
     line-height: 2.5;
     border-radius: 0.5rem;

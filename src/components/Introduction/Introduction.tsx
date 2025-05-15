@@ -19,7 +19,13 @@ export default function Introduction() {
           <div className="link-content">
             <h6>Contact.</h6>
             <Link href={"mailto:esh5218@gmail.com"}>
-              <Image src="/icons/mail.svg" alt="mail icon" width={18} height={18} />
+              <Image
+                src="/icons/mail.svg"
+                alt="mail icon"
+                className="auto-dark"
+                width={18}
+                height={18}
+              />
               <p>Email</p>
             </Link>
           </div>
@@ -27,11 +33,23 @@ export default function Introduction() {
             <h6>Channel.</h6>
             <div className="link-item">
               <Link href={`https://muring-blog.vercel.app/`}>
-                <Image src="/icons/blog.svg" alt="blog icon" width={18} height={18} />
+                <Image
+                  src="/icons/blog.svg"
+                  alt="blog icon"
+                  className="auto-dark"
+                  width={18}
+                  height={18}
+                />
                 <p>Blog</p>
               </Link>
               <Link href={`https://github.com/Muring`}>
-                <Image src="/icons/github.svg" alt="github icon" width={18} height={18} />
+                <Image
+                  src="/icons/github.svg"
+                  alt="github icon"
+                  className="auto-dark"
+                  width={18}
+                  height={18}
+                />
                 <p>Github</p>
               </Link>
             </div>
