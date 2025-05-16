@@ -27,7 +27,7 @@ Docker에 파일을 빌드하는 방법은 크게 3가지로 나눌 수 있다.
 
 ### 흐름
 
-```
+```bash
 GCP 서버에 접속 → Dockerfile과 소스 파일 전송 → GCP 서버 터미널에서 docker build
 ```
 
@@ -71,7 +71,7 @@ docker build -t myimage:latest .
 
 ### 흐름
 
-```
+```bash
 로컬 PC에서 GitHub에 소스 Push → 서버에서 Git Pull → 서버에서 docker build
 ```
 
@@ -112,7 +112,7 @@ docker build -t myimage:latest .
 
 ### 흐름
 
-```
+```bash
 로컬에서 docker build → docker save로 이미지 저장 → scp로 서버에 업로드 → docker load로 등록
 ```
 
