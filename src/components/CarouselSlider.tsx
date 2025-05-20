@@ -145,7 +145,7 @@ const CarouselContainer = styled.div`
   width: 100%;
   max-width: 900px;
   margin: 0 auto 1rem auto;
-  padding: 0 40px;
+  padding: 0 40px 60px 40px;
 
   h4 {
     padding: 2rem 0;
