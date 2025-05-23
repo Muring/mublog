@@ -1,9 +1,9 @@
 import { allPosts } from "contentlayer/generated";
 import { notFound } from "next/navigation";
-import PostContent from "@/components/PostContent/PostContent";
-import RecentPostTracker from "@/components/RecentPostTracker/RecentPostTracker";
+import PostContent from "@/components/PostContent";
+import RecentPostTracker from "@/components/trackers/RecentPostTracker";
 import CarouselSlider from "@/components/CarouselSlider";
-import RelatedContent from "@/components/RelatedContent/RelatedContent";
+import RelatedContent from "@/components/RelatedContent";
 
 type Props = {
   params: Promise<{ slug: string }>;

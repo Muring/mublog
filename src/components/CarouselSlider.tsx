@@ -3,8 +3,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Post } from "contentlayer/generated";
 import Link from "next/link";
-import styled from "@emotion/styled";
-import PostCard from "./PostCard/PostCard";
+import PostCard from "./PostCard";
+import Carousel from "./CarouselSlider.styled";
 
 interface CarouselSliderProps {
   posts: Post[];
@@ -92,41 +92,41 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
   }, [currentIndex, duplicatedPosts.length, totalSlides]);
 
   return (
-    <CarouselContainer>
+    <Carousel.Container>
       <h4>연관된 글</h4>
-      <ArrowButton
+      <Carousel.ArrowButton
         className="left"
         onClick={handlePrev}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
         &lt;
-      </ArrowButton>
-      <CarouselWrapper>
-        <CarouselTrack
+      </Carousel.ArrowButton>
+      <Carousel.Wrapper>
+        <Carousel.Track
           ref={trackRef}
-          style={{
-            transform: `translateX(-${(cardWidth + cardGap) * currentIndex - 70}px)`,
-            transition: isTransitioning ? "transform 0.5s ease-in-out" : "none",
-          }}
+          cardGap={cardGap}
+          cardWidth={cardWidth}
+          currentIndex={currentIndex}
+          isTransitioning={isTransitioning}
         >
           {duplicatedPosts.map((post, index) => (
-            <CarouselSlide key={`${post._id}-${index}`}>
+            <Carousel.Slide key={`${post._id}-${index}`} cardWidth={cardWidth}>
               <Link href={`/${post.slug}`}>
                 <PostCard post={post} style={{ animationDelay: `${index * 0.05}s` }} />
               </Link>
-            </CarouselSlide>
+            </Carousel.Slide>
           ))}
-        </CarouselTrack>
-      </CarouselWrapper>
-      <ArrowButton
+        </Carousel.Track>
+      </Carousel.Wrapper>
+      <Carousel.ArrowButton
         className="right"
         onClick={handleNext}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
         &gt;
-      </ArrowButton>
+      </Carousel.ArrowButton>
       {/* <Dots>
         {relatedPosts.map((_, idx) => (
           <Dot
@@ -136,85 +136,6 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
           />
         ))}
       </Dots> */}
-    </CarouselContainer>
+    </Carousel.Container>
   );
 }
-
-const CarouselContainer = styled.div`
-  position: relative;
-  width: 100%;
-  max-width: 900px;
-  margin: 0 auto 1rem auto;
-  padding: 0 40px 60px 40px;
-
-  h4 {
-    padding: 2rem 0;
-  }
-`;
-
-const CarouselWrapper = styled.div`
-  overflow: hidden;
-  width: 100%;
-`;
-
-const CarouselTrack = styled.div`
-  display: flex;
-  gap: ${cardGap}px;
-  padding-top: 0.5rem;
-`;
-
-const CarouselSlide = styled.div`
-  flex-shrink: 0;
-  width: ${cardWidth}px;
-  box-sizing: border-box;
-  transition: all 0.2s ease-in-out;
-
-  &:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0px 6px 5px -2px rgba(0, 0, 0, 0.15);
-  }
-`;
-
-const ArrowButton = styled.button`
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  transition: 0.2s all ease-in;
-  background: transparent;
-  border: none;
-  font-size: 36px;
-  cursor: pointer;
-  z-index: 1;
-
-  &.left {
-    left: 0;
-  }
-
-  &.right {
-    right: 0;
-  }
-
-  &:hover {
-    transform: translateY(-50%) scale(1.2);
-  }
-`;
-
-// const Dots = styled.div`
-//   text-align: center;
-//   margin-top: 10px;
-// `;
-
-// const Dot = styled.button`
-//   display: inline-block;
-//   width: 10px;
-//   height: 10px;
-//   background: #ccc;
-//   border-radius: 50%;
-//   margin: 0 5px;
-//   border: none;
-//   cursor: pointer;
-
-//   &.active {
-//     background: #333;
-//   }
-// `;

@@ -1,4 +1,4 @@
-import { CardWrapper } from "./PostCard.styled";
+import Card from "./PostCard.styled";
 import { Post } from "contentlayer/generated";
 import dayjs from "dayjs";
 import Image from "next/image";
@@ -7,26 +7,25 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
   const formattedDate = dayjs(post.date).format("YY년 MM월 DD일");
 
   return (
-    <CardWrapper style={style}>
+    <Card.Wrapper style={style}>
       {/* 이미지 */}
-      <div className="image-wrapper ">
-        <Image
+      <Card.ImageWrapper>
+        <Card.StyledImage
           src={post.thumbnail ?? "/thumbnails/page-not-found.svg"}
           alt="thumbnail"
           width={400}
           height={200}
           quality={100}
-          className="thumbnail"
         />
-      </div>
+      </Card.ImageWrapper>
 
       {/* 텍스트 영역 */}
-      <div className="card-body">
-        <h5 className="title">{post.title}</h5>
-        <p className="description">{post.description}</p>
+      <Card.Body>
+        <Card.Title>{post.title}</Card.Title>
+        <Card.Desc>{post.description}</Card.Desc>
 
-        <div className="footer">
-          <div className="tag-container">
+        <Card.Footer>
+          <Card.Tag>
             <Image
               src="/icons/tag.svg"
               alt="tag icon"
@@ -35,10 +34,10 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
               height={14}
             />
             <div className="tags">
-              <p>{post.tags?.map((tag) => `#${tag}`).join(" ")}</p>
+              <Card.Text>{post.tags?.map((tag) => `#${tag}`).join(" ")}</Card.Text>
             </div>
-          </div>
-          <div className="date">
+          </Card.Tag>
+          <Card.Date>
             <Image
               src="/icons/calendar.svg"
               alt="calendar icon"
@@ -46,10 +45,10 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
               width={14}
               height={14}
             />
-            <p>{formattedDate}</p>
-          </div>
-        </div>
-      </div>
-    </CardWrapper>
+            <Card.Text>{formattedDate}</Card.Text>
+          </Card.Date>
+        </Card.Footer>
+      </Card.Body>
+    </Card.Wrapper>
   );
 }

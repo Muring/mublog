@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { PostGridWrapper, GridList } from "./PostGrid.styled";
 import { useSearchParams } from "next/navigation";
 import { allPosts } from "contentlayer/generated";
-import TagMenu from "@/components/TagMenu/TagMenu";
+import TagMenu from "@/components/TagMenu";
 import Link from "next/link";
-import PostCard from "../PostCard/PostCard";
+import PostCard from "./PostCard";
 
 const BATCH_SIZE = 6;
 
