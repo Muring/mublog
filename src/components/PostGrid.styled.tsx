@@ -18,7 +18,7 @@ export const GridList = styled.div`
 
   li {
     border-radius: 12px;
-    transition: 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
 
     &:hover {
       transform: translateY(-4px) !important;

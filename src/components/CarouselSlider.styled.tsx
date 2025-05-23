@@ -35,6 +35,7 @@ const Slide = styled.div<{ cardWidth: number }>`
   flex-shrink: 0;
   width: ${(props) => props.cardWidth}px;
   box-sizing: border-box;
+  border-radius: 12px;
   transition: all 0.2s ease-in-out;
 
   &:hover {
