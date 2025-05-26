@@ -32,7 +32,7 @@ export const Article = styled.article`
     line-height: 1.5;
   }
   p {
-    margin-top: 0.5rem;
+    margin-top: 1rem;
   }
   li {
     margin-left: 1rem;
