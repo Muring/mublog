@@ -26,7 +26,7 @@ export const projectData = [
     },
     {
         date: "2025.07 ~ 2025.09",
-        title: "Hankook Tire Global CPC: Company Identity Clean Up",
+        title: "Hankook Tire Global: Company Identity Clean Up",
         description: "Next.js & Typescript & TypeORM을 사용한 풀스택 설계 및 구현",
     },
 ];
