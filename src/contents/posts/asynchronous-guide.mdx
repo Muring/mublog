@@ -1,0 +1,442 @@
+---
+title: "자바스크립트 비동기 처리 완전 가이드 (then/catch vs async/await)"
+date: "2025-10-24"
+description: "두 비동기 구문의 차이점 및 장단점"
+tags:
+  - frontend
+thumbnail: "/thumbnails/async.jpg"
+---
+
+## Promise 기본기 (공통 토대)
+
+```jsx
+const p = new Promise((resolve, reject) => {
+  // 비동기 작업…
+  setTimeout(() => resolve(42), 1000); // 성공
+  // 또는 reject(new Error('문제 발생'));
+});
+```
+
+- **상태**: pending → fulfilled(성공) 또는 rejected(실패)
+- **값 전달**: 성공 값은 다음 단계로, 실패는 에러로 전파
+
+---
+
+## then/catch 체이닝: 특징, 장단점, 예시
+
+### 핵심 문법
+
+```jsx
+doAsyncA()
+  .then(resultA => doAsyncB(resultA))
+  .then(resultB => doAsyncC(resultB))
+  .then(final => console.log('완료:', final))
+  .catch(err => console.error('실패:', err))
+  .finally(() => console.log('정리'));
+
+```
+
+### 장점
+
+- **함수형 파이프라인**처럼 연속 변환·전달이 명확
+- **지연 실행 패턴**(필요할 때까지 실행 안 함) 구성에 유리
+- `Promise.all`, `race`, `allSettled`, `any` 같은 **조합기**와 자연스럽게 결합
+- 스트림/이벤트 기반 라이브러리(RxJS 등)와 **스타일 일관성**
+
+### 단점/주의
+
+- 체인 길어지면 **피라미드/우측 드리프트**로 가독성이 떨어짐
+- `return` 누락 시 다음 then으로 **값이 안 전달**되는 실수
+- 복잡한 분기·루프·조건부 흐름에서 **제어 흐름 가독성 저하**
+- 에러가 어디서 났는지 **스택 트레이스 추적**이 다소 불리
+
+### 실무 예시 (API 연쇄 호출)
+
+```jsx
+fetch('/api/auth')
+  .then(r => r.json())
+  .then(({ token }) => fetch('/api/data', { headers: { Authorization: `Bearer ${token}` }}))
+  .then(r => r.json())
+  .then(data => process(data))
+  .catch(err => showError(err));
+
+```
+
+---
+
+## async/await: 특징, 장단점, 예시
+
+### 핵심 문법
+
+```jsx
+async function run() {
+  try {
+    const resultA = await doAsyncA();
+    const resultB = await doAsyncB(resultA);
+    const final = await doAsyncC(resultB);
+    console.log('완료:', final);
+  } catch (err) {
+    console.error('실패:', err);
+  } finally {
+    console.log('정리');
+  }
+}
+```
+
+> async 함수는 항상 Promise를 반환합니다. 내부에서 await는 Promise가 해결될 때까지 “그 함수만” 일시 중단했다가, 이어서 동기 코드처럼 작성할 수 있게 해줍니다.
+> 
+
+### 장점
+
+- **동기 코드처럼 읽히는 흐름**: if/for/try-catch와 자연스럽게 결합
+- **가독성/유지보수성** 뛰어남 (복잡한 분기·루프에서 특히)
+- **스택 트레이스 가독성**이 상대적으로 좋음
+- 에러 처리가 **표준 try/catch**로 일관됨
+
+### 단점/주의
+
+- 무심코 `await`를 남발하면 **불필요한 순차화**로 성능 저하
+- **병렬**이 필요한 곳에서도 `await`를 루프 안에서 써서 느려지는 실수
+- 최상위(모듈 외부)에서는 전통적으로 `await` 사용 불가였지만, 이제 **ES 모듈 Top-Level Await**로 개선(번들러/환경 호환성 확인 필요)
+
+### 실무 예시 (동일 흐름을 async/await로)
+
+```jsx
+async function run() {
+  try {
+    const auth = await fetch('/api/auth').then(r => r.json());
+    const data = await fetch('/api/data', {
+      headers: { Authorization: `Bearer ${auth.token}` }
+    }).then(r => r.json());
+    const result = process(data);
+    return result;
+  } catch (e) {
+    showError(e);
+    throw e; // 상위로 전파 필요 시
+  }
+}
+```
+
+---
+
+## 에러 처리: then/catch vs try/catch 비교
+
+### then/catch
+
+- 체인의 **어디서** 발생하든 마지막 `catch`에서 잡힘
+- 중간 단계에서 복구 후 계속 진행하려면 **분기용 then**을 잘 나눠야 함
+
+```jsx
+taskA()
+  .then(taskB)
+  .catch(err => recoverOrSubstitute(err))
+  .then(taskC) // 복구 후 계속
+  .catch(finalErr => handle(finalErr));
+```
+
+### async/await
+
+- 익숙한 **`try/catch/finally`*로 구간별 정확한 범위 지정
+
+```jsx
+try {
+  const a = await taskA();
+  try {
+    const b = await taskB(a);
+    // …
+  } finally {
+    await cleanup();
+  }
+} catch (err) {
+  handle(err);
+}
+```
+
+---
+
+## 순차 vs 병렬 vs 제한된 병렬
+
+### 잘못된(느린) 예: 불필요한 순차화
+
+```jsx
+// 각 호출이 서로 독립인데 순차로 실행 → 느림
+const a = await fetchA();
+const b = await fetchB();
+const c = await fetchC();
+```
+
+### 올바른 병렬
+
+```jsx
+const [a, b, c] = await Promise.all([fetchA(), fetchB(), fetchC()]);
+```
+
+### 일부만 성공이어도 계속(전체 결과 필요)
+
+```jsx
+const results = await Promise.allSettled([a(), b(), c()]);
+// { status: 'fulfilled'|'rejected', value|reason }
+```
+
+### 가장 빠른 하나만 필요
+
+```jsx
+const fastest = await Promise.any([a(), b(), c()]); // 하나라도 성공하면 resolve
+```
+
+### 제한된 동시성(예: 3개씩만 병렬)
+
+```jsx
+async function withPool(tasks, size = 3) {
+  const ret = [];
+  const executing = new Set();
+  for (const t of tasks) {
+    const p = Promise.resolve().then(() => t());
+    ret.push(p);
+    executing.add(p);
+    p.finally(() => executing.delete(p));
+    if (executing.size >= size) {
+      await Promise.race(executing); // 하나 끝날 때까지 대기
+    }
+  }
+  return Promise.all(ret);
+}
+```
+
+---
+
+## “어떤 게 더 좋은가?”에 대한 결론
+
+### 한 줄 요약(권장 가이드)
+
+- **기본값은 `async/await`**: 읽기 쉽고 유지보수에 유리하며 에러 처리(try/catch)가 직관적입니다.
+- **병렬 조합에는 Promise 조합기**를 곁들여라: `await` 앞에서 **`const p1 = job1(); const p2 = job2();` → `await Promise.all([p1, p2])`** 패턴.
+- **체인형 변환 파이프라인**이 명확하거나 **라이브러리 콜백 스타일**과 맞출 때, 혹은 **지연 평가**가 필요할 때는 `then/catch`도 여전히 적합합니다.
+
+### 실제 현업에서 더 자주 쓰이는 것
+
+- 2020년대 이후 코드베이스·가이드라인·튜토리얼은 **async/await 중심**이 대세입니다.
+- 라이브러리 내부, 유틸리티형 API, 스트림 연산 쪽에서 **then 체인**도 꾸준히 사용됩니다.
+
+---
+
+## 각 방식이 “특히” 좋은 지점 요약
+
+### then/catch가 좋은 곳
+
+- **직렬 변환 파이프라인**을 함수 합성처럼 기술하고 싶을 때
+- **지연 실행**을 쉽게 묶고 싶을 때 (필요할 때 `.then` 붙여 실행)
+- **Promise 조합기**와 자연 파이프(예: `.then(Promise.all.bind(Promise))` 같은 트릭)로 일관성 유지
+
+### async/await가 좋은 곳
+
+- **분기·루프·중첩 try/finally** 등 **복잡한 제어 흐름**
+- 테스트/리팩토링/코드리뷰에서 **읽기 쉬운 비즈니스 로직**
+- **에러 전파 범위**를 세밀히 제어해야 할 때
+
+---
+
+## 실무 예시 모음 (두 스타일 비교)
+
+### 1) 순차 의존형 호출
+
+**then/catch**
+
+```jsx
+login()
+  .then(user => fetchProfile(user.id))
+  .then(profile => updateUI(profile))
+  .catch(showError);
+```
+
+**async/await**
+
+```jsx
+async function main() {
+  try {
+    const user = await login();
+    const profile = await fetchProfile(user.id);
+    updateUI(profile);
+  } catch (e) {
+    showError(e);
+  }
+}
+```
+
+### 2) 병렬 독립 호출 + 결과 결합
+
+**then/catch**
+
+```jsx
+Promise.all([fetchNotices(), fetchMenus(), fetchUser()])
+  .then(([notices, menus, user]) => render({ notices, menus, user }))
+  .catch(showError);
+```
+
+**async/await**
+
+```jsx
+async function load() {
+  try {
+    const pNotices = fetchNotices();
+    const pMenus   = fetchMenus();
+    const pUser    = fetchUser();
+    const [notices, menus, user] = await Promise.all([pNotices, pMenus, pUser]);
+    render({ notices, menus, user });
+  } catch (e) {
+    showError(e);
+  }
+}
+```
+
+### 3) 재시도 + 타임아웃 + 취소(AbortController)
+
+```jsx
+async function fetchWithRetry(url, { retries = 3, timeout = 5000 } = {}) {
+  for (let i = 0; i < retries; i++) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const r = await fetch(url, { signal: controller.signal });
+      clearTimeout(id);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    } catch (e) {
+      clearTimeout(id);
+      if (i === retries - 1 || e.name === 'AbortError') throw e;
+      await new Promise(res => setTimeout(res, 200 * (i + 1))); // 백오프
+    }
+  }
+}
+```
+
+---
+
+## 흔한 실수와 예방책
+
+### 1) 루프 내 불필요한 순차화
+
+```jsx
+// ❌ 각 항목을 순차 await (느림)
+for (const x of xs) {
+  await work(x);
+}
+// ✅ 병렬
+await Promise.all(xs.map(work));
+```
+
+### 2) `await` 빼먹기 / “떠다니는 Promise”
+
+```jsx
+// ❌ 에러를 상위에서 캐치하지 못할 수 있음
+doAsync(); // 결과를 쓰지도, await하지도 않음
+// ✅ 반드시 처리
+await doAsync(); // 또는 반환하거나 .catch 처리
+```
+
+> ESLint: @typescript-eslint/no-floating-promises(TS), promise/catch-or-return 같은 규칙으로 예방
+> 
+
+### 3) then 체인에서 `return` 누락
+
+```jsx
+taskA().then(v => { taskB(v); }) // ❌ return 누락 → 다음 then에 값 전달 안 됨
+taskA().then(v => { return taskB(v); }) // ✅
+```
+
+### 4) try/catch 범위 오해
+
+```jsx
+try {
+  const p = doAsync();  // 여기서 에러 안 남 (Promise 생성만)
+  const v = await p;     // await 시점에서 throw 될 수 있음
+} catch (e) { /* 여기서 잡힘 */ }
+```
+
+---
+
+## 타입스크립트·테스트·디버깅 팁
+
+### 타입스크립트
+
+- `async function f(): Promise<T>`처럼 **반환 타입이 항상 Promise**임을 인지
+- `void` 반환하려면 `Promise<void>` 사용
+- `await`는 표현식을 **값**으로 만드는 장점(제네릭 추론 용이)
+
+### 테스트
+
+- Jest 등에서 **비동기 테스트는 `await`**로 명확히 마무리
+
+```jsx
+test('loads data', async () => {
+  const data = await getData();
+  expect(data).toMatchObject({ ok: true });
+});
+```
+
+### 디버깅
+
+- 최신 런타임/브라우저는 **async 스택 트레이스** 지원 향상
+- `unhandledrejection` 이벤트 핸들러 등록하여 누락된 에러 로그
+
+```jsx
+window.addEventListener('unhandledrejection', e => {
+  console.error('Unhandled promise rejection:', e.reason);
+});
+```
+
+---
+
+## 환경·호환성 메모
+
+- **async/await**: 현대 브라우저 & Node.js LTS에서 기본 지원. 구형 브라우저는 트랜스파일/폴리필 필요.
+- **Top-Level Await**: ES 모듈(`type: "module"`)에서 지원. 번들러/플랫폼 설정 확인.
+
+---
+
+## 무엇을 선택할까? (실천용 체크리스트)
+
+- **업무 로직을 이야기하듯 읽히게** 쓰고 싶다 → **async/await**
+- **독립 호출 병렬화**가 많다 → `await` 앞에서 **Promise 생성 → `Promise.all`**
+- **변환 파이프라인** 위주, 함수형 스타일 선호 → **then 체인**
+- **세밀한 에러 범위 제어**, **finally 정리**가 자주 필요 → **async/await**
+- 팀 컨벤션/린트 규칙이 정해져 있다면 **그 규칙**을 우선
+
+---
+
+## 빠른 치트시트
+
+### 순차
+
+```jsx
+const a = await A();
+const b = await B(a);
+```
+
+### 병렬
+
+```jsx
+const [a, b] = await Promise.all([A(), B()]);
+```
+
+### 일부 실패 허용
+
+```jsx
+const results = await Promise.allSettled(tasks.map(t => t()));
+```
+
+### 타임아웃 + 취소
+
+```jsx
+const c = new AbortController();
+const id = setTimeout(() => c.abort(), 5000);
+const r = await fetch(url, { signal: c.signal }).finally(() => clearTimeout(id));
+```
+
+---
+
+## 마무리 추천
+
+- **기본 문체는 async/await**, 병렬 구간에서 **Promise 조합기**를 적극 활용하세요.
+- 팀 코드베이스가 then 체인 위주라면 그 스타일을 존중하되, **복잡한 구간은 async/await로 감싸** 가독성을 확보하세요.
+- 린트 규칙(“떠다니는 프로미스 금지”, “에러 반드시 처리”)을 켜서 **실수를 시스템적으로 차단**하세요.

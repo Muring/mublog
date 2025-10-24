@@ -11,13 +11,13 @@ export const historyData = [
 export const projectData = [
     {
         date: "2024.11 ~ 2025.02",
-        title: "Windsor Global 모바일 프로젝트",
-        description: "Salesforce 기반의 모바일 환경 구축 및 추가 개발 프로젝트에 참여",
+        title: "Windsor Global: 모바일 최적화 및 반복 작업 자동화 프로젝트",
+        description: "Salesforce 기반의 모바일 환경 구축 및 추가 개발",
     },
     {
         date: "2025.02 ~ 2025.03",
-        title: "Agentforce 해커톤 – 프로젝트 Creamforce",
-        description: "Salesforce 플랫폼을 활용한 해커톤 프로젝트에 참가하여 Creamforce 서비스를 개발하여 인기상 수상",
+        title: "Agentforce Hackathon: Project Creamforce 🏆",
+        description: "Agentforce 및 Data Cloud를 활용한 B2B 고객 지원 AI 챗봇 개발",
     },
     {
         date: "2025.04 ~ 2025.07",
@@ -28,5 +28,10 @@ export const projectData = [
         date: "2025.07 ~ 2025.09",
         title: "Hankook Tire Global: Company Identity Clean Up",
         description: "Next.js & Typescript & TypeORM을 사용한 풀스택 설계 및 구현",
+    },
+    {
+        date: "2025.09 ~ ",
+        title: "Hurom: Europe Call Center System",
+        description: "Salesforce LWC & Apex를 사용한 풀스택 설계 및 구현",
     },
 ];
