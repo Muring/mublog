@@ -21,9 +21,8 @@ export const SidePostWrapper = styled.div`
     }
 
     .side-title {
-        display: flex;
-        flex-wrap: nowrap;
         height: 55%;
+        max-height: 1.5rem;
         padding: 0 !important;
         overflow: hidden;
         text-overflow: ellipsis;
