@@ -33,7 +33,6 @@ doAsyncA()
   .then(final => console.log('완료:', final))
   .catch(err => console.error('실패:', err))
   .finally(() => console.log('정리'));
-
 ```
 
 ### 장점
@@ -59,7 +58,6 @@ fetch('/api/auth')
   .then(r => r.json())
   .then(data => process(data))
   .catch(err => showError(err));
-
 ```
 
 ---
@@ -136,7 +134,7 @@ taskA()
 
 ### async/await
 
-- 익숙한 **`try/catch/finally`*로 구간별 정확한 범위 지정
+- 익숙한 ** `try/catch/finally` **로 구간별 정확한 범위 지정
 
 ```jsx
 try {
@@ -365,7 +363,7 @@ try {
 
 ### 테스트
 
-- Jest 등에서 **비동기 테스트는 `await`**로 명확히 마무리
+- Jest 등에서 ** 비동기 테스트는 `await` **로 명확히 마무리
 
 ```jsx
 test('loads data', async () => {
