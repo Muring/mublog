@@ -1,0 +1,423 @@
+---
+title: "Docker에 DB 생성하기"
+date: "2025-12-11"
+description: "DB 생성 · 계정 생성 · 애플리케이션 접속까지 전체 흐름 정리"
+tags:
+    - docker
+thumbnail: "/thumbnails/docker.png"
+---
+
+로컬 개발 환경에서 MySQL을 깔끔하게 관리하려면 **Docker 컨테이너로 DB를 분리**하는 것이 편합니다.
+
+하지만 처음 설정할 때 비밀번호, DB 이름, 볼륨 설정 등을 잘못 잡으면 `Unknown database` 같은 에러를 계속 보게 됩니다.
+
+이 글에서는:
+
+1. MySQL 컨테이너를 새로 만들고
+2. DB와 사용자 계정을 생성한 다음
+3. Next.js / TypeORM 같은 애플리케이션에서 접속할 때까지
+
+**처음부터 주의할 점을 모두 포함해서** 순서대로 정리합니다.
+
+---
+
+## 1. 전체 구성 이해하기
+
+기본 구조는 아주 단순합니다.
+
+- **Docker 컨테이너**
+    - MySQL 서버가 돌아가는 공간
+    - 데이터 파일은 **볼륨**으로 호스트에 보관 (컨테이너 삭제되어도 데이터 유지)
+- **애플리케이션 (Next.js + TypeORM 등)**
+    - `.env` 또는 설정 파일에 DB 접속 정보 저장
+- **연결 정보**
+    - 호스트/컨테이너에 따라 `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE` 를 올바르게 맞춰야 함
+
+가장 많이 쓰는 패턴은 **docker-compose로 MySQL만 컨테이너로 띄워 놓고**,
+
+애플리케이션은 로컬에서 실행하면서 `localhost:포트`로 MySQL에 접속하는 방식입니다.
+
+---
+
+## 2. docker-compose.yml로 MySQL 컨테이너 생성
+
+### 2-1. 기본 compose 파일 예시
+
+프로젝트 루트에 `docker-compose.yml` 파일을 하나 만듭니다.
+
+```yaml
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-local
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_here      # root 비밀번호
+      MYSQL_DATABASE: app_db                       # 최초 1회 자동 생성할 DB 이름
+      MYSQL_USER: app_user                         # 애플리케이션용 계정
+      MYSQL_PASSWORD: app_user_password_here       # 애플리케이션용 계정 비밀번호
+      TZ: Asia/Seoul
+    command: >
+      mysqld
+        --character-set-server=utf8mb4
+        --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3307:3306"                                # 호스트 3307 → 컨테이너 3306
+    volumes:
+      - mysql-data:/var/lib/mysql                  # 데이터 영구 보관
+
+volumes:
+  mysql-data:
+```
+
+### 2-2. 여기서 중요한 포인트들
+
+1. **MYSQL_ROOT_PASSWORD**
+    - MySQL root 계정 비밀번호입니다.
+    - 나중에 `docker exec`으로 MySQL에 접속할 때 사용합니다.
+2. **MYSQL_DATABASE / MYSQL_USER / MYSQL_PASSWORD**
+    - **중요:** 이 값들은 **해당 볼륨(`mysql-data`)이 비어 있을 때, 최초 1회만** 적용됩니다.
+    - 이미 한 번 컨테이너를 띄운 뒤 볼륨에 데이터가 생긴 상태에서
+        
+        `MYSQL_DATABASE` 이름을 바꿔도 새 DB는 자동으로 안 만들어집니다.
+        
+    - 그래서 나중에 DB 이름 바꾸면 `Unknown database`가 잘 발생합니다.
+3. **ports: "3307:3306"**
+    - 호스트에서 `localhost:3307` 으로 접속하면 컨테이너 안 `3306`으로 연결됩니다.
+    - 이미 로컬에 MySQL이 깔려 있으면 3306이 사용 중일 수 있으니,
+        
+        **컨테이너용 포트를 3307 같은 다른 포트로 두는 것이 안전**합니다.
+        
+4. **volumes: mysql-data:/var/lib/mysql**
+    - MySQL 실제 데이터가 저장되는 경로입니다.
+    - 컨테이너를 지워도 이 볼륨을 지우지 않으면 데이터는 유지됩니다.
+    - 완전히 초기화하고 싶으면 **컨테이너 + 볼륨 둘 다 삭제**해야 합니다.
+
+---
+
+## 3. 컨테이너 실행 및 상태 확인
+
+### 3-1. 컨테이너 실행
+
+```bash
+docker compose up -d
+# 또는 docker-compose up -d
+```
+
+### 3-2. 컨테이너가 잘 떴는지 확인
+
+```bash
+docker ps
+```
+
+- `mysql-local` 이라는 컨테이너가 `Up` 상태인지 확인합니다.
+
+### 3-3. 로그 확인 (에러 여부 체크)
+
+```bash
+docker logs -f mysql-local
+```
+
+- 에러 없이 `ready for connections` 같은 문구가 나오면 정상입니다.
+
+---
+
+## 4. 컨테이너 안에서 MySQL 접속
+
+이제 컨테이너 안으로 들어가서 root로 접속해 보겠습니다.
+
+```bash
+docker exec -it mysql-local mysql -u root -p
+# 비밀번호: docker-compose.yml에 설정한 MYSQL_ROOT_PASSWORD
+```
+
+정상 접속되면 MySQL 프롬프트가 뜹니다.
+
+```sql
+mysql>
+```
+
+---
+
+## 5. DB와 사용자 계정 확인 및 생성
+
+### 5-1. 자동으로 생성된 DB/계정 확인
+
+아까 `docker-compose.yml`에서 `MYSQL_DATABASE: app_db`를 넣어놓았으므로
+
+**볼륨이 처음 생성될 때** `app_db` 라는 DB가 만들어집니다.
+
+```sql
+SHOW DATABASES;
+```
+
+여기에서 `app_db`가 있는지 확인합니다.
+
+또한 `MYSQL_USER: app_user` / `MYSQL_PASSWORD` 값을 넣어두었기 때문에
+
+`app_user` 계정도 자동으로 생성됩니다.
+
+사용자 목록은 다음과 같이 볼 수 있습니다.
+
+```sql
+SELECT User, Host FROM mysql.user;
+```
+
+여기서 `app_user`가 보이면 정상입니다.
+
+---
+
+### 5-2. DB가 없거나, 새로 만들고 싶을 때
+
+`SHOW DATABASES;` 결과에 `app_db`가 없다면 직접 생성할 수 있습니다.
+
+```sql
+CREATE DATABASE app_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+```
+
+이미 `MYSQL_DATABASE`로 만든 DB 대신 다른 이름의 DB를 쓰고 싶으면
+
+이렇게 직접 만들어 주면 됩니다.
+
+---
+
+### 5-3. app_user 계정 수동 생성 (또는 권한 재설정)
+
+자동 생성 대신 직접 만들고 싶다면 다음처럼 합니다.
+
+```sql
+CREATE USER 'app_user'@'%' IDENTIFIED BY 'app_user_password_here';
+
+GRANT ALL PRIVILEGES ON app_db.* TO 'app_user'@'%';
+FLUSH PRIVILEGES;
+```
+
+- `'%'` 는 어떤 호스트에서 접속해도 허용한다는 의미입니다.
+    - 보안을 강화하려면 `'localhost'` 등으로 제한할 수 있습니다.
+- 권한을 좁히고 싶으면:
+
+```sql
+GRANT SELECT, INSERT, UPDATE, DELETE ON app_db.* TO 'app_user'@'%';
+```
+
+---
+
+## 6. 애플리케이션에서 MySQL에 접속하기
+
+이제 컨테이너는 준비되었고, DB와 사용자도 만들어졌습니다.
+
+이제 Next.js / TypeORM 애플리케이션에서 접속 설정만 맞추면 됩니다.
+
+### 6-1. 애플리케이션이 **로컬에서 실행**될 때
+
+이 케이스가 가장 흔합니다.
+
+- MySQL은 Docker 컨테이너에서 돌아감 (`mysql-local`)
+- Next.js 서버는 로컬 터미널에서 `npm run dev` 등으로 실행
+
+이 경우 DB 설정은 다음과 같이 맞춥니다.
+
+```
+# .env
+
+DB_HOST=localhost      # 컨테이너 포트를 호스트에 바인딩했으므로 localhost 사용
+DB_PORT=3307           # docker-compose에서 "3307:3306" 으로 설정했던 호스트 포트
+DB_USERNAME=app_user
+DB_PASSWORD=app_user_password_here
+DB_DATABASE=app_db
+```
+
+TypeORM 설정(예시):
+
+```tsx
+// data-source.ts
+
+import { DataSource } from 'typeorm';
+
+export const AppDataSource = new DataSource({
+  type: 'mysql',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  entities: [/* ... */],
+  synchronize: false, // 운영에서는 false 권장
+  logging: true,
+});
+```
+
+**중요 포인트**
+
+1. `DB_PORT`는 컨테이너의 3306이 아니라 **호스트에 바인딩한 3307** 입니다.
+2. `DB_DATABASE` 값은 **MySQL 안에서 `SHOW DATABASES;`로 확인한 이름과 정확히 일치**해야 합니다.
+    - 여기서 틀리면 `Unknown database 'xxx'` 에러가 발생합니다.
+3. `DB_USERNAME`, `DB_PASSWORD`는 **실제 MySQL에 존재하는 계정과 비밀번호**여야 합니다.
+
+---
+
+### 6-2. 애플리케이션도 Docker 컨테이너로 함께 띄우는 경우
+
+만약 애플리케이션도 같은 `docker-compose.yml` 안에서 컨테이너로 실행한다면,
+
+DB_HOST는 `localhost`가 아니라 **MySQL 서비스 이름**을 써야 합니다.
+
+예를 들어:
+
+```yaml
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-local
+    # ...
+
+  app:
+    build: .
+    container_name: my-next-app
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql          # 여기!
+      DB_PORT: 3306           # 같은 네트워크 안에서는 컨테이너 포트 그대로
+      DB_USERNAME: app_user
+      DB_PASSWORD: app_user_password_here
+      DB_DATABASE: app_db
+```
+
+이 경우에는:
+
+- 앱 컨테이너와 MySQL 컨테이너가 **같은 Docker 네트워크** 안에 있으므로
+- `DB_HOST=localhost` 가 아니라 `DB_HOST=mysql` (서비스 이름)을 사용해야 합니다.
+
+---
+
+## 7. 자주 발생하는 에러와 원인 정리
+
+### 7-1. `Unknown database 'xxx'`
+
+**의미:**
+
+→ 계정/비밀번호는 맞는데, **접속하려는 DB 이름이 MySQL 안에 없음**
+
+**원인**
+
+1. `DB_DATABASE` 이름이 잘못되었거나 오타 있음
+2. 대소문자 차이 (`app_db` vs `App_Db`)
+3. `MYSQL_DATABASE` 값을 바꿨지만, 이미 생성된 볼륨 때문에 새 DB가 자동 생성되지 않음
+4. 애플리케이션이 다른 MySQL 인스턴스에 접속하고 있음 (예: 로컬 MySQL vs Docker MySQL)
+
+**해결**
+
+1. 컨테이너 안에서:
+    
+    ```sql
+    SHOW DATABASES;
+    ```
+    
+2. 거기에 실제로 있는 이름을 `DB_DATABASE`에 그대로 적는다.
+3. 없다면:
+    
+    ```sql
+    CREATE DATABASE app_db
+      CHARACTER SET utf8mb4
+      COLLATE utf8mb4_unicode_ci;
+    ```
+    
+4. 그리고 `GRANT ... ON app_db.* TO 'app_user'@'%';` 로 권한 부여.
+
+---
+
+### 7-2. `Access denied for user 'app_user'@'...'`
+
+**의미:**
+
+→ MySQL에는 연결됐는데, 해당 유저/호스트 조합에 권한이 없거나 비밀번호가 틀림.
+
+**체크 순서**
+
+1. MySQL 안에서:
+    
+    ```sql
+    SELECT User, Host FROM mysql.user;
+    ```
+    
+    - `app_user`가 어느 Host로 등록돼 있는지 확인
+        
+        (`'app_user'@'%'`, `'app_user'@'localhost'` 등)
+        
+2. 비밀번호 재설정이 필요하면:
+    
+    ```sql
+    ALTER USER 'app_user'@'%' IDENTIFIED BY '새_비밀번호';
+    FLUSH PRIVILEGES;
+    ```
+    
+3. 애플리케이션 `.env`의 비밀번호와 동일하게 맞추기.
+
+---
+
+### 7-3. 접속 자체가 안 되는 경우 (Connection refused 등)
+
+**에러 예시**
+
+- `ECONNREFUSED 127.0.0.1:3307`
+- `connect ECONNREFUSED`
+
+**체크**
+
+1. 컨테이너 살아있는지 확인
+    
+    ```bash
+    docker ps
+    ```
+    
+2. 포트 매핑 확인
+    
+    ```bash
+    docker inspect mysql-local | grep -i "3306"
+    ```
+    
+3. `.env`에서 `DB_HOST`, `DB_PORT`가 맞는지 다시 확인
+    - 로컬에서 실행 중 → HOST는 `localhost`, PORT는 `3307`
+    - 컨테이너끼리 통신 → HOST는 `mysql` (서비스 이름), PORT는 `3306`
+
+---
+
+## 8. 마무리 정리
+
+한 번 정리하면, Docker + MySQL 기본 패턴은 다음과 같습니다.
+
+1. **docker-compose.yml 작성**
+    - `MYSQL_ROOT_PASSWORD`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `ports`, `volumes` 설정
+    - `MYSQL_DATABASE` / `MYSQL_USER` / `MYSQL_PASSWORD`는 **볼륨 초기 생성 시 한 번만** 적용된다는 점 주의
+2. **컨테이너 실행 & 상태 확인**
+    - `docker compose up -d`
+    - `docker ps` / `docker logs` 로 정상 작동 확인
+3. **컨테이너 안에서 MySQL 접속**
+    - `docker exec -it mysql-local mysql -u root -p`
+    - `SHOW DATABASES;` / 필요 시 `CREATE DATABASE ...`
+4. **사용자 계정 및 권한 설정**
+    - `CREATE USER 'app_user'@'%' IDENTIFIED BY '...';`
+    - `GRANT ALL PRIVILEGES ON app_db.* TO 'app_user'@'%';`
+    - `FLUSH PRIVILEGES;`
+5. **애플리케이션에서 접속**
+    - 로컬에서 실행 → `DB_HOST=localhost`, `DB_PORT=3307`
+    - 컨테이너에서 실행 → `DB_HOST=mysql`, `DB_PORT=3306`
+    - `DB_DATABASE`는 MySQL 안에 실제로 존재하는 이름과 **완전히 동일**하게
+6. **에러 메시지는 DB 이름 / 계정 / 포트를 다시 점검하라는 신호**
+    - `Unknown database` → DB 이름 문제
+    - `Access denied` → 계정/권한/비밀번호 문제
+    - `ECONNREFUSED` → 컨테이너/포트/호스트 문제
+
+---
+
+개인적인 프로젝트나 업무를 위한 데이터베이스를 만드는 경우가 굉장히 빈번한데 매번 까먹어서 생성하는데 오랜 시간이 걸려 시간이 남는 김에 작성해보았는데, 
+오랜만에 하나 작성했는데 너무 기본적인걸 작성한 것 같아서 뭔가 좀 되돌아보게 되는 것 같네요.
+
+앞으로도 꾸준히 공부를 더 해야될 것 같습니다..
+
+모두들 화이팅!

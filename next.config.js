@@ -1,4 +1,4 @@
-// // next.config.js
+// next.config.js
 
 const { withContentlayer } = require("next-contentlayer");
 
@@ -7,14 +7,14 @@ const { withContentlayer } = require("next-contentlayer");
 
 /** @type {import('next').NextConfig} */
 const baseConfig = {
-  webpack(config, { dev }) {
-    if (dev) {
-      config.watchOptions = {
-        ignored: ["**/node_modules/**", "**/.git/**", "**/.next/**"],
-      };
-    }
-    return config;
-  },
+    webpack(config, { dev }) {
+        if (dev) {
+            config.watchOptions = {
+                ignored: ["**/node_modules/**", "**/.git/**", "**/.next/**"],
+            };
+        }
+        return config;
+    },
 };
 
 module.exports = withContentlayer(baseConfig);
