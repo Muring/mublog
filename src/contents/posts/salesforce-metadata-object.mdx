@@ -1,0 +1,306 @@
+---
+title: "메타데이터 - 객체 정보 가져오기"
+date: "2025-12-12"
+description: "LWC에서 Salesforce Object 메타데이터 활용하기"
+tags:
+    - ssalesforce
+    - lwc
+
+thumbnail: "/thumbnails/salesforce.png"
+---
+
+세일즈포스 개발을 진행하다 보면 여러 **Standard Object**와 **Custom Object**를 다루게 됩니다.
+
+LWC 기반 화면을 만들다 보면 아래와 같은 상황이 자연스럽게 발생합니다.
+
+-   오브젝트의 **라벨**이나 **복수형 라벨**을 동적으로 가져와 헤더에 표시하고 싶을 때
+-   각 필드의 **라벨**, **데이터 타입**, **필수 여부**, **권한 정보**가 필요할 때
+-   레코드타입별 **피클리스트 옵션**을 가져와야 할 때
+-   특정 오브젝트가 갖고 있는 **자식 관계(child relationships)** 가 궁금할 때
+-   사용자 권한에 따라 **버튼 표시/비활성화**를 제어해야 할 때
+
+이러한 요구사항들은 모두 **UI API**를 활용하면 간단하게 해결됩니다.
+
+오늘은 이 중에서도 핵심인 **`getObjectInfo`** 를 중심으로,
+
+객체 메타데이터를 어떻게 가져오고 활용하는지 정리해보겠습니다.
+
+---
+
+## 0. 사용할 메서드: `getObjectInfo`
+
+Salesforce는 객체 정보를 통째로 불러올 수 있는 UI API를 제공합니다.
+
+그중 대표적인 것이 바로 **`getObjectInfo`** 입니다.
+
+> getObjectInfo = 오브젝트 하나에 대한 “메타데이터 설명서”
+
+이 메서드 하나로 다음과 같은 정보를 모두 얻을 수 있습니다.
+
+-   오브젝트 이름, 라벨, 복수 라벨
+-   CRUD 권한 (createable, updateable, deletable 등)
+-   필드 정보(타입, 라벨, 필수 여부, 권한 등)
+-   레코드타입 정보
+-   child relationship 정보
+-   테마/아이콘 정보
+
+LWC 개발에서는 거의 필수적으로 사용되는 API입니다.
+
+---
+
+## 1. 기본 사용 예시
+
+```jsx
+import { LightningElement, wire } from "lwc";
+import { getObjectInfo } from "lightning/uiObjectInfoApi";
+import SERVICE_LINE_ITEM_OBJECT from "@salesforce/schema/Service_Line_Item__c";
+
+export default class Example extends LightningElement {
+    objectInfo;
+
+    @wire(getObjectInfo, { objectApiName: SERVICE_LINE_ITEM_OBJECT })
+    wiredObjectInfo({ data, error }) {
+        if (data) {
+            this.objectInfo = data;
+        } else if (error) {
+            console.error(error);
+        }
+    }
+}
+```
+
+`data` 안에 해당 오브젝트의 모든 메타데이터가 담겨옵니다.
+
+---
+
+## 2. 최상위 레벨에서 자주 활용하는 정보들
+
+`objectInfo` 구조는 아래와 같습니다.
+
+```jsx
+objectInfo = {
+  apiName: 'Service_Line_Item__c',
+  label: 'Service Line Item',
+  labelPlural: 'Service Line Items',
+  keyPrefix: 'a12',
+  fields: { ... },
+  recordTypeInfos: { ... },
+  childRelationships: [ ... ],
+  defaultRecordTypeId: '012xxxx',
+  themeInfo: { ... },
+  createable: true,
+  updateable: true,
+  deletable: true,
+  queryable: true,
+  searchable: true
+};
+```
+
+### 자주 쓰이는 속성 요약
+
+| 속성                                      | 설명                                     |
+| ----------------------------------------- | ---------------------------------------- |
+| `label`                                   | 오브젝트 단수 라벨                       |
+| `labelPlural`                             | 복수 라벨(테이블 헤더 등에서 자주 사용)  |
+| `createable` / `updateable` / `deletable` | 현재 로그인한 사용자의 권한 반영         |
+| `defaultRecordTypeId`                     | 기본 레코드 타입 ID                      |
+| `recordTypeInfos`                         | 전체 레코드타입 관련 메타                |
+| `fields`                                  | 모든 필드에 대한 상세 정보               |
+| `childRelationships`                      | 이 오브젝트를 부모로 갖는 자식 관계 목록 |
+
+특히 CRUD 권한 정보는 버튼 활성화/비활성화 제어에 매우 유용합니다.
+
+---
+
+## 3. 필드 메타데이터(fields)
+
+각 필드에 대한 정보도 다음처럼 쉽게 조회할 수 있습니다.
+
+```jsx
+const f = objectInfo.fields.Quantity__c;
+
+f.label; // 'Quantity'
+f.dataType; // 예: 'Double'
+f.createable;
+f.updateable;
+f.required;
+f.referenceTo; // Lookup 대상 오브젝트
+f.length;
+```
+
+대표적 활용:
+
+-   필드 라벨 자동 매핑
+-   인라인 편집 가능 여부 결정
+-   validation rule UX 개선
+-   텍스트 길이 제한
+-   lookup 대상 객체 UI 표시
+
+### 필드 메타 속성 요약
+
+| 카테고리  | 속성                                                   |
+| --------- | ------------------------------------------------------ |
+| 공통      | `apiName`, `label`, `dataType`, `required`, `nillable` |
+| 권한      | `createable`, `updateable`, `filterable`, `sortable`   |
+| 관계      | `referenceTo`, `relationshipName`                      |
+| 숫자/문자 | `length`, `precision`, `scale`                         |
+
+---
+
+## 4. 레코드타입 정보(recordTypeInfos)
+
+레코드 타입을 사용 중이라면 다음 정보를 활용할 수 있습니다.
+
+```jsx
+const rt = objectInfo.recordTypeInfos[objectInfo.defaultRecordTypeId];
+
+rt.name;
+rt.label;
+rt.available;
+rt.defaultRecordTypeMapping;
+```
+
+이 정보는 아래와 같은 개발에 매우 중요합니다.
+
+-   레코드타입별 피클리스트 옵션 구성
+-   특정 레코드타입만 허용하는 UI 제어
+-   자동 선택/노출되는 레코드타입 표시
+
+특히 `getPicklistValuesByRecordType` 와 조합하면 **동적 피클리스트 UI**를 만들 때 강력합니다.
+
+---
+
+## 5. 자식 관계(childRelationships)
+
+이 오브젝트를 부모로 참조하는 모든 자식 오브젝트 정보를 얻을 수 있습니다.
+
+```jsx
+objectInfo.childRelationships.forEach((rel) => {
+    rel.childObjectApiName; // 자식 오브젝트
+    rel.relationshipName; // relationshipName
+    rel.fieldName; // 자식이 부모를 참조하는 필드
+});
+```
+
+활용 사례:
+
+-   roll-up 화면 만들 때
+-   관련 리스트 구성 시
+-   동적 관계 구조 분석 도구 구축 시
+
+---
+
+## 6. 테마/아이콘(themeInfo)
+
+오브젝트 아이콘이나 색상을 UI에 표시하고 싶은 경우 활용합니다.
+
+```jsx
+const theme = objectInfo.themeInfo;
+theme.color;
+theme.iconUrl;
+```
+
+커스텀 헤더 UI나 오브젝트 요약 카드 구성 시 유용합니다.
+
+---
+
+## 7. 권한 정보 정리 (Object & Field)
+
+### 오브젝트 레벨
+
+```jsx
+objectInfo.createable;
+objectInfo.updateable;
+objectInfo.deletable;
+objectInfo.queryable;
+objectInfo.searchable;
+```
+
+→ 버튼 제어, 메뉴 노출 제어 등에 사용
+
+### 필드 레벨
+
+```jsx
+objectInfo.fields.Quantity__c.updateable;
+objectInfo.fields.Price__c.createable;
+```
+
+→ 인라인 편집 제어, 필드 숨김 처리 등에 사용
+
+---
+
+## 8. LWC에서 자주 쓰는 패턴 요약
+
+### 1) 오브젝트 복수 라벨 UI 표시
+
+```jsx
+get objectLabelPlural() {
+    return this.objectInfo?.labelPlural ?? '';
+}
+```
+
+### 2) New 버튼 권한 체크
+
+```jsx
+get canCreate() {
+    return !!this.objectInfo?.createable;
+}
+```
+
+### 3) 필드 라벨 매핑
+
+```jsx
+buildFieldLabelMap(baseColumns, objectInfoData) {
+    const map = new Map();
+    const fields = objectInfoData.fields || {};
+
+    baseColumns.forEach(col => {
+        const apiName = col.fieldApiName;
+        const key = col.fieldName;
+        const label =
+            (apiName && fields[apiName]?.label) ||
+            col.label ||
+            key;
+        map.set(key, label);
+    });
+
+    return map;
+}
+```
+
+### 4) 레코드타입 기준 피클리스트 조회
+
+```jsx
+get recordTypeId() {
+    return this.objectInfo?.defaultRecordTypeId;
+}
+
+@wire(getPicklistValuesByRecordType, {
+    objectApiName: '$objectApiName',
+    recordTypeId: '$recordTypeId',
+})
+wiredPicklists({ data }) { ... }
+```
+
+---
+
+## 마무리
+
+`getObjectInfo`는 Salesforce LWC 개발에서 가장 중요한 API 중 하나입니다.
+
+이 API 하나로 아래의 정보들을 한 번에 처리할 수 있습니다.
+
+-   오브젝트 라벨/복수 라벨
+-   CRUD 권한
+-   필드 메타데이터
+-   레코드타입 정보
+-   자식 관계
+-   테마/아이콘
+
+특히 동적 UI, 권한 기반 렌더링, 메타 기반 데이터테이블 구성, 레코드타입 기반 로직 작성 등
+
+LWC 개발 전반에서 활용도가 매우 높습니다.
+
+앞으로 LWC를 개발하면서 **동적 UI 또는 권한·라벨·피클리스트가 필요할 때는 항상 `getObjectInfo`를 떠올려 보세요.**
+
+UI API만으로도 대부분 해결할 수 있습니다.

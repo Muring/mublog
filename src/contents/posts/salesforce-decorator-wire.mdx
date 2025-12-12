@@ -1,0 +1,280 @@
+---
+title: "Reactive Service Decorator - @wire"
+date: "2025-12-12"
+description: "비동기 데이터 조회와 UI 반영을 자동화하는 핵심 메커니즘"
+tags:
+    - salesforce
+    - lwc
+thumbnail: "/thumbnails/salesforce.png"
+---
+
+LWC 개발을 하다 보면 거의 모든 화면에서 **데이터를 조회하거나 메타데이터를 가져오는 코드**를 보게 됩니다.
+
+이때 가장 자주 사용하는 기능이 바로 **`@wire` 데코레이터**입니다.
+
+`@wire`는 LWC가 UI 중심 프레임워크라는 것을 잘 보여주는 기능으로,
+
+**데이터를 비동기로 가져오고, 그 결과를 자동으로 컴포넌트에 반영해주는 반응형(reactive) 메커니즘**입니다.
+
+이번 글에서는 `@wire`가 무엇이고 어떻게 사용하는지,
+
+그리고 실무에서 반드시 알아야 하는 패턴까지 하나씩 정리해보겠습니다.
+
+---
+
+# 1. @wire란 무엇인가?
+
+## ✔ 공식 정의
+
+> 데이터를 비동기적으로 가져와 자동으로 컴포넌트에 주입하는 방법
+
+좀 더 쉽게 말하면:
+
+-   비동기 호출을 **직접 await 처리할 필요 없이**
+-   결과에 따라 UI가 자동으로 다시 렌더링되도록 돕는
+-   **반응형 데이터 바인딩 기능**
+
+입니다.
+
+Apex 호출, UI API(getRecord, getRecordUi, getObjectInfo 등), LDS(Lightning Data Service) 모두
+
+`@wire`를 통해 쉽게 연결할 수 있습니다.
+
+---
+
+# 2. @wire의 두 가지 사용 방식
+
+`@wire`는 **속성(property) 방식**과 **함수(function) 방식** 두 가지가 있습니다.
+
+## 2.1. 속성 방식 (자동 바인딩)
+
+```jsx
+@wire(getRecord, { recordId: '$recordId', fields })
+record;
+```
+
+특징:
+
+-   `data` / `error` 구조를 자동으로 가진다
+    → `this.record.data.fields.Name.value`
+-   recordId처럼 **반응형 파라미터**가 바뀌면 자동 재호출
+-   결과값을 바로 템플릿에서 사용할 수 있음
+
+예시 템플릿:
+
+```html
+<template if:true="{record.data}">
+    <p>{record.data.fields.Name.value}</p>
+</template>
+```
+
+가장 간결하고 빠르게 UI와 연결할 수 있는 방식.
+
+## 2.2. 함수 방식 (커스텀 로직 가능)
+
+```jsx
+@wire(getRecord, { recordId: '$recordId', fields })
+wiredRecord({ data, error }) {
+    if (data) {
+        this.name = data.fields.Name.value;
+    } else if (error) {
+        console.error(error);
+    }
+}
+```
+
+특징:
+
+-   결과를 보자마자 추가 로직을 수행해야 할 때 유용
+-   데이터를 가공해서 별도 변수에 저장 가능
+-   여러 개의 wire 결과를 조합할 때도 사용
+
+예시:
+
+```jsx
+if (data && data.fields.Status.value === "Closed") {
+    this.isClosed = true;
+}
+```
+
+더 복잡한 로직이 필요한 경우 반드시 함수 방식을 사용합니다.
+
+---
+
+# 3. Wire 파라미터는 왜 "$"를 붙일까?
+
+```jsx
+@wire(getRecord, { recordId: '$recordId' })
+```
+
+`$recordId` 는 **반응형(Reactive) 변수**임을 의미합니다.
+
+-   `$recordId` 값이 변경되면
+-   **@wire 함수가 자동으로 다시 실행**
+-   그 결과가 UI에 다시 반영됨
+
+즉, LWC의 데이터 흐름을 단순화하는 핵심 키워드입니다.
+
+> $가 없으면 “정적 값”으로 취급되어 wire가 다시 실행되지 않음.
+
+---
+
+# 4. Apex 메서드 Wire하기
+
+```jsx
+@AuraEnabled(cacheable=true)
+public static List<Account> getAccounts() {
+    return [SELECT Id, Name FROM Account];
+}
+```
+
+LWC:
+
+```jsx
+import getAccounts from "@salesforce/apex/AccountController.getAccounts";
+
+@wire(getAccounts)
+accounts;
+```
+
+주의 사항:
+
+-   긴 목록/변경 없는 데이터일 경우 **cacheable=true 필수**
+-   cacheable=false면 wire 사용 불가능 → imperatively 호출해야 함
+
+---
+
+# 5. Wire 결과 구조
+
+Apex Wire 또는 UI API Wire 모두 아래 두 값이 제공됩니다.
+
+```jsx
+{
+    data, error;
+}
+```
+
+특징:
+
+-   한 번에 둘 중 하나만 존재함
+-   둘 다 undefined인 경우도 있음 (아직 로딩 중)
+
+UI 예시:
+
+```html
+<template if:true="{data}">
+    <!-- 성공 -->
+</template>
+<template if:true="{error}">
+    <!-- 오류 -->
+</template>
+```
+
+---
+
+# 6. 언제 wire를 쓰고 언제 imperative(Await) 호출을 쓸까?
+
+## ✔ Wire를 써야 하는 경우
+
+-   데이터가 바뀌면 화면이 자동으로 업데이트되길 원할 때
+-   레코드/오브젝트 메타데이터처럼 UI API를 사용해야 할 때
+-   특정 필드만 읽어오면 되는 단순 read 화면
+-   캐싱을 활용해 성능을 높이고 싶을 때
+
+대표 사례:
+
+-   getRecord
+-   getObjectInfo
+-   getPicklistValuesByRecordType
+
+## ✔ Imperative (`await`) 호출이 나은 경우
+
+-   저장 버튼 클릭 시 실행해야 하는 Apex
+-   사용자 액션 기반 로직
+-   wire로 가져온 값을 조합해 Apex를 호출해야 할 때
+-   cacheable=false 메서드를 호출할 때
+
+예:
+
+```jsx
+const result = await createOrder({ accountId: this.recordId });
+```
+
+---
+
+# 7. @wire 실무 패턴 모음
+
+## ✔ 패턴 1: 데이터는 wire, 조작은 imperative
+
+```jsx
+@wire(getRecord, { recordId: '$recordId', fields })
+record;
+
+async save() {
+    const data = this.record.data;
+    await updateAccount({ name: data.fields.Name.value });
+}
+
+```
+
+UI는 wire로 업데이트 → 저장은 imperative.
+
+## ✔ 패턴 2: 여러 Wire 결과를 조합할 때
+
+```jsx
+@wire(getObjectInfo, { objectApiName: ACCOUNT_OBJECT })
+wiredObj;
+
+@wire(getRecord, { recordId: '$recordId', fields })
+wiredRecord({ data }) {
+    if (data && this.wiredObj?.data) {
+        this.combined = {
+            label: this.wiredObj.data.label,
+            name: data.fields.Name.value
+        };
+    }
+}
+
+```
+
+## ✔ 패턴 3: Wire 결과를 다른 컴포넌트로 전달
+
+```jsx
+<template>
+    <c-child name={record?.data.fields.Name.value}></c-child>
+</template>
+```
+
+---
+
+# 8. Wire 주의 사항
+
+-   **Apex wire 메서드는 반드시 `cacheable=true`**
+-   Wire는 오류를 던지지 않음 → 항상 error 체크 필요
+-   Wire 속성은 재할당하면 안 됨
+    (예: `this.record = …` 재할당 금지, 내부에서 data를 읽기만 해야 함)
+-   Wire는 **렌더링 시 자동 호출**되므로 무거운 연산 입력하면 비효율적
+
+---
+
+# 9. 정리
+
+`@wire`는 LWC에서 **데이터 흐름을 자동화하는 핵심 기능**입니다.
+
+### ✔ Wire를 사용해야 할 때
+
+-   데이터가 변화하면 UI 자동 갱신 필요
+-   UI API(getRecord, getRecordUi, getObjectInfo 등) 사용
+-   캐싱 기반 데이터 조회
+
+### ✔ 함수 방식 vs 속성 방식
+
+| 방식      | 특징                                         |
+| --------- | -------------------------------------------- |
+| 속성 방식 | 단순 데이터 바인딩, 템플릿에서 바로 사용     |
+| 함수 방식 | 커스텀 로직 필요할 때, 데이터 가공 필요할 때 |
+
+### ✔ Wire는 LWC의 반응형 핵심
+
+-   `$`가 붙은 파라미터가 변경되면 자동 재조회
+-   UI API와 반드시 함께 사용되는 중요한 패턴

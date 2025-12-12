@@ -1,0 +1,191 @@
+---
+title: "UI API - getRecord vs getRecordUI"
+date: "2025-12-12"
+description: "무엇이 다르고 언제 사용해야 할까?"
+tags:
+    - salesforce
+    - lwc
+thumbnail: "/thumbnails/salesforce.png"
+---
+
+LWC에서 레코드 데이터를 가져올 때 가장 흔히 사용되는 UI API가 바로 **`getRecord`** 와 **`getRecordUi`** 입니다.
+
+두 메서드는 이름이 비슷해서 처음엔 헷갈리기 쉽지만, 실제로는 용도가 완전히 다릅니다.
+
+오늘은 이 두 메서드의 **차이점과 특징, 언제 어떤 것을 써야 하는지**를 정리해보겠습니다.
+
+---
+
+# 1. 목적의 차이 (가장 중요한 핵심)
+
+## ✅ getRecord
+
+> “레코드의 실제 데이터”를 가져오기 위한 API
+
+-   특정 필드의 값을 읽고 싶을 때 사용
+-   화면에 표준 UI가 아닌 **커스텀 형태로 데이터를 표시**할 때 주로 사용
+-   반환값이 **순수하게 레코드 데이터에 집중되어 있음**
+
+➡️ **데이터만 필요하면 → `getRecord`**
+
+## ✅ getRecordUi
+
+> “레코드 화면(UI)에 필요한 모든 정보를 한 번에” 가져오기 위한 API
+
+-   필드 라벨, 레이아웃 정보, 편집가능 여부, UI 표시 규칙 등까지 포함
+-   \*표준 Form 컴포넌트(lightning-record-form, lightning-input-field 등)\*\*와 함께 쓰기 좋음
+-   레이아웃 기반 동적 UI가 필요할 때 필수
+
+➡️ **UI 구성까지 필요하면 → `getRecordUi`**
+
+---
+
+# 2. 가져오는 데이터 차이
+
+## 📌 getRecord 결과 구조
+
+`getRecord`는 정말 **레코드의 필드 값만** 내려줍니다.
+
+```jsx
+record.data.fields.Name.value;
+record.data.fields.Status.value;
+record.data.fields.OwnerId.value;
+```
+
+-   필드 value만 존재
+-   필드 라벨 없음
+-   필드 타입 없음
+-   레이아웃 정보 없음
+-   권한 정보 없음
+
+✔️ 최소 데이터만 빠르게 가져오는 용도.
+
+## 📌 getRecordUI 결과 구조
+
+`getRecordUi`는 UI가 필요한 모든 정보를 포함합니다.
+
+```jsx
+recordUi.data.layouts;
+recordUi.data.objectInfo;
+recordUi.data.record.fields.Name.value;
+recordUi.data.recordTypeInfo;
+```
+
+포함 정보:
+
+| 항목             | 설명                                      |
+| ---------------- | ----------------------------------------- |
+| `record`         | 실제 레코드 데이터                        |
+| `objectInfo`     | 오브젝트 메타데이터 (라벨/필드/CRUD 권한) |
+| `layouts`        | 레코드타입별 페이지 레이아웃 구조         |
+| `recordTypeInfo` | RT 이름/라벨/가용 여부                    |
+| `themeInfo`      | 아이콘/컬러                               |
+
+✔️ "Name 필드가 UI 상에서 읽기 전용인가?"
+
+✔️ "레이아웃에서 어떤 섹션이 보여야 하지?"
+
+✔️ "필드 라벨을 자동으로 가져오고 싶다"
+
+→ 이런 요구사항은 **무조건 `getRecordUi`**.
+
+---
+
+# 3. 성능 차이
+
+| API             | 특징                                                       |
+| --------------- | ---------------------------------------------------------- |
+| **getRecord**   | 빠름. 데이터만 가져오므로 적은 오버헤드                    |
+| **getRecordUi** | 상대적으로 무거움(메타데이터 + 레이아웃까지 가져오기 때문) |
+
+### 정리
+
+-   **단순 값만 필요 → getRecord (성능 우수)**
+-   **UI 기반 화면 생성 → getRecordUi (데이터량 많음)**
+
+---
+
+# 4. 사용 예시 비교
+
+## ✔️ getRecord 예시
+
+```jsx
+@wire(getRecord, {
+    recordId: "$recordId",
+    fields: ["Account.Name", "Account.OwnerId"]
+})
+record;
+```
+
+필드 value만 접근:
+
+```jsx
+this.record.data.fields.Name.value;
+```
+
+## ✔️ getRecordUi 예시
+
+```jsx
+@wire(getRecordUi, { recordIds: "$recordId" })
+recordUi;
+```
+
+UI, 레이아웃 정보 접근:
+
+```jsx
+recordUi.data.layouts.Account.Edit.sections;
+recordUi.data.objectInfos.Account.fields.Phone.label;
+recordUi.data.record.fields.Name.value;
+```
+
+---
+
+# 5. 언제 어떤 것을 써야 하나? (결론)
+
+## 🟢 getRecord 를 쓰는 상황
+
+-   특정 필드 값만 필요할 때
+-   커스텀 UI에서 데이터를 가볍게 렌더링할 때
+-   반복 로딩해야 하는 경우 (성능 이점)
+-   Apex 대체용으로 필드 필요한 화면
+
+예: 테이블, 카드 UI, list view 등에 데이터 표시
+
+## 🔵 getRecordUi 를 써야 하는 상황
+
+-   lightning-record-form / lightning-input-field 를 쓸 때
+-   레이아웃 기반 동적 UI를 구성할 때
+-   필드 라벨·권한·읽기/쓰기 설정이 필요할 때
+-   레코드타입별 화면 구성해야 할 때
+
+예:
+
+-   “레이아웃 그대로 보여주는 편집 화면 만들기”
+-   “필드 라벨을 코드에 하드코딩하지 않고 UI API로 자동화”
+-   “권한 기반 입력 제어 자동 처리”
+
+---
+
+# 6. 두 API 비교 표 (요약)
+
+| 항목                          | getRecord          | getRecordUi                            |
+| ----------------------------- | ------------------ | -------------------------------------- |
+| 목적                          | 값 조회            | UI 구성용 메타데이터 포함 전체 구조    |
+| 포함 정보                     | 필드 값만          | 필드·오브젝트·RT·레이아웃·권한 등 전체 |
+| 성능                          | 빠름               | 무거움                                 |
+| 권한값(createable/updateable) | ❌ 없음            | ✔️ 있음                                |
+| 필드 라벨                     | ❌ 없음            | ✔️ 있음                                |
+| 레이아웃                      | ❌ 없음            | ✔️ 있음                                |
+| recordTypeInfo                | ❌ 없음            | ✔️ 있음                                |
+| 언제 사용?                    | 데이터만 필요할 때 | UI 기반 화면 만들 때                   |
+
+---
+
+# 마무리
+
+`getRecord` 와 `getRecordUi` 는 이름은 비슷하지만 목적이 완전히 다릅니다.
+
+-   빠른 데이터 조회 → **`getRecord`**
+-   UI 구성에 필요한 모든 메타데이터 → **`getRecordUi`**
+
+LWC 개발 시 “값만 필요한가?”, “UI 메타데이터까지 필요한가?” 를 기준으로 선택하면 됩니다.
