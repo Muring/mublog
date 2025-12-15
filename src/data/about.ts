@@ -12,7 +12,7 @@ export const projectData = [
     {
         date: "2024.11 ~ 2025.02",
         title: "Windsor Global: 모바일 최적화 및 반복 작업 자동화 프로젝트",
-        description: "Salesforce 기반의 모바일 환경 구축 및 추가 개발",
+        description: "Salesforce 기반의 모바일 환경 구축 및 고도화",
     },
     {
         date: "2025.02 ~ 2025.03",
