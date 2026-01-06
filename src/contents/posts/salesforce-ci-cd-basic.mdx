@@ -1,0 +1,301 @@
+---
+title: "GitHub Actions로 구축하는 Salesforce CI/CD 기본"
+date: "2026-01-06"
+description: "GitHub Actions 기반 CI/CD 적용 방법: PR 검증부터 main 자동 배포까지"
+tags:
+    - salesforce
+    - devOps
+thumbnail: "/thumbnails/salesforce-ci-cd.png"
+---
+
+# CI/CD - GitAction
+
+개인적으로 세일즈포스에서 개발을 하면서 가장 불편했던 지점은 결국 **“버전 관리”** 였다.
+
+잘 돌아가던 코드를 개선하려다가 꼬이면 원점으로 돌아가고 싶어도, 플랫폼 자체에서 코드별 버전 히스토리를 촘촘하게 되돌릴 수 있는 장치가 부족하다. 배포 후 장애가 터졌을 때도 _“이전 상태로 즉시 복원”_ 같은 안전장치가 딱히 없어서, 결국 개발자가 **스스로 백업 체계**를 만들어야 한다.
+
+그래서 Git을 쓰게 된다. 그런데 여기서 또 불편함이 생긴다.
+
+**배포는 배포대로**, **Git에 저장은 저장대로**, 결국 두 가지 일을 병행하게 된다.
+
+이 글은 이 불편함을 배경으로, **GitHub Actions로 세일즈포스 CI/CD 파이프라인을 구축**해서 “저장(버전관리) → 검증(CI) → 배포(CD)”를 한 흐름으로 묶는 방법을 정리한 내용이다.
+
+---
+
+## **📚** 배포 전에 검증, 머지되면 자동 배포
+
+내가 원하는 파이프라인은 보통 아래 형태다.
+
+-   PR이 열리면(또는 업데이트되면)
+    → **Validate(배포 검증 + 테스트)** 를 자동 실행해서, “병합해도 되는 코드인지”를 판단한다.
+-   main 브랜치에 머지되면
+    → **Deploy(실제 배포)** 를 자동 실행한다.
+-   누가 언제 무엇을 배포했는지
+    → **Git 히스토리로 남는다.**
+-   급하면 되돌리는 것도
+    → “이전 커밋으로 롤백 배포”가 가능해진다.
+
+즉, Git과 배포를 따로 운영하던 것을 **한 파이프라인으로 합치는 것**이 핵심이다.
+
+---
+
+## ⚙️ 전체 구조
+
+-   **GitHub**: 코드 저장소(버전관리의 기준점)
+-   **GitHub Actions**: CI/CD 실행 엔진
+-   **Salesforce CLI (sf)**: 검증/배포 수행 도구
+-   **인증 방식**: JWT(Connected App) 기반 Headless 인증
+    (서버에서 브라우저 로그인 없이 배포 가능)
+
+---
+
+## 📖사전 준비물
+
+### 1) Git 저장소에 Salesforce 프로젝트가 있어야 한다
+
+보통 아래 구조를 갖는다.
+
+-   `sfdx-project.json`
+-   `force-app/main/default/...` (Apex/LWC/Flow 등 메타데이터)
+
+이미 SFDX 프로젝트로 관리 중이라면 그대로 진행하면 된다.
+
+### 2) 배포 대상 환경 결정
+
+-   Sandbox / Dev Hub / Production 중 어디로 배포할지 정한다.
+-   실무에서는 보통
+    -   PR 검증: **통합 테스트용 Sandbox(또는 Scratch Org)**
+    -   main 배포: **Staging/Prod**
+        같은 식으로 분리한다.
+
+---
+
+## 1️⃣ GitHub Actions에서 Salesforce에 “로그인”하는 방법(JWT)
+
+CI/CD에서 제일 중요한 부분은 결국 인증이다.
+
+개발자처럼 PC 브라우저로 로그인할 수 없기 때문에, **External Client App + JWT** 조합을 사용한다.
+
+### 1.1 Salesforce에서 External Client App 생성
+
+-   Setup → App Manager → New External Client App
+    ![*“”*](/images/salesforce-ci-cd-basic/image.png)
+-   OAuth 설정 활성화
+-   **Consumer Key (Client Id)** 는 이후 인증에 필요하니 저장해 놓자.
+-   Callback URL은 임의값이어도 되지만, 조직 정책에 맞게 설정한다.
+    ![*“”*](/images/salesforce-ci-cd-basic/image1.png)
+-   필요한 Scope는 최소 권한 원칙으로(예: api, refresh_token 등 조직 정책에 맞춰)
+    ![*“”*](/images/salesforce-ci-cd-basic/image2.png)
+
+### 1.2 인증서 키 생성(로컬에서 1회)
+
+예시:
+
+```bash
+mkdir -p assets
+openssl genrsa -out assets/server.key 2048
+openssl req -new -x509 -key assets/server.key -out assets/server.crt -days 3650
+```
+
+-   `server.crt`를 Connected App에 업로드(인증서)
+    ![*“”*](/images/salesforce-ci-cd-basic/image3.png)
+-   `server.key`는 **GitHub Secrets로만** 보관(절대 커밋 금지)
+-   Require secret for Web Server Flow 체크 해제
+-   Require secret for Refresh Token Flow 체크 해제
+    ![*“”*](/images/salesforce-ci-cd-basic/image4.png)
+
+### 1.3 App Policies 설정
+
+-   Start Page: None
+-   Select Profiles: 허용할 Profile 선택
+-   Select Permission Sets: 허용할 Permission Set 선택
+-   Permitted Users : `Admin approved users are pre-authorized`
+-   IP Relaxation : `Relax IP restrictions`
+    ![*“”*](/images/salesforce-ci-cd-basic/image5.png)
+
+### 1.4 GitHub Secrets 등록
+
+Repository → Settings → Secrets and variables → Actions → New repository secret
+
+보통 아래를 넣는다.
+
+-   `SF_CONSUMER_KEY` : Connected App의 Consumer Key
+-   `SF_USERNAME` : 배포용 Integration User 계정(권한 최소화 권장)
+-   `SF_INSTANCE_URL` : `https://login.salesforce.com` 또는 sandbox면 `https://test.salesforce.com`
+-   `SF_JWT_KEY` : `server.key` 내용(파일 자체를 저장하지 않고 **문자열로 저장**하는 방식 추천)
+    ![*“”*](/images/salesforce-ci-cd-basic/image6.png)
+
+> 배포 계정은 “사람 계정”이 아니라 배포 전용 계정을 두는 편이 운영 관점에서 훨씬 깔끔하다.
+
+---
+
+## 2️⃣ CI: PR에서 “배포 검증(Validate)” 돌리기
+
+PR 단계에서는 “실제 배포”가 아니라, **배포 가능한지 + 테스트가 통과하는지**만 본다.
+
+이게 CI의 본질이다.
+
+`.github/workflows/ci-validate.yml`
+
+```yaml
+name: CI - Validate Salesforce Deployment
+on:
+    pull_request:
+        branches: ["main"]
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install Salesforce CLI
+              run: npm install -g @salesforce/cli
+
+            - name: Write JWT key
+              run: |
+                  mkdir -p assets
+                  echo "${{ secrets.SF_JWT_KEY }}" > assets/server.key
+
+            - name: Authenticate to Salesforce (JWT)
+              run: |
+                  sf org login jwt \
+                    --client-id "${{ secrets.SF_CONSUMER_KEY }}" \
+                    --jwt-key-file assets/server.key \
+                    --username "${{ secrets.SF_USERNAME }}" \
+                    --instance-url "${{ secrets.SF_INSTANCE_URL }}" \
+                    --set-default
+
+            - name: Validate deployment (Run tests)
+              run: |
+                  sf project deploy validate \
+                    --source-dir force-app \
+                    --test-level RunLocalTests
+```
+
+여기서 중요한 점은 딱 두 가지다.
+
+1. **validate는 실제 배포가 아니라 검증이다.**
+2. **테스트 레벨을 어떻게 가져갈지**가 품질을 결정한다.
+    - 빠르게: `RunSpecifiedTests`
+    - 안전하게: `RunLocalTests`
+    - 가장 무겁게: `RunAllTestsInOrg`
+
+---
+
+## 3️⃣ CD: main에 머지되면 “실제 배포(Deploy)” 실행하기
+
+이번에는 진짜 배포다.
+
+`.github/workflows/cd-deploy.yml`
+
+```yaml
+name: CD - Deploy to Salesforce
+on:
+    push:
+        branches: ["main"]
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install Salesforce CLI
+              run: npm install -g @salesforce/cli
+
+            - name: Write JWT key
+              run: |
+                  mkdir -p assets
+                  echo "${{ secrets.SF_JWT_KEY }}" > assets/server.key
+
+            - name: Authenticate to Salesforce (JWT)
+              run: |
+                  sf org login jwt \
+                    --client-id "${{ secrets.SF_CONSUMER_KEY }}" \
+                    --jwt-key-file assets/server.key \
+                    --username "${{ secrets.SF_USERNAME }}" \
+                    --instance-url "${{ secrets.SF_INSTANCE_URL }}" \
+                    --set-default
+
+            - name: Deploy
+              run: |
+                  sf project deploy start \
+                    --source-dir force-app \
+                    --test-level RunLocalTests
+```
+
+이렇게 하면 흐름이 단순해진다.
+
+-   PR: validate로 안전성 확인
+-   main merge: 자동 deploy
+-   배포 단위는 커밋(=버전)
+
+---
+
+## ⚠️ 운영에서 실제로 부딪히는 포인트들
+
+### 1) “전체 배포” vs “변경분만 배포(Delta)”
+
+초기에는 전체 배포로 시작해도 된다.
+
+다만 리포지토리가 커지면 검증/배포 시간이 늘어난다.
+
+-   변경분만 뽑아 배포하는 방식(Delta)을 적용하면 속도와 안정성이 좋아진다.
+-   이 부분은 팀의 성숙도에 따라 단계적으로 붙이는 편이 좋다.
+
+### 2) 롤백 전략을 파이프라인에 포함시켜야 한다
+
+Git으로 버전관리를 한다고 해서 롤백이 자동으로 되는 것은 아니다.
+
+하지만 최소한 “이전 커밋을 다시 배포”할 수 있으니, **플랫폼 단독보다 훨씬 현실적인 백업 수단**이 된다.
+
+운영 관점에서 자주 쓰는 방식은:
+
+-   “마지막 정상 커밋”에 태그를 찍고(tag)
+-   장애 시 그 태그 버전을 재배포하는 형태
+
+### 3) Secrets/권한 관리가 곧 보안이다
+
+-   배포 유저 권한을 최소화해야 한다.
+-   GitHub Secrets는 접근 권한을 제한해야 한다.
+-   가능하면 GitHub Environments를 써서
+    Production 배포는 승인(Review) 후 진행하도록 구성하는 편이 안전하다.
+
+---
+
+## 🎯 “버전관리 + 배포”를 한 작업으로 만드는 것
+
+세일즈포스 개발에서 불편했던 “버전 관리 부재”는 결국 Git으로 해결하게 된다.
+
+그런데 Git만 도입하면, 오히려 “저장”과 “배포”가 분리되면서 일이 두 배가 되는 느낌이 들 수 있다.
+
+그래서 GitHub Actions로 CI/CD를 묶으면, 최소한 아래는 달라진다.
+
+-   누가 어떤 변경을 했는지 기록이 남고
+-   PR 단계에서 배포 가능 여부가 자동으로 검증되고
+-   머지되면 자동 배포가 되며
+-   필요하면 이전 커밋으로 되돌아갈 수 있다
+
+버전 관리가 불편했던 지점이, CI/CD를 붙이면서 “개발자가 수동으로 하던 안전장치”로 바뀐다.
+
+---
+
+### 추가 확장 가능성
+
+-   변경분(Delta) 배포 적용 버전
+-   Sandbox/Prod 환경 분리 + GitHub Environments 승인 배포
+-   RunSpecifiedTests로 “PR은 빠르게, Prod는 엄격하게” 운영하는 패턴
+-   destructiveChanges(삭제 메타데이터)까지 포함한 완성형 파이프라인 구성
