@@ -1,0 +1,420 @@
+---
+title: "Salesforce CI/CD 고도화편"
+date: "2026-01-07"
+description: "태그 규칙 + 운영 Validate → Quick Deploy + 워크플로 변조 방지"
+tags:
+    - salesforce
+    - devOps
+thumbnail: "/thumbnails/salesforce-ci-cd.png"
+---
+
+실전편에서는 아래 흐름을 다뤘다.
+
+- **Sandbox**: 푸시/머지되면 자주 자동 배포했다(개발 속도 우선).
+- **Production**: 승인/통제 후 제한적으로 배포했다(안정성 우선).
+
+이번 글에서는 운영 배포를 “더 빠르게, 더 안전하게” 만들기 위해 다음 3가지를 추가했다.
+
+1. *prod- 태그 네이밍 규칙 + 릴리즈 노트 자동 생성*
+2. **운영 배포 전 Validate → Quick Deploy 설계**(운영 배포 시간 단축)
+3. **.github/workflows 변경 자체를 보호하는 규칙**(워크플로 변조 방지)
+
+---
+
+## 1) prod-* 태그 네이밍 규칙 설계 (날짜/시퀀스/릴리즈 노트 자동 생성)
+
+운영 배포를 “승인된 행위”로 만들기 위해 보통 **태그 생성(=릴리즈 승인)** 을 기준점으로 둔다. 다만 `prod-*`만으로는 “검증용 태그”와 “실배포 태그”가 섞이기 쉬우므로, 아래처럼 **두 단계 태그**를 권장한다.
+
+### 추천 태그 규칙
+
+- **검증(Validate) 태그**: `prod-rc-YYYY.MM.DD-SS`
+- **실배포(Quick Deploy) 태그**: `prod-YYYY.MM.DD-SS`
+
+예시는 아래와 같다.
+
+- `prod-rc-2026.01.07-06` → 운영 Org에서 **Validate만 실행**했다.
+- `prod-2026.01.07-06` → 검증 결과를 이용해 **Quick Deploy를 실행**했다.
+
+이 구조는 “검증은 업무시간에”, “실배포는 영향이 적은 시간대에”로 자연스럽게 분리되는 장점이 있다. 운영 배포 시간 단축 목적에도 부합한다. 또한 Salesforce의 **Quick Deploy는 최근 10일 내 검증 결과(job id)**가 있어야 사용할 수 있으므로, 이 구조와 궁합이 좋다. ([Salesforce Developers](https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_deployRecentValidation.htm?utm_source=chatgpt.com))
+
+### 릴리즈 노트 자동 생성
+
+실배포 태그(`prod-*`)가 푸시되면 GitHub Release를 생성하면서 **자동 릴리즈 노트(generate-notes)**를 생성할 수 있다. GitHub CLI는 `--generate-notes` 옵션을 제공한다. ([GitHub CLI](https://cli.github.com/manual/gh_release_create?utm_source=chatgpt.com))
+
+---
+
+## 2) 운영 배포 전 Validate → Quick Deploy (배포 시간 단축) 설계
+
+Salesforce에서 “Validate-only 배포”를 성공시키면, 그 결과를 기반으로 **Quick Deploy** 를 수행할 수 있다.
+
+- Validate 단계는 테스트를 포함한 검증 단계이며 시간이 오래 걸린다.
+- Quick Deploy 단계는 검증된 결과를 그대로 반영하므로 상대적으로 빠르다.
+
+Salesforce CLI 기준으로 핵심 커맨드는 아래와 같다.
+
+- Validate: `sf project deploy validate ...`
+- Quick Deploy: `sf project deploy quick --job-id <검증 Job ID> ...` ([Trailhead](https://trailhead.salesforce.com/content/learn/modules/org-development-model/test-and-deploy-changes?utm_source=chatgpt.com))
+
+또한 **검증 Job ID는 10일 유효**하다. ([Salesforce Developers](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_project_commands_unified.htm?utm_source=chatgpt.com))
+
+> 추가로, Validate 단계에서 테스트를 생략(NoTestRun)하는 방식은 CLI/명령 체계상 제약이 있을 수 있다. Validate는 통상 RunLocalTests/RunAllTestsInOrg/RunSpecifiedTests 흐름을 전제로 한다. (GitHub)
+> 
+
+---
+
+## 3) .github/workflows 변경 자체를 보호하기 (워크플로 변조 방지)
+
+CI/CD에서 가장 위험한 상황은 “배포 파이프라인 자체가 변조”되는 경우이다. 따라서 **워크플로 파일(.github/workflows/*\*)** 은 아래와 같이 보호하는 구성이 일반적이다.
+
+### (1) CODEOWNERS + 브랜치 보호(현실적으로 가장 많이 사용)
+
+GitHub에서는 `.github/workflows/**`를 CODEOWNERS로 지정하고, 브랜치 보호 규칙에서 **“Require review from Code Owners”** 를 켜면 워크플로 변경이 반드시 지정 리뷰어 승인을 거치게 만들 수 있다. ([GitHub Docs](https://docs.github.com/en/actions/reference/security/secure-use?utm_source=chatgpt.com))
+
+브랜치 보호(Protected Branch) 자체도 “PR 필수, 승인 필수, 상태 체크 필수” 같은 강제 장치의 표준이다. ([GitHub Docs](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/managing-a-branch-protection-rule?utm_source=chatgpt.com))
+
+### CODEOWNERS 예시
+
+```bash
+# .github/CODEOWNERS
+
+# 워크플로/보안 파일은 릴리즈 매니저(또는 DevOps 담당) 승인 필수
+/.github/workflows/  @Muring @muring3
+/.github/CODEOWNERS  @Muring @muring3
+```
+
+### 브랜치 보호(main) 추천 체크
+
+- Require a pull request before merging
+- Require approvals (예: 1명 이상)
+- **Require review from Code Owners**
+- Require status checks to pass (PR Validate 등)
+- Restrict who can push to matching branches (가능하면 릴리즈 담당자만)
+
+### (2) Ruleset 기반 보호(가능하면 더 강력)
+
+Ruleset(리포지토리 규칙)에서 **특정 경로(.github/workflows/*\*) 변경을 제한**하고, 우회(bypass) 주체를 최소화하는 방식도 가능하다. 다만 계정/플랜/조직 조건에 따라 private repo에서 강제 적용(enforcement)이 제한될 수 있다. 이런 경우에는 (1) CODEOWNERS + 브랜치 보호 조합이 현실적인 정답이다.
+
+---
+
+# 최종 구현: GitHub Actions 워크플로 2개
+
+최종 구현은 아래 2개 워크플로로 구성했다.
+
+- **Workflow A**: `prod-rc-*` 태그 푸시 → 운영 Org **Validate** 실행 → 검증 Job ID를 GitHub Release(검증 태그) 본문에 저장했다.
+- **Workflow B**: `prod-*` 태그 푸시 → 같은 커밋의 `prod-rc-*` Release에서 Job ID를 읽었다 → 운영 Org **Quick Deploy**를 실행했다 → GitHub Release를 생성했고(자동 릴리즈 노트), 배포 정보를 함께 기록했다.
+
+또한 운영 환경(Environment)을 사용한다면 **environment secrets를 읽기 위해 job에 `environment: production`을 반드시 선언**해야 한다. 이를 선언하지 않으면 “Environment에 넣어둔 secret을 읽지 못하는 문제”가 재현된다. Environment는 “승인/제한/시크릿 접근”을 위한 GitHub의 공식 메커니즘이다. ([GitHub Docs](https://docs.github.com/actions/deployment/about-deployments/deploying-with-github-actions?utm_source=chatgpt.com))
+
+> Environment에서 “Selected branches and tags”로 태그 패턴을 제한하면, 패턴 불일치 시
+> 
+> 
+> `Tag "xxx" is not allowed to deploy... due to environment protection rules` 에러가 발생한다. ([The GitHub Blog](https://github.blog/changelog/2023-10-06-actions-secure-deployment-rollouts-to-protected-environments-based-on-select-tag-patterns/?utm_source=chatgpt.com))
+> 
+
+---
+
+## Workflow A) Production Validate (Tag: prod-rc-*)
+
+`.github/workflows/prod-validate.yml` 파일은 아래와 같다.
+
+```yaml
+name: Validate to Production (prod-rc-* tag)
+
+on:
+  push:
+    tags:
+      - "prod-rc-*"
+
+concurrency:
+  group: validate-production
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # GitHub Release 작성용(gh)
+
+jobs:
+  validate_prod:
+    runs-on: ubuntu-latest
+    environment: production  # ★ environment secrets 사용(중요)
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gate - allow only release managers
+        shell: bash
+        run: |
+          ALLOWED=("Muring" "muring3")
+          for u in "${ALLOWED[@]}"; do
+            if [ "${{ github.actor }}" = "$u" ]; then
+              echo "Actor allowed: $u"
+              exit 0
+            fi
+          done
+          echo "Actor '${{ github.actor }}' is not allowed."
+          exit 1
+
+      - name: Ensure tag commit is on main
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          TAG_SHA="$(git rev-list -n 1 "${GITHUB_REF_NAME}")"
+          if ! git merge-base --is-ancestor "$TAG_SHA" "origin/main"; then
+            echo "Tag commit is not contained in origin/main. Aborting."
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Salesforce CLI
+        run: |
+          npm i -g @salesforce/cli
+          sf --version
+
+      - name: Create JWT key file
+        shell: bash
+        run: |
+          printf '%s' "${{ secrets.SF_JWT_KEY }}" > server.key
+
+      - name: Auth to Production (JWT)
+        run: |
+          sf org login jwt \
+            --client-id "${{ secrets.SF_CLIENT_ID }}" \
+            --jwt-key-file server.key \
+            --username "${{ secrets.SF_USERNAME }}" \
+            --instance-url "${{ secrets.SF_INSTANCE_URL }}" \
+            --alias ci-prod \
+            --set-default
+
+      - name: Validate Deployment (RunLocalTests)
+        id: validate
+        shell: bash
+        run: |
+          # JSON 응답을 받아 job id 추출
+          OUT="$(sf project deploy validate \
+            --source-dir force-app \
+            --target-org ci-prod \
+            --test-level RunLocalTests \
+            --wait 120 \
+            --json)"
+
+          echo "$OUT" | jq .
+          JOB_ID="$(echo "$OUT" | jq -r '.result.id')"
+          if [ -z "$JOB_ID" ] || [ "$JOB_ID" = "null" ]; then
+            echo "Failed to extract job id."
+            exit 1
+          fi
+
+          echo "JOB_ID=$JOB_ID" >> "$GITHUB_OUTPUT"
+          echo "ValidatedDeployId: $JOB_ID" > validate_result.txt
+
+      - name: Create/Update GitHub Release (draft) with validation id
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          BODY="$(cat validate_result.txt)"
+
+          # release가 없으면 create, 있으면 edit
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --draft --notes "$BODY"
+          else
+            gh release create "$TAG" --draft --notes "$BODY"
+          fi
+
+          echo "Validation OK. DeployId stored in release notes."
+```
+
+이 워크플로의 핵심은 다음과 같다.
+
+- Validate 결과의 **Job ID를 GitHub Release 본문에 저장**했다.
+- 다음 단계(실배포)는 이 값을 읽어서 Quick Deploy만 수행하도록 구성했다.
+
+---
+
+## Workflow B) Production Quick Deploy (Tag: prod-*)
+
+`.github/workflows/prod-deploy.yml` 파일은 아래와 같다.
+
+```yaml
+name: Deploy to Production (prod-* tag, Quick Deploy)
+
+on:
+  push:
+    tags:
+      - "prod-*"
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: write  # GitHub Release 작성/수정용
+
+jobs:
+  deploy_prod:
+    runs-on: ubuntu-latest
+    environment: production  # ★ environment secrets 사용(중요)
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Skip if RC tag
+        if: startsWith(github.ref_name, 'prod-rc-')
+        run: |
+          echo "RC tag detected. This workflow is for real deploy tags only."
+          exit 0
+
+      - name: Gate - allow only release managers
+        shell: bash
+        run: |
+          ALLOWED=("Muring" "muring3")
+          for u in "${ALLOWED[@]}"; do
+            if [ "${{ github.actor }}" = "$u" ]; then
+              echo "Actor allowed: $u"
+              exit 0
+            fi
+          done
+          echo "Actor '${{ github.actor }}' is not allowed."
+          exit 1
+
+      - name: Ensure tag commit is on main
+        shell: bash
+        run: |
+          git fetch origin main --depth=1
+          TAG_SHA="$(git rev-list -n 1 "${GITHUB_REF_NAME}")"
+          if ! git merge-base --is-ancestor "$TAG_SHA" "origin/main"; then
+            echo "Tag commit is not contained in origin/main. Aborting."
+            exit 1
+          fi
+          echo "TAG_SHA=$TAG_SHA" >> "$GITHUB_ENV"
+
+      - name: Find matching prod-rc tag on same commit
+        id: find_rc
+        shell: bash
+        run: |
+          RC_TAG="$(git tag --points-at "$TAG_SHA" | grep '^prod-rc-' | sort -V | tail -n 1 || true)"
+          if [ -z "$RC_TAG" ]; then
+            echo "No prod-rc-* tag found on the same commit. Aborting."
+            exit 1
+          fi
+          echo "RC_TAG=$RC_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Read validation job id from RC release notes
+        id: read_job
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          RC_TAG="${{ steps.find_rc.outputs.RC_TAG }}"
+          BODY="$(gh release view "$RC_TAG" --json body -q '.body')"
+
+          JOB_ID="$(echo "$BODY" | sed -n 's/^ValidatedDeployId:[[:space:]]*//p' | head -n 1)"
+          if [ -z "$JOB_ID" ]; then
+            echo "No ValidatedDeployId found in release body. Aborting."
+            exit 1
+          fi
+
+          echo "JOB_ID=$JOB_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Salesforce CLI
+        run: |
+          npm i -g @salesforce/cli
+          sf --version
+
+      - name: Create JWT key file
+        shell: bash
+        run: |
+          printf '%s' "${{ secrets.SF_JWT_KEY }}" > server.key
+
+      - name: Auth to Production (JWT)
+        run: |
+          sf org login jwt \
+            --client-id "${{ secrets.SF_CLIENT_ID }}" \
+            --jwt-key-file server.key \
+            --username "${{ secrets.SF_USERNAME }}" \
+            --instance-url "${{ secrets.SF_INSTANCE_URL }}" \
+            --alias ci-prod \
+            --set-default
+
+      - name: Quick Deploy to Production
+        shell: bash
+        run: |
+          sf project deploy quick \
+            --job-id "${{ steps.read_job.outputs.JOB_ID }}" \
+            --target-org ci-prod \
+            --wait 60
+
+      - name: Create/Update GitHub Release (auto release notes)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          RC_TAG="${{ steps.find_rc.outputs.RC_TAG }}"
+          JOB_ID="${{ steps.read_job.outputs.JOB_ID }}"
+
+          EXTRA=$'Deploy Strategy: Validate → Quick Deploy\n'"Validated From: $RC_TAG"$'\n'"ValidatedDeployId: $JOB_ID"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --notes "$EXTRA"
+          else
+            gh release create "$TAG" --generate-notes --notes "$EXTRA"
+          fi
+```
+
+---
+
+# 운영/샌드박스 테스트 전략 정리
+
+RunLocalTests와 “변경 관련 테스트만”의 차이는 다음과 같다.
+
+- **RunLocalTests**: 패키지 테스트를 제외한 로컬 Apex 테스트를 실행한다. 운영 배포에서 흔히 사용한다.
+- **RunSpecifiedTests**: 사용자가 지정한 테스트만 실행한다. 시간 단축이 가능하나 누락 리스크는 팀이 감당해야 한다.
+- **RunAllTestsInOrg**: org 전체 테스트를 실행한다. 가장 강력하나 가장 느리다.
+- **NoTestRun**: 테스트를 실행하지 않는다. 운영(Production)에서는 일반적으로 허용되지 않거나 제약이 크다. ([Salesforce Developers](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_project_commands_unified.htm?utm_source=chatgpt.com))
+
+샌드박스는 자주 배포하고 운영은 가끔 배포하는 조건에서 현실적인 운영은 보통 아래 형태이다.
+
+- **Sandbox**: `NoTestRun` 또는 최소 테스트로 속도를 우선했다.
+- **Production**:
+    - 업무시간에는 Validate를 수행했다(RunLocalTests 또는 팀 규칙의 테스트 수준).
+    - 배포 시간대에는 Quick Deploy를 수행했다(빠름).
+
+---
+
+# GitHub Environment 구성 체크리스트
+
+이번 구조에서 중요한 체크리스트는 아래와 같다.
+
+1. **Settings → Environments → production**을 생성했다.
+2. **Secrets를 production environment에 저장**했다(SF_INSTANCE_URL 등).
+3. **Deployment branches and tags**를 `Selected branches and tags`로 설정했다.
+    - Tag rule로 `prod-*`를 추가했다(필요하다면 `prod-rc-*`도 포함했다). ([GitHub Docs](https://docs.github.com/ko/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments?utm_source=chatgpt.com))
+4. 워크플로 job에 `environment: production`을 선언했다(선언하지 않으면 env secret 접근이 불가하다).
+
+---
+
+## 마무리
+
+이번 고도화의 결과는 다음 3가지이다.
+
+- **태그 기반 릴리즈 승인 흐름이 명확해졌다.**
+- 운영 배포는 **Quick Deploy로 짧아졌다.**(검증은 미리 수행했다.)
+- `.github/workflows`는 **CODEOWNERS/브랜치 보호로 변조를 방지**했다.
+
+---

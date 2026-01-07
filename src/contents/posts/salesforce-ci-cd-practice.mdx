@@ -1,0 +1,355 @@
+---
+title: "Salesforce CI/CD 실전편"
+date: "2026-01-07"
+description: "Sandbox 자동 배포 + Production 태그 승인(Protected Environment) 구축하기"
+tags:
+    - salesforce
+    - devOps
+thumbnail: "/thumbnails/salesforce-ci-cd.png"
+---
+
+## 목표
+
+해당 포스트는 운영 환경이 1개(Production), 샌드박스가 1개이고 릴리즈 주기가 랜덤한 조직이라는 가정 하에 작성된 포스트이다.
+
+-   **Sandbox**: 메타데이터 변경이 자주 발생하므로 **main 반영 시 자동 배포**가 필요
+-   **Production**: 배포 빈도는 낮고, 배포 시점에는 **명확한 승인(통제)** 이 필요
+-   **테스트 전략**
+    -   Sandbox 배포는 속도가 중요하므로 **테스트 스킵(NoTestRun)**
+    -   Production 배포는 안정성이 중요하므로 **전체 테스트 실행(RunLocalTests 또는 RunAllTestsInOrg)**
+
+---
+
+## 전체 구조 요약
+
+### 브랜치 / 배포 트리거
+
+-   **PR → main**: 검증(Validate)만 수행
+-   **push(main)**: Sandbox에 자동 배포(테스트 스킵)
+-   **push(tag: `prod-*`)**: Production 배포(승인 의미의 태그)
+    -   GitHub Actions **Environment 보호 규칙**으로 “허용된 태그만 production에 배포 가능”하게 제한
+
+GitHub Actions의 Environment는 “선택된 브랜치/태그만 배포 허용(Selected branches and tags)”을 지원한다. ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments?utm_source=chatgpt.com))
+
+또한 기존의 Tag protection 규칙은 sunset(폐지)되어 Rulesets로 이전 흐름이므로, 태그 통제는 **Environment의 배포 제한(브랜치/태그 패턴)** 또는 **Rulesets** 방향으로 설계하는 편이 현재 흐름에 부합하지만 Team을 생성하거나 Enterprise 버전을 활용해야한다. ([The GitHub Blog](https://github.blog/changelog/2024-05-29-sunset-notice-tag-protections/?utm_source=chatgpt.com))
+
+---
+
+## 핵심 개념 1: 테스트 레벨 전략
+
+Salesforce CLI 배포 명령은 `--test-level`로 테스트 범위를 제어한다.
+
+`RunLocalTests`, `RunAllTestsInOrg` 등 값 정의는 공식 레퍼런스에 정리되어 있다. ([Salesforce Developers](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_project_commands_unified.htm?utm_source=chatgpt.com))
+
+### Sandbox 배포: `NoTestRun`
+
+-   `sf project deploy start --test-level NoTestRun`
+-   빠르며, 잦은 배포에 유리
+
+### Production 배포: `RunLocalTests` 또는 `RunAllTestsInOrg`
+
+-   **RunLocalTests**: 관리형 패키지 테스트를 제외한 로컬 테스트 전체 실행(일반적으로 운영 배포 최소 기준으로 많이 사용) ([Salesforce Developers](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_project_commands_unified.htm?utm_source=chatgpt.com))
+-   **RunAllTestsInOrg**: 조직 내 모든 테스트 실행(조직 정책상 더 엄격한 경우)
+
+### PR 검증(Validate)에서 “NoTestRun”이 어려운 이유
+
+`sf project deploy validate`는 “나중에 Quick Deploy 가능한 검증” 성격이라 `NoTestRun` 같은 옵션이 제한되는 케이스가 알려져 있습니다. ([GitHub](https://github.com/forcedotcom/cli/issues/3023?utm_source=chatgpt.com))
+
+따라서 PR에서는 보통 `RunLocalTests` 등 테스트를 포함한 검증을 둡니다.
+
+---
+
+## 핵심 개념 2: JWT 인증과 instance-url
+
+CI/CD에서는 대개 JWT Flow로 Org 인증을 수행한다. Salesforce 공식 문서에서도 `sf org login jwt` 사용을 안내한다. ([Salesforce Developers](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_auth_jwt_flow.htm?utm_source=chatgpt.com))
+
+-   Production: `https://login.salesforce.com`
+-   Sandbox: `https://test.salesforce.com` ([Salesforce](https://test.salesforce.com/?utm_source=chatgpt.com))
+
+이때 `--instance-url` 값이 비면(Secrets 미주입 등) 바로 파싱 에러가 발생하기 때문에 **Environment secrets를 쓴다면 job에 `environment:`를 지정**해야 한다.
+
+---
+
+## 구축 단계 1: GitHub Environments 설정(핵심)
+
+### 1) Environment 생성
+
+-   `Settings → Environments`
+    -   `sandbox`
+    -   `production`
+
+### 2) Environment Secrets 등록(각 환경별로 값이 다름)
+
+`production` 환경에 예시로 아래를 저장한다.
+
+-   `SF_CLIENT_ID` (Connected App Consumer Key)
+-   `SF_USERNAME` (배포용 유저)
+-   `SF_INSTANCE_URL` = `https://login.salesforce.com`
+-   `SF_JWT_KEY` (private key 문자열)
+
+`sandbox`도 동일 키 이름으로 두되, 값만 sandbox용으로 넣는다.
+
+단, `SF_JWT_KEY` 는 동일 값을 사용하므로 공통 secret에 등록해도 된다.
+
+이 방식이면 워크플로 파일에서 **시크릿 이름을 통일**할 수 있다.
+
+### 3) production Environment 보호 규칙: “허용된 태그만 배포”
+
+> Tag "...” is not allowed to deploy to production due to environment protection rules.
+
+이 메시지는 production Environment에 “배포 가능한 ref 제한”이 걸려 있고, 현재 태그가 허용되지 않아 차단된 것이다.
+
+`production` Environment에서 **Deployment branches and tags**를 다음처럼 구성한다. ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments?utm_source=chatgpt.com))
+
+-   옵션: **Selected branches and tags**
+-   허용 규칙 추가:
+    -   Branch: `main`
+    -   Tag pattern: `prod-*`
+
+이렇게 하면 “prod-\* 태그”로 실행된 배포만 production에 접근할 수 있다.
+
+> (참고) 구 Tag protection 규칙은 폐지 흐름이므로, 앞으로는 Rulesets/Environment 기반으로 정리하는 편이 안전하다.
+
+---
+
+## 구축 단계 2: 워크플로 템플릿(최종본)
+
+위의 내용을 토대로 아래 3개 파일을 작성하여 운영한다.
+
+-   PR 검증: `validate-prod.yml`
+-   Sandbox 자동 배포: `deploy-sandbox.yml`
+-   Production 태그 배포: `deploy-prod.yml`
+
+### 1) PR 검증: `.github/workflows/validate-prod.yml`
+
+```yaml
+name: PR Validate (Salesforce)
+on:
+    pull_request:
+        branches: [main]
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+        environment: sandbox
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install Salesforce CLI
+              run: |
+                  npm i -g @salesforce/cli
+                  sf --version
+
+            - name: Create JWT key file
+              shell: bash
+              run: |
+                  printf '%s' "${{ secrets.SF_JWT_KEY }}" > server.key
+
+            - name: Auth (JWT)
+              run: |
+                  sf org login jwt \
+                    --client-id "${{ secrets.SF_CLIENT_ID }}" \
+                    --jwt-key-file server.key \
+                    --username "${{ secrets.SF_USERNAME }}" \
+                    --instance-url "${{ secrets.SF_INSTANCE_URL }}" \
+                    --alias ci-sandbox \
+                    --set-default
+
+            - name: Validate deployment (with tests)
+              run: |
+                  sf project deploy validate \
+                    --source-dir force-app \
+                    --target-org ci-sandbox \
+                    --test-level RunLocalTests
+```
+
+### 2) main → Sandbox 자동 배포(테스트 스킵): `.github/workflows/deploy-sandbox.yml`
+
+```yaml
+name: Deploy to Sandbox (Skip Tests)
+on:
+    push:
+        branches: [main]
+concurrency:
+    group: deploy-sandbox
+    cancel-in-progress: true
+jobs:
+    deploy_sandbox:
+        runs-on: ubuntu-latest
+        environment: sandbox
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install Salesforce CLI
+              run: |
+                  npm i -g @salesforce/cli
+                  sf --version
+
+            - name: Create JWT key file
+              shell: bash
+              run: |
+                  printf '%s' "${{ secrets.SF_JWT_KEY }}" > server.key
+
+            - name: Auth (JWT)
+              run: |
+                  sf org login jwt \
+                    --client-id "${{ secrets.SF_CLIENT_ID }}" \
+                    --jwt-key-file server.key \
+                    --username "${{ secrets.SF_USERNAME }}" \
+                    --instance-url "${{ secrets.SF_INSTANCE_URL }}" \
+                    --alias ci-sandbox \
+                    --set-default
+
+            - name: Deploy to Sandbox (NoTestRun)
+              run: |
+                  sf project deploy start \
+                    --source-dir force-app \
+                    --target-org ci-sandbox \
+                    --test-level NoTestRun
+```
+
+### 3) Production 태그 승인 배포: `.github/workflows/deploy-prod.yml`
+
+-   트리거: `prod-*` 태그 push
+-   `environment: production`을 반드시 지정(그래야 production environment secrets 주입 + 보호 규칙 적용)
+-   태그 커밋이 `main`에 포함되어 있는지도 검사(안전장치)
+
+```yaml
+name: Deploy to Production (Tag-based)
+on:
+    push:
+        tags:
+            - "prod-*"
+concurrency:
+    group: deploy-production
+    cancel-in-progress: false
+jobs:
+    deploy_prod:
+        runs-on: ubuntu-latest
+        environment: production
+
+        steps:
+            - name: Checkout (full history for tag verification)
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Ensure tag commit is on main
+              shell: bash
+              run: |
+                  git fetch origin main --depth=1
+                  TAG_SHA="$(git rev-list -n 1 ${{ github.ref }})"
+                  if ! git merge-base --is-ancestor "$TAG_SHA" "origin/main"; then
+                    echo "Tag commit is not contained in origin/main. Aborting."
+                    exit 1
+                  fi
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install Salesforce CLI
+              run: |
+                  npm i -g @salesforce/cli
+                  sf --version
+
+            - name: Create JWT key file
+              shell: bash
+              run: |
+                  printf '%s' "${{ secrets.SF_JWT_KEY }}" > server.key
+
+            - name: Guard - ensure required secrets exist
+              shell: bash
+              run: |
+                  [ -n "${{ secrets.SF_CLIENT_ID }}" ] || (echo "Missing SF_CLIENT_ID" && exit 1)
+                  [ -n "${{ secrets.SF_USERNAME }}" ] || (echo "Missing SF_USERNAME" && exit 1)
+                  [ -n "${{ secrets.SF_INSTANCE_URL }}" ] || (echo "Missing SF_INSTANCE_URL" && exit 1)
+                  [ -n "${{ secrets.SF_JWT_KEY }}" ] || (echo "Missing SF_JWT_KEY" && exit 1)
+
+            - name: Auth to Production (JWT)
+              run: |
+                  sf org login jwt \
+                    --client-id "${{ secrets.SF_CLIENT_ID }}" \
+                    --jwt-key-file server.key \
+                    --username "${{ secrets.SF_USERNAME }}" \
+                    --instance-url "${{ secrets.SF_INSTANCE_URL }}" \
+                    --alias ci-prod \
+                    --set-default
+
+            - name: Deploy to Production (RunLocalTests)
+              run: |
+                  sf project deploy start \
+                    --source-dir force-app \
+                    --target-org ci-prod \
+                    --test-level RunLocalTests
+                  # 더 엄격하게 전 테스트를 원하면:
+                  # --test-level RunAllTestsInOrg
+```
+
+---
+
+## 운영 프로세스: “승인 = prod 태그 생성”
+
+운영 배포는 다음 절차로 수행한다.
+
+1. `main`이 샌드박스 자동 배포로 충분히 검증되었다고 판단
+2. 승인자가 아래처럼 태그를 생성하고 push
+
+```bash
+git checkout main
+git pull
+
+git tag -a prod-2026.01.07-06 -m "Production release"
+git push origin prod-2026.01.07-06
+```
+
+1. `deploy-prod.yml`이 자동 실행되어 운영 배포
+
+여기서 production Environment의 “Selected branches and tags”에 `prod-*`가 허용되어 있어야 태그 배포가 차단되지 않는다. ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments?utm_source=chatgpt.com))
+
+---
+
+## 자주 겪는 문제와 해결
+
+### 1) `-instance-url Expected a valid url but received:`
+
+대부분 **Environment secrets가 주입되지 않아 빈 문자열**이 들어간 케이스이다.
+
+해결: job에 `environment: production`(또는 sandbox)을 정확히 지정하고, 해당 Environment에 `SF_INSTANCE_URL`이 존재하는지 확인한다.
+
+### 2) `Tag ... is not allowed to deploy to production due to environment protection rules.`
+
+production Environment에서 태그가 허용되지 않은 상태이다.
+
+해결: `Deployment branches and tags`를 `Selected branches and tags`로 두고 `prod-*` 태그를 허용한다. ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments?utm_source=chatgpt.com))
+
+---
+
+## 마무리: 이 구조가 “샌드박스 1개 + 운영 드문 배포”에 강한 이유
+
+-   Sandbox는 **main 기준 자동 배포**로 개발 속도를 최대화
+-   Production은 **태그라는 명확한 승인 행위**로만 배포가 트리거되며,
+-   GitHub Actions Environment가 **허용된 태그 패턴만 배포**하게 보호할 수 있다. ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments?utm_source=chatgpt.com))
+-   Tag protection은 폐지 흐름이므로, 장기적으로도 Environment/Rulsets 기반 설계가 유지보수에 유리하다. ([The GitHub Blog](https://github.blog/changelog/2024-05-29-sunset-notice-tag-protections/?utm_source=chatgpt.com))
+
+---
+
+### 추가 확장 가능성
+
+-   `prod-*` 태그 네이밍 규칙(날짜/시퀀스/릴리즈 노트 자동 생성)
+-   운영 배포 전 **validate → quick deploy** 방식(배포 시간 단축) 설계
+-   `.github/workflows` 변경 자체를 보호하는 규칙(워크플로 변조 방지)
