@@ -10,8 +10,8 @@ thumbnail: "/thumbnails/salesforce-ci-cd.png"
 
 실전편에서는 아래 흐름을 다뤘다.
 
-- **Sandbox**: 푸시/머지되면 자주 자동 배포했다(개발 속도 우선).
-- **Production**: 승인/통제 후 제한적으로 배포했다(안정성 우선).
+- **Sandbox**: 푸시/머지되면 자동 배포(개발 속도 우선).
+- **Production**: 승인/통제 후 제한적으로 배포(안정성 우선).
 
 이번 글에서는 운영 배포를 “더 빠르게, 더 안전하게” 만들기 위해 다음 3가지를 추가했다.
 
@@ -21,7 +21,7 @@ thumbnail: "/thumbnails/salesforce-ci-cd.png"
 
 ---
 
-## 1) prod-* 태그 네이밍 규칙 설계 (날짜/시퀀스/릴리즈 노트 자동 생성)
+## 1️⃣ prod-* 태그 네이밍 규칙 설계 (날짜/시퀀스/릴리즈 노트 자동 생성)
 
 운영 배포를 “승인된 행위”로 만들기 위해 보통 **태그 생성(=릴리즈 승인)** 을 기준점으로 둔다. 다만 `prod-*`만으로는 “검증용 태그”와 “실배포 태그”가 섞이기 쉬우므로, 아래처럼 **두 단계 태그**를 권장한다.
 
@@ -43,7 +43,7 @@ thumbnail: "/thumbnails/salesforce-ci-cd.png"
 
 ---
 
-## 2) 운영 배포 전 Validate → Quick Deploy (배포 시간 단축) 설계
+## 2️⃣ 운영 배포 전 Validate → Quick Deploy (배포 시간 단축) 설계
 
 Salesforce에서 “Validate-only 배포”를 성공시키면, 그 결과를 기반으로 **Quick Deploy** 를 수행할 수 있다.
 
@@ -62,7 +62,7 @@ Salesforce CLI 기준으로 핵심 커맨드는 아래와 같다.
 
 ---
 
-## 3) .github/workflows 변경 자체를 보호하기 (워크플로 변조 방지)
+## 3️⃣ .github/workflows 변경 자체를 보호하기 (워크플로 변조 방지)
 
 CI/CD에서 가장 위험한 상황은 “배포 파이프라인 자체가 변조”되는 경우이다. 따라서 **워크플로 파일(.github/workflows/*\*)** 은 아래와 같이 보호하는 구성이 일반적이다.
 
