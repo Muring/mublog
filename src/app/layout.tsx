@@ -6,27 +6,31 @@ import Footer from "@/components/Footer";
 import RootProvider from "@/Providers/RootProvider";
 
 export const metadata: Metadata = {
-  title: "Mublog",
-  description: "Muring's blog",
-  icons: {
-    icon: "/icons/mublog.svg", // 또는 "/icons/custom-icon.svg"
-  },
+    //   title: "Mublog",
+    title: {
+        default: "Mublog",
+        template: "Mublog | %s", // 페이지 title이 있으면 "%s | Mublog"로
+    },
+    description: "Muring's blog",
+    icons: {
+        icon: "/icons/mublog.svg", // 또는 "/icons/custom-icon.svg"
+    },
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <RootProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-        </RootProvider>
-      </body>
-    </html>
-  );
+    return (
+        <html lang="en" suppressHydrationWarning>
+            <body>
+                <RootProvider>
+                    <Header />
+                    <main>{children}</main>
+                    <Footer />
+                </RootProvider>
+            </body>
+        </html>
+    );
 }
