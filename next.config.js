@@ -1,6 +1,6 @@
 // next.config.js
 
-const { withContentlayer } = require("next-contentlayer");
+const { withContentlayer } = require("next-contentlayer2");
 
 // module.exports = withContentlayer({});
 // next.config.js
