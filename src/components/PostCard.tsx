@@ -15,7 +15,7 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
                     alt="thumbnail"
                     width={400}
                     height={200}
-                    quality={100}
+                    quality={75}
                 />
             </Card.ImageWrapper>
 
@@ -26,13 +26,7 @@ export default function PostCard({ post, style }: { post: Post; style?: React.CS
 
                 <Card.Footer>
                     <Card.Tag>
-                        <Image
-                            src="/icons/tag.svg"
-                            alt="tag icon"
-                            className="auto-dark"
-                            width={14}
-                            height={14}
-                        />
+                        <Image src="/icons/tag.svg" alt="tag icon" className="auto-dark" width={14} height={14} />
                         <div className="tags">
                             <Card.Text>{post.tags?.map((tag) => `#${tag}`).join(" ")}</Card.Text>
                         </div>

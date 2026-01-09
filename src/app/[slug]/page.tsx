@@ -5,6 +5,7 @@ import PostContent from "@/components/PostContent";
 import RecentPostTracker from "@/components/trackers/RecentPostTracker";
 import CarouselSlider from "@/components/CarouselSlider";
 import RelatedContent from "@/components/RelatedContent";
+import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
 
 type Props = {
     params: Promise<{ slug: string }>;
@@ -45,6 +46,7 @@ export default async function PostPage(props: Props) {
 
     return (
         <div>
+            <HeaderTitleSetter title={post.title} />
             <RecentPostTracker slug={slug} />
             <PostContent
                 title={post.title}

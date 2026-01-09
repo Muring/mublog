@@ -6,15 +6,21 @@ const { withContentlayer } = require("next-contentlayer");
 // next.config.js
 
 /** @type {import('next').NextConfig} */
-const baseConfig = {
-    webpack(config, { dev }) {
-        if (dev) {
-            config.watchOptions = {
-                ignored: ["**/node_modules/**", "**/.git/**", "**/.next/**"],
-            };
-        }
-        return config;
-    },
+const nextConfig = {
+    // Next.js 16 기본 번들러(Turbopack)를 “의도적으로 사용”한다고 명시
+    turbopack: {},
 };
+module.exports = withContentlayer(nextConfig);
 
-module.exports = withContentlayer(baseConfig);
+// const baseConfig = {
+//     webpack(config, { dev }) {
+//         if (dev) {
+//             config.watchOptions = {
+//                 ignored: ["**/node_modules/**", "**/.git/**", "**/.next/**"],
+//             };
+//         }
+//         return config;
+//     },
+// };
+
+// module.exports = withContentlayer(baseConfig);
