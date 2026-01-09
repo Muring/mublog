@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { fadeSlide } from "@/styles/motion";
 
 export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
     background-color: var(--background);
@@ -35,55 +36,43 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
             padding: 0.5rem;
         }
 
+        /* 타이틀: 스크롤 맨 위(0)면 숨김 */
         .header-center-title {
             position: absolute;
             left: 50%;
             top: 50%;
-            transform: translate(-50%, -50%);
 
             max-width: min(60vw, 720px);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
 
-            pointer-events: none;
             font-size: 0.95rem;
             font-weight: 600;
 
-            /* 스크롤 맨 위(0)에서는 숨김, 내려가면 표시 */
-            opacity: ${({ scrollRatio }) => (scrollRatio === 0 ? 0 : 1)};
-            visibility: ${({ scrollRatio }) => (scrollRatio === 0 ? "hidden" : "visible")};
-            transform: translate(-50%, -50%) translateY(${({ scrollRatio }) => (scrollRatio === 0 ? "-6px" : "0")});
-
-            transition: opacity 200ms ease, transform 200ms ease,
-                visibility 0ms linear ${({ scrollRatio }) => (scrollRatio === 0 ? "200ms" : "0ms")};
+            ${(props) =>
+                fadeSlide({
+                    visible: props.scrollRatio > 0,
+                    baseTransform: "translate(-50%, -50%)",
+                    hiddenY: -6,
+                    durationMs: 200,
+                })}
         }
 
         .fast-route-container {
             display: flex;
+            justify-content: space-between;
             align-items: center;
             gap: 1rem;
 
-            /* 기본 상태(보임) */
-            opacity: 1;
-            transform: translateY(0);
-            visibility: visible;
-            pointer-events: auto;
-
-            /* 전환 설정 */
-            transition: opacity 200ms ease, transform 200ms ease, visibility 0ms linear 0ms;
+            /* 기본: 보임 */
+            ${fadeSlide({ visible: true, hiddenY: -6, durationMs: 200 })}
         }
 
+        /* 765px 이하: fast-route-container만 부드럽게 숨김 */
         @media (max-width: 765px) {
             .fast-route-container {
-                /* 부드럽게 사라짐 */
-                opacity: 0;
-                transform: translateY(-6px);
-                visibility: hidden;
-                pointer-events: none;
-
-                /* visibility는 opacity 애니메이션 끝난 뒤에 숨기기 */
-                transition: opacity 200ms ease, transform 200ms ease, visibility 0ms linear 200ms;
+                ${fadeSlide({ visible: false, hiddenY: -6, durationMs: 200 })}
             }
         }
 
