@@ -5,19 +5,13 @@ import Image from "next/image";
 import { ProfileWrapper } from "./Profile.styled";
 
 export default function Profile() {
-  return (
-    <ProfileWrapper>
-      <Image
-        src="/icons/mublog.svg"
-        className="auto-dark"
-        alt="hamburger icon"
-        width={72}
-        height={72}
-      />
-      <div className="text-container">
-        <h4>무링의 개발 블로그</h4>
-        <p>Frontend Developer</p>
-      </div>
-    </ProfileWrapper>
-  );
+    return (
+        <ProfileWrapper>
+            <Image src="/icons/mublog.svg" className="auto-dark" alt="hamburger icon" width={72} height={72} />
+            <div className="text-container">
+                <h4>무링의 개발 블로그</h4>
+                <p>Salesforce Developer</p>
+            </div>
+        </ProfileWrapper>
+    );
 }
