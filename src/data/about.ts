@@ -6,6 +6,7 @@ export const historyData = [
     { date: "2024.11", content: "청년 CRM101 2기 수료" },
     { date: "2024.11", content: "Concentrix Korea 입사 – Salesforce 개발자" },
     { date: "2025.04", content: "Concentrix Korea AI COE 부서로 전배 – Frontend 개발자" },
+    { date: "2025.09", content: "Concentrix Korea Salesforce 부서로 전배 – Salesforce 개발자" },
 ];
 
 export const projectData = [
@@ -30,8 +31,13 @@ export const projectData = [
         description: "Next.js & Typescript & TypeORM을 사용한 풀스택 설계 및 구현",
     },
     {
-        date: "2025.09 ~ ",
+        date: "2025.09 ~ 2026.02",
         title: "Hurom: Europe Call Center System",
         description: "Salesforce LWC & Apex를 사용한 풀스택 설계 및 구현",
+    },
+    {
+        date: "2026.03 ~ ",
+        title: "HLI: Salesforce AS 관리 시스템 고도화 구축 프로젝트",
+        description: "ERP 중심 AS 업무의 Salesforce CRM 통합 구축 · Apex, LWC, ERP 인터페이스 설계 및 개발",
     },
 ];
