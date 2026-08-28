@@ -1,32 +1,43 @@
 // SideList.tsx
 "use client";
 
-import { allPosts } from "contentlayer/generated";
+import { useQuery } from "@tanstack/react-query";
 import { SideListWrapper } from "./SideList.styled";
 import { useRecentPosts } from "@/hooks/useRecentPosts";
 import SidePost from "./SidePost";
 import Link from "next/link";
+import type { PostSummary } from "@/types/post";
 
 type Props = {
   type?: string; // 기본값 없음, recent일 때만 최근 포스트
   onLinkClick?: () => void;
 };
 
+async function fetchPosts(): Promise<PostSummary[]> {
+  const res = await fetch("/api/posts/summary");
+  if (!res.ok) throw new Error("포스트를 불러오지 못했습니다.");
+  return res.json();
+}
+
 export default function SideList({ type, onLinkClick }: Props) {
   const isRecent = type === "recent";
   const title = isRecent ? "Recently viewed" : "Latest posts";
 
-  const { recentPosts, isLoading } = useRecentPosts();
+  const { recentPosts, isLoading: isRecentLoading } = useRecentPosts();
+  const { data: posts = [], isLoading: isPostsLoading } = useQuery({
+    queryKey: ["posts", "summary"],
+    queryFn: fetchPosts,
+    staleTime: 5 * 60_000,
+  });
 
-  // 렌더링할 포스트 목록 결정
+  const isLoading = isPostsLoading || (isRecent && isRecentLoading);
+
+  // 렌더링할 포스트 목록 결정. 목록은 서버에서 이미 최신순으로 정렬돼 온다.
   const postsToRender = isRecent
     ? recentPosts
-        .map((slug) => allPosts.find((post) => post.slug === slug))
-        .filter((post): post is NonNullable<typeof post> => Boolean(post))
-    : allPosts
-        .slice()
-        .sort((a, b) => b.date.localeCompare(a.date))
-        .slice(0, 5);
+        .map((slug) => posts.find((post) => post.slug === slug))
+        .filter((post): post is PostSummary => Boolean(post))
+    : posts.slice(0, 5);
 
   return (
     <SideListWrapper>
@@ -43,12 +54,16 @@ export default function SideList({ type, onLinkClick }: Props) {
           ) : (
             postsToRender.map((post) => (
               <Link
-                key={post._id}
+                key={post.id}
                 href={`/${post.slug}`}
                 className="side-link"
                 onClick={onLinkClick}
               >
-                <SidePost title={post.title} desc={post.description} thumbnail={post.thumbnail} />
+                <SidePost
+                  title={post.title}
+                  desc={post.description ?? undefined}
+                  thumbnail={post.thumbnail ?? undefined}
+                />
               </Link>
             ))
           )}
