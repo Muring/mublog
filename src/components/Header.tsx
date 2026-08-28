@@ -7,6 +7,7 @@ import { useHeaderTitle } from "@/Providers/HeaderTitleProvider";
 import Image from "next/image";
 import Link from "next/link";
 import SideMenu from "./SideMenu";
+import HeaderAuth from "./HeaderAuth";
 
 export default function Header() {
     const [scrollRatio, setScrollRatio] = useState(0);
@@ -67,6 +68,8 @@ export default function Header() {
                 <div className="header-center-title" aria-label="Current post title">
                     <h5>{title}</h5>
                 </div>
+
+                <HeaderAuth />
             </nav>
         </HeaderWrapper>
     );

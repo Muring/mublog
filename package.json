@@ -12,7 +12,8 @@
         "postinstall": "prisma generate",
         "check:db": "tsx scripts/check-db.mts",
         "verify:render": "tsx scripts/smoke-render.mts",
-        "audit:render": "tsx scripts/audit-render.mts"
+        "audit:render": "tsx scripts/audit-render.mts",
+        "sweep:images": "tsx scripts/sweep-images.mts"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",

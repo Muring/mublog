@@ -117,3 +117,45 @@ export const getRecentPosts = unstable_cache(
     ["posts-recent"],
     { tags: ["posts:list"], revalidate: 3600 }
 );
+
+/**
+ * 관리자 목록용. 초안까지 포함하며 캐시하지 않는다.
+ * (관리자 화면은 force-dynamic 이라 항상 최신을 봐야 한다)
+ */
+export async function getAllPostsForAdmin() {
+    const rows = await prisma.post.findMany({
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        select: {
+            id: true,
+            slug: true,
+            title: true,
+            tags: true,
+            status: true,
+            publishedAt: true,
+            updatedAt: true,
+            commentCount: true,
+        },
+    });
+    return rows.map((row) => ({
+        ...row,
+        publishedAt: row.publishedAt?.toISOString() ?? null,
+        updatedAt: row.updatedAt.toISOString(),
+    }));
+}
+
+/** 에디터에서 불러올 단건. 초안도 조회된다. */
+export async function getPostForEdit(id: string) {
+    const row = await prisma.post.findUnique({ where: { id } });
+    if (!row) return null;
+    return {
+        id: row.id,
+        slug: row.slug,
+        title: row.title,
+        description: row.description,
+        tags: row.tags,
+        thumbnail: row.thumbnail,
+        contentMd: row.contentMd,
+        status: row.status,
+        publishedAt: row.publishedAt?.toISOString() ?? null,
+    };
+}
