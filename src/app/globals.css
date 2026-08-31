@@ -6,10 +6,13 @@
   --activecolor: black;
   --activefontcolor: white;
   --codefontbgcolor: #f4f4f4;
+  /* 밝은 배경에서 #ff7b00 은 2.36:1 로 읽기 힘들다. 주황을 유지한 채 톤만 낮춘다 (5.02) */
+  --codefontcolor: #a94f00;
   --bordercolor: #e6e6e6;
   --cardbackground: #ffffff;
   --shadowcolor: rgba(0, 0, 0, 0.1);
-  --desccolor: #888888;
+  /* 흰 배경에서 #888 은 3.54:1 로 AA 미달이라 한 단계 어둡게 잡는다 (5.33:1) */
+  --desccolor: #6b6b6b;
   --calloutborder: #ffee8a;
   /* 밝은 배경용 빨강. 어두운 배경에서는 대비가 3:1 로 떨어지므로 다크에서 따로 준다 */
   --dangercolor: #d93025;
@@ -25,12 +28,16 @@ html.dark {
   --activecolor: #dadada;
   --activefontcolor: black;
   --codefontbgcolor: #303030;
+  /* 어두운 배경에서는 원래의 밝은 주황이 5.08:1 로 충분하다 */
+  --codefontcolor: #ff7b00;
   --bordercolor: #5c5c5c;
   --cardbackground: #27272a;
   --shadowcolor: rgba(255, 255, 255, 0.1);
   --calloutborder: #685800;
-  /* #d93025 는 다크 카드 배경 위에서 3.09:1 로 AA 미달이다. 밝은 빨강으로 올린다 */
-  --dangercolor: #f85149;
+  /* #d93025 는 다크 카드 위에서 3.09:1. #f85149 도 4.44 로 모자라 한 단계 더 올린다 (5.91) */
+  /* 라이트용 회색을 그대로 쓰면 카드 위에서 4.20:1 로 미달한다 (6.76 / 5.29) */
+  --desccolor: #9a9a9a;
+  --dangercolor: #ff7b72;
   /* 밝아진 빨강 위에 흰 글자를 올리면 3.3:1 로 더 나빠진다. 어두운 글자가 5.7:1 로 안전하다 */
   --dangerfontcolor: #101010;
 }

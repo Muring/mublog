@@ -37,7 +37,7 @@ export const SideListWrapper = styled.div<{ isClosing?: boolean }>`
 
     .status-text {
       padding: 0.5rem;
-      color: gray;
+      color: var(--desccolor);
     }
 
     .side-link {

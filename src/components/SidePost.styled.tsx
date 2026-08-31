@@ -31,7 +31,7 @@ export const SidePostWrapper = styled.div`
     .side-desc {
         height: 45%;
         font-size: 0.8rem;
-        color: gray;
+        color: var(--desccolor);
         font-weight: 400;
         white-space: nowrap;
         overflow: hidden;

@@ -17,7 +17,7 @@ export const ProfileWrapper = styled.div`
 
   .contact {
     font-size: 0.8rem;
-    color: #777;
+    color: var(--desccolor);
   }
 
   p {

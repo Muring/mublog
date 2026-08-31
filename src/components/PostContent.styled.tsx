@@ -81,7 +81,7 @@ export const Article = styled.article`
     display: block;
     text-align: center;
     font-size: 0.875rem;
-    color: #888;
+    color: var(--desccolor);
     margin-top: 0 !important;
     margin-bottom: 2rem;
   }
@@ -206,7 +206,7 @@ export const Article = styled.article`
     border-radius: 4px;
     font-size: 0.85rem;
     font-family: "Consolas";
-    color: #ff7b00;
+    color: var(--codefontcolor);
   }
 
   .code-highlight {

@@ -19,7 +19,8 @@ export const StatsWrapper = styled.p`
         color: var(--foreground);
     }
 
+    /* --bordercolor 는 라이트에서 1.25:1 이라 사실상 보이지 않는다 */
     .divider {
-        color: var(--bordercolor);
+        color: var(--desccolor);
     }
 `;

@@ -13,7 +13,7 @@ export const FooterWrapper = styled.footer`
   border-top: 1px solid var(--bordercolor);
   text-align: center;
   font-size: 0.875rem;
-  color: #777;
+  color: var(--desccolor);
   gap: 1rem;
 
   @media (prefers-color-scheme: dark) {
