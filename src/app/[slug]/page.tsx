@@ -5,6 +5,7 @@ import RecentPostTracker from "@/components/trackers/RecentPostTracker";
 import CarouselSlider from "@/components/CarouselSlider";
 import RelatedContent from "@/components/RelatedContent";
 import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
+import Comments from "@/components/comments/Comments";
 import { getPostBySlug, getPublishedPosts, getPublishedSlugs } from "@/lib/posts";
 
 type Props = {
@@ -57,6 +58,11 @@ export default async function PostPage(props: Props) {
                 html={post.contentHtml}
             />
             <RelatedContent />
+            {/*
+              댓글은 클라이언트에서 가져온다.
+              그래야 이 페이지가 정적 캐시 + ISR 상태를 그대로 유지한다.
+            */}
+            <Comments slug={post.slug} />
             <CarouselSlider posts={posts} tags={post.tags} currentSlug={post.slug} />
         </div>
     );
