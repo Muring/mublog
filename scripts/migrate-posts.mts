@@ -60,8 +60,9 @@ async function main() {
             thumbnail: (data.thumbnail as string) ?? null,
             contentMd: content,
             contentHtml,
-            status: "PUBLISHED" as const,
-            publishedAt: new Date(data.date),
+            // backup:posts 가 초안에만 붙이는 표시. 없으면 발행글이다.
+            status: (data.status === "draft" ? "DRAFT" : "PUBLISHED") as "DRAFT" | "PUBLISHED",
+            publishedAt: data.status === "draft" ? null : new Date(data.date),
             readingTime: estimateReadingTime(content),
         };
 
@@ -69,7 +70,7 @@ async function main() {
             console.log(
                 `  ${slug}\n` +
                     `      title  ${fields.title}\n` +
-                    `      date   ${fields.publishedAt.toISOString().slice(0, 10)}\n` +
+                    `      date   ${fields.publishedAt?.toISOString().slice(0, 10) ?? "(초안)"}\n` +
                     `      tags   ${fields.tags.join(", ") || "-"}\n` +
                     `      html   ${contentHtml.length.toLocaleString()} chars, ${fields.readingTime}분\n`
             );

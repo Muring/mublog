@@ -32,19 +32,25 @@ async function main() {
     const posts = await prisma.post.findMany();
     const dbSlugs = new Set(posts.map((p) => p.slug));
 
-    // 1. 개수와 slug 집합 일치
-    assert("DB 포스트 수 == mdx 파일 수", posts.length === files.length, `db=${posts.length} files=${files.length}`);
-    const missing = [...fileSlugs].filter((s) => !dbSlugs.has(s));
-    const extra = [...dbSlugs].filter((s) => !fileSlugs.has(s));
+    // 1. 이전된 글이 모두 DB 에 있는가.
+    //
+    //    한쪽 방향만 본다. 웹 에디터로 쓴 글은 대응하는 mdx 파일이 없는 것이
+    //    정상이므로, DB 에만 있는 글을 초과분으로 취급하면 안 된다.
+    //    mdx 파일은 이전 당시의 백업이고, 이 검사는 그 백업과의 대조가 목적이다.
+    const missing = [...fileSlugs].filter((slug) => !dbSlugs.has(slug));
     assert(
-        "slug 집합 일치",
-        missing.length === 0 && extra.length === 0,
-        [missing.length ? `누락: ${missing.join(", ")}` : "", extra.length ? `초과: ${extra.join(", ")}` : ""]
-            .filter(Boolean)
-            .join(" / ")
+        `mdx 백업 ${files.length}개가 모두 DB 에 존재`,
+        missing.length === 0,
+        missing.length ? `누락: ${missing.join(", ")}` : ""
     );
 
-    for (const post of posts) {
+    const dbOnly = [...dbSlugs].filter((slug) => !fileSlugs.has(slug));
+    if (dbOnly.length > 0) {
+        console.log(`INFO  웹 에디터로 작성된 글 ${dbOnly.length}개는 대조 대상에서 제외: ${dbOnly.join(", ")}`);
+    }
+
+    // 아래 항목별 검사는 mdx 원본이 있는 글에만 적용한다
+    for (const post of posts.filter((p) => fileSlugs.has(p.slug))) {
         const raw = readFileSync(`${POSTS_DIR}/${post.slug}.mdx`, "utf8");
         const { content } = matter(raw);
 
