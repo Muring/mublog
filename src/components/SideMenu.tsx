@@ -57,8 +57,20 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
             className="main-icon auto-dark"
           />
           <ButtonWrapper>
-            <button onClick={handleClose} className="menu-button auto-dark">
-              <Image src="/icons/cancel.svg" alt="cancel icon" width={22} height={22} />
+            <button onClick={handleClose} className="menu-button" aria-label="메뉴 닫기">
+              {/*
+                파일로 불러오면 메뉴가 열리는 순간 아직 안 그려져 빈 자리로 보인다.
+                메뉴를 닫을 유일한 버튼이라 로딩에 기대지 않고 인라인으로 둔다.
+                currentColor 라서 invert 필터(auto-dark) 없이 테마를 따른다.
+              */}
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M6 6l12 12M18 6L6 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
+              </svg>
             </button>
           </ButtonWrapper>
         </div>

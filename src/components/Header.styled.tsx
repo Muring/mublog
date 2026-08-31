@@ -34,15 +34,21 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
             align-items: center;
             gap: 2rem;
             padding: 0.5rem;
+            flex-shrink: 0;
         }
 
-        /* 타이틀: 스크롤 맨 위(0)면 숨김 */
+        /*
+         * 타이틀: 스크롤 맨 위(0)면 숨김.
+         *
+         * absolute 로 화면 가운데에 띄우면 좌우 형제의 폭을 알 수 없어서,
+         * 화면이 좁아지면 오른쪽 로그인 영역과 글자가 겹쳤다.
+         * 흐름 안에 두고 남은 자리를 차지하게 하면 구조적으로 겹칠 수 없다.
+         */
         .header-center-title {
-            position: absolute;
-            left: 50%;
-            top: 50%;
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: center;
 
-            max-width: min(60vw, 720px);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -53,7 +59,6 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
             ${(props) =>
                 fadeSlide({
                     visible: props.scrollRatio > 0,
-                    baseTransform: "translate(-50%, -50%)",
                     hiddenY: -6,
                     durationMs: 200,
                 })}
@@ -73,6 +78,12 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
         @media (max-width: 765px) {
             .fast-route-container {
                 ${fadeSlide({ visible: false, hiddenY: -6, durationMs: 200 })}
+                /* visibility 만 끄면 자리는 그대로 남아 타이틀이 쓸 폭을 잡아먹는다 */
+                display: none;
+            }
+
+            .menu {
+                gap: 0;
             }
         }
 
@@ -142,9 +153,13 @@ export const ButtonWrapper = styled.div`
         width: 3rem;
         height: 3rem;
         border-radius: 0.5rem;
+        /* 인라인 아이콘이 currentColor 로 따라온다 */
+        color: var(--foreground);
 
         &:hover {
             background-color: var(--hovercolor);
+            /* --hovercolor 는 양 테마 모두 밝은 회색이라 글자색도 같이 뒤집어야 한다 */
+            color: var(--hoverfontcolor);
             transition: 0.1s ease-in-out;
         }
     }

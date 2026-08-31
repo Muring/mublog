@@ -54,12 +54,32 @@ const Body = styled.div`
   background-color: var(--cardbackground);
 `;
 
+/**
+ * 제목과 설명은 자리를 미리 잡아둔다.
+ *
+ * 줄 수를 막지 않으면 긴 제목·설명이 아래를 밀어내 푸터의 안쪽 여백이
+ * 16px → 6px 로 줄고, 더 길면 푸터가 본문 밖으로 나가 날짜가 잘렸다.
+ * 2lh 는 현재 line-height 로 정확히 두 줄이라 글자 크기를 건드리지 않는다.
+ * 짧은 제목도 두 줄 자리를 차지하므로 카드끼리 줄이 맞는다.
+ */
+const clampTwoLines = `
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  height: 2lh;
+  /* ContentDocumentLink 처럼 안 끊기는 긴 단어가 카드의 최소 폭을 밀어올린다 */
+  overflow-wrap: anywhere;
+`;
+
 const Title = styled.h5`
+  ${clampTwoLines};
   margin-bottom: 0.6rem;
   color: var(--foreground);
 `;
 
 const Desc = styled.p`
+  ${clampTwoLines};
   color: var(--desccolor);
   margin-bottom: 0.8rem;
   line-height: 1.4;
@@ -70,8 +90,8 @@ const Footer = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  bottom: 0;
+  /* wrap 이면 태그가 길어질 때 날짜가 아랫줄로 떨어져 카드 높이가 흐트러진다 */
+  flex-wrap: nowrap;
   margin-top: auto;
   font-size: 0.75rem;
   color: var(--desccolor);
@@ -85,29 +105,36 @@ const Text = styled.p`
   text-overflow: ellipsis;
 `;
 
+/** 자리가 모자라면 태그 쪽이 줄어들며 말줄임 된다. */
 const Tag = styled.div`
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  /* flex 자식의 min-width 기본값이 auto 라, 이게 없으면 줄어들지 않고 날짜를 민다 */
+  min-width: 0;
 
   img {
+    flex-shrink: 0;
     filter: grayscale(100%);
     opacity: 0.6;
   }
 
   .tags {
-    width: 100%;
+    min-width: 0;
   }
 `;
 
+/** 날짜는 항상 온전히 보여야 한다. */
 const Date = styled.div`
   display: flex;
   justify-content: space-evenly;
   align-items: center;
   gap: 0.3rem;
   flex-wrap: nowrap;
+  flex-shrink: 0;
 
   img {
+    flex-shrink: 0;
     opacity: 0.6;
   }
 `;

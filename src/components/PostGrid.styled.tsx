@@ -1,37 +1,38 @@
 import styled from "@emotion/styled";
 
 export const PostGridWrapper = styled.div`
+  /*
+   * 부모(.home)가 align-items: center 인 flex 라 이 요소는 내용에 맞춰 줄어든다.
+   * 예전에는 카드의 min-width 290px 이 3열분의 폭을 붙잡아 줘서 우연히 넓어졌지만,
+   * 열 수를 폭에서 구하도록 바꾸면 그 받침이 사라져 2열로 접힌다.
+   */
+  width: 100%;
   max-width: 1050px;
   min-height: 80vh;
   padding: 0 1rem;
-
-  @media (max-width: 640px) {
-    width: 100% !important;
-  }
 `;
 
 export const GridList = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /*
+   * 캐러셀과 같은 규칙: 열 수를 폭에서 거꾸로 구한다.
+   * 카드 최소 폭이 290px 이고 그리드가 최대 1018px 이라 데스크톱은 그대로 3열,
+   * 좁아지면 2열·1열로 알아서 내려간다. min() 은 290px 보다 좁은 화면에서
+   * 열이 화면을 넘지 않게 막는다.
+   */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
   gap: 1rem;
   padding: 1rem 0 4rem;
 
   li {
+    /* 그리드 아이템도 기본 min-width 가 auto 라 긴 단어가 열을 넓힌다 */
+    min-width: 0;
     border-radius: 12px;
     transition: all 0.2s ease-in-out;
 
     &:hover {
       transform: translateY(-4px) !important;
-      box-shadow: 0px 6px 5px -2px rgba(0, 0, 0, 0.15);
+      box-shadow: 0px 6px 5px -2px var(--shadowcolor);
     }
-  }
-
-  @media (max-width: 928px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 640px) {
-    width: 100% !important;
-    grid-template-columns: repeat(1, 1fr);
   }
 `;

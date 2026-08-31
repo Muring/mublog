@@ -14,6 +14,8 @@ export const AuthWrapper = styled.div`
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    /* 타이틀이 남은 자리를 차지하므로, 이쪽이 눌리지 않게 고정한다 */
+    flex-shrink: 0;
 
     .avatar {
         width: 26px;

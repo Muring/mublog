@@ -52,6 +52,9 @@ const Track = styled.div<{
 
 const Slide = styled.div`
   flex: 0 0 var(--card);
+  /* flex 아이템의 min-width 기본값이 auto 라, 안 끊기는 긴 단어가 있으면
+     flex-basis 를 무시하고 슬라이드가 넓어진다 (254.7 -> 313). */
+  min-width: 0;
   box-sizing: border-box;
   border-radius: 12px;
   transition: all 0.2s ease-in-out;
