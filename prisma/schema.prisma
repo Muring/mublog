@@ -97,11 +97,9 @@ model Comment {
 /// 요청당 행을 남기지 않으므로 연 365행(약 20KB)에 그친다.
 /// 총 방문자 = SUM(visitors).
 model DailyStat {
-    date      DateTime @id @db.Date
     /// 그날의 순 방문자 (쿠키 기준 1일 1회)
-    visitors  Int      @default(0)
-    /// 그날의 페이지뷰
-    pageViews Int      @default(0) @map("page_views")
+    date     DateTime @id @db.Date
+    visitors Int      @default(0)
 
     @@map("daily_stats")
 }

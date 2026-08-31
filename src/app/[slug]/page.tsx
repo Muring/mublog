@@ -53,6 +53,8 @@ export default async function PostPage(props: Props) {
             <PostContent
                 title={post.title}
                 date={post.publishedAt}
+                slug={post.slug}
+                viewCount={post.viewCount}
                 description={post.description}
                 tags={post.tags}
                 html={post.contentHtml}
