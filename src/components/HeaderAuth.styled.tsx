@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { buttonQuiet } from "@/styles/button";
 
 /**
  * 헤더 우측 로그인 영역.
@@ -33,28 +34,17 @@ export const AuthWrapper = styled.div`
 
     /* HeaderWrapper 의 a 규칙을 덮어쓰기 위해 클래스를 겹쳐 쓴다 */
     && .auth-action {
+        ${buttonQuiet}
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        /* HeaderWrapper 의 a { width/height: 3rem } 을 되돌린다 */
         width: auto;
         height: auto;
         padding: 0.35rem 0.7rem;
-        border: 1px solid var(--bordercolor);
-        border-radius: 0.5rem;
-        background: none;
-        color: var(--foreground);
-        font-family: inherit;
         font-size: 0.78rem;
-        font-weight: 700;
         line-height: 1.4;
         white-space: nowrap;
-        cursor: pointer;
-
-        &:hover {
-            background-color: var(--hovercolor);
-            color: var(--hoverfontcolor);
-            transition: 0.1s ease-in-out;
-        }
     }
 
     form {

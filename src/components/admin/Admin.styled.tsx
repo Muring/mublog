@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
 
 export const AdminWrapper = styled.div`
   max-width: 1100px;
@@ -104,44 +105,14 @@ export const Button = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+  ${buttonBase}
   padding: 0.5rem 0.9rem;
-  border: 1px solid var(--bordercolor);
-  border-radius: 0.5rem;
-  background-color: var(--cardbackground);
-  color: var(--foreground);
-  font-family: inherit;
   font-size: 0.85rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.15s ease-in-out;
 
-  &:hover:not(:disabled) {
-    background-color: var(--hovercolor);
-    color: var(--hoverfontcolor);
-  }
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
   &.primary {
-    background-color: var(--activecolor);
-    color: var(--activefontcolor);
-    border-color: var(--activecolor);
+    ${buttonPrimary}
   }
-
-  /*
-    테두리를 글자색과 같게 둔다. 고정된 연분홍(#f0b4b0)을 쓰면
-    다크 모드에서 흰 테두리처럼 보인다.
-  */
   &.danger {
-    color: var(--dangercolor);
-    border-color: currentColor;
-  }
-
-  /* 되돌릴 수 없는 동작이므로 hover 에서 색을 잃지 않고 오히려 또렷해져야 한다 */
-  &.danger:hover:not(:disabled) {
-    background-color: var(--dangercolor);
-    border-color: var(--dangercolor);
-    color: var(--dangerfontcolor);
+    ${buttonDanger}
   }
 `;

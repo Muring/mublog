@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { buttonBase } from "@/styles/button";
 
 export const LoginWrapper = styled.div`
   display: flex;
@@ -31,24 +32,7 @@ export const GithubButton = styled.button`
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  ${buttonBase}
   padding: 0.75rem 1.4rem;
-  border: 1px solid var(--bordercolor);
-  border-radius: 0.5rem;
-  background-color: var(--cardbackground);
-  color: var(--foreground);
-  font-family: inherit;
   font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.15s ease-in-out;
-
-  &:hover:not(:disabled) {
-    background-color: var(--hovercolor);
-    color: var(--hoverfontcolor);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: default;
-  }
 `;

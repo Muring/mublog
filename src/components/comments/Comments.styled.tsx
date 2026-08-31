@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { buttonQuiet } from "@/styles/button";
 
 /*
  * 스레드 기하 구조.
@@ -345,24 +346,11 @@ export const CommentFormWrapper = styled.form`
     }
 
     button {
+        ${buttonQuiet}
         padding: 0.45rem 1rem;
-        border: 1px solid var(--bordercolor);
-        border-radius: 0.5rem;
-        background-color: var(--cardbackground);
-        color: var(--foreground);
-        font-family: inherit;
         font-size: 0.8rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: border-color 0.15s ease-in-out;
 
-        &:hover:not(:disabled) {
-            border-color: var(--foreground);
-        }
-        &:disabled {
-            opacity: 0.45;
-            cursor: default;
-        }
+        /* 댓글 등록은 전경/배경을 뒤집어 한 눈에 주 동작임을 드러낸다 */
         &.primary {
             background-color: var(--foreground);
             color: var(--background);

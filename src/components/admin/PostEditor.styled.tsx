@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { buttonBase } from "@/styles/button";
 import { Article } from "@/components/PostContent.styled";
 
 export const EditorWrapper = styled.div`
@@ -105,24 +106,10 @@ export const MetaGrid = styled.div`
   }
 
   .thumb-upload {
+    ${buttonBase}
     padding: 0.5rem 0.7rem;
-    border: 1px solid var(--bordercolor);
-    border-radius: 0.4rem;
-    background-color: var(--cardbackground);
-    color: var(--foreground);
-    font-family: inherit;
     font-size: 0.78rem;
-    font-weight: 700;
     white-space: nowrap;
-    cursor: pointer;
-  }
-  .thumb-upload:hover:not(:disabled) {
-    background-color: var(--hovercolor);
-    color: var(--hoverfontcolor);
-  }
-  .thumb-upload:disabled {
-    opacity: 0.5;
-    cursor: default;
   }
 
   .thumb-preview {
