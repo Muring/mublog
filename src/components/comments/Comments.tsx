@@ -8,6 +8,7 @@ import { CommentsWrapper, CommentList, SignInPrompt } from "./Comments.styled";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { fetchMe } from "@/components/HeaderAuth";
+import { useToast } from "@/Providers/Toast";
 import type { CommentNode } from "@/types/comment";
 
 async function fetchComments(slug: string): Promise<CommentNode[]> {
@@ -23,6 +24,7 @@ async function readError(res: Response, fallback: string): Promise<never> {
 
 export default function Comments({ slug }: { slug: string }) {
     const pathname = usePathname();
+    const toast = useToast();
     const queryClient = useQueryClient();
     const queryKey = ["comments", slug];
 
@@ -97,7 +99,7 @@ export default function Comments({ slug }: { slug: string }) {
         },
         onError: (error, _input, context) => {
             if (context) queryClient.setQueryData(queryKey, context.snapshot);
-            setFormError(error.message);
+            toast.error(error.message);
         },
         onSettled: () => queryClient.invalidateQueries({ queryKey }),
     });
@@ -120,7 +122,7 @@ export default function Comments({ slug }: { slug: string }) {
         },
         onError: (error, _id, context) => {
             if (context) queryClient.setQueryData(queryKey, context.snapshot);
-            setFormError(error.message);
+            toast.error(error.message);
         },
         onSettled: () => queryClient.invalidateQueries({ queryKey }),
     });

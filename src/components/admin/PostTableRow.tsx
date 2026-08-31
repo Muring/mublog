@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "./Admin.styled";
+import { useToast } from "@/Providers/Toast";
 import { formatCardDate } from "@/lib/date";
 
 type Props = {
@@ -20,6 +21,7 @@ type Props = {
 
 export default function PostTableRow({ post }: Props) {
     const router = useRouter();
+    const toast = useToast();
     const [isPending, startTransition] = useTransition();
     const [isDeleting, setIsDeleting] = useState(false);
 
@@ -31,10 +33,11 @@ export default function PostTableRow({ post }: Props) {
         const res = await fetch(`/api/admin/posts/${post.id}`, { method: "DELETE" });
         if (!res.ok) {
             const body = await res.json().catch(() => ({}));
-            alert(body.error ?? "삭제에 실패했습니다.");
+            toast.error(body.error ?? "삭제에 실패했습니다.");
             setIsDeleting(false);
             return;
         }
+        toast.success(`"${post.title}" 을(를) 삭제했습니다.`);
         startTransition(() => router.refresh());
     }
 
@@ -60,7 +63,7 @@ export default function PostTableRow({ post }: Props) {
                         <Button as="span">수정</Button>
                     </Link>
                     <Button className="danger" onClick={remove} disabled={busy}>
-                        삭제
+                        {busy ? "삭제 중..." : "삭제"}
                     </Button>
                 </div>
             </td>

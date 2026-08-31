@@ -6,6 +6,7 @@ import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
+import { useToast } from "@/Providers/Toast";
 import {
     EditorWrapper,
     MetaGrid,
@@ -38,6 +39,7 @@ const FENCE = "```";
 
 export default function PostEditor({ initial, knownTags }: Props) {
     const router = useRouter();
+    const toast = useToast();
     const [post, setPost] = useState(initial);
     const [postId, setPostId] = useState(initial.id);
     const [html, setHtml] = useState("");
@@ -46,8 +48,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
         available: null,
         reason: null,
     });
-    const [message, setMessage] = useState<{ text: string; error: boolean } | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
+    const [pending, setPending] = useState<"DRAFT" | "PUBLISHED" | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [isUploadingThumb, setIsUploadingThumb] = useState(false);
     const [tagError, setTagError] = useState<string | null>(null);
@@ -128,15 +129,15 @@ export default function PostEditor({ initial, knownTags }: Props) {
             const res = await fetch("/api/admin/upload", { method: "POST", body });
             const data = await res.json();
             if (!res.ok) {
-                setMessage({ text: data.error ?? "업로드 실패", error: true });
+                toast.error(data.error ?? "이미지 업로드에 실패했습니다.");
                 return null;
             }
             return data.url as string;
         } catch {
-            setMessage({ text: "업로드 중 오류가 발생했습니다.", error: true });
+            toast.error("이미지 업로드 중 오류가 발생했습니다.");
             return null;
         }
-    }, []);
+    }, [toast]);
 
     /** 본문 이미지: 업로드하고 커서 위치에 마크다운으로 삽입 */
     const uploadIntoBody = useCallback(
@@ -159,9 +160,10 @@ export default function PostEditor({ initial, knownTags }: Props) {
                     ...prev,
                     contentMd: prev.contentMd.replace(token, url ? "![](" + url + ")" : ""),
                 }));
+                if (url) toast.success("이미지를 올렸습니다.");
             }
         },
-        [upload]
+        [upload, toast]
     );
 
     /** 썸네일 업로드 */
@@ -179,8 +181,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
             return;
         }
 
-        setIsSaving(true);
-        setMessage(null);
+        setPending(status);
 
         const payload = {
             slug: post.slug,
@@ -201,39 +202,43 @@ export default function PostEditor({ initial, knownTags }: Props) {
             body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
-        setIsSaving(false);
 
         if (!res.ok) {
-            setMessage({ text: data.error ?? "저장에 실패했습니다.", error: true });
+            setPending(null);
+            toast.error(data.error ?? "저장에 실패했습니다.");
             return;
         }
 
         // 발행 후에는 실제로 게시된 글을 바로 보여준다.
         // 초안 저장은 이어서 쓰는 중이라 화면을 유지한다.
-        //
-        // refresh() 를 먼저 불러 방금 무효화한 캐시를 다시 채운 뒤 이동한다.
-        // 순서를 바꾸면 이동 직후 이전 내용이 잠깐 보일 수 있다.
         if (status === "PUBLISHED") {
-            router.refresh();
+            // 결과를 먼저 알리고 이동한다. 이동이 끝날 때까지 pending 을 유지해
+            // 버튼이 "이동 중"으로 남아 있게 한다.
+            //
+            // 여기서 router.refresh() 를 부르지 않는다. 떠날 편집 화면을 다시
+            // 그리느라 이동이 눈에 띄게 느려지는데, 목적지는 이미 서버에서
+            // revalidatePath 로 무효화돼 있어 새로 받아온다.
+            toast.success("발행했습니다. 글로 이동합니다.");
             router.push("/" + (data.slug ?? post.slug));
             return;
         }
 
+        setPending(null);
         setPost((prev) => ({
             ...prev,
             status,
             publishedAt: data.publishedAt ?? prev.publishedAt,
         }));
-        setMessage({ text: "초안을 저장했습니다.", error: false });
+        toast.success("초안을 저장했습니다.");
 
         // 새 글이면 이후 저장이 PATCH 로 가도록 주소와 id 를 맞춰둔다
         if (!postId && data.id) {
             setPostId(data.id);
             router.replace("/admin/posts/" + data.id);
         }
-        router.refresh();
     }
 
+    const isSaving = pending !== null;
     const canSave = Boolean(post.title.trim()) && slugState.available !== false && !isSaving;
 
     return (
@@ -241,23 +246,18 @@ export default function PostEditor({ initial, knownTags }: Props) {
             <div className="editor-head">
                 <h2>{postId ? "포스트 수정" : "새 글 쓰기"}</h2>
                 <div className="actions">
-                    {message && (
-                        <span className={message.error ? "status-text error" : "status-text"}>
-                            {message.text}
-                        </span>
-                    )}
                     <Link href="/admin">
                         <Button as="span">목록</Button>
                     </Link>
                     <Button onClick={() => save("DRAFT")} disabled={!canSave}>
-                        초안 저장
+                        {pending === "DRAFT" ? "저장 중..." : "초안 저장"}
                     </Button>
                     <Button
                         className="primary"
                         onClick={() => save("PUBLISHED")}
                         disabled={!canSave}
                     >
-                        발행
+                        {pending === "PUBLISHED" ? "발행 중..." : "발행"}
                     </Button>
                 </div>
             </div>
