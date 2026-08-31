@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { requireUserApi } from "@/lib/auth";
 import { handleApiError } from "@/lib/http";
+import { parseBody } from "@/lib/api";
 import { commentInputSchema } from "@/lib/validation";
 import { createComment, getCommentsByPostSlug } from "@/lib/comments";
 
@@ -25,19 +26,13 @@ export async function POST(request: NextRequest, { params }: Params) {
         const { slug } = await params;
         const profile = await requireUserApi();
 
-        const parsed = commentInputSchema.safeParse(await request.json());
-        if (!parsed.success) {
-            return NextResponse.json(
-                { error: parsed.error.issues[0]?.message ?? "잘못된 입력입니다." },
-                { status: 400 }
-            );
-        }
+        const input = await parseBody(request, commentInputSchema);
 
         const comment = await createComment({
             slug,
             authorId: profile.id,
-            body: parsed.data.body,
-            parentId: parsed.data.parentId,
+            body: input.body,
+            parentId: input.parentId,
         });
 
         return NextResponse.json(comment, { status: 201 });

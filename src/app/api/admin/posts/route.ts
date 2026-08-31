@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/auth";
 import { handleApiError } from "@/lib/http";
+import { parseBody } from "@/lib/api";
 import { postInputSchema } from "@/lib/validation";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { estimateReadingTime } from "@/lib/reading-time";
@@ -13,16 +14,8 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
     try {
         const profile = await requireAdminApi();
-        const parsed = postInputSchema.safeParse(await request.json());
+        const input = await parseBody(request, postInputSchema);
 
-        if (!parsed.success) {
-            return NextResponse.json(
-                { error: parsed.error.issues[0]?.message ?? "잘못된 입력입니다." },
-                { status: 400 }
-            );
-        }
-
-        const input = parsed.data;
         const existing = await prisma.post.findUnique({ where: { slug: input.slug } });
         if (existing) {
             return NextResponse.json({ error: "이미 사용 중인 slug 입니다." }, { status: 409 });

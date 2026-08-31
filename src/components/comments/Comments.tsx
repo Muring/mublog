@@ -9,17 +9,13 @@ import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { fetchMe } from "@/components/HeaderAuth";
 import { useToast } from "@/Providers/Toast";
+import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import type { CommentNode } from "@/types/comment";
 
-async function fetchComments(slug: string): Promise<CommentNode[]> {
-    const res = await fetch(`/api/posts/${encodeURIComponent(slug)}/comments`);
-    if (!res.ok) throw new Error("댓글을 불러오지 못했습니다.");
-    return res.json();
-}
+const commentsUrl = (slug: string) => `/api/posts/${encodeURIComponent(slug)}/comments`;
 
-async function readError(res: Response, fallback: string): Promise<never> {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.error ?? fallback);
+function fetchComments(slug: string): Promise<CommentNode[]> {
+    return fetchJson<CommentNode[]>(commentsUrl(slug));
 }
 
 export default function Comments({ slug }: { slug: string }) {
@@ -39,15 +35,8 @@ export default function Comments({ slug }: { slug: string }) {
     } = useQuery({ queryKey, queryFn: () => fetchComments(slug) });
 
     const create = useMutation({
-        mutationFn: async (input: { body: string; parentId: string | null }) => {
-            const res = await fetch(`/api/posts/${encodeURIComponent(slug)}/comments`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(input),
-            });
-            if (!res.ok) await readError(res, "댓글을 저장하지 못했습니다.");
-            return (await res.json()) as CommentNode;
-        },
+        mutationFn: (input: { body: string; parentId: string | null }) =>
+            fetchJson<CommentNode>(commentsUrl(slug), jsonRequest("POST", input)),
         // 응답을 기다리지 않고 화면에 먼저 올린다.
         // 실패하면 onError 에서 스냅샷으로 되돌린다.
         onMutate: async (input) => {
@@ -79,15 +68,11 @@ export default function Comments({ slug }: { slug: string }) {
     });
 
     const update = useMutation({
-        mutationFn: async (input: { id: string; body: string }) => {
-            const res = await fetch(`/api/comments/${input.id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ body: input.body }),
-            });
-            if (!res.ok) await readError(res, "댓글을 수정하지 못했습니다.");
-            return (await res.json()) as CommentNode;
-        },
+        mutationFn: (input: { id: string; body: string }) =>
+            fetchJson<CommentNode>(
+                `/api/comments/${input.id}`,
+                jsonRequest("PATCH", { body: input.body })
+            ),
         onMutate: async ({ id, body }) => {
             await queryClient.cancelQueries({ queryKey });
             const snapshot = queryClient.getQueryData<CommentNode[]>(queryKey) ?? [];
@@ -105,10 +90,8 @@ export default function Comments({ slug }: { slug: string }) {
     });
 
     const remove = useMutation({
-        mutationFn: async (id: string) => {
-            const res = await fetch(`/api/comments/${id}`, { method: "DELETE" });
-            if (!res.ok) await readError(res, "댓글을 삭제하지 못했습니다.");
-        },
+        mutationFn: (id: string) =>
+            fetchJson<{ ok: true }>(`/api/comments/${id}`, { method: "DELETE" }),
         onMutate: async (id) => {
             await queryClient.cancelQueries({ queryKey });
             const snapshot = queryClient.getQueryData<CommentNode[]>(queryKey) ?? [];

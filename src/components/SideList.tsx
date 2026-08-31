@@ -7,16 +7,15 @@ import { useRecentPosts } from "@/hooks/useRecentPosts";
 import SidePost from "./SidePost";
 import Link from "next/link";
 import type { PostSummary } from "@/types/post";
+import { fetchJson } from "@/lib/fetcher";
 
 type Props = {
   type?: string; // 기본값 없음, recent일 때만 최근 포스트
   onLinkClick?: () => void;
 };
 
-async function fetchPosts(): Promise<PostSummary[]> {
-  const res = await fetch("/api/posts/summary");
-  if (!res.ok) throw new Error("포스트를 불러오지 못했습니다.");
-  return res.json();
+function fetchPosts(): Promise<PostSummary[]> {
+  return fetchJson<PostSummary[]>("/api/posts/summary");
 }
 
 export default function SideList({ type, onLinkClick }: Props) {

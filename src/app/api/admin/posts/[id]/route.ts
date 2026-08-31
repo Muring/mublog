@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/auth";
 import { handleApiError } from "@/lib/http";
+import { parseBody } from "@/lib/api";
 import { postPatchSchema } from "@/lib/validation";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { estimateReadingTime } from "@/lib/reading-time";
@@ -23,14 +24,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
             return NextResponse.json({ error: "포스트를 찾을 수 없습니다." }, { status: 404 });
         }
 
-        const parsed = postPatchSchema.safeParse(await request.json());
-        if (!parsed.success) {
-            return NextResponse.json(
-                { error: parsed.error.issues[0]?.message ?? "잘못된 입력입니다." },
-                { status: 400 }
-            );
-        }
-        const input = parsed.data;
+        const input = await parseBody(request, postPatchSchema);
 
         if (input.slug && input.slug !== existing.slug) {
             const taken = await prisma.post.findUnique({ where: { slug: input.slug } });

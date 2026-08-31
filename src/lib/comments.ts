@@ -2,6 +2,17 @@ import { prisma } from "@/lib/prisma";
 import { HttpError } from "@/lib/auth";
 import type { CommentNode } from "@/types/comment";
 
+/** 댓글 조회에 공통으로 쓰는 필드. 세 곳에서 같은 목록을 되풀이하고 있었다. */
+const COMMENT_SELECT = {
+    id: true,
+    parentId: true,
+    body: true,
+    createdAt: true,
+    editedAt: true,
+    deletedAt: true,
+    author: { select: { id: true, username: true, avatarUrl: true } },
+} as const;
+
 type CommentRow = {
     id: string;
     parentId: string | null;
@@ -36,15 +47,7 @@ export async function getCommentsByPostSlug(slug: string): Promise<CommentNode[]
     const rows = await prisma.comment.findMany({
         where: { postId: post.id },
         orderBy: { createdAt: "asc" },
-        select: {
-            id: true,
-            parentId: true,
-            body: true,
-            createdAt: true,
-            editedAt: true,
-            deletedAt: true,
-            author: { select: { id: true, username: true, avatarUrl: true } },
-        },
+        select: COMMENT_SELECT,
     });
 
     return rows.map(toNode);
@@ -112,15 +115,7 @@ export async function createComment(params: {
     const [created] = await prisma.$transaction([
         prisma.comment.create({
             data: { postId: post.id, authorId, body, parentId: parentId ?? null },
-            select: {
-                id: true,
-                parentId: true,
-                body: true,
-                createdAt: true,
-                editedAt: true,
-                deletedAt: true,
-                author: { select: { id: true, username: true, avatarUrl: true } },
-            },
+            select: COMMENT_SELECT,
         }),
         prisma.post.update({
             where: { id: post.id },
@@ -149,15 +144,7 @@ export async function updateComment(params: {
     const updated = await prisma.comment.update({
         where: { id },
         data: { body, editedAt: new Date() },
-        select: {
-            id: true,
-            parentId: true,
-            body: true,
-            createdAt: true,
-            editedAt: true,
-            deletedAt: true,
-            author: { select: { id: true, username: true, avatarUrl: true } },
-        },
+        select: COMMENT_SELECT,
     });
 
     return toNode(updated);

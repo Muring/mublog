@@ -1,13 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { fetchJson } from "@/lib/fetcher";
 
 export const postViewsKey = (slug: string) => ["post-views", slug];
 
 async function fetchViews(slug: string): Promise<number> {
-    const res = await fetch(`/api/posts/${encodeURIComponent(slug)}/views`);
-    if (!res.ok) throw new Error("조회수를 불러오지 못했습니다.");
-    const data = await res.json();
+    const data = await fetchJson<{ views: number | null }>(
+        `/api/posts/${encodeURIComponent(slug)}/views`
+    );
     return data.views ?? 0;
 }
 

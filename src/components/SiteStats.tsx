@@ -2,13 +2,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { StatsWrapper } from "./SiteStats.styled";
+import { fetchJson } from "@/lib/fetcher";
 
 type Stats = { today: number; total: number };
 
-async function fetchStats(): Promise<Stats> {
-    const res = await fetch("/api/stats");
-    if (!res.ok) throw new Error("통계를 불러오지 못했습니다.");
-    return res.json();
+function fetchStats(): Promise<Stats> {
+    return fetchJson<Stats>("/api/stats");
 }
 
 /**
@@ -32,9 +31,14 @@ export default function SiteStats() {
 
     return (
         <StatsWrapper>
-            오늘 방문 <strong>{data.today.toLocaleString("ko-KR")}</strong>명
+            {/* JSX 줄바꿈이 공백으로 렌더돼 "4 명" 처럼 벌어지므로 한 조각으로 묶는다 */}
+            <span>
+                오늘 방문 <strong>{data.today.toLocaleString("ko-KR")}</strong>명
+            </span>
             <span className="divider">·</span>
-            누적 <strong>{data.total.toLocaleString("ko-KR")}</strong>명
+            <span>
+                누적 <strong>{data.total.toLocaleString("ko-KR")}</strong>명
+            </span>
         </StatsWrapper>
     );
 }

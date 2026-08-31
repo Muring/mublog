@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { requireUserApi, getProfile } from "@/lib/auth";
 import { handleApiError } from "@/lib/http";
+import { parseBody } from "@/lib/api";
 import { commentInputSchema } from "@/lib/validation";
 import { deleteComment, updateComment } from "@/lib/comments";
 
@@ -14,18 +15,12 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         const { id } = await params;
         const profile = await requireUserApi();
 
-        const parsed = commentInputSchema.safeParse(await request.json());
-        if (!parsed.success) {
-            return NextResponse.json(
-                { error: parsed.error.issues[0]?.message ?? "잘못된 입력입니다." },
-                { status: 400 }
-            );
-        }
+        const input = await parseBody(request, commentInputSchema);
 
         const comment = await updateComment({
             id,
             actorId: profile.id,
-            body: parsed.data.body,
+            body: input.body,
         });
 
         return NextResponse.json(comment);
