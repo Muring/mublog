@@ -6,7 +6,7 @@
         "dev": "next dev",
         "build": "prisma generate && next build",
         "start": "next start",
-        "lint": "next lint",
+        "lint": "eslint .",
         "migrate:posts": "tsx scripts/migrate-posts.mts",
         "verify:migration": "tsx scripts/verify-migration.mts",
         "postinstall": "prisma generate",
@@ -14,7 +14,8 @@
         "verify:render": "tsx scripts/smoke-render.mts",
         "audit:render": "tsx scripts/audit-render.mts",
         "sweep:images": "tsx scripts/sweep-images.mts",
-        "backup:posts": "tsx scripts/backup-posts.mts"
+        "backup:posts": "tsx scripts/backup-posts.mts",
+        "lint:fix": "eslint . --fix"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",
@@ -47,6 +48,8 @@
         "@types/pg": "^8.23.1",
         "@types/react": "^19.2.7",
         "@types/react-dom": "^19.2.3",
+        "eslint": "^9",
+        "eslint-config-next": "16.3.4",
         "gray-matter": "^4.0.3",
         "prisma": "7.10.0",
         "tsx": "^4.23.12",

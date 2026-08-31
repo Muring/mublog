@@ -79,6 +79,9 @@ export default function PostEditor({ initial, knownTags }: Props) {
     // slug 중복/형식 실시간 확인
     useEffect(() => {
         if (!post.slug) {
+            // 이 effect 는 디바운스 후 서버에 물어보는 외부 동기화다.
+            // slug 를 비웠을 때 직전 판정을 지우는 것도 그 동기화의 일부다.
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSlugState({ checking: false, available: null, reason: null });
             return;
         }

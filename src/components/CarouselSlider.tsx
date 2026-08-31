@@ -113,11 +113,15 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
     [relatedPosts, visible, isLooping],
   );
 
-  // 보일 장수가 바뀌면 복제 구간의 위치도 달라진다
-  useEffect(() => {
+  // 보일 장수가 바뀌면 복제 구간의 위치도 달라진다.
+  // effect 로 미루면 옛 위치가 한 프레임 그려지므로 렌더 중에 맞춘다.
+  const layoutKey = `${visible}:${isLooping}`;
+  const [syncedLayout, setSyncedLayout] = useState(layoutKey);
+  if (syncedLayout !== layoutKey) {
+    setSyncedLayout(layoutKey);
     setIsTransitioning(false);
     setCurrentIndex(isLooping ? visible : 0);
-  }, [visible, isLooping]);
+  }
 
   useEffect(() => {
     if (!isLooping || isPaused || reducedMotion) return;
@@ -130,6 +134,10 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
 
     const atClone = currentIndex === 0 || currentIndex === slides.length - visible;
     if (!atClone) {
+      // 복제 구간에서 조용히 되돌린 직후 다시 애니메이션을 켜는 자리다.
+      // 파생값으로 뺄 수 없다 - 끄는 시점이 타이머에 달려 있어서
+      // 되돌린 "다음" 이동부터 켜져야 한다.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsTransitioning(true);
       return;
     }

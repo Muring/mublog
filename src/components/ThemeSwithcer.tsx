@@ -15,8 +15,11 @@ export default function ThemeSwitcher() {
       setTheme("system");
     }
 
-    setMounted(true); // hydration mismatch 방지
-  }, []);
+    // 서버에는 테마가 없으므로 첫 렌더에서는 아무것도 그리지 않는다.
+    // next-themes 를 쓸 때의 표준 hydration 가드라 파생값으로 뺄 수 없다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, [setTheme]);
 
   if (!mounted) return null;
 
