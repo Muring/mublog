@@ -22,7 +22,6 @@ export default function Header() {
             const maxScroll = scrollHeight - clientHeight;
             const ratio = Math.min(scrollTop / maxScroll, 1);
             setScrollRatio(ratio);
-            console.log("scroll: " + ratio);
         };
 
         window.addEventListener("scroll", handleScroll, { passive: true });

@@ -36,7 +36,7 @@ export const projectData = [
         description: "Salesforce LWC & Apex를 사용한 풀스택 설계 및 구현",
     },
     {
-        date: "2026.03 ~ ",
+        date: "2026.03 ~ 2026.08",
         title: "HLI: Salesforce AS 관리 시스템 고도화 구축 프로젝트",
         description: "ERP 중심 AS 업무의 Salesforce CRM 통합 구축 · Apex, LWC, ERP 인터페이스 설계 및 개발",
     },
