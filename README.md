@@ -8,12 +8,14 @@
 
 Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 
-처음에는 MDX 파일을 Contentlayer로 읽는 정적 블로그였지만,
-지금은 **포스트를 DB에 두고 웹에서 직접 작성·수정**합니다.
-Notion에서 글을 쓰고 마크다운으로 변환해 파일로 커밋하던 과정을 걷어내고,
-브라우저에서 쓰고 발행하면 **재배포 없이** 반영되도록 바꿨습니다.
+처음에는 MDX 파일을 Contentlayer로 읽는 정적 블로그였습니다.
+글 하나를 올리려면 Notion에서 쓰고 → 마크다운으로 변환하고 → mdx 파일을 만들고 → 커밋하고 → 재배포해야 했습니다.
+지금은 **포스트가 DB에 있고, 브라우저에서 쓰고 발행하면 재배포 없이 반영**됩니다.
 
 글쓰기 권한은 소유자만 가지며, 다른 사용자는 GitHub으로 로그인해 **댓글**을 남길 수 있습니다.
+
+전환하면서 Contentlayer는 완전히 제거했고, 마크다운 → HTML 파이프라인을 직접 구성해
+기존 25개 글의 렌더 결과가 바뀌지 않도록 맞췄습니다.
 
 <br>
 
@@ -25,18 +27,23 @@ Notion에서 글을 쓰고 마크다운으로 변환해 파일로 커밋하던 �
 
 ## 🔧 기술 스택
 
-| 분야          | 기술                                      |
-| ------------- | ----------------------------------------- |
-| 프레임워크    | Next.js 16 (App Router, Turbopack)        |
-| 언어          | TypeScript                                |
-| 스타일링      | Emotion, CSS 변수 기반 테마               |
-| 데이터베이스  | Supabase (PostgreSQL)                     |
-| ORM           | Prisma 7 (드라이버 어댑터)                |
-| 인증          | Supabase Auth (GitHub OAuth)              |
-| 파일 저장소   | Supabase Storage                          |
-| 서버 상태     | TanStack Query                            |
-| 본문 렌더링   | remark / rehype (+ Prism 하이라이팅)      |
-| 배포          | Vercel                                    |
+| 분야         | 기술                                                        |
+| ------------ | ----------------------------------------------------------- |
+| 프레임워크   | Next.js 16 (App Router, Turbopack)                          |
+| 언어         | TypeScript 5.9                                               |
+| UI           | React 19                                                     |
+| 스타일링     | Emotion, CSS 변수 기반 테마, next-themes                     |
+| 데이터베이스 | Supabase (PostgreSQL)                                        |
+| ORM          | Prisma 7 (`@prisma/adapter-pg` 드라이버 어댑터)              |
+| 인증         | Supabase Auth (GitHub OAuth) + `@supabase/ssr`               |
+| 파일 저장소  | Supabase Storage                                             |
+| 서버 상태    | TanStack Query 5                                             |
+| 검증         | Zod 4                                                        |
+| 본문 렌더링  | unified (remark / rehype) + refractor 기반 Prism 하이라이팅  |
+| 배포         | Vercel (Hobby) + Vercel Cron                                 |
+
+> 무료 티어(Supabase Free + Vercel Hobby)에서 돌아가는 것을 전제로 설계했습니다.
+> 이 제약이 스키마와 집계 방식에 그대로 반영되어 있습니다.
 
 <br>
 
@@ -49,6 +56,7 @@ Notion에서 글을 쓰고 마크다운으로 변환해 파일로 커밋하던 �
 - [x] 🔗 **연관 글 캐러셀**, 최근 본 글
 - [x] 🎨 **다크모드 토글**
 - [x] 🐢 **Lazy Loading** (그리드 콘텐츠)
+- [x] 📱 **반응형** — 카드 최소 폭에서 열 수를 거꾸로 계산
 
 ### 쓰기 (관리자 전용)
 
@@ -65,6 +73,270 @@ Notion에서 글을 쓰고 마크다운으로 변환해 파일로 커밋하던 �
 
 <br>
 
+---
+
+# 🏗 아키텍처
+
+## 데이터베이스
+
+Supabase의 PostgreSQL 하나를 씁니다. `public` 스키마만 Prisma가 관리하고,
+`auth` 스키마는 Supabase 소유이므로 건드리지 않습니다.
+
+### 모델
+
+| 모델        | 역할                                                            |
+| ----------- | --------------------------------------------------------------- |
+| `Profile`   | `auth.users`의 미러. 사용자명·아바타·권한(`role`)                |
+| `Post`      | 포스트. 마크다운 원문과 렌더된 HTML을 함께 보관                  |
+| `Comment`   | 댓글. 자기참조 `parentId`로 답글, soft delete                    |
+| `DailyStat` | 사이트 전체 방문 집계. KST 기준 **하루 1행**                     |
+
+### 설계 결정과 근거
+
+**`Profile`을 `auth.users`와 Prisma 관계로 묶지 않습니다.**
+`multiSchema`로 모델링하면 `prisma migrate`가 Supabase 소유 스키마에 손댑니다.
+대신 FK와 동기화 트리거(`on_auth_user_created`)를 **raw SQL 마이그레이션**으로 넣어,
+제약은 DB에 두고 Prisma Migrate는 `public`에만 가둡니다.
+
+**태그는 `String[]` 컬럼이고 조인 테이블이 아닙니다.**
+포스트 25개·태그 6종·작성자 1명이며 태그에 별도 메타데이터가 없습니다.
+조인 테이블은 모든 목록 쿼리에 조인을 더하고 컴포넌트가 쓰는 `tags: string[]` 형태를 깨뜨립니다.
+검색은 GIN 인덱스로 충분하고, 태그 이름 변경은 25행 `UPDATE` 하나입니다.
+
+**`Post.contentMd`와 `contentHtml`을 둘 다 저장합니다.**
+HTML은 저장 시점에 한 번만 렌더합니다. 읽기 경로에서 마크다운을 파싱하지 않습니다.
+
+**`commentCount` / `viewCount`는 비정규화했습니다.**
+목록 렌더마다 `_count` 서브쿼리를 돌리지 않기 위해서고,
+댓글 insert/delete와 **같은 트랜잭션**에서 갱신해 어긋나지 않게 합니다.
+
+**댓글은 soft delete입니다.**
+hard delete하면 달려 있던 답글이 함께 사라집니다. 행은 남기고 API가 본문과 작성자를 가립니다.
+
+**방문 통계는 하루 정수 한 개입니다.**
+요청당 행을 남기지 않습니다 — 무료 티어 500MB를 갉아먹는 유일한 벡터입니다.
+연 365행(약 20KB)이고, 총 방문자는 `SUM(visitors)`입니다.
+
+### 인덱스
+
+```
+posts     (status, published_at DESC)   -- 목록 정렬
+posts     GIN (tags)                     -- 태그 필터
+comments  (post_id, created_at)          -- 스레드 조회
+comments  (author_id, created_at)        -- 레이트 리밋 카운트
+```
+
+### 접속 경로
+
+Prisma 7은 접속 URL을 스키마가 아니라 `prisma.config.ts`에 둡니다.
+런타임 접속은 `PrismaClient`에 넘기는 드라이버 어댑터(`@prisma/adapter-pg`)가 담당합니다.
+
+| 용도                 | 포트                     | 비고                                    |
+| -------------------- | ------------------------ | --------------------------------------- |
+| 앱 런타임            | **6543** Transaction 풀러 | `?pgbouncer=true&connection_limit=1` 필수 |
+| 마이그레이션         | **5432** Session 풀러     | `db.<ref>...:5432`는 IPv6 전용이라 CI 실패 |
+
+<br>
+
+## 백엔드
+
+Route Handler와 서버 컴포넌트가 전부입니다. 별도 서버는 없습니다.
+
+### 계층
+
+```
+Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──▶  Postgres
+      │                     │
+      │                     └── unstable_cache + 태그 (읽기 경로)
+      └── requireAdminApi / parseBody(zod)
+```
+
+- **`lib/posts.ts`** — 읽기 전용 데이터 접근 계층. 모든 조회를 `unstable_cache`로 감싸고
+  `posts:list` / `post:<slug>` 태그를 답니다. 여기서 `Date`를 ISO 문자열로 바꿔
+  클라이언트 컴포넌트까지 `Date` 객체가 새어 hydration이 어긋나는 것을 막습니다.
+- **`lib/comments.ts`** — 댓글 CRUD, 2단 깊이 강제, soft delete, 도배 방지
+- **`lib/stats.ts`** — 방문·조회 집계, KST 날짜 키
+- **`lib/auth.ts`** — 세션 조회와 권한 확인 (`requireAdmin` / `requireAdminApi`)
+- **`lib/api.ts`** — 요청 본문 zod 파싱을 한 곳으로. 실패 시 `HttpError(400)`
+- **`lib/revalidate.ts`** — 포스트 변경 후 캐시 무효화
+
+### API
+
+| 라우트                            | 메서드            | 권한        |
+| --------------------------------- | ----------------- | ----------- |
+| `/api/posts/summary`              | GET               | 공개        |
+| `/api/posts/[slug]/comments`      | GET, POST         | 조회 공개 / 작성 로그인 |
+| `/api/posts/[slug]/views`         | POST              | 공개        |
+| `/api/comments/[id]`              | PATCH, DELETE     | 본인 (삭제는 관리자도) |
+| `/api/stats`, `/api/visit`        | GET / POST        | 공개        |
+| `/api/me`                         | GET               | 공개        |
+| `/api/admin/posts`                | POST              | **관리자**  |
+| `/api/admin/posts/[id]`           | PATCH, DELETE     | **관리자**  |
+| `/api/admin/slug-check`           | GET               | **관리자**  |
+| `/api/admin/upload`               | POST              | **관리자**  |
+| `/api/cron/daily`                 | GET               | `CRON_SECRET` |
+
+### 렌더링·캐싱 전략
+
+댓글과 방문자 수를 의도적으로 클라이언트 페치로 두어,
+본질적으로 동적인 두 기능이 이를 담는 페이지까지 동적으로 만들지 않게 했습니다.
+
+| 라우트                       | 모드                                   | 무효화                              |
+| ---------------------------- | -------------------------------------- | ----------------------------------- |
+| `/`                          | Static + ISR 3600s                     | `posts:list` + `revalidatePath("/")` |
+| `/[slug]`                    | `generateStaticParams` + ISR 3600s     | `post:<slug>` (**이름 바꾸면 옛 slug도**) |
+| `/about`                     | 완전 정적                              | —                                   |
+| `/admin/**`                  | `force-dynamic`                        | —                                   |
+| `/api/posts/summary`         | ISR 3600s, `posts:list`                | 포스트 변경 시                      |
+| `/api/posts/[slug]/comments` | 캐시 안 함                             | TanStack Query                      |
+| `/api/stats`, `/api/visit`   | `force-dynamic`                        | —                                   |
+
+`generateStaticParams`는 빌드 시점에 DB를 조회하므로 `try/catch`로 감싸
+정지된 Supabase나 빌드 환경의 `DATABASE_URL` 누락이 배포를 깨지 않게 하고,
+실패하면 온디맨드 렌더로 degrade시킵니다.
+
+**이것이 "재배포 없이 새 글이 보이는" 메커니즘입니다.**
+`generateStaticParams`는 빌드 시점 것만 프리렌더하고, `dynamicParams`(기본 true)가
+새 slug를 첫 요청에 렌더하며, `revalidateTag`가 기존 것을 갱신합니다.
+
+### 마크다운 파이프라인
+
+```
+remarkParse → remarkGfm → remarkRehype(allowDangerousHtml)
+            → rehypeRaw → rehypeSlug → rehypePrism(refractor) → rehypeStringify
+```
+
+- `rehypeRaw`는 반드시 `remarkRehype` **뒤**, `rehypePrism` **앞**이어야 합니다.
+  그 전까지 `<aside>` 같은 raw HTML은 불투명한 문자열 노드라 Prism이 볼 수 없습니다.
+- `refractor`는 `lib/core.js`에 필요한 언어만 **명시적으로 등록**합니다.
+  `common` 번들에는 jsx·tsx가 없어서 그대로 쓰면 코드블록 72개가 조용히 깨집니다
+  (`ignoreMissing: true`가 오류를 삼켜 무증상 회귀가 됩니다).
+- 등록 순서가 중요합니다. `js-extras`는 `javascript` 뒤, `jsx`/`tsx` **앞**이어야 합니다.
+  jsx/tsx가 등록 시점에 javascript의 정의를 복사해가기 때문입니다.
+- `normalizeCallouts()`가 `<aside>` 앞뒤에 빈 줄을 넣습니다.
+  MDX는 이를 JSX flow element로 파싱해 내부 마크다운을 처리했지만,
+  CommonMark는 다음 빈 줄까지 전부 raw HTML로 삼켜 `**굵게**`가 문자 그대로 렌더됩니다.
+
+`yarn verify:render`가 이 12가지를 회귀 검사합니다.
+
+### 권한과 보안
+
+**관리자 판별은 `profiles.role` 컬럼이 유일한 진실입니다.**
+환경변수로 GitHub id를 비교하는 방식을 쓰지 않은 이유는,
+그 자연스러운 구현이 `user.user_metadata.provider_id`를 보는데
+**`user_metadata`는 사용자가 직접 쓸 수 있기 때문**입니다.
+아무 로그인 사용자나 `updateUser({ data: { provider_id: ... } })`로 관리자가 될 수 있습니다.
+
+**모든 테이블에 정책 없는 RLS를 켰습니다.**
+저장소가 public이라 publishable key가 번들에 노출되고,
+Supabase는 `public` 테이블을 PostgREST로 자동 노출합니다.
+정책이 하나도 없는 RLS를 켜면 익명 접근이 전부 막히고,
+Prisma는 `postgres` 롤로 붙어 RLS를 우회하므로 앱은 영향받지 않습니다.
+
+**`/admin`은 403이 아니라 404를 반환합니다.** public 저장소에서 존재를 확인시켜주지 않습니다.
+
+**댓글은 평문으로 저장·렌더합니다.** (`white-space: pre-wrap`)
+URL만 정규식으로 분리해 `<a rel="nofollow ugc noopener noreferrer">` **엘리먼트**를 만듭니다 — HTML 문자열이 아닙니다.
+저장형 XSS 표면을 sanitize로 막는 게 아니라 아예 없앴습니다.
+
+> **포스트 본문과의 비대칭:** 포스트는 sanitize하지 **않습니다.**
+> 작성자가 소유자 한 명이고 서버에서 `requireAdmin`으로 강제되며,
+> `rehype-sanitize` 기본 스키마는 지금 지키려는 `<aside>` 콜아웃을 제거해버립니다.
+
+**도배 방지는 DB 카운트로 합니다.** 인메모리 `Map`은 서버리스 인스턴스 간에 동작하지 않습니다.
+
+| 규칙                     | 응답  |
+| ------------------------ | ----- |
+| 1분에 3개 이상           | `429` |
+| 1시간에 20개 이상        | `429` |
+| 직전 댓글과 본문이 동일  | `429` |
+
+`@@index([authorId, createdAt])`를 쓰므로 밀리초 수준입니다.
+
+**이미지 업로드는 반드시 자체 라우트를 경유합니다.**
+브라우저에서 Storage로 직접 올리면 인가 경로가 둘(라우트 가드 + Storage RLS)이 됩니다.
+`/api/admin/upload` 하나만 두어 `requireAdminApi`가 유일한 관문이 되게 했습니다.
+secret key는 서버에서만 쓰이며 버킷에는 insert 정책이 없습니다.
+
+### 집계 방식
+
+| 지표          | 기준                                                             |
+| ------------- | ---------------------------------------------------------------- |
+| 오늘 / 누적 방문 | **순 방문자.** `mublog_seen` 쿠키가 오늘 날짜(KST)면 DB에 아예 안 씁니다 |
+| 포스트 조회수 | 같은 방문자는 **30분** 안에 다시 세지 않습니다                    |
+
+방문 기록은 `INSERT ... ON CONFLICT DO UPDATE` **단일 문장**입니다.
+`prisma.upsert`가 아니라 `$executeRaw`를 쓰는 이유는 raw 형태가 레이스 없는 한 문장임이 보장되기 때문입니다.
+트리거는 미들웨어가 아니라 클라이언트 이펙트입니다 — Edge에서는 Prisma가 Postgres에 닿지 못하고,
+캐시된 요청을 포함한 모든 요청의 TTFB에 DB 지연이 붙습니다.
+
+<br>
+
+## 프론트엔드
+
+### 서버 / 클라이언트 경계
+
+`.styled.tsx` 파일에는 `"use client"`가 없습니다.
+따라서 이들을 import하는 컴포넌트는 **클라이언트를 벗어날 수 없습니다.**
+서버 쪽은 `page.tsx` / `layout.tsx`와 데이터 접근 계층뿐입니다.
+
+```
+page.tsx (서버)  ──▶  DAL 조회  ──▶  props  ──▶  클라이언트 컴포넌트
+```
+
+`SideMenu`처럼 root layout 안에 있어 서버 props를 받을 수 없는 컴포넌트는
+`/api/posts/summary`를 TanStack Query로 페치합니다.
+
+### 상태
+
+- **서버 데이터** — TanStack Query. `QueryClient`는 `useState`로 컴포넌트 안에서 만듭니다.
+  모듈 스코프에 두면 서버에서 동시 요청 간에 공유되어 A의 캐시가 B에게 갑니다.
+- **댓글** — `onMutate` 스냅샷 → 낙관적 추가 → `onError` 롤백 → `onSettled` invalidate
+- **테마** — next-themes가 `html`에 `.dark`를 붙이고, 색은 전부 CSS 변수로 갈립니다
+
+### 레이아웃 규칙
+
+반복해서 문제를 일으켰던 두 가지를 규칙으로 굳혔습니다.
+
+**폭 계산은 CSS에 맡깁니다.** 캐러셀은 카드 폭을 JS 상태로 들지 않습니다.
+측정값을 상태로 두면 하이드레이션 전에 폭이 0이라 납작하게 그려집니다.
+JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n)`로 CSS가 나눕니다.
+홈 그리드도 같은 규칙을 `repeat(auto-fill, minmax(min(100%, 290px), 1fr))`로 표현합니다.
+
+**flex·grid 아이템에는 `min-width: 0`을 답니다.**
+기본값이 `auto`라 `ContentDocumentLink` 같은 안 끊기는 단어가
+지정한 폭을 무시하고 아이템을 밀어냅니다.
+
+카드 내부는 제목·설명을 `2lh`로 두 줄씩 고정합니다.
+줄 수를 막지 않으면 긴 글이 아래를 밀어내 푸터 여백이 사라지고 날짜가 잘립니다.
+
+<br>
+
+## 🎨 테마와 접근성
+
+색은 전부 `globals.css`의 CSS 변수로 정의하고, `:root`(라이트)와 `html.dark`(다크)에
+**같은 이름으로 한 벌씩** 둡니다. 컴포넌트에 색을 직접 적지 않는 것이 규칙입니다 —
+한쪽에만 정의된 토큰은 반대 테마에서 조용히 어긋납니다.
+
+| 토큰                                    | 쓰임                          |
+| --------------------------------------- | ----------------------------- |
+| `--background` / `--foreground`         | 페이지 바탕과 본문            |
+| `--cardbackground` / `--bordercolor`    | 카드·버튼 면과 테두리         |
+| `--desccolor`                           | 설명·날짜 등 보조 텍스트      |
+| `--codefontcolor` / `--codefontbgcolor` | 인라인 코드                   |
+| `--dangercolor` / `--dangerfontcolor`   | 삭제 등 되돌릴 수 없는 동작   |
+| `--hovercolor` / `--hoverfontcolor`     | 호버 상태                     |
+| `--activecolor` / `--activefontcolor`   | 선택·주요 동작                |
+| `--shadowcolor`                         | 그림자 (다크에서는 흰 글로우) |
+
+본문 글자는 두 테마 모두 **WCAG AA**(일반 4.5:1, 큰 글자 3:1)를 넘도록 맞췄습니다.
+코드 하이라이팅은 색상(hue)을 유지한 채 명도만 올린 GitHub Primer 대응값을 씁니다.
+
+버튼 생김새는 `styles/button.ts`의 조각(`buttonBase` / `buttonQuiet` / `buttonPrimary` / `buttonDanger`)을
+깔고 크기만 각자 덧붙입니다. 토큰이 바뀌었을 때 일부만 어긋나는 것을 막기 위해서입니다.
+
+<br>
+
 ## 🗂 프로젝트 구조
 
 ```
@@ -76,25 +348,37 @@ scripts/                  # 일회성·운영 스크립트 (tsx 로 실행)
 
 src/
 ├── app/
-│   ├── [slug]/           # 포스트 상세
-│   ├── admin/            # 관리자 화면 (목록·에디터)
+│   ├── [slug]/           # 포스트 상세 (SSG + ISR)
+│   ├── admin/            # 관리자 화면 (목록·에디터), force-dynamic
 │   ├── api/              # 라우트 핸들러
 │   ├── auth/             # OAuth 콜백 · 로그아웃
-│   └── login/
+│   ├── login/
+│   └── globals.css       # 테마 토큰
 ├── components/
 │   ├── admin/            # 에디터·태그 선택기
 │   ├── comments/         # 댓글 스레드
-│   └── ...
+│   └── ...               # X.tsx + X.styled.tsx 짝
 ├── lib/
 │   ├── markdown/         # 마크다운 → HTML 파이프라인
 │   ├── supabase/         # 브라우저·서버·프록시 클라이언트
-│   ├── posts.ts          # 데이터 접근 계층
+│   ├── posts.ts          # 데이터 접근 계층 (캐시 태그 포함)
 │   ├── comments.ts
 │   ├── stats.ts
-│   └── storage.ts
+│   ├── storage.ts
+│   ├── auth.ts           # 세션·권한 확인
+│   ├── api.ts            # 요청 본문 검증
+│   ├── fetcher.ts        # 클라이언트 fetch 래퍼
+│   └── revalidate.ts
+├── styles/
+│   ├── button.ts         # 버튼 공통 스타일 조각
+│   ├── motion.ts         # 페이드·슬라이드 전환
+│   └── prism-notion-theme.css
 ├── contents/posts/       # DB 내보내기 백업 (읽지 않음)
 └── proxy.ts              # 세션 갱신 · /admin 가드
 ```
+
+> `proxy.ts`(구 `middleware.ts`)는 **UX이지 보안 경계가 아닙니다.**
+> Edge에서 돌고 DB에 닿지 못하며 우회 가능합니다. 실제 권한 확인은 서버에서 합니다.
 
 <br>
 
@@ -105,7 +389,7 @@ src/
 $ yarn install
 
 # 2. 환경변수 설정
-$ cp .env.example .env    # 값은 Supabase 대시보드에서
+$ cp .env.example .env    # 값은 Supabase 대시보드 [Connect] 에서
 
 # 3. 접속 확인
 $ yarn check:db
@@ -117,8 +401,25 @@ $ yarn prisma migrate deploy
 $ yarn dev
 ```
 
-> ✅ `DATABASE_URL`은 **6543(Transaction pooler)**, `DIRECT_URL`은 **5432(Session pooler)** 입니다.
-> `?pgbouncer=true`를 빠뜨리면 동시 요청 시에만 오류가 나서 로컬에서는 재현되지 않습니다.
+### 환경변수
+
+| 키                                     | 용도                                          |
+| -------------------------------------- | --------------------------------------------- |
+| `DATABASE_URL`                         | 앱 런타임. **6543** (Transaction pooler)      |
+| `DIRECT_URL`                           | 마이그레이션. **5432** (Session pooler)       |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Supabase 프로젝트 URL                         |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 구 anon key. 번들 노출이 정상                 |
+| `SUPABASE_SECRET_KEY`                  | 구 service_role key. **`NEXT_PUBLIC_` 금지**  |
+| `NEXT_PUBLIC_SITE_URL`                 | OAuth 콜백 URL 구성                           |
+| `CRON_SECRET`                          | cron 라우트 보호                              |
+
+> ⚠️ `?pgbouncer=true`를 빠뜨리면 **동시 요청 시에만** `prepared statement "s0" already exists`가
+> 간헐적으로 납니다. 로컬에서는 재현되지 않고 프로덕션에서만 터집니다.
+> `connection_limit=1`도 필수입니다 — 서버리스 인스턴스마다 풀이 생기므로
+> 그 이상이면 무료 티어 커넥션이 고갈됩니다.
+
+> Vercel에서는 **Production·Preview·Development 전부**에 등록해야 합니다.
+> `generateStaticParams`가 빌드 시점에 DB를 조회하므로 빌드에도 `DATABASE_URL`이 필요합니다.
 
 <br>
 
@@ -130,7 +431,7 @@ $ yarn dev
 | `yarn backup:posts`     | DB 포스트를 mdx로 내보내기 (백업)               |
 | `yarn migrate:posts`    | mdx를 DB로 가져오기 (복구·최초 이전)            |
 | `yarn verify:migration` | 백업과 DB 대조                                  |
-| `yarn verify:render`    | 마크다운 파이프라인 회귀 검사                   |
+| `yarn verify:render`    | 마크다운 파이프라인 회귀 검사 (12가지)          |
 | `yarn audit:render`     | 전체 포스트 렌더링 점검                         |
 | `yarn sweep:images`     | 참조 없는 이미지 정리 (기본 dry-run)            |
 
@@ -143,8 +444,26 @@ $ yarn dev
 
 `vercel.json`의 cron이 하루 한 번(`0 3 * * *`) 도는 동안 두 가지를 처리합니다.
 
-- **Supabase 깨우기** — 무료 프로젝트는 7일 무활동 시 정지되고, 정지되면 빌드까지 실패합니다
-- **고아 이미지 정리** — 본문에서 지웠거나, 저장 없이 창을 닫았거나, 글이 삭제되어 참조를 잃은 파일
+- **Supabase 깨우기** (`SELECT 1`) — 무료 프로젝트는 7일 무활동 시 정지되고,
+  정지되면 빌드타임 `generateStaticParams`까지 실패합니다
+- **고아 이미지 정리** — 본문에서 지웠거나, 저장 없이 창을 닫았거나,
+  글이 삭제되어 참조를 잃은 파일. 24시간 유예를 둡니다
+
+<br>
+
+## ⚠️ 알아둘 함정
+
+이 저장소에서 실제로 시간을 잡아먹었던 것들입니다.
+
+| 증상                                     | 원인                                                    |
+| ---------------------------------------- | ------------------------------------------------------- |
+| 코드블록 색이 조용히 사라짐              | `refractor/common`에 jsx·tsx가 없음. `ignoreMissing`이 삼킴 |
+| `<aside>` 안의 `**굵게**`가 그대로 보임  | CommonMark HTML-block 규칙. 빈 줄 정규화 필요           |
+| DB는 맞는데 페이지가 낡음                | `unstable_cache`가 `.next/cache`에 남음. `rm -rf .next/cache` |
+| `f.createContext is not a function`      | 서버 컴포넌트가 `"use client"` 없는 `.styled.tsx`를 import |
+| 무작위 로그아웃                          | `@supabase/ssr`에서 만든 응답 객체를 그대로 반환하지 않음  |
+| 옛 URL에 낡은 페이지가 남음              | slug 변경 시 이전 slug의 태그·경로를 무효화하지 않음      |
+| 프로덕션에서만 나는 prepared statement 오류 | `?pgbouncer=true` 누락                                  |
 
 <br>
 

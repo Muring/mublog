@@ -50,7 +50,7 @@ model Post {
     status      PostStatus @default(DRAFT)
     publishedAt DateTime?  @map("published_at")
     readingTime Int        @default(1) @map("reading_time")
-    /// 포스트별 조회수. 컬럼만 확보해두고 증가 로직은 아직 연결하지 않는다.
+    /// 포스트별 조회수. 같은 방문자는 30분(POST_VIEW_WINDOW_MS) 안에 다시 세지 않는다.
     viewCount   Int        @default(0) @map("view_count")
     /// 목록 렌더마다 _count 서브쿼리를 돌리지 않으려고 비정규화한다.
     commentCount Int       @default(0) @map("comment_count")
