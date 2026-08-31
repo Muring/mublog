@@ -83,6 +83,8 @@ export default function PostEditor({ initial, knownTags }: Props) {
             return;
         }
         let cancelled = false;
+        // 이전 판정을 지우지 않고 checking 만 켠다.
+        // 매 타이핑마다 결과를 비우면 "확인 중" 과 결과가 번갈아 나타나 깜빡인다.
         setSlugState((state) => ({ ...state, checking: true }));
         const timer = setTimeout(async () => {
             const params = new URLSearchParams({ slug: post.slug });
@@ -100,7 +102,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
             } catch {
                 if (!cancelled) setSlugState({ checking: false, available: null, reason: null });
             }
-        }, 400);
+        }, 500);
         return () => {
             cancelled = true;
             clearTimeout(timer);
@@ -288,12 +290,17 @@ export default function PostEditor({ initial, knownTags }: Props) {
                         onChange={(e) => set("slug", e.target.value)}
                         placeholder="english-kebab-case"
                     />
-                    {slugState.checking ? (
-                        <span className="field-hint">확인 중...</span>
-                    ) : slugState.available === false ? (
+                    {/*
+                      판정을 checking 보다 먼저 본다. 재확인 중이라고 결과를
+                      "확인 중..." 으로 되돌리면 타자마다 화면이 깜빡인다.
+                      첫 확인일 때만 "확인 중..." 을 보여준다.
+                    */}
+                    {slugState.available === false ? (
                         <span className="field-error">{slugState.reason}</span>
                     ) : slugState.available ? (
                         <span className="field-ok">/{post.slug}</span>
+                    ) : slugState.checking ? (
+                        <span className="field-hint">확인 중...</span>
                     ) : (
                         <span className="field-hint">글이 열릴 주소입니다</span>
                     )}

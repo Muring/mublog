@@ -29,7 +29,7 @@ export const EditorWrapper = styled.div`
     color: var(--desccolor);
   }
   .status-text.error {
-    color: #d93025;
+    color: var(--dangercolor);
   }
 `;
 
@@ -69,7 +69,7 @@ export const MetaGrid = styled.div`
 
   .field-error {
     font-size: 0.7rem;
-    color: #d93025;
+    color: var(--dangercolor);
     font-weight: 500;
   }
   .field-ok {
@@ -189,8 +189,9 @@ export const EditorColumn = styled.div`
     }
   }
 
+  /* 입력한 글이 묻히지 않도록 배경만 한 톤 바꾼다 */
   &.dragging textarea {
-    background-color: var(--hovercolor);
+    background-color: var(--codefontbgcolor);
   }
 `;
 

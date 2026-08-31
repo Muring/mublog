@@ -28,8 +28,8 @@ export function useToast(): ToastApi {
 
 // 오류는 읽는 데 시간이 더 걸리므로 오래 남긴다
 const DURATION: Record<ToastKind, number> = {
-    success: 2500,
-    info: 2500,
+    success: 3500,
+    info: 3500,
     error: 5000,
 };
 

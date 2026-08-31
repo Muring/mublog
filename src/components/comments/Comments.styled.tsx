@@ -67,10 +67,14 @@ export const CommentsWrapper = styled.section`
         }
     }
 
+    /* 댓글이 도착하기 전후로 높이가 튀지 않도록 자리를 잡아둔다 */
     .status-text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 6rem;
         font-size: 0.85rem;
         color: var(--desccolor);
-        padding: 1.5rem 0;
         text-align: center;
     }
 `;
@@ -281,7 +285,7 @@ export const CommentRow = styled.div`
             color: var(--foreground);
         }
         &.danger:hover {
-            color: #d93025;
+            color: var(--dangercolor);
         }
         &:disabled {
             opacity: 0.5;
@@ -331,7 +335,7 @@ export const CommentFormWrapper = styled.form`
         color: var(--desccolor);
     }
     .counter.over {
-        color: #d93025;
+        color: var(--dangercolor);
         font-weight: 700;
     }
 
@@ -374,7 +378,7 @@ export const CommentFormWrapper = styled.form`
         color: transparent;
     }
     .form-error.visible {
-        color: #d93025;
+        color: var(--dangercolor);
     }
 `;
 

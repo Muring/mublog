@@ -77,6 +77,6 @@ export const TagSelectorWrapper = styled.div`
     }
 
     .hint.error {
-        color: #d93025;
+        color: var(--dangercolor);
     }
 `;

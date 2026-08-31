@@ -5,12 +5,13 @@ import styled from "@emotion/styled";
 export const ToastViewport = styled.div`
     position: fixed;
     left: 50%;
-    bottom: 1.5rem;
+    /* 헤더가 fixed / 64px 이므로 그 아래에 띄운다 */
+    top: calc(64px + 1rem);
     transform: translateX(-50%);
     z-index: 100;
 
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     align-items: center;
     gap: 0.5rem;
 
@@ -20,7 +21,6 @@ export const ToastViewport = styled.div`
     @media (max-width: 640px) {
         left: 1rem;
         right: 1rem;
-        bottom: 1rem;
         transform: none;
         align-items: stretch;
     }
@@ -51,7 +51,7 @@ export const ToastItem = styled.div`
         border-left-color: #1a7f37;
     }
     &.error {
-        border-left-color: #d93025;
+        border-left-color: var(--dangercolor);
     }
 
     .message {
@@ -79,7 +79,7 @@ export const ToastItem = styled.div`
     @keyframes toast-in {
         from {
             opacity: 0;
-            transform: translateY(0.5rem);
+            transform: translateY(-0.5rem);
         }
         to {
             opacity: 1;

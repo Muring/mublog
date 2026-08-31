@@ -62,8 +62,14 @@ export const PostTable = styled.table`
     font-weight: 700;
   }
 
+  /*
+    --hovercolor 는 다크 모드에서 #dadada 라 글자색(--foreground #cacaca)과
+    거의 같아져 내용이 묻힌다. --hoverfontcolor 를 함께 쓰는 버튼과 달리
+    행은 안쪽 글자색이 제각각이라 배경만 은은하게 바꾸는 편이 안전하다.
+    --codefontbgcolor 는 라이트/다크 모두 배경보다 한 톤만 다른 값이다.
+  */
   tbody tr:hover {
-    background-color: var(--hovercolor);
+    background-color: var(--codefontbgcolor);
   }
 
   .title-cell {
@@ -122,8 +128,20 @@ export const Button = styled.button`
     color: var(--activefontcolor);
     border-color: var(--activecolor);
   }
+
+  /*
+    테두리를 글자색과 같게 둔다. 고정된 연분홍(#f0b4b0)을 쓰면
+    다크 모드에서 흰 테두리처럼 보인다.
+  */
   &.danger {
-    color: #d93025;
-    border-color: #f0b4b0;
+    color: var(--dangercolor);
+    border-color: currentColor;
+  }
+
+  /* 되돌릴 수 없는 동작이므로 hover 에서 색을 잃지 않고 오히려 또렷해져야 한다 */
+  &.danger:hover:not(:disabled) {
+    background-color: var(--dangercolor);
+    border-color: var(--dangercolor);
+    color: var(--dangerfontcolor);
   }
 `;

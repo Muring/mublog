@@ -23,7 +23,7 @@ export const LoginWrapper = styled.div`
 
   .error {
     font-size: 0.85rem;
-    color: #d93025;
+    color: var(--dangercolor);
   }
 `;
 
