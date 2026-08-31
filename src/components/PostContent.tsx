@@ -1,22 +1,24 @@
 "use client";
 
-import { useMDXComponent } from "next-contentlayer2/hooks";
 import { Article } from "./PostContent.styled";
 import Image from "next/image";
 import Link from "next/link";
-import dayjs from "dayjs";
+import { formatPostDate } from "@/lib/date";
+import PostViews from "./PostViews";
 
 type Props = {
     title: string;
     date: string;
-    description?: string;
+    slug: string;
+    viewCount: number;
+    description?: string | null;
     tags?: string[];
-    code: string;
+    /** 저장 시점에 렌더된 본문 HTML. 작성자는 관리자뿐이므로 sanitize 하지 않는다. */
+    html: string;
 };
 
-export default function PostContent({ title, date, description, tags, code }: Props) {
-    const MDXContent = useMDXComponent(code);
-    const formattedDate = dayjs(date).format("YYYY년 M월 D일");
+export default function PostContent({ title, date, slug, viewCount, description, tags, html }: Props) {
+    const formattedDate = formatPostDate(date);
 
     return (
         <Article>
@@ -32,6 +34,9 @@ export default function PostContent({ title, date, description, tags, code }: Pr
                         className="article-detail-icon auto-dark"
                     />
                     <p className="desc">{formattedDate}</p>
+                    <p className="desc views">
+                        <PostViews slug={slug} initialViews={viewCount} />
+                    </p>
                 </div>
 
                 <div className="article-item">
@@ -45,7 +50,7 @@ export default function PostContent({ title, date, description, tags, code }: Pr
                     <ul>
                         {tags?.map((tag) => (
                             <li key={tag}>
-                                <Link href={`/?tag=${tag}`}>
+                                <Link href={`/?tag=${encodeURIComponent(tag)}`}>
                                     <h4 className=" tag">{"#" + tag}</h4>
                                 </Link>
                             </li>
@@ -54,7 +59,7 @@ export default function PostContent({ title, date, description, tags, code }: Pr
                 </div>
             </div>
             <hr />
-            <MDXContent />
+            <div dangerouslySetInnerHTML={{ __html: html }} />
         </Article>
     );
 }

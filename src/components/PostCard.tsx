@@ -1,10 +1,10 @@
 import Card from "./PostCard.styled";
-import { Post } from "contentlayer/generated";
-import dayjs from "dayjs";
+import type { PostSummary } from "@/types/post";
+import { formatCardDate } from "@/lib/date";
 import Image from "next/image";
 
-export default function PostCard({ post, style }: { post: Post; style?: React.CSSProperties }) {
-    const formattedDate = dayjs(post.date).format("YY년 MM월 DD일");
+export default function PostCard({ post, style }: { post: PostSummary; style?: React.CSSProperties }) {
+    const formattedDate = formatCardDate(post.publishedAt);
 
     return (
         <Card.Wrapper style={style}>

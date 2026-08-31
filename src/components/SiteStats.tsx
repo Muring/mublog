@@ -1,0 +1,40 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { StatsWrapper } from "./SiteStats.styled";
+
+type Stats = { today: number; total: number };
+
+async function fetchStats(): Promise<Stats> {
+    const res = await fetch("/api/stats");
+    if (!res.ok) throw new Error("통계를 불러오지 못했습니다.");
+    return res.json();
+}
+
+/**
+ * 사이트 방문자 수.
+ *
+ * "Today / Total" 처럼 줄이면 무엇을 센 숫자인지 드러나지 않는다.
+ * 가로 폭이 있는 자리이므로 문장으로 적어 뜻이 바로 읽히게 한다.
+ *
+ * 클라이언트에서 가져오므로 홈은 정적 캐시를 유지한다.
+ */
+export default function SiteStats() {
+    const { data } = useQuery({
+        queryKey: ["site-stats"],
+        queryFn: fetchStats,
+        // 방문 비콘이 응답으로 갱신값을 심어주므로 보통 추가 요청 없이 맞춰진다
+        staleTime: 0,
+    });
+
+    // 실패하거나 아직 안 왔으면 자리만 지킨다
+    if (!data) return <StatsWrapper aria-hidden />;
+
+    return (
+        <StatsWrapper>
+            오늘 방문 <strong>{data.today.toLocaleString("ko-KR")}</strong>명
+            <span className="divider">·</span>
+            누적 <strong>{data.total.toLocaleString("ko-KR")}</strong>명
+        </StatsWrapper>
+    );
+}

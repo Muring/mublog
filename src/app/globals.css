@@ -11,6 +11,10 @@
   --shadowcolor: rgba(0, 0, 0, 0.1);
   --desccolor: #888888;
   --calloutborder: #ffee8a;
+  /* 밝은 배경용 빨강. 어두운 배경에서는 대비가 3:1 로 떨어지므로 다크에서 따로 준다 */
+  --dangercolor: #d93025;
+  /* 위 색으로 채웠을 때 올릴 글자색 */
+  --dangerfontcolor: #ffffff;
 }
 
 html.dark {
@@ -25,6 +29,10 @@ html.dark {
   --cardbackground: #27272a;
   --shadowcolor: rgba(255, 255, 255, 0.1);
   --calloutborder: #685800;
+  /* #d93025 는 다크 카드 배경 위에서 3.09:1 로 AA 미달이다. 밝은 빨강으로 올린다 */
+  --dangercolor: #f85149;
+  /* 밝아진 빨강 위에 흰 글자를 올리면 3.3:1 로 더 나빠진다. 어두운 글자가 5.7:1 로 안전하다 */
+  --dangerfontcolor: #101010;
 }
 
 .dark .auto-dark {
@@ -142,6 +150,16 @@ a {
 
 li {
   list-style-type: none;
+}
+
+/*
+  콘텐츠가 로딩 중이라 짧아져도 푸터가 화면 위로 끌려 올라오지 않게 한다.
+  클라이언트에서 데이터를 받아 채우는 영역(목록, 댓글 등)이 있어서
+  최소 높이가 없으면 로딩 전후로 푸터가 오르내린다.
+*/
+main {
+  display: block;
+  min-height: 100vh;
 }
 
 .home {

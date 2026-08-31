@@ -50,3 +50,9 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+
+# prisma generated client
+/src/generated/
+
+.vercel
+.env*

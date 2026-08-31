@@ -109,6 +109,14 @@ export const Article = styled.article`
       font-size: 0.8rem;
       margin: 0;
     }
+    /* 조회수는 보조 정보라 날짜보다 한 단계 물러나게 한다 */
+    .desc.views {
+      opacity: 0.7;
+    }
+    .desc.views::before {
+      content: "·";
+      margin-right: 0.4rem;
+    }
     .tag {
       font-size: 0.75rem;
       height: 100%;

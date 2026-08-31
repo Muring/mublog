@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Post } from "contentlayer/generated";
+import type { PostSummary } from "@/types/post";
+import { byNewest } from "@/lib/date";
 import Link from "next/link";
 import PostCard from "./PostCard";
 import Carousel from "./CarouselSlider.styled";
 
 interface CarouselSliderProps {
-  posts: Post[];
+  posts: PostSummary[];
   tags?: string[];
   currentSlug: string;
 }
@@ -27,17 +28,17 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
     // 현재글 제외된 최신글 (중복 제거용으로도 사용)
     const latestPosts = posts
       .filter((post) => post.slug !== currentSlug)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      .sort((a, b) => byNewest(a.publishedAt, b.publishedAt));
 
     // 태그 일치 + 현재글 제외
     const taggedPosts = latestPosts.filter((post) => post.tags?.some((tag) => tags?.includes(tag)));
 
     // taggedPosts에서 최대 5개 확보, 부족하면 latestPosts로 보완
-    const result: Post[] = [...taggedPosts];
+    const result: PostSummary[] = [...taggedPosts];
 
     for (const post of latestPosts) {
       if (result.length >= 5) break;
-      if (!result.some((p) => p._id === post._id)) {
+      if (!result.some((p) => p.id === post.id)) {
         result.push(post);
       }
     }
@@ -111,7 +112,7 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
           isTransitioning={isTransitioning}
         >
           {duplicatedPosts.map((post, index) => (
-            <Carousel.Slide key={`${post._id}-${index}`} cardWidth={cardWidth}>
+            <Carousel.Slide key={`${post.id}-${index}`} cardWidth={cardWidth}>
               <Link href={`/${post.slug}`}>
                 <PostCard post={post} style={{ animationDelay: `${index * 0.05}s` }} />
               </Link>
