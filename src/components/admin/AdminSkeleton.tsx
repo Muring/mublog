@@ -1,13 +1,32 @@
 "use client";
 
-import { AdminWrapper, PostTable, Skeleton } from "./Admin.styled";
+import Link from "next/link";
+import { AdminWrapper, PostTable, Button, Skeleton } from "./Admin.styled";
 
 /**
- * 관리 화면이 데이터를 기다리는 동안 보여줄 뼈대.
+ * 관리 화면의 뼈대.
  *
- * 실제 화면과 같은 자리·같은 높이로 그린다. 스피너 하나만 띄우면
- * 내용이 도착하는 순간 배치가 통째로 바뀌어 화면이 튄다.
+ * loading.tsx 와 page.tsx 가 **같은 컴포넌트**를 쓴다.
+ * 둘이 조금이라도 다르면 loading -> page 로 넘어갈 때 화면이 한 번 더 튄다.
+ * 실제로 헤더를 한쪽은 스켈레톤, 한쪽은 진짜 버튼으로 그렸다가 깜빡임을 만들었다.
  */
+
+/** 데이터가 필요 없는 부분. 기다리는 동안에도 눌러서 글을 쓰러 갈 수 있다. */
+export function AdminShell({ children }: { children: React.ReactNode }) {
+    return (
+        <AdminWrapper>
+            <div className="admin-head">
+                <h2>포스트 관리</h2>
+                <Link href="/admin/posts/new">
+                    <Button as="span" className="primary">
+                        새 글 쓰기
+                    </Button>
+                </Link>
+            </div>
+            {children}
+        </AdminWrapper>
+    );
+}
 
 /** 통계 4칸 */
 export function StatRowSkeleton() {
@@ -47,7 +66,9 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
                             />
                         </td>
                         <td data-label="상태">
-                            <Skeleton style={{ width: "2.6rem", height: "1.25rem", borderRadius: "999px" }} />
+                            <Skeleton
+                                style={{ width: "2.6rem", height: "1.25rem", borderRadius: "999px" }}
+                            />
                         </td>
                         <td data-label="태그">
                             <Skeleton style={{ width: "70%", height: "0.8rem" }} />
@@ -71,16 +92,12 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
     );
 }
 
-/** 화면 전체. 네비게이션 직후 loading.tsx 가 이것을 쓴다. */
+/** 목록이 오기 전 상태 그대로. loading.tsx 가 이것을 쓴다. */
 export default function AdminSkeleton() {
     return (
-        <AdminWrapper>
-            <div className="admin-head">
-                <h2>포스트 관리</h2>
-                <Skeleton style={{ width: "6.5rem", height: "2.2rem" }} />
-            </div>
+        <AdminShell>
             <StatRowSkeleton />
             <PostTableSkeleton />
-        </AdminWrapper>
+        </AdminShell>
     );
 }
