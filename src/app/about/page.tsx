@@ -1,7 +1,7 @@
-import HistoryTimeline from "@/components/HistoryTimeline";
-import Introduction from "@/components/Introduction";
+import HistoryTimeline from "@/components/about/HistoryTimeline";
+import Introduction from "@/components/about/Introduction";
 import Profile from "@/components/Profile";
-import ProjectTimeline from "@/components/ProjectTimeline";
+import ProjectTimeline from "@/components/about/ProjectTimeline";
 
 export default function AboutPage() {
   return (

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { PostGridWrapper, GridList } from "./PostGrid.styled";
 import { useSearchParams } from "next/navigation";
-import TagMenu from "@/components/TagMenu";
+import TagMenu from "@/components/post/TagMenu";
 import Link from "next/link";
 import PostCard from "./PostCard";
 import type { PostSummary } from "@/types/post";

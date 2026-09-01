@@ -2,7 +2,7 @@
 
 import styled from "@emotion/styled";
 import { buttonBase } from "@/styles/button";
-import { Article } from "@/components/PostContent.styled";
+import { Article } from "@/components/post/PostContent.styled";
 
 export const EditorWrapper = styled.div`
   max-width: 1400px;

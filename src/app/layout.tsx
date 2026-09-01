@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "@/styles/prism-notion-theme.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import RootProvider from "@/providers/RootProvider";
 import VisitTracker from "@/components/trackers/VisitTracker";
 

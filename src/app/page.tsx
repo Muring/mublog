@@ -1,7 +1,7 @@
 // src/app/page.tsx
 
 import Profile from "@/components/Profile";
-import PostGrid from "@/components/PostGrid";
+import PostGrid from "@/components/post/PostGrid";
 import SiteStats from "@/components/SiteStats";
 import { getAllTags, getPublishedPosts } from "@/lib/posts";
 import { Suspense } from "react";

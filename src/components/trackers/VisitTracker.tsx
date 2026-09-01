@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { postViewsKey } from "@/components/PostViews";
+import { postViewsKey } from "@/components/post/PostViews";
 
 /** 포스트 상세 경로에서만 slug 를 뽑는다. /about 같은 정적 경로는 제외. */
 const RESERVED = new Set(["", "about", "login", "admin", "auth", "api"]);

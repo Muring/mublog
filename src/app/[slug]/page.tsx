@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import PostContent from "@/components/PostContent";
+import PostContent from "@/components/post/PostContent";
 import RecentPostTracker from "@/components/trackers/RecentPostTracker";
-import CarouselSlider from "@/components/CarouselSlider";
-import RelatedContent from "@/components/RelatedContent";
+import CarouselSlider from "@/components/post/CarouselSlider";
+import RelatedContent from "@/components/post/RelatedContent";
 import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
 import Comments from "@/components/comments/Comments";
 import { getPostBySlug, getPublishedPosts, getPublishedSlugs } from "@/lib/posts";
