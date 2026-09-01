@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getProfile } from "@/lib/auth";
-import { handleApiError } from "@/lib/http";
+import { handleApiError } from "@/lib/api";
 
 // 사용자별 응답이므로 절대 캐시하지 않는다
 export const dynamic = "force-dynamic";

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/auth";
-import { handleApiError } from "@/lib/http";
+import { handleApiError } from "@/lib/api";
 import { slugSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";

@@ -1,7 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { requireUserApi, getProfile } from "@/lib/auth";
-import { handleApiError } from "@/lib/http";
-import { parseBody } from "@/lib/api";
+import { handleApiError, parseBody } from "@/lib/api";
 import { commentInputSchema } from "@/lib/validation";
 import { deleteComment, updateComment } from "@/lib/comments";
 
