@@ -13,6 +13,7 @@ import {
     SplitPane,
     EditorColumn,
     ToolbarButton,
+    PaneTab,
     PreviewArticle,
 } from "./PostEditor.styled";
 
@@ -52,6 +53,8 @@ export default function PostEditor({ initial, knownTags }: Props) {
     const [isDragging, setIsDragging] = useState(false);
     const [isUploadingThumb, setIsUploadingThumb] = useState(false);
     const [tagError, setTagError] = useState<string | null>(null);
+    // 좁은 화면에서만 쓰는 탭. 글을 쓰러 들어오는 화면이라 본문에서 시작한다.
+    const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const thumbInputRef = useRef<HTMLInputElement>(null);
 
@@ -370,8 +373,30 @@ export default function PostEditor({ initial, knownTags }: Props) {
                 </div>
             </MetaGrid>
 
-            <SplitPane>
-                <EditorColumn className={isDragging ? "dragging" : ""}>
+            <SplitPane activeTab={activeTab}>
+                {/* 넓은 화면에서는 숨는다. 둘이 나란히 보이므로 고를 것이 없다 */}
+                <div className="pane-tabs" role="tablist">
+                    <PaneTab
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === "write"}
+                        className={activeTab === "write" ? "active" : ""}
+                        onClick={() => setActiveTab("write")}
+                    >
+                        본문
+                    </PaneTab>
+                    <PaneTab
+                        type="button"
+                        role="tab"
+                        aria-selected={activeTab === "preview"}
+                        className={activeTab === "preview" ? "active" : ""}
+                        onClick={() => setActiveTab("preview")}
+                    >
+                        미리보기
+                    </PaneTab>
+                </div>
+
+                <EditorColumn className={`pane-write ${isDragging ? "dragging" : ""}`}>
                     <div className="toolbar">
                         <ToolbarButton onClick={() => insertAtCursor("## ", "", "제목")}>
                             H2
@@ -436,7 +461,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
                     />
                 </EditorColumn>
 
-                <div>
+                <div className="pane-preview">
                     <PreviewArticle>
                         <h1>{post.title || "제목 없음"}</h1>
                         <h5>{post.description}</h5>

@@ -12,12 +12,6 @@ export const Article = styled.article`
   animation: fadeIn 1s ease forwards;
   animation-fill-mode: forwards;
 
-  /* 미디어 쿼리로 다크모드 대응 */
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--background);
-    color: var(--foreground);
-  }
-
   /* 타이포그래피 기본 구조 */
   h1 {
     margin-bottom: 0.5rem;

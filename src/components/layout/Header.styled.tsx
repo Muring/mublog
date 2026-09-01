@@ -5,11 +5,6 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
     background-color: var(--background);
     color: var(--foreground);
 
-    @media (prefers-color-scheme: dark) {
-        background-color: var(--background);
-        color: var(--foreground);
-    }
-
     position: fixed;
     top: 0;
     z-index: 50;
@@ -127,12 +122,10 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
 export const DiagonalLine = styled.div`
     height: 28px;
     width: 1px;
-    background-color: #d4d4d8; //
+    /* OS 설정(prefers-color-scheme)으로 색을 갈랐더니 사용자가 고른 테마와
+       어긋났다. 다른 구분선과 같은 토큰을 쓴다 */
+    background-color: var(--bordercolor);
     transform: rotate(30deg);
-
-    @media (prefers-color-scheme: dark) {
-        background-color: #3f3f46;
-    }
 `;
 
 export const Overlay = styled.div`

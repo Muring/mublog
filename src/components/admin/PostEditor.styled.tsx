@@ -177,14 +177,54 @@ export const MetaGrid = styled.div`
   }
 `;
 
-export const SplitPane = styled.div`
+/**
+ * 본문과 미리보기.
+ *
+ * 900px 아래에서는 좌우로 놓을 자리가 없다. 예전에는 위아래로 쌓았는데
+ * 본문 입력란이 화면을 가득 채우다 보니 미리보기가 한참 아래로 밀려
+ * 사실상 보이지 않았다. 좁아지면 탭으로 바꿔 한 번에 하나만 보여준다.
+ */
+export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   align-items: start;
 
+  /* 넓을 때는 탭이 필요 없다 */
+  .pane-tabs {
+    display: none;
+  }
+
   @media (max-width: 900px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+
+    .pane-tabs {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    /* 고른 쪽만 남긴다. 감추는 쪽은 DOM 에 그대로 두어
+       탭을 오갈 때 입력 중이던 내용과 커서가 유지된다. */
+    .pane-write {
+      display: ${(props) => (props.activeTab === "write" ? "flex" : "none")};
+    }
+    .pane-preview {
+      display: ${(props) => (props.activeTab === "preview" ? "block" : "none")};
+    }
+  }
+`;
+
+/** 탭 버튼. 고른 쪽만 채워서 색과 무관하게 구분되도록 밑줄도 함께 준다. */
+export const PaneTab = styled.button`
+  ${buttonBase}
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+
+  &.active {
+    background-color: var(--activecolor);
+    color: var(--activefontcolor);
+    border-color: var(--activecolor);
   }
 `;
 

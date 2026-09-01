@@ -16,11 +16,6 @@ export const FooterWrapper = styled.footer`
   color: var(--desccolor);
   gap: 1rem;
 
-  @media (prefers-color-scheme: dark) {
-    background-color: var(--background);
-    color: var(--foreground);
-  }
-
   .stack {
     display: flex;
     justify-content: space-evenly;
