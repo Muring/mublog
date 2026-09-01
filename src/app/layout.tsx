@@ -3,7 +3,7 @@ import "./globals.css";
 import "@/styles/prism-notion-theme.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import RootProvider from "@/Providers/RootProvider";
+import RootProvider from "@/providers/RootProvider";
 import VisitTracker from "@/components/trackers/VisitTracker";
 
 export const metadata: Metadata = {

@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { HeaderWrapper, DiagonalLine, ButtonWrapper } from "./Header.styled";
-import { useHeaderTitle } from "@/Providers/HeaderTitleProvider";
+import { useHeaderTitle } from "@/providers/HeaderTitleProvider";
 import Image from "next/image";
 import Link from "next/link";
 import SideMenu from "./SideMenu";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useHeaderTitle } from "@/Providers/HeaderTitleProvider";
+import { useHeaderTitle } from "@/providers/HeaderTitleProvider";
 
 export default function HeaderTitleSetter({ title }: { title: string }) {
     const { setTitle } = useHeaderTitle();

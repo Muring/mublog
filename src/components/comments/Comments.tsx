@@ -8,7 +8,7 @@ import { CommentsWrapper, CommentList, SignInPrompt } from "./Comments.styled";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { fetchMe } from "@/components/HeaderAuth";
-import { useToast } from "@/Providers/Toast";
+import { useToast } from "@/providers/Toast";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import type { CommentNode } from "@/types/comment";
 

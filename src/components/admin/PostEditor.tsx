@@ -6,7 +6,7 @@ import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
-import { useToast } from "@/Providers/Toast";
+import { useToast } from "@/providers/Toast";
 import {
     EditorWrapper,
     MetaGrid,

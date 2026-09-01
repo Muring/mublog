@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "./Admin.styled";
-import { useToast } from "@/Providers/Toast";
+import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
 
 type Props = {
