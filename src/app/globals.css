@@ -23,6 +23,10 @@
   --dangercolor: #d93025;
   /* 위 색으로 채웠을 때 올릴 글자색 */
   --dangerfontcolor: #ffffff;
+  /* "아직 발행 전" 처럼 주의를 끌되 위험은 아닌 상태 (6.44) */
+  --warncolor: #7a5000;
+  --warnbg: #fff4d6;
+  --warnborder: #e0c07a;
 }
 
 html.dark {
@@ -45,6 +49,10 @@ html.dark {
   --dangercolor: #ff7b72;
   /* 밝아진 빨강 위에 흰 글자를 올리면 3.3:1 로 더 나빠진다. 어두운 글자가 5.7:1 로 안전하다 */
   --dangerfontcolor: #101010;
+  /* 라이트용 앰버(#7a5000)는 어두운 바탕에서 3.51:1 로 미달이라 밝은 쪽으로 뒤집는다 (8.91) */
+  --warncolor: #f0c657;
+  --warnbg: #33280d;
+  --warnborder: #8a6f28;
 }
 
 .dark .auto-dark {

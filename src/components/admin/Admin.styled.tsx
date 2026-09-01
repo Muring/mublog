@@ -27,14 +27,20 @@ export const AdminWrapper = styled.div`
   }
 
   /*
-   * flex + flex-wrap 이면 좁아질 때 한 줄에 하나씩 떨어져 세로로 길어진다.
-   * 최소 폭만 정해두면 4 -> 2 -> 1 개로 알아서 접힌다.
+   * auto-fit 은 폭에 따라 3열 같은 어중간한 배치를 만든다.
+   * 네 수치는 한 세트라 4열 아니면 2x2 둘 중 하나여야 한다.
    */
   .stat-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
     margin-bottom: 2rem;
+  }
+
+  @container admin (max-width: 620px) {
+    .stat-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   .stat {
@@ -58,6 +64,25 @@ export const PostTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+
+  /*
+   * auto 레이아웃은 내용이 긴 열(제목의 slug, 태그 목록)이 폭을 독차지하고
+   * 나머지를 굶긴다. 그 결과 "발행" 배지가 "발/행" 으로, 버튼이 "수/정" 으로
+   * 세로로 쪼개졌다. 각 열이 필요한 만큼을 미리 정해준다.
+   */
+  table-layout: fixed;
+
+  th:nth-of-type(2) { width: 5rem; }    /* 상태 */
+  th:nth-of-type(3) { width: 14rem; }   /* 태그 */
+  th:nth-of-type(4) { width: 8rem; }    /* 발행일 */
+  th:nth-of-type(5) { width: 4rem; }    /* 댓글 */
+  th:nth-of-type(6) { width: 9.5rem; }  /* 수정·삭제 */
+
+  /* 날짜와 버튼은 한 덩어리다. 쪼개지느니 열을 넓힌다 */
+  td:nth-of-type(4),
+  td:nth-of-type(5) {
+    white-space: nowrap;
+  }
 
   th,
   td {
@@ -92,36 +117,73 @@ export const PostTable = styled.table`
     font-size: 0.75rem;
     color: var(--desccolor);
     font-family: "Consolas", monospace;
+    /* 긴 slug 가 제목 열을 밀어 다른 열을 굶기던 것을 막는다 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .badge {
     display: inline-block;
-    padding: 0.1rem 0.5rem;
+    padding: 0.15rem 0.55rem;
     border-radius: 999px;
     font-size: 0.7rem;
     font-weight: 700;
+    /* 글자가 두 자뿐이라 쪼개지면 배지로 보이지 않는다 */
+    white-space: nowrap;
     border: 1px solid var(--bordercolor);
   }
+
+  /* 발행은 정상 상태다. 배경만 한 톤 얹어 조용히 둔다 */
   .badge.published {
     background-color: var(--codefontbgcolor);
+    color: var(--desccolor);
   }
+
+  /*
+   * 초안은 "아직 안 보이는 글" 이라 눈에 걸려야 한다.
+   * 예전에는 #b26a00 을 하드코딩해 다크 3.51 / 라이트 4.24 로 양쪽 다 미달이었고
+   * 테마도 따르지 않았다. 토큰으로 바꿔 라이트 6.44 / 다크 8.91 을 만든다.
+   */
   .badge.draft {
-    color: #b26a00;
-    border-color: #e3b341;
+    background-color: var(--warnbg);
+    color: var(--warncolor);
+    border-color: var(--warnborder);
   }
 
   .action-buttons {
     display: flex;
     gap: 0.4rem;
+    white-space: nowrap;
   }
 
   /*
-   * 좁은 화면에서는 6열을 가로로 유지할 방법이 없다.
-   * 가로 스크롤은 목록을 훑는 동작과 맞지 않으므로 행을 카드로 바꾼다.
-   * 헤더를 감추는 대신 각 셀이 data-label 로 제 이름을 달고 나온다.
+   * 좁아진다고 바로 카드로 바꾸지 않는다. 표는 여러 글을 한눈에 훑는 데 유리하므로
+   * 먼저 덜 중요한 열부터 접어서 표 모양을 최대한 오래 유지한다.
+   * 접는 순서는 태그 -> 댓글 이고, 둘 다 수정 화면에서 다시 볼 수 있는 정보다.
    */
-  @container admin (max-width: 860px) {
+  @container admin (max-width: 900px) {
+    th:nth-of-type(3),
+    td:nth-of-type(3) {
+      display: none;
+    }
+  }
+
+  @container admin (max-width: 720px) {
+    th:nth-of-type(5),
+    td:nth-of-type(5) {
+      display: none;
+    }
+  }
+
+  /*
+   * 여기부터는 제목이 설 자리가 없다(상태 80 + 버튼 152 를 빼면 100px 남짓).
+   * 열을 더 접느니 행을 카드로 바꾼다. 헤더를 감추고 각 셀이 data-label 로
+   * 제 이름표를 달고 나온다.
+   */
+  @container admin (max-width: 560px) {
     display: block;
+    table-layout: auto;
 
     thead {
       display: none;
@@ -131,6 +193,12 @@ export const PostTable = styled.table`
     tr,
     td {
       display: block;
+    }
+
+    /* 접었던 열을 카드에서는 다시 보여준다. 세로로는 자리가 있다 */
+    td:nth-of-type(3),
+    td:nth-of-type(5) {
+      display: flex;
     }
 
     tr {
@@ -149,6 +217,7 @@ export const PostTable = styled.table`
       border-bottom: none;
       padding: 0.3rem 0;
       text-align: right;
+      white-space: normal;
     }
 
     td::before {
