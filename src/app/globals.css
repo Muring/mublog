@@ -63,6 +63,35 @@ html.dark {
   --okborder: #35804b;
 }
 
+
+/*
+  목록에 놓인 포스트 카드 한 장의 폭.
+
+  PostGrid 는 auto-fill(최소 290px, 간격 1rem)이라 뷰포트에 따라 3 / 2 / 1 열이
+  되고 카드 폭도 290~588px 로 변한다. 에디터의 썸네일 미리보기가 "목록에서 보일
+  크기" 를 보여주려면 같은 값을 써야 하므로, 계산을 여기 한 곳에 둔다.
+
+  그리드 폭 = min(1050px, 100vw) - 2rem(좌우 패딩)
+  3열: (그리드 - 간격 2개) / 3   2열: (그리드 - 간격 1개) / 2   1열: 그리드
+*/
+:root {
+  --card-width: calc((min(1050px, 100vw) - 4rem) / 3);
+}
+
+/* 2열로 바뀌는 지점 */
+@media (max-width: 933px) {
+  :root {
+    --card-width: calc((min(1050px, 100vw) - 3rem) / 2);
+  }
+}
+
+/* 1열로 바뀌는 지점 */
+@media (max-width: 627px) {
+  :root {
+    --card-width: calc(min(1050px, 100vw) - 2rem);
+  }
+}
+
 .dark .auto-dark {
   filter: invert(1) brightness(1) !important;
 }

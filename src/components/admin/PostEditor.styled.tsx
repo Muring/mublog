@@ -5,10 +5,6 @@ import { buttonBase } from "@/styles/button";
 import { Article } from "@/components/post/PostContent.styled";
 
 export const EditorWrapper = styled.div`
-  /* 메타 영역이 자기가 받은 폭을 보고 한 열로 접히도록 기준을 만든다 */
-  container-type: inline-size;
-  container-name: editor;
-
   max-width: 1400px;
   margin: 0 auto;
   /* 헤더가 position: fixed / height 64px 이므로 그만큼 비워준다 */
@@ -38,17 +34,15 @@ export const EditorWrapper = styled.div`
   }
 `;
 
-/** 오른쪽 열 폭. 홈 그리드의 카드 폭(약 328px)과 맞춰 미리보기가 실물 크기로 보이게 한다. */
-const CARD_WIDTH = "20.5rem";
-
 export const MetaGrid = styled.div`
   display: grid;
   /*
-   * 왼쪽은 글 자체(제목·설명·slug), 오른쪽은 썸네일이다.
-   * 오른쪽을 카드 폭으로 고정해 미리보기가 목록에서 보일 크기 그대로 나온다.
-   * 태그는 아래 한 줄을 통째로 쓴다.
+   * 왼쪽은 글 자체(제목·설명·글 주소·태그), 오른쪽은 썸네일이다.
+   * 오른쪽 폭은 globals.css 의 --card-width 를 그대로 쓴다. 목록의 카드가
+   * 뷰포트에 따라 3/2/1 열로 바뀌며 폭이 변하므로, 미리보기도 같이 변해야
+   * "목록에서 보일 크기" 라는 말이 실제로 맞는다.
    */
-  grid-template-columns: minmax(0, 1fr) ${CARD_WIDTH};
+  grid-template-columns: minmax(0, 1fr) var(--card-width);
   gap: 0.75rem 1.25rem;
   margin-bottom: 1.25rem;
 
@@ -128,7 +122,7 @@ export const MetaGrid = styled.div`
     display: flex;
     gap: 0.35rem;
     /* 아래 미리보기와 폭을 맞춘다 */
-    max-width: ${CARD_WIDTH};
+    max-width: var(--card-width);
   }
   .thumb-row input {
     flex: 1;
@@ -149,7 +143,7 @@ export const MetaGrid = styled.div`
   .thumb-preview {
     margin-top: 0.35rem;
     width: 100%;
-    max-width: ${CARD_WIDTH};
+    max-width: var(--card-width);
     aspect-ratio: 16 / 9;
     object-fit: cover;
     object-position: center;
@@ -165,7 +159,7 @@ export const MetaGrid = styled.div`
     align-items: center;
     justify-content: center;
     width: 100%;
-    max-width: ${CARD_WIDTH};
+    max-width: var(--card-width);
     aspect-ratio: 16 / 9;
     border: 1px dashed var(--bordercolor);
     border-radius: 12px;
@@ -176,11 +170,11 @@ export const MetaGrid = styled.div`
 
 
   /*
-   * 오른쪽 열을 붙일 자리가 없으면 위아래로 쌓는다.
-   * 미리보기를 줄여서 두 열을 유지하지 않는다 - 카드 폭이 곧 미리보기의 뜻이라
-   * 작아지면 볼 이유가 없다. 대신 한 열이 되면 가로를 다 쓴다.
+   * 목록이 1열이 되는 지점(627px)에서 에디터도 한 열로 쌓는다.
+   * 이 아래로는 카드 폭이 곧 화면 폭이라 옆에 붙일 자리가 없다.
+   * 컨테이너가 아니라 뷰포트를 보는 이유는 목록의 열 수가 뷰포트로 정해지기 때문이다.
    */
-  @container editor (max-width: 760px) {
+  @media (max-width: 627px) {
     grid-template-columns: minmax(0, 1fr);
 
     .thumb-row,
