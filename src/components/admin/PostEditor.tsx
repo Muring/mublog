@@ -268,6 +268,8 @@ export default function PostEditor({ initial, knownTags }: Props) {
             </div>
 
             <MetaGrid>
+                {/* 왼쪽 열: 글 자체를 설명하는 것들 */}
+                <div className="meta-left">
                 <label>
                     제목
                     <input
@@ -308,7 +310,9 @@ export default function PostEditor({ initial, knownTags }: Props) {
                         <span className="field-hint">글이 열릴 주소입니다</span>
                     )}
                 </label>
+                </div>
 
+                {/* 오른쪽 열: 카드 폭에 맞춰 실물 크기로 보여준다 */}
                 <label>
                     썸네일
                     <div className="thumb-row">
@@ -337,10 +341,12 @@ export default function PostEditor({ initial, knownTags }: Props) {
                             }}
                         />
                     </div>
-                    {post.thumbnail && (
+                    {post.thumbnail ? (
                         // 미리보기용이라 next/image 최적화를 태우지 않는다
                         // eslint-disable-next-line @next/next/no-img-element
                         <img className="thumb-preview" src={post.thumbnail} alt="썸네일 미리보기" />
+                    ) : (
+                        <div className="thumb-empty">목록에 보일 크기 그대로 미리 봅니다</div>
                     )}
                 </label>
 

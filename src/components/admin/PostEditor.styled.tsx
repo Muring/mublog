@@ -5,6 +5,10 @@ import { buttonBase } from "@/styles/button";
 import { Article } from "@/components/post/PostContent.styled";
 
 export const EditorWrapper = styled.div`
+  /* 메타 영역이 자기가 받은 폭을 보고 한 열로 접히도록 기준을 만든다 */
+  container-type: inline-size;
+  container-name: editor;
+
   max-width: 1400px;
   margin: 0 auto;
   /* 헤더가 position: fixed / height 64px 이므로 그만큼 비워준다 */
@@ -34,12 +38,31 @@ export const EditorWrapper = styled.div`
   }
 `;
 
+/** 오른쪽 열 폭. 홈 그리드의 카드 폭(약 328px)과 맞춰 미리보기가 실물 크기로 보이게 한다. */
+const CARD_WIDTH = "20.5rem";
+
 export const MetaGrid = styled.div`
   display: grid;
-  /* 제목 / 설명 / slug / 썸네일 을 한 줄에 두고, 태그는 그 아래 한 줄을 차지한다 */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
+  /*
+   * 왼쪽은 글 자체(제목·설명·slug), 오른쪽은 썸네일이다.
+   * 오른쪽을 카드 폭으로 고정해 미리보기가 목록에서 보일 크기 그대로 나온다.
+   * 태그는 아래 한 줄을 통째로 쓴다.
+   */
+  grid-template-columns: minmax(0, 1fr) ${CARD_WIDTH};
+  gap: 0.75rem 1.25rem;
   margin-bottom: 1.25rem;
+
+  /* 오른쪽 열을 붙일 자리가 없으면 위아래로 쌓는다 */
+  @container editor (max-width: 760px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* 제목·설명·slug 는 왼쪽 열에 세로로 쌓인다 */
+  .meta-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 
   label,
   .field {
@@ -99,6 +122,8 @@ export const MetaGrid = styled.div`
   .thumb-row {
     display: flex;
     gap: 0.35rem;
+    /* 아래 미리보기와 폭을 맞춘다 */
+    max-width: ${CARD_WIDTH};
   }
   .thumb-row input {
     flex: 1;
@@ -112,13 +137,36 @@ export const MetaGrid = styled.div`
     white-space: nowrap;
   }
 
+  /*
+   * 카드의 썸네일과 같은 비율·같은 폭이라 목록에서 어떻게 잘릴지 그대로 보인다.
+   * 한 열로 접히면 열이 넓어지므로 카드 폭을 상한으로 걸어 크기를 유지한다.
+   */
   .thumb-preview {
     margin-top: 0.35rem;
-    max-height: 5rem;
-    width: auto;
-    border: 1px solid var(--bordercolor);
-    border-radius: 0.4rem;
+    width: 100%;
+    max-width: ${CARD_WIDTH};
+    aspect-ratio: 16 / 9;
     object-fit: cover;
+    object-position: center;
+    border: 1px solid var(--bordercolor);
+    border-radius: 12px;
+    background-color: var(--codefontbgcolor);
+  }
+
+  /* 이미지가 없을 때도 자리를 지켜 폼이 위아래로 튀지 않는다 */
+  .thumb-empty {
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: ${CARD_WIDTH};
+    aspect-ratio: 16 / 9;
+    border: 1px dashed var(--bordercolor);
+    border-radius: 12px;
+    color: var(--desccolor);
+    font-size: 0.75rem;
+    font-weight: 400;
   }
 
 `;
