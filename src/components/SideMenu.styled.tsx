@@ -53,6 +53,15 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
   a:hover {
     background-color: var(--hovercolor);
     color: var(--hoverfontcolor);
+
+    /*
+     * 설명 줄은 스스로 색을 정하고 있어서 위 color 상속이 닿지 않는다.
+     * 제목만 뒤집히고 설명은 --desccolor 로 남아, 밝은 호버 면 위에서
+     * 다크 기준 2.01:1 이 된다 (거의 안 보인다).
+     */
+    .side-desc {
+      color: var(--hoverdesccolor);
+    }
   }
 
   .side-header {

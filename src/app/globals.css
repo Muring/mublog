@@ -3,6 +3,11 @@
   --foreground: #171717;
   --hovercolor: #f4f4f4;
   --hoverfontcolor: black;
+  /* 호버 면 위의 보조 텍스트.
+     --hovercolor 는 라이트 #f4f4f4 / 다크 #dadada 로 양쪽 다 밝은 회색이라
+     테마를 나눌 필요가 없다. 이 값 하나로 6.27 / 4.93 을 넘긴다.
+     --desccolor 를 그대로 쓰면 다크 호버에서 2.01:1 로 글자가 사라진다. */
+  --hoverdesccolor: #5a5a5a;
   --activecolor: black;
   --activefontcolor: white;
   --codefontbgcolor: #f4f4f4;
