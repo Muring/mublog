@@ -1,5 +1,5 @@
 /**
- * src/contents/posts/*.mdx 를 DB 로 이전한다.
+ * backup/posts/*.mdx 를 DB 로 이전한다.
  *
  *   yarn migrate:posts --dry-run      결과만 출력하고 쓰지 않음
  *   yarn migrate:posts --only <slug>  특정 글 하나만
@@ -22,7 +22,7 @@ try {
 const { prisma } = await import("../src/lib/prisma");
 const { renderMarkdown } = await import("../src/lib/markdown/render");
 
-const POSTS_DIR = "src/contents/posts";
+const POSTS_DIR = "backup/posts";
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const onlyIndex = args.indexOf("--only");

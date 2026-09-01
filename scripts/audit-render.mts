@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, existsSync } from "node:fs";
 import matter from "gray-matter";
 import { renderMarkdown } from "../src/lib/markdown/render";
 
-const DIR = "src/contents/posts";
+const DIR = "backup/posts";
 const files = readdirSync(DIR).filter((f) => f.endsWith(".mdx"));
 let problems = 0;
 

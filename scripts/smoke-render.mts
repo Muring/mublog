@@ -9,7 +9,7 @@ function check(name: string, pass: boolean, detail = "") {
 }
 
 const read = (slug: string) =>
-    matter(readFileSync(`src/contents/posts/${slug}.mdx`, "utf8")).content;
+    matter(readFileSync(`backup/posts/${slug}.mdx`, "utf8")).content;
 
 // 1. aside 정규화: 빈 줄 없는 케이스
 const aside = read("docker-gcp-02-docker-installation");

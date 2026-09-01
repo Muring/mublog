@@ -14,7 +14,7 @@ try {
 
 const { prisma } = await import("../src/lib/prisma");
 
-const POSTS_DIR = "src/contents/posts";
+const POSTS_DIR = "backup/posts";
 let failures = 0;
 
 function assert(name: string, ok: boolean, detail = "") {

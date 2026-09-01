@@ -1,5 +1,5 @@
 /**
- * DB 의 포스트를 src/contents/posts/*.mdx 로 내보낸다.
+ * DB 의 포스트를 backup/posts/*.mdx 로 내보낸다.
  *
  *   yarn backup:posts             내보내기
  *   yarn backup:posts --dry-run   무엇이 바뀔지만 출력
@@ -22,7 +22,7 @@ try {
 const { prisma } = await import("../src/lib/prisma");
 const { seoulDateKey } = await import("../src/lib/date");
 
-const POSTS_DIR = "src/contents/posts";
+const POSTS_DIR = "backup/posts";
 const dryRun = process.argv.includes("--dry-run");
 
 /** YAML 이중따옴표 스칼라. JSON 문자열은 그대로 유효하므로 이스케이프를 맡긴다. */
