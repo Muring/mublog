@@ -96,6 +96,7 @@ export const PostTable = styled.table`
     font-size: 0.75rem;
     color: var(--desccolor);
     font-weight: 700;
+    text-align: center;
   }
 
   /*

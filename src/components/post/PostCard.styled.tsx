@@ -66,10 +66,18 @@ const Body = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  /* 카드에서 썸네일을 뺀 나머지를 전부 차지한다 */
   flex: 1;
-  min-height: 0;
   padding: 0.875rem 1rem 1rem;
+
+  /*
+   * 카드 높이를 여기서 책임진다.
+   * 태그 1줄 + 제목 2줄 + 설명 3줄 + 메타 1줄이 다 들어가는 높이다.
+   *
+   * 제목·설명 상자를 각각 고정하면 제목이 한 줄일 때 제목과 설명 사이가 붕 뜬다.
+   * 대신 본문 전체 높이만 잡아두고 글은 제 높이대로 두면, 남는 자리가
+   * 메타 줄 위(margin-top: auto) 한 곳에만 모인다.
+   */
+  min-height: 12.5rem;
 `;
 
 /**
@@ -136,6 +144,7 @@ const Tags = styled.div`
  * "모든 카드 높이 동일" 과 "임의 길이 제목 전부 표시" 는 동시에 성립하지 않는다.
  * 지금 글이 두 줄이라서 두 줄로 잡은 것이 아니라, 카드 격자에서 제목이 차지할
  * 몫을 두 줄로 정한 것이다. 더 긴 제목이 와도 말줄임될 뿐 격자는 흐트러지지 않는다.
+ * 높이는 고정하지 않는다. 짧은 제목이 두 줄 상자를 차지하면 설명과의 사이가 벌어진다.
  * 잘린 전체 제목은 title 속성으로 볼 수 있고, 어차피 한 번 누르면 본문이다.
  */
 const Title = styled.h5`
@@ -143,8 +152,6 @@ const Title = styled.h5`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
-  /* 한 줄짜리 제목도 두 줄 자리를 차지해야 카드끼리 줄이 맞는다 */
-  height: 2lh;
   color: var(--foreground);
   line-height: 1.35;
   /*
@@ -162,8 +169,6 @@ const Desc = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
-  /* 설명이 짧거나 없어도 세 줄 자리를 지킨다 */
-  height: 3lh;
   color: var(--desccolor);
   font-size: 0.85rem;
   line-height: 1.45;
