@@ -9,6 +9,11 @@ import type { Profile } from "@/generated/prisma";
  *
  * 서버에서는 항상 getUser() 를 쓴다. getSession() 은 쿠키만 읽고
  * JWT 서명을 검증하지 않아 위조된 세션을 통과시킨다.
+ *
+ * 여기를 getClaims() 로 바꾸지 않는다. 그쪽은 서명만 로컬로 확인하므로
+ * 토큰을 원격 폐기해도 만료(기본 1시간) 전까지 통과한다.
+ * 이 함수는 requireAdmin() 이 쓰는 실제 인가 경계라 Auth 서버에 물어봐야 한다.
+ * 속도가 필요한 곳은 proxy 이고, 거기는 인가 결정을 하지 않아 이미 getClaims() 를 쓴다.
  */
 export const getUser = cache(async () => {
     const supabase = await createClient();

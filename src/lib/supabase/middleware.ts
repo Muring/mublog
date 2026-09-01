@@ -38,13 +38,25 @@ export async function updateSession(request: NextRequest) {
         }
     );
 
-    // getUser() 호출이 토큰 갱신을 유발한다. 빼면 세션이 만료된 채 남는다.
-    // getSession() 은 JWT 서명을 검증하지 않으므로 서버에서는 쓰지 않는다.
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    // getClaims() 를 쓰는 이유:
+    //
+    // 이 프로젝트는 ES256(비대칭) 서명 키라 서명을 로컬에서 검증할 수 있다.
+    // getUser() 는 매 요청마다 Auth 서버에 물어보느라 왕복 70ms(콜드 400ms)가 붙는데,
+    // getClaims() 는 JWKS 를 한 번 받아 캐시한 뒤 crypto.subtle.verify 로 끝낸다.
+    //
+    // 토큰 갱신은 그대로다. getClaims() 는 내부에서 getSession() 을 부르고,
+    // 만료가 임박했으면 먼저 갱신한 뒤 검증한다. 갱신된 쿠키는 아래 setAll 로 실린다.
+    //
+    // 여기서 로컬 검증으로 바꿔도 안전한 이유는 이 호출이 인가 결정이 아니기 때문이다.
+    // 이 값은 /admin 미인증 방문자를 /login 으로 보내는 UX 용도로만 쓴다.
+    // 실제 인가는 admin/layout.tsx 의 requireAdmin() 이 확정하며, 그쪽은 계속
+    // getUser() 로 Auth 서버에 물어본다. 그래야 토큰을 원격 폐기했을 때 즉시 막힌다.
+    //
+    // getSession() 으로 대신하지 않는다. 그것은 쿠키를 읽기만 하고 서명을 검증하지 않는다.
+    const { data } = await supabase.auth.getClaims();
+    const isSignedIn = Boolean(data?.claims?.sub);
 
-    if (!user && request.nextUrl.pathname.startsWith("/admin")) {
+    if (!isSignedIn && request.nextUrl.pathname.startsWith("/admin")) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         url.searchParams.set("next", request.nextUrl.pathname);
