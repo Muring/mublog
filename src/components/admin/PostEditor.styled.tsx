@@ -38,11 +38,11 @@ export const MetaGrid = styled.div`
   display: grid;
   /*
    * 왼쪽은 글 자체(제목·설명·글 주소·태그), 오른쪽은 썸네일이다.
-   * 오른쪽 폭은 globals.css 의 --card-width 를 그대로 쓴다. 목록의 카드가
-   * 뷰포트에 따라 3/2/1 열로 바뀌며 폭이 변하므로, 미리보기도 같이 변해야
-   * "목록에서 보일 크기" 라는 말이 실제로 맞는다.
+   * 오른쪽 폭은 목록 카드와 같은 --card-width 를 쓰되 상한이 걸린 값이다.
+   * 상한이 없으면 목록이 3열 -> 2열로 넘어가는 1px 지점에서 카드가 290 -> 443 이
+   * 되고, 그만큼 왼쪽이 한 번에 153px 를 잃어 화면이 반반으로 꺾인다.
    */
-  grid-template-columns: minmax(0, 1fr) var(--card-width);
+  grid-template-columns: minmax(0, 1fr) var(--card-width-capped);
   gap: 0.75rem 1.25rem;
   margin-bottom: 1.25rem;
 
@@ -122,7 +122,7 @@ export const MetaGrid = styled.div`
     display: flex;
     gap: 0.35rem;
     /* 아래 미리보기와 폭을 맞춘다 */
-    max-width: var(--card-width);
+    max-width: var(--card-width-capped);
   }
   .thumb-row input {
     flex: 1;
@@ -143,7 +143,7 @@ export const MetaGrid = styled.div`
   .thumb-preview {
     margin-top: 0.35rem;
     width: 100%;
-    max-width: var(--card-width);
+    max-width: var(--card-width-capped);
     aspect-ratio: 16 / 9;
     object-fit: cover;
     object-position: center;
@@ -159,7 +159,7 @@ export const MetaGrid = styled.div`
     align-items: center;
     justify-content: center;
     width: 100%;
-    max-width: var(--card-width);
+    max-width: var(--card-width-capped);
     aspect-ratio: 16 / 9;
     border: 1px dashed var(--bordercolor);
     border-radius: 12px;
