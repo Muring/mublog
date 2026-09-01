@@ -84,6 +84,15 @@ export const PostTable = styled.table`
     white-space: nowrap;
   }
 
+  /*
+   * 상태 배지와 댓글 수는 값이 짧아 열 안에서 떠 보인다. 헤더와 함께 가운데로 맞춘다.
+   * 카드 모드에서는 td 가 flex 라 justify-content 가 자리를 정하므로 영향이 없다.
+   */
+  td:nth-of-type(2),
+  td:nth-of-type(5) {
+    text-align: center;
+  }
+
   th,
   td {
     border-bottom: 1px solid var(--bordercolor);
@@ -135,10 +144,16 @@ export const PostTable = styled.table`
     border: 1px solid var(--bordercolor);
   }
 
-  /* 발행은 정상 상태다. 배경만 한 톤 얹어 조용히 둔다 */
+  /*
+   * 두 상태가 한눈에 갈려야 한다.
+   * 회색으로 조용히 두었더니 배경(--codefontbgcolor)과 글자(--desccolor)가
+   * 둘 다 무채색이라 "상태" 가 아니라 그냥 흐린 글씨로 보였다.
+   * 켜져 있음은 초록, 아직임은 앰버로 색을 갈라 놓는다.
+   */
   .badge.published {
-    background-color: var(--codefontbgcolor);
-    color: var(--desccolor);
+    background-color: var(--okbg);
+    color: var(--okcolor);
+    border-color: var(--okborder);
   }
 
   /*

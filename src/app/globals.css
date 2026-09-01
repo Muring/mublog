@@ -27,6 +27,10 @@
   --warncolor: #7a5000;
   --warnbg: #fff4d6;
   --warnborder: #e0c07a;
+  /* 정상적으로 켜져 있는 상태 (6.60) */
+  --okcolor: #116329;
+  --okbg: #e6f6ec;
+  --okborder: #9fd6b0;
 }
 
 html.dark {
@@ -53,6 +57,10 @@ html.dark {
   --warncolor: #f0c657;
   --warnbg: #33280d;
   --warnborder: #8a6f28;
+  /* 라이트용 초록(#116329)은 어두운 바탕에서 묻힌다. 밝은 쪽으로 뒤집는다 (9.00) */
+  --okcolor: #6fdc8c;
+  --okbg: #0f2a19;
+  --okborder: #35804b;
 }
 
 .dark .auto-dark {
