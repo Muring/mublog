@@ -278,7 +278,7 @@ secret key는 서버에서만 쓰이며 버킷에는 insert 정책이 없습니�
 
 ### 서버 / 클라이언트 경계
 
-`.styled.tsx` 파일에는 `"use client"`가 없습니다.
+`.styled.tsx` 24개 중 16개에는 `"use client"`가 없습니다.
 따라서 이들을 import하는 컴포넌트는 **클라이언트를 벗어날 수 없습니다.**
 서버 쪽은 `page.tsx` / `layout.tsx`와 데이터 접근 계층뿐입니다.
 
