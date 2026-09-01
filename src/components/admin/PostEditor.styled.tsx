@@ -198,9 +198,11 @@ export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
   @media (max-width: 900px) {
     grid-template-columns: minmax(0, 1fr);
 
+    /* 책갈피처럼 가로를 반씩 나눠 갖는다 */
     .pane-tabs {
-      display: flex;
-      gap: 0.4rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--bordercolor);
       margin-bottom: 0.75rem;
     }
 
@@ -215,16 +217,34 @@ export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
   }
 `;
 
-/** 탭 버튼. 고른 쪽만 채워서 색과 무관하게 구분되도록 밑줄도 함께 준다. */
+/**
+ * 책갈피형 탭.
+ *
+ * 버튼 두 개를 나란히 두는 대신 가로를 반씩 갖고 아래 선으로 이어지게 한다.
+ * 고른 쪽은 색만 바꾸지 않고 밑줄을 함께 줘서, 색이 잘 안 보이는 상황에서도
+ * 어느 쪽이 열려 있는지 알 수 있다.
+ */
 export const PaneTab = styled.button`
-  ${buttonBase}
-  padding: 0.45rem 0.9rem;
+  background: none;
+  border: none;
+  /* 선택 표시가 켜졌다 꺼졌다 하며 높이가 변하지 않도록 자리를 미리 잡는다 */
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 0.65rem 0;
+  color: var(--desccolor);
+  font-family: inherit;
   font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+
+  &:hover:not(.active) {
+    color: var(--foreground);
+  }
 
   &.active {
-    background-color: var(--activecolor);
-    color: var(--activefontcolor);
-    border-color: var(--activecolor);
+    color: var(--foreground);
+    border-bottom-color: var(--foreground);
   }
 `;
 
