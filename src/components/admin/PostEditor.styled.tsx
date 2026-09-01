@@ -52,11 +52,6 @@ export const MetaGrid = styled.div`
   gap: 0.75rem 1.25rem;
   margin-bottom: 1.25rem;
 
-  /* 오른쪽 열을 붙일 자리가 없으면 위아래로 쌓는다 */
-  @container editor (max-width: 760px) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   /*
    * 양쪽 열 모두 세로로 쌓는다.
    * 간격이 0.75rem 이면 왼쪽 네 덩어리(제목·설명·글주소·태그)의 합이
@@ -179,6 +174,21 @@ export const MetaGrid = styled.div`
     font-weight: 400;
   }
 
+
+  /*
+   * 오른쪽 열을 붙일 자리가 없으면 위아래로 쌓는다.
+   * 미리보기를 줄여서 두 열을 유지하지 않는다 - 카드 폭이 곧 미리보기의 뜻이라
+   * 작아지면 볼 이유가 없다. 대신 한 열이 되면 가로를 다 쓴다.
+   */
+  @container editor (max-width: 760px) {
+    grid-template-columns: minmax(0, 1fr);
+
+    .thumb-row,
+    .thumb-preview,
+    .thumb-empty {
+      max-width: none;
+    }
+  }
 `;
 
 export const SplitPane = styled.div`
