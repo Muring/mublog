@@ -23,8 +23,10 @@ export default function SiteStats() {
     const { data } = useQuery({
         queryKey: ["site-stats"],
         queryFn: fetchStats,
-        // 방문 비콘이 응답으로 갱신값을 심어주므로 보통 추가 요청 없이 맞춰진다
-        staleTime: 0,
+        // 방문 비콘(/api/visit)이 응답으로 갱신값을 심어준다.
+        // staleTime 이 0 이면 그 값을 받고도 곧바로 다시 받아와, 프로덕션에서
+        // 필요 없는 서버리스 호출이 한 번 더 생긴다.
+        staleTime: 60_000,
     });
 
     // 빈칸으로 두면 없는 것처럼 보이다가 값이 튀어나온다.

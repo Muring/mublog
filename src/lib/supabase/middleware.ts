@@ -1,49 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import type { JWK } from "@supabase/supabase-js";
-
-/**
- * JWKS 를 프로세스 단위로 캐시한다.
- *
- * getClaims() 는 서명 키를 supabase 클라이언트 인스턴스에 캐시하는데,
- * 이 프록시는 요청마다 새 클라이언트를 만든다. 그대로 두면 로그인한 사용자의
- * 모든 요청이 JWKS 를 새로 받아, 왕복을 없애려고 바꾼 의미가 사라진다.
- *
- * 키를 넘겨주면 그 안에서 kid 를 먼저 찾고, 없으면(키 교체 등) 알아서 다시 받는다.
- * 그래서 캐시가 오래돼도 인증이 깨지지 않는다.
- */
-type Jwks = { keys: JWK[] };
-let jwksCache: Jwks | null = null;
-let jwksFetchedAt = 0;
-let jwksInFlight: Promise<Jwks | null> | null = null;
-const JWKS_TTL_MS = 10 * 60 * 1000;
-
-async function loadJwks(): Promise<Jwks | null> {
-    if (jwksCache && Date.now() - jwksFetchedAt < JWKS_TTL_MS) return jwksCache;
-    // 동시에 여러 요청이 들어와도 한 번만 받는다
-    if (jwksInFlight) return jwksInFlight;
-
-    jwksInFlight = (async () => {
-        try {
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/.well-known/jwks.json`
-            );
-            if (!res.ok) return null;
-            const data = (await res.json()) as Jwks;
-            if (!data?.keys?.length) return null;
-            jwksCache = data;
-            jwksFetchedAt = Date.now();
-            return data;
-        } catch {
-            // 실패해도 getClaims 가 스스로 받아오므로 인증은 계속 동작한다
-            return null;
-        } finally {
-            jwksInFlight = null;
-        }
-    })();
-
-    return jwksInFlight;
-}
+import { jwksOption } from "./jwks";
 
 /**
  * 세션 쿠키 갱신 + /admin 접근 차단.
@@ -97,8 +54,7 @@ export async function updateSession(request: NextRequest) {
     // getUser() 로 Auth 서버에 물어본다. 그래야 토큰을 원격 폐기했을 때 즉시 막힌다.
     //
     // getSession() 으로 대신하지 않는다. 그것은 쿠키를 읽기만 하고 서명을 검증하지 않는다.
-    const jwks = await loadJwks();
-    const { data } = await supabase.auth.getClaims(undefined, jwks ? { keys: jwks.keys } : undefined);
+    const { data } = await supabase.auth.getClaims(undefined, await jwksOption());
     const isSignedIn = Boolean(data?.claims?.sub);
 
     if (!isSignedIn && request.nextUrl.pathname.startsWith("/admin")) {

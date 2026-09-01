@@ -51,6 +51,10 @@ export default function VisitTracker() {
                     queryClient.setQueryData(postViewsKey(slug), data.views);
                 }
                 if (data?.stats) {
+                    // 먼저 진행 중인 /api/stats 요청을 끊는다. 그쪽은 60초 캐시라
+                    // 방문이 반영되기 전의 값을 들고 있을 수 있는데, 그게 나중에
+                    // 도착하면 방금 올린 숫자를 도로 내려버린다.
+                    await queryClient.cancelQueries({ queryKey: ["site-stats"] });
                     queryClient.setQueryData(["site-stats"], data.stats);
                 }
             })

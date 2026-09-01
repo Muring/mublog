@@ -193,7 +193,19 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 | `/admin/**`                  | `force-dynamic`                        | —                                   |
 | `/api/posts/summary`         | ISR 3600s, `posts:list`                | 포스트 변경 시                      |
 | `/api/posts/[slug]/comments` | 캐시 안 함                             | TanStack Query                      |
-| `/api/stats`, `/api/visit`   | `force-dynamic`                        | —                                   |
+| `/api/stats`                 | ISR 60s                                | 시간                                |
+| `/api/visit`, `/api/me`      | `force-dynamic`                        | —                                   |
+
+`/api/stats`와 `/api/me`는 홈이 그려진 **뒤에** 클라이언트가 부르는 값이라,
+서버리스에서는 각각이 콜드 스타트와 DB 연결을 따로 겪습니다. 그래서 둘을 다르게 다룹니다.
+
+- `/api/stats`는 사용자별 값이 아니므로 60초 ISR로 두어 함수가 아예 깨어나지 않게 합니다.
+  방문자 본인의 숫자는 `/api/visit` 응답이 TanStack Query 캐시에 직접 심어 즉시 맞춥니다
+  (그때 진행 중인 `/api/stats` 요청은 `cancelQueries`로 끊습니다. 캐시된 옛 값이 늦게
+  도착해 방금 올린 숫자를 되돌리는 것을 막기 위해서입니다).
+- `/api/me`는 사용자별이라 캐시할 수 없습니다. 대신 `getDisplayProfile()`이
+  `getClaims()`로 JWT 서명만 로컬 검증해 Auth 서버 왕복 하나를 없앱니다.
+  인가는 여전히 `getProfile()`(`getUser()` 기반)이 담당합니다 — 아래 인증 절 참고.
 
 `generateStaticParams`는 빌드 시점에 DB를 조회하므로 `try/catch`로 감싸
 정지된 Supabase나 빌드 환경의 `DATABASE_URL` 누락이 배포를 깨지 않게 하고,
@@ -428,6 +440,31 @@ src/
 
 > `proxy.ts`(구 `middleware.ts`)는 **UX이지 보안 경계가 아닙니다.**
 > Edge에서 돌고 DB에 닿지 못하며 우회 가능합니다. 실제 권한 확인은 서버에서 합니다.
+
+### 토큰 검증을 두 갈래로 나눈 이유
+
+같은 세션 쿠키를 읽는 방법이 둘인데, 비용과 보장이 다릅니다.
+
+| | 하는 일 | 비용 | 폐기 반영 |
+|---|---|---|---|
+| `getUser()` | Auth 서버에 토큰을 물어봄 | 네트워크 왕복 1회 | 즉시 |
+| `getClaims()` | JWT 서명을 로컬 검증 | JWKS 캐시 후 사실상 0 | 만료(기본 1시간)까지 지연 |
+
+**인가 결정에는 `getUser()`를 씁니다.** `requireAdmin()` / `requireAdminApi()`가
+쓰는 `getProfile()`이 그 경로입니다. 관리자를 강등하거나 토큰을 폐기했을 때
+한 시간 동안 통과되면 안 되기 때문입니다.
+
+**결정하지 않는 곳에서는 `getClaims()`를 씁니다.** `proxy.ts`의 `/admin` 가드와
+`/api/me`의 `getDisplayProfile()`이 여기 해당합니다. 둘 다 잘못돼도 결과는
+"메뉴에 링크가 보인다" 뿐이고, 그 링크로 도달하는 `/admin`은 `requireAdmin()`이
+다시 확인합니다.
+
+`getClaims()`는 서명 키를 **supabase 클라이언트 인스턴스에** 캐시하는데
+서버는 요청마다 새 클라이언트를 만듭니다. 그대로 두면 로그인한 사용자의 모든
+요청이 JWKS를 새로 받아 왕복을 없앤 의미가 사라집니다. `lib/supabase/jwks.ts`가
+이를 프로세스 단위(10분 TTL, 동시 요청은 in-flight 공유)로 캐시해 넘겨줍니다.
+넘긴 키에서 `kid`를 못 찾으면 `getClaims()`가 알아서 다시 받으므로,
+키가 교체돼도 인증이 깨지지 않습니다.
 
 <br>
 

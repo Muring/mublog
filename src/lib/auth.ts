@@ -2,6 +2,7 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { jwksOption } from "@/lib/supabase/jwks";
 import type { Profile } from "@/generated/prisma";
 
 /**
@@ -28,6 +29,28 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
     const user = await getUser();
     if (!user) return null;
     return prisma.profile.findUnique({ where: { id: user.id } });
+});
+
+/**
+ * 화면에 이름과 아바타를 그리기 위한 로그인 상태. **인가에 쓰지 않는다.**
+ *
+ * getProfile() 과 달리 Auth 서버에 묻지 않고 JWT 서명만 로컬에서 확인한다.
+ * 왕복이 하나 줄어드는 대신 원격 폐기가 토큰 만료까지 늦게 반영된다.
+ * 그 지연이 여기서 문제되지 않는 이유는, 이 값으로 할 수 있는 일이
+ * "메뉴에 관리 링크가 보인다" 뿐이고 그 링크를 눌러 도달하는 /admin 은
+ * requireAdmin() 이 getProfile() 로 다시 확인하기 때문이다.
+ *
+ * 역할은 반드시 DB 에서 읽는다. JWT 의 user_metadata 는 사용자가 쓸 수 있어
+ * 거기서 관리자 여부를 도출하면 누구나 관리자가 된다.
+ */
+export const getDisplayProfile = cache(async (): Promise<Profile | null> => {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getClaims(undefined, await jwksOption());
+
+    const id = data?.claims?.sub;
+    if (!id) return null;
+
+    return prisma.profile.findUnique({ where: { id } });
 });
 
 export async function isAdmin(): Promise<boolean> {
