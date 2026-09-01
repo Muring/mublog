@@ -57,11 +57,23 @@ export const MetaGrid = styled.div`
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* 제목·설명·slug 는 왼쪽 열에 세로로 쌓인다 */
-  .meta-left {
+  /* 양쪽 열 모두 세로로 쌓는다 */
+  .meta-left,
+  .meta-right {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+  }
+
+  /*
+   * 태그가 왼쪽 열의 남는 높이를 채운다.
+   * flex-basis 0 이라 태그 개수가 열 높이를 밀지 않고, 반대로 오른쪽 열
+   * (글 주소 + 썸네일 + 미리보기)이 정한 높이만큼 늘어난다.
+   * 그래서 두 열 높이가 저절로 맞고, 태그가 많으면 그 안에서 스크롤된다.
+   */
+  .meta-left .field:last-child {
+    flex: 1;
+    min-height: 0;
   }
 
   label,

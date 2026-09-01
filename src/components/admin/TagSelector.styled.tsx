@@ -6,6 +6,9 @@ export const TagSelectorWrapper = styled.div`
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+    /* 부모(태그 field)가 남는 높이를 받으면 그대로 목록에 물려준다 */
+    flex: 1;
+    min-height: 0;
 
     /*
      * 태그가 늘어나면 이 목록만 계속 길어져 왼쪽 열이 오른쪽(썸네일)보다
@@ -16,7 +19,21 @@ export const TagSelectorWrapper = styled.div`
         display: flex;
         flex-wrap: wrap;
         gap: 0.35rem;
-        max-height: 5.25rem;
+        /*
+         * 목록이 남는 높이를 받으므로 기본값(stretch)이면 칩이 세로로 늘어난다.
+         * 칩은 제 높이를 지키고, 줄들은 위부터 쌓이게 한다.
+         */
+        align-items: flex-start;
+        align-content: flex-start;
+        /*
+         * 자리가 있으면 채우고(flex), 모자라면 그 안에서 스크롤한다.
+         * max-height 가 없으면 태그가 아주 많을 때 목록이 그대로 자라
+         * 왼쪽 열이 오른쪽보다 한없이 길어진다 (207개에서 1275px 까지 갔다).
+         * 평소에는 이 상한에 닿지 않아 두 열 높이가 정확히 맞는다.
+         */
+        flex: 1;
+        min-height: 5.25rem;
+        max-height: 12rem;
         overflow-y: auto;
         /* 스크롤이 생겼을 때 마지막 줄이 잘려 보이도록 아래를 살짝 띄운다 */
         padding-bottom: 0.15rem;
