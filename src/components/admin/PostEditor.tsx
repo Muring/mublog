@@ -288,6 +288,27 @@ export default function PostEditor({ initial, knownTags }: Props) {
                     />
                 </label>
 
+                <label>
+                    <span className="label-row">
+                        글 주소(slug)
+                        {/* 판정 결과를 라벨 오른쪽 끝에 붙여 입력란 아래를 비운다 */}
+                        {slugState.available === false ? (
+                            <span className="field-error">{slugState.reason}</span>
+                        ) : slugState.available ? (
+                            <span className="field-ok">/{post.slug}</span>
+                        ) : slugState.checking ? (
+                            <span className="field-hint">확인 중...</span>
+                        ) : (
+                            <span className="field-hint">글이 열릴 주소입니다</span>
+                        )}
+                    </span>
+                    <input
+                        value={post.slug}
+                        onChange={(e) => set("slug", e.target.value)}
+                        placeholder="english-kebab-case"
+                    />
+                </label>
+
                 {/*
                   label 로 감싸면 안 된다. label 은 클릭 시 내부 첫 번째 폼 요소를
                   활성화시키는데, 태그 칩이 button 이라 어떤 칩을 눌러도 첫 칩이
@@ -309,28 +330,6 @@ export default function PostEditor({ initial, knownTags }: Props) {
 
                 {/* 오른쪽 열: 카드 폭에 맞춰 실물 크기로 보여준다 */}
                 <div className="meta-right">
-                <label>
-                    글 주소(slug)
-                    <input
-                        value={post.slug}
-                        onChange={(e) => set("slug", e.target.value)}
-                        placeholder="english-kebab-case"
-                    />
-                    {/*
-                      판정을 checking 보다 먼저 본다. 재확인 중이라고 결과를
-                      "확인 중..." 으로 되돌리면 타자마다 화면이 깜빡인다.
-                      첫 확인일 때만 "확인 중..." 을 보여준다.
-                    */}
-                    {slugState.available === false ? (
-                        <span className="field-error">{slugState.reason}</span>
-                    ) : slugState.available ? (
-                        <span className="field-ok">/{post.slug}</span>
-                    ) : slugState.checking ? (
-                        <span className="field-hint">확인 중...</span>
-                    ) : (
-                        <span className="field-hint">글이 열릴 주소입니다</span>
-                    )}
-                </label>
 
                 <label>
                     썸네일

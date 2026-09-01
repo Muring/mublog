@@ -57,23 +57,16 @@ export const MetaGrid = styled.div`
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* 양쪽 열 모두 세로로 쌓는다 */
+  /*
+   * 양쪽 열 모두 세로로 쌓는다.
+   * 간격이 0.75rem 이면 왼쪽 네 덩어리(제목·설명·글주소·태그)의 합이
+   * 오른쪽(썸네일 + 미리보기)보다 10px 길어진다. 0.5rem 이면 거의 맞아떨어진다.
+   */
   .meta-left,
   .meta-right {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  /*
-   * 태그가 왼쪽 열의 남는 높이를 채운다.
-   * flex-basis 0 이라 태그 개수가 열 높이를 밀지 않고, 반대로 오른쪽 열
-   * (글 주소 + 썸네일 + 미리보기)이 정한 높이만큼 늘어난다.
-   * 그래서 두 열 높이가 저절로 맞고, 태그가 많으면 그 안에서 스크롤된다.
-   */
-  .meta-left .field:last-child {
-    flex: 1;
-    min-height: 0;
+    gap: 0.5rem;
   }
 
   label,
@@ -101,6 +94,14 @@ export const MetaGrid = styled.div`
   select:focus {
     outline: 2px solid var(--bordercolor);
     outline-offset: 1px;
+  }
+
+  /* 라벨과 판정 문구를 한 줄에서 양 끝으로 벌린다 */
+  .label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
   }
 
   .field-error {
