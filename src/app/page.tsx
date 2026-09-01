@@ -2,7 +2,7 @@
 
 import Profile from "@/components/Profile";
 import PostGrid from "@/components/post/PostGrid";
-import SiteStats from "@/components/SiteStats";
+import SiteStats from "@/components/stats/SiteStats";
 import { getAllTags, getPublishedPosts } from "@/lib/posts";
 import { Suspense } from "react";
 

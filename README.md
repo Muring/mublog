@@ -363,9 +363,10 @@ src/
 │   ├── about/            # Introduction, HistoryTimeline, ProjectTimeline
 │   ├── admin/            # 에디터·태그 선택기
 │   ├── comments/         # 댓글 스레드
-│   ├── trackers/         # 방문·조회·헤더 제목을 알리는 null 컴포넌트
+│   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
+│   ├── trackers/         # 화면에 아무것도 그리지 않고 부수효과만 내는 null 컴포넌트
 │   ├── ui/               # 토스트 등 범용 조각
-│   └── Profile / SiteStats   # 여러 영역이 함께 쓰는 것만 루트에 둔다
+│   └── Profile.tsx       # 루트에는 두 영역 이상이 함께 쓰는 것만 둔다
 ├── lib/
 │   ├── markdown/         # 마크다운 → HTML 파이프라인
 │   ├── supabase/         # 브라우저·서버·프록시 클라이언트
@@ -391,6 +392,15 @@ src/
 
 > `src/` 안에는 앱이 실제로 읽는 것만 둔다. mdx 백업이 `backup/` 으로 나가 있는 것도
 > 같은 이유다 — 참조하는 것은 `scripts/` 뿐이다.
+
+**컴포넌트를 어디에 둘지**는 이 순서로 정합니다.
+
+1. 한 기능이 여러 조각으로 나뉘면 **기능 폴더**에 함께 둔다 (`stats/`, `comments/`, `admin/`)
+2. 아니면 **쓰이는 화면**을 따른다 (`layout/`, `post/`, `about/`)
+3. 두 영역 이상이 함께 쓰면 **루트**에 둔다 (`Profile`)
+
+루트는 "아직 분류 안 한 것"을 쌓아두는 자리가 아닙니다. 3번에 해당하지 않으면
+어느 폴더로든 들어가야 합니다.
 
 > `proxy.ts`(구 `middleware.ts`)는 **UX이지 보안 경계가 아닙니다.**
 > Edge에서 돌고 DB에 닿지 못하며 우회 가능합니다. 실제 권한 확인은 서버에서 합니다.
