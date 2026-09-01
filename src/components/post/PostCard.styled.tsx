@@ -116,17 +116,29 @@ const Desc = styled.p`
   overflow-wrap: break-word;
 `;
 
-/** 날짜·조회·댓글. 항상 카드 바닥에 붙는다. */
+/**
+ * 날짜(왼쪽)와 조회·댓글(오른쪽). 항상 카드 바닥에 붙는다.
+ *
+ * 언제 쓴 글인지와 얼마나 읽혔는지는 성격이 다른 정보라 양 끝으로 나눈다.
+ * 폭이 모자라면 오른쪽 묶음이 통째로 아랫줄로 내려간다 (숫자끼리는 붙어 있게).
+ */
 const Meta = styled.div`
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.35rem 0.75rem;
   /* 위 내용이 짧아도 이 줄은 바닥으로 내려간다 */
   margin-top: auto;
   padding-top: 0.5rem;
   color: var(--desccolor);
   font-size: 0.75rem;
+
+  .group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
 
   .item {
     display: inline-flex;

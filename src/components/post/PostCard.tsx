@@ -80,18 +80,22 @@ export default function PostCard({
                 {post.description && <Card.Desc>{post.description}</Card.Desc>}
 
                 <Card.Meta>
-                    <span className="item">
-                        <CalendarIcon />
-                        {formattedDate}
-                    </span>
-                    <span className="item" title={`조회 ${post.viewCount}`}>
-                        <EyeIcon />
-                        {post.viewCount.toLocaleString("ko-KR")}
-                    </span>
-                    <span className="item" title={`댓글 ${post.commentCount}`}>
-                        <CommentIcon />
-                        {post.commentCount.toLocaleString("ko-KR")}
-                    </span>
+                    <div className="group">
+                        <span className="item">
+                            <CalendarIcon />
+                            {formattedDate}
+                        </span>
+                    </div>
+                    <div className="group">
+                        <span className="item" title={`조회 ${post.viewCount}`}>
+                            <EyeIcon />
+                            {post.viewCount.toLocaleString("ko-KR")}
+                        </span>
+                        <span className="item" title={`댓글 ${post.commentCount}`}>
+                            <CommentIcon />
+                            {post.commentCount.toLocaleString("ko-KR")}
+                        </span>
+                    </div>
                 </Card.Meta>
             </Card.Body>
         </Card.Wrapper>
