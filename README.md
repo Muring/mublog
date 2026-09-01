@@ -157,7 +157,9 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 - **`lib/comments.ts`** — 댓글 CRUD, 2단 깊이 강제, soft delete, 도배 방지
 - **`lib/stats.ts`** — 방문·조회 집계, KST 날짜 키
 - **`lib/auth.ts`** — 세션 조회와 권한 확인 (`requireAdmin` / `requireAdminApi`)
-- **`lib/api.ts`** — 요청 본문 zod 파싱을 한 곳으로. 실패 시 `HttpError(400)`
+- **`lib/api.ts`** — 라우트 헬퍼. `parseBody`가 zod로 본문을 검증하고 실패 시
+  `HttpError(400)`을 던지면, `handleApiError`가 한 곳에서 응답으로 바꿉니다.
+  요청을 **보내는** 쪽은 `lib/fetcher.ts`로 방향이 반대입니다.
 - **`lib/revalidate.ts`** — 포스트 변경 후 캐시 무효화
 
 ### API
@@ -345,6 +347,7 @@ prisma/
 └── migrations/           # RLS·트리거 포함 마이그레이션
 
 scripts/                  # 일회성·운영 스크립트 (tsx 로 실행)
+backup/posts/             # DB 내보내기 백업 (앱은 읽지 않음)
 
 src/
 ├── app/
@@ -354,10 +357,15 @@ src/
 │   ├── auth/             # OAuth 콜백 · 로그아웃
 │   ├── login/
 │   └── globals.css       # 테마 토큰
-├── components/
+├── components/           # X.tsx + X.styled.tsx 짝
+│   ├── layout/           # Header, Footer, SideMenu, ThemeSwitcher …
+│   ├── post/             # PostCard, PostGrid, PostContent, CarouselSlider …
+│   ├── about/            # Introduction, HistoryTimeline, ProjectTimeline
 │   ├── admin/            # 에디터·태그 선택기
 │   ├── comments/         # 댓글 스레드
-│   └── ...               # X.tsx + X.styled.tsx 짝
+│   ├── trackers/         # 방문·조회·헤더 제목을 알리는 null 컴포넌트
+│   ├── ui/               # 토스트 등 범용 조각
+│   └── Profile / SiteStats   # 여러 영역이 함께 쓰는 것만 루트에 둔다
 ├── lib/
 │   ├── markdown/         # 마크다운 → HTML 파이프라인
 │   ├── supabase/         # 브라우저·서버·프록시 클라이언트
@@ -366,16 +374,23 @@ src/
 │   ├── stats.ts
 │   ├── storage.ts
 │   ├── auth.ts           # 세션·권한 확인
-│   ├── api.ts            # 요청 본문 검증
+│   ├── api.ts            # 라우트 헬퍼 (본문 검증 + 에러 응답)
 │   ├── fetcher.ts        # 클라이언트 fetch 래퍼
-│   └── revalidate.ts
+│   ├── revalidate.ts
+│   └── date.ts / reading-time.ts / validation.ts   # 순수 함수
+├── providers/            # RootProvider 가 감싸는 컨텍스트 트리
+├── hooks/                # useRecentPosts (최근 본 글)
 ├── styles/
 │   ├── button.ts         # 버튼 공통 스타일 조각
 │   ├── motion.ts         # 페이드·슬라이드 전환
 │   └── prism-notion-theme.css
-├── contents/posts/       # DB 내보내기 백업 (읽지 않음)
+├── types/                # post.ts / comment.ts
+├── data/                 # about 페이지 정적 데이터
 └── proxy.ts              # 세션 갱신 · /admin 가드
 ```
+
+> `src/` 안에는 앱이 실제로 읽는 것만 둔다. mdx 백업이 `backup/` 으로 나가 있는 것도
+> 같은 이유다 — 참조하는 것은 `scripts/` 뿐이다.
 
 > `proxy.ts`(구 `middleware.ts`)는 **UX이지 보안 경계가 아닙니다.**
 > Edge에서 돌고 DB에 닿지 못하며 우회 가능합니다. 실제 권한 확인은 서버에서 합니다.
