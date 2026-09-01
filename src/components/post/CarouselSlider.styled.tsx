@@ -59,9 +59,11 @@ const Slide = styled.div`
   border-radius: 12px;
   transition: all 0.2s ease-in-out;
 
-  /* 기본값이 inline 이라 카드 폭을 잡아주지 못하고 카드가 슬라이드 밖으로 새어나갔다 */
+  /* 기본값이 inline 이라 카드 폭도 높이도 잡아주지 못한다.
+     높이는 메타 줄을 카드 바닥에 붙이는 데 필요하다. */
   a {
     display: block;
+    height: 100%;
   }
 
   /* 카드는 홈 그리드 기준 min-width: 290px 를 갖는다.

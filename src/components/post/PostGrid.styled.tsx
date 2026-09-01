@@ -28,6 +28,13 @@ export const GridList = styled.div`
     /* 그리드 아이템도 기본 min-width 가 auto 라 긴 단어가 열을 넓힌다 */
     min-width: 0;
     border-radius: 12px;
+
+    /* 카드가 행 높이를 채워야 메타 줄이 카드 바닥에 정렬된다.
+       a 는 기본이 inline 이라 높이를 물려주지 못한다. */
+    > a {
+      display: block;
+      height: 100%;
+    }
     transition: all 0.2s ease-in-out;
 
     &:hover {
