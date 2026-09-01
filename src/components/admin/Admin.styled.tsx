@@ -4,6 +4,13 @@ import styled from "@emotion/styled";
 import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
 
 export const AdminWrapper = styled.div`
+  /*
+   * 표가 뷰포트가 아니라 "자기가 실제로 받은 폭" 을 보고 판단하도록 기준을 만든다.
+   * 뷰포트 기준이면 이 영역이 좁아진 다른 이유(사이드 패널 등)에는 반응하지 못한다.
+   */
+  container-type: inline-size;
+  container-name: admin;
+
   max-width: 1100px;
   margin: 0 auto;
   /* 헤더가 position: fixed / height 64px 이므로 그만큼 비워준다 */
@@ -113,7 +120,7 @@ export const PostTable = styled.table`
    * 가로 스크롤은 목록을 훑는 동작과 맞지 않으므로 행을 카드로 바꾼다.
    * 헤더를 감추는 대신 각 셀이 data-label 로 제 이름을 달고 나온다.
    */
-  @media (max-width: 860px) {
+  @container admin (max-width: 860px) {
     display: block;
 
     thead {
