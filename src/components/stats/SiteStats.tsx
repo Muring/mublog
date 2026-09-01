@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { StatsWrapper } from "./SiteStats.styled";
+import { Skeleton } from "@/components/ui/Skeleton.styled";
 import { fetchJson } from "@/lib/fetcher";
 
 type Stats = { today: number; total: number };
@@ -26,8 +27,15 @@ export default function SiteStats() {
         staleTime: 0,
     });
 
-    // 실패하거나 아직 안 왔으면 자리만 지킨다
-    if (!data) return <StatsWrapper aria-hidden />;
+    // 빈칸으로 두면 없는 것처럼 보이다가 값이 튀어나온다.
+    // 실제 줄(141x19)과 같은 크기의 블록을 깔아 "오는 중" 으로 읽히게 한다.
+    if (!data) {
+        return (
+            <StatsWrapper aria-hidden>
+                <Skeleton style={{ width: "8.8rem", height: "0.85rem" }} />
+            </StatsWrapper>
+        );
+    }
 
     return (
         <StatsWrapper>

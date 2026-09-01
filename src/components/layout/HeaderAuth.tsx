@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthWrapper } from "./HeaderAuth.styled";
 import { fetchJson } from "@/lib/fetcher";
+import { Skeleton } from "@/components/ui/Skeleton.styled";
 
 export type Me = {
     user: { id: string; username: string; avatarUrl: string | null } | null;
@@ -23,9 +24,17 @@ export default function HeaderAuth() {
         staleTime: 60_000,
     });
 
-    // 로딩 중에는 자리만 잡아둔다. 버튼이 늦게 튀어나오면 헤더가 흔들린다.
+    // 자리만 비워두면 헤더 오른쪽이 한동안 텅 비었다가 갑자기 채워진다.
+    // 아바타·이름·버튼과 같은 모양을 미리 깔아 둔다 (실제 216x31).
     if (isLoading) {
-        return <AuthWrapper aria-hidden style={{ minHeight: 32 }} />;
+        return (
+            <AuthWrapper aria-hidden>
+                <Skeleton style={{ width: 26, height: 26, borderRadius: "50%" }} />
+                <Skeleton style={{ width: 47, height: 14 }} />
+                <Skeleton style={{ width: 48, height: 31 }} />
+                <Skeleton style={{ width: 72, height: 31 }} />
+            </AuthWrapper>
+        );
     }
 
     if (!data?.user) {

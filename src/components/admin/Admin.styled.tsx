@@ -3,6 +3,9 @@
 import styled from "@emotion/styled";
 import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
 
+// 홈 헤더와 방문자 수도 같은 것을 쓰게 되어 ui/ 로 옮겼다. 기존 import 경로는 유지한다.
+export { Skeleton } from "@/components/ui/Skeleton.styled";
+
 export const AdminWrapper = styled.div`
   /*
    * 표가 뷰포트가 아니라 "자기가 실제로 받은 폭" 을 보고 판단하도록 기준을 만든다.
@@ -277,33 +280,7 @@ export const PostTable = styled.table`
 `;
 
 
-/**
- * 불러오는 동안 자리를 지키는 회색 블록.
- *
- * 관리 화면은 force-dynamic 이라 인증 왕복(콜드 400ms)과 DB 조회가 끝나야 첫 픽셀이 나온다.
- * 그동안 아무것도 없으면 눌렀는지조차 알 수 없어서, 실제 배치와 같은 모양을 먼저 그린다.
- * 높이를 실물과 맞춰야 내용이 도착할 때 화면이 튀지 않는다.
- */
-export const Skeleton = styled.div`
-  border-radius: 0.4rem;
-  background-color: var(--codefontbgcolor);
-  animation: skeleton-pulse 1.4s ease-in-out infinite;
 
-  @keyframes skeleton-pulse {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.55;
-    }
-  }
-
-  /* 움직임을 원치 않는 사용자에게는 깜빡이지 않고 자리만 지킨다 */
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-`;
 
 export const Button = styled.button`
   display: inline-flex;
