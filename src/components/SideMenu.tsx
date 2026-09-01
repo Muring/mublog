@@ -7,7 +7,7 @@ import { MenuWrapper } from "./SideMenu.styled";
 import Image from "next/image";
 import Link from "next/link";
 import SideList from "./SideList";
-import ThemeSwitcher from "./ThemeSwithcer";
+import ThemeSwitcher from "./ThemeSwitcher";
 
 export default function SideMenu({ onClose }: { onClose: () => void }) {
   const [isClosing, setIsClosing] = useState(false);
