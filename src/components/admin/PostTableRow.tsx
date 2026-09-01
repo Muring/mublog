@@ -52,7 +52,7 @@ export default function PostTableRow({ post }: Props) {
             </td>
             <td data-label="상태">
                 <span className={`badge ${post.status === "PUBLISHED" ? "published" : "draft"}`}>
-                    {post.status === "PUBLISHED" ? "발행" : "초안"}
+                    {post.status === "PUBLISHED" ? "공개" : "초안"}
                 </span>
             </td>
             <td data-label="태그">{post.tags.join(", ") || "-"}</td>

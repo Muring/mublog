@@ -310,6 +310,24 @@ export default function PostEditor({ initial, knownTags }: Props) {
                         <span className="field-hint">글이 열릴 주소입니다</span>
                     )}
                 </label>
+
+                {/*
+                  label 로 감싸면 안 된다. label 은 클릭 시 내부 첫 번째 폼 요소를
+                  활성화시키는데, 태그 칩이 button 이라 어떤 칩을 눌러도 첫 칩이
+                  함께 토글된다. 캡션은 span 으로 따로 둔다.
+                */}
+                <div className="field">
+                    <span className="field-label">태그</span>
+                    <TagSelector
+                        knownTags={knownTags}
+                        selected={post.tags}
+                        error={tagError}
+                        onChange={(tags) => {
+                            set("tags", tags);
+                            if (tags.length > 0) setTagError(null);
+                        }}
+                    />
+                </div>
                 </div>
 
                 {/* 오른쪽 열: 카드 폭에 맞춰 실물 크기로 보여준다 */}
@@ -349,24 +367,6 @@ export default function PostEditor({ initial, knownTags }: Props) {
                         <div className="thumb-empty">목록에 보일 크기 그대로 미리 봅니다</div>
                     )}
                 </label>
-
-                {/*
-                  label 로 감싸면 안 된다. label 은 클릭 시 내부 첫 번째 폼 요소를
-                  활성화시키는데, 태그 칩이 button 이라 어떤 칩을 눌러도 첫 칩이
-                  함께 토글된다. 캡션은 span 으로 따로 둔다.
-                */}
-                <div className="span-all field">
-                    <span className="field-label">태그</span>
-                    <TagSelector
-                        knownTags={knownTags}
-                        selected={post.tags}
-                        error={tagError}
-                        onChange={(tags) => {
-                            set("tags", tags);
-                            if (tags.length > 0) setTagError(null);
-                        }}
-                    />
-                </div>
             </MetaGrid>
 
             <SplitPane>

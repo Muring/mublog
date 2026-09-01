@@ -108,9 +108,6 @@ export const MetaGrid = styled.div`
   }
 
   /* 태그는 칩이 여러 줄로 늘어나므로 한 줄 전체를 쓴다 */
-  .span-all {
-    grid-column: 1 / -1;
-  }
 
   @media (max-width: 1100px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));

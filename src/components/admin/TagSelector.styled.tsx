@@ -7,10 +7,29 @@ export const TagSelectorWrapper = styled.div`
     flex-direction: column;
     gap: 0.35rem;
 
+    /*
+     * 태그가 늘어나면 이 목록만 계속 길어져 왼쪽 열이 오른쪽(썸네일)보다
+     * 한참 커진다. 두 줄 남짓까지만 자리를 주고 그 뒤로는 안에서 스크롤한다.
+     * 고르는 화면이라 다 보이는 것보다 다 닿을 수 있는 것이 중요하다.
+     */
     .tag-list {
         display: flex;
         flex-wrap: wrap;
         gap: 0.35rem;
+        max-height: 5.25rem;
+        overflow-y: auto;
+        /* 스크롤이 생겼을 때 마지막 줄이 잘려 보이도록 아래를 살짝 띄운다 */
+        padding-bottom: 0.15rem;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+    }
+
+    .tag-list::-webkit-scrollbar {
+        width: 6px;
+    }
+    .tag-list::-webkit-scrollbar-thumb {
+        background-color: var(--bordercolor);
+        border-radius: 999px;
     }
 
     /*
