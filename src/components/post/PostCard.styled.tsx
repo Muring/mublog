@@ -2,14 +2,14 @@ import styled from "@emotion/styled";
 import Image from "next/image";
 
 /**
- * 카드 높이는 고정하지 않는다.
+ * 모든 카드는 같은 높이다.
  *
- * 예전에는 Body 를 10rem 으로 못박고 제목·설명을 두 줄씩 잘랐다. 태그와 날짜가
- * 한 줄을 나눠 쓰다 보니 태그가 길면 날짜가 밀려나기까지 했다.
+ * 안쪽 네 덩어리가 저마다 자기 몫을 고정으로 갖는다.
+ *   태그 한 줄 / 제목 두 줄 / 설명 세 줄 / 메타 한 줄
+ * 내용 길이에 따라 늘어나는 곳이 없으므로 줄이 달라도 카드가 들쭉날쭉하지 않다.
  *
- * 지금은 내용이 필요한 만큼 차지하고, 같은 줄에 놓인 카드끼리는 grid/flex 의
- * stretch 로 높이가 맞는다. 메타 줄은 margin-top: auto 로 항상 바닥에 붙는다.
- * 그래서 태그도 제목도 잘리지 않으면서 한 줄 안의 카드들은 나란히 보인다.
+ * height: 100% 는 여전히 필요하다. 부모가 stretch 로 늘어난 경우
+ * (썸네일 비율이 어긋나는 등) 메타 줄을 바닥에 붙여 두기 위해서다.
  */
 const Wrapper = styled.article`
   display: flex;
@@ -72,26 +72,79 @@ const Body = styled.div`
   padding: 0.875rem 1rem 1rem;
 `;
 
-/** 태그는 전부 보여야 하므로 줄바꿈을 허용한다. 말줄임하지 않는다. */
+/**
+ * 태그는 언제나 한 줄이다.
+ *
+ * wrap 을 허용하면 태그가 많은 글만 카드가 길어져 줄이 들쭉날쭉해진다.
+ * 넘치는 것은 +N 으로 접고, 그 위에 마우스를 올리면 나머지를 보여준다.
+ */
 const Tags = styled.div`
+  /* 팝오버가 태그 줄 전체를 기준으로 놓이도록 여기서 기준점을 만든다 */
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
   gap: 0.3rem;
+  height: 1.6em;
+  font-size: 0.7rem;
+  overflow: visible;
 
   .chip {
+    flex-shrink: 0;
     padding: 0.1rem 0.45rem;
     border-radius: 999px;
     background-color: var(--codefontbgcolor);
     color: var(--desccolor);
-    font-size: 0.7rem;
     font-weight: 700;
     line-height: 1.6;
     white-space: nowrap;
+    /* 태그 하나가 아주 길면 그것만 줄어들며 말줄임 된다 */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .more {
+    cursor: default;
+  }
+
+  /* 카드가 overflow: hidden 이므로 팝오버는 카드 안쪽(태그 줄 바로 아래)에 띄운다 */
+  .popover {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    z-index: 2;
+    display: none;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--bordercolor);
+    border-radius: 8px;
+    background-color: var(--background);
+    color: var(--desccolor);
+    box-shadow: 0px 3px 8px -2px var(--shadowcolor);
+    /* 카드가 overflow: hidden 이라 폭을 넘기면 잘린다. 넘치면 줄바꿈시킨다 */
+    max-width: 100%;
+    white-space: normal;
+    font-weight: 700;
+  }
+
+  .more:hover .popover {
+    display: block;
   }
 `;
 
-/** 줄 수를 제한하지 않는다. 제목이 잘리면 어떤 글인지 알 수 없다. */
+/**
+ * 제목은 두 줄까지.
+ *
+ * "모든 카드 높이 동일" 과 "임의 길이 제목 전부 표시" 는 동시에 성립하지 않는다.
+ * 지금 글이 두 줄이라서 두 줄로 잡은 것이 아니라, 카드 격자에서 제목이 차지할
+ * 몫을 두 줄로 정한 것이다. 더 긴 제목이 와도 말줄임될 뿐 격자는 흐트러지지 않는다.
+ * 잘린 전체 제목은 title 속성으로 볼 수 있고, 어차피 한 번 누르면 본문이다.
+ */
 const Title = styled.h5`
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  /* 한 줄짜리 제목도 두 줄 자리를 차지해야 카드끼리 줄이 맞는다 */
+  height: 2lh;
   color: var(--foreground);
   line-height: 1.35;
   /*
@@ -109,6 +162,8 @@ const Desc = styled.p`
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
+  /* 설명이 짧거나 없어도 세 줄 자리를 지킨다 */
+  height: 3lh;
   color: var(--desccolor);
   font-size: 0.85rem;
   line-height: 1.45;

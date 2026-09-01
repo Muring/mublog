@@ -19,15 +19,18 @@ export const AdminWrapper = styled.div`
     margin-bottom: 1.5rem;
   }
 
+  /*
+   * flex + flex-wrap 이면 좁아질 때 한 줄에 하나씩 떨어져 세로로 길어진다.
+   * 최소 폭만 정해두면 4 -> 2 -> 1 개로 알아서 접힌다.
+   */
   .stat-row {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: 0.75rem;
     margin-bottom: 2rem;
   }
 
   .stat {
-    flex: 1 1 8rem;
     border: 1px solid var(--bordercolor);
     border-radius: 12px;
     background-color: var(--cardbackground);
@@ -98,6 +101,86 @@ export const PostTable = styled.table`
   .badge.draft {
     color: #b26a00;
     border-color: #e3b341;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  /*
+   * 좁은 화면에서는 6열을 가로로 유지할 방법이 없다.
+   * 가로 스크롤은 목록을 훑는 동작과 맞지 않으므로 행을 카드로 바꾼다.
+   * 헤더를 감추는 대신 각 셀이 data-label 로 제 이름을 달고 나온다.
+   */
+  @media (max-width: 860px) {
+    display: block;
+
+    thead {
+      display: none;
+    }
+
+    tbody,
+    tr,
+    td {
+      display: block;
+    }
+
+    tr {
+      border: 1px solid var(--bordercolor);
+      border-radius: 12px;
+      background-color: var(--cardbackground);
+      padding: 0.875rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: none;
+      padding: 0.3rem 0;
+      text-align: right;
+    }
+
+    td::before {
+      content: attr(data-label);
+      flex-shrink: 0;
+      color: var(--desccolor);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    /* 이 둘은 이름표가 필요 없다. attr() 이 빈 값이면 빈 상자가 남는다 */
+    .title-cell::before,
+    .actions::before {
+      content: none;
+    }
+
+    /* 제목은 이름표 없이 한 줄을 통째로 쓴다 */
+    .title-cell {
+      display: block;
+      text-align: left;
+      padding: 0 0 0.5rem;
+      border-bottom: 1px solid var(--bordercolor);
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+    }
+
+    .actions {
+      justify-content: flex-end;
+      padding-top: 0.75rem;
+    }
+
+    /* 카드가 곧 행이라 배경을 또 바꾸면 어수선하다 */
+    tbody tr:hover {
+      background-color: var(--cardbackground);
+      border-color: var(--desccolor);
+    }
   }
 `;
 

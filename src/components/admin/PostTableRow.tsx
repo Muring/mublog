@@ -45,20 +45,23 @@ export default function PostTableRow({ post }: Props) {
 
     return (
         <tr style={busy ? { opacity: 0.5 } : undefined}>
+            {/* data-label 은 좁은 화면에서 행이 카드로 바뀔 때 각 값 앞에 붙는 이름표다 */}
             <td className="title-cell">
                 {post.title}
                 <span className="slug">/{post.slug}</span>
             </td>
-            <td>
+            <td data-label="상태">
                 <span className={`badge ${post.status === "PUBLISHED" ? "published" : "draft"}`}>
                     {post.status === "PUBLISHED" ? "발행" : "초안"}
                 </span>
             </td>
-            <td>{post.tags.join(", ") || "-"}</td>
-            <td>{post.publishedAt ? formatCardDate(post.publishedAt) : "-"}</td>
-            <td>{post.commentCount}</td>
-            <td>
-                <div style={{ display: "flex", gap: "0.4rem" }}>
+            <td data-label="태그">{post.tags.join(", ") || "-"}</td>
+            <td data-label="발행일">
+                {post.publishedAt ? formatCardDate(post.publishedAt) : "-"}
+            </td>
+            <td data-label="댓글">{post.commentCount}</td>
+            <td className="actions">
+                <div className="action-buttons">
                     <Link href={`/admin/posts/${post.id}`}>
                         <Button as="span">수정</Button>
                     </Link>
