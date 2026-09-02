@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import type { PostSummary, PostDetail } from "@/types/post";
+import { compareTags } from "@/lib/tags";
 
 const SUMMARY_SELECT = {
     id: true,
@@ -93,11 +94,7 @@ export const getAllTags = unstable_cache(
             where: { status: "PUBLISHED" },
             select: { tags: true },
         });
-        return [...new Set(rows.flatMap((r) => r.tags))].sort((a, b) => {
-            if (a === "etc") return 1;
-            if (b === "etc") return -1;
-            return a.localeCompare(b);
-        });
+        return [...new Set(rows.flatMap((r) => r.tags))].sort(compareTags);
     },
     ["posts-tags"],
     { tags: ["posts:list"], revalidate: 3600 }

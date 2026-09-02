@@ -7,6 +7,7 @@ import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
 import { useToast } from "@/providers/Toast";
+import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import {
     EditorWrapper,
     MetaGrid,
@@ -96,8 +97,9 @@ export default function PostEditor({ initial, knownTags }: Props) {
             const params = new URLSearchParams({ slug: post.slug });
             if (postId) params.set("excludeId", postId);
             try {
-                const res = await fetch("/api/admin/slug-check?" + params.toString());
-                const data = await res.json();
+                const data = await fetchJson<{ available: boolean; reason: string | null }>(
+                    "/api/admin/slug-check?" + params.toString()
+                );
                 if (!cancelled) {
                     setSlugState({
                         checking: false,
@@ -134,15 +136,13 @@ export default function PostEditor({ initial, knownTags }: Props) {
         const body = new FormData();
         body.append("file", file);
         try {
-            const res = await fetch("/api/admin/upload", { method: "POST", body });
-            const data = await res.json();
-            if (!res.ok) {
-                toast.error(data.error ?? "이미지 업로드에 실패했습니다.");
-                return null;
-            }
-            return data.url as string;
-        } catch {
-            toast.error("이미지 업로드 중 오류가 발생했습니다.");
+            const { url } = await fetchJson<{ url: string }>("/api/admin/upload", {
+                method: "POST",
+                body,
+            });
+            return url;
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
             return null;
         }
     }, [toast]);
@@ -204,16 +204,16 @@ export default function PostEditor({ initial, knownTags }: Props) {
             publishedAt: post.publishedAt,
         };
 
-        const res = await fetch(postId ? "/api/admin/posts/" + postId : "/api/admin/posts", {
-            method: postId ? "PATCH" : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
+        type Saved = { id?: string; slug?: string; publishedAt?: string | null };
+        let data: Saved;
+        try {
+            data = await fetchJson<Saved>(
+                postId ? "/api/admin/posts/" + postId : "/api/admin/posts",
+                jsonRequest(postId ? "PATCH" : "POST", payload)
+            );
+        } catch (error) {
             setPending(null);
-            toast.error(data.error ?? "저장에 실패했습니다.");
+            toast.error(error instanceof Error ? error.message : "저장에 실패했습니다.");
             return;
         }
 

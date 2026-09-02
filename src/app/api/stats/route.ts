@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSiteStats } from "@/lib/stats";
+import { handleApiError } from "@/lib/api";
 
 // force-dynamic 을 쓰면 Next 가 응답의 Cache-Control 을 지워버려 CDN 이 관여하지 못한다.
 // 이 핸들러는 쿠키도 헤더도 읽지 않으므로 그냥 60초 재검증 라우트로 둔다.
@@ -19,7 +20,6 @@ export async function GET() {
     try {
         return NextResponse.json(await getSiteStats());
     } catch (error) {
-        console.error("[api/stats]", error);
-        return NextResponse.json({ error: "통계를 불러오지 못했습니다." }, { status: 500 });
+        return handleApiError(error, "api/stats", "통계를 불러오지 못했습니다.");
     }
 }

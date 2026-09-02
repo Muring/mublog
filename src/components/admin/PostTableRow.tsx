@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "./Admin.styled";
 import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
+import { fetchJson } from "@/lib/fetcher";
 
 type Props = {
     post: {
@@ -30,10 +31,10 @@ export default function PostTableRow({ post }: Props) {
             return;
         }
         setIsDeleting(true);
-        const res = await fetch(`/api/admin/posts/${post.id}`, { method: "DELETE" });
-        if (!res.ok) {
-            const body = await res.json().catch(() => ({}));
-            toast.error(body.error ?? "삭제에 실패했습니다.");
+        try {
+            await fetchJson(`/api/admin/posts/${post.id}`, { method: "DELETE" });
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "삭제에 실패했습니다.");
             setIsDeleting(false);
             return;
         }

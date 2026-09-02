@@ -30,11 +30,21 @@ export async function parseBody<T>(request: NextRequest, schema: ZodType<T>): Pr
     return parsed.data;
 }
 
-/** 예상치 못한 오류의 내부 정보를 응답에 노출하지 않는다. */
-export function handleApiError(error: unknown, context: string) {
+/**
+ * 예상치 못한 오류의 내부 정보를 응답에 노출하지 않는다.
+ *
+ * fallback 은 HttpError 가 아닌 오류에 쓸 문구다. 라우트마다 "포스트를 불러오지
+ * 못했습니다" 처럼 더 구체적으로 말할 수 있으면 그 편이 낫기 때문에 열어 둔다.
+ * 어느 쪽이든 내부 오류 내용은 로그에만 남는다.
+ */
+export function handleApiError(
+    error: unknown,
+    context: string,
+    fallback = "서버 오류가 발생했습니다."
+) {
     if (error instanceof HttpError) {
         return NextResponse.json({ error: error.message }, { status: error.status });
     }
     console.error(`[${context}]`, error);
-    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+    return NextResponse.json({ error: fallback }, { status: 500 });
 }

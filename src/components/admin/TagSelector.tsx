@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TagSelectorWrapper } from "./TagSelector.styled";
+import { compareTags } from "@/lib/tags";
 
 type Props = {
     /** 기존 포스트에서 수집한 태그 목록 */
@@ -24,11 +25,7 @@ export default function TagSelector({ knownTags, selected, onChange, error }: Pr
     const [draft, setDraft] = useState("");
 
     // 기존 목록에 없지만 이 글에 이미 붙어 있는 태그도 함께 보여준다
-    const options = [...new Set([...knownTags, ...selected])].sort((a, b) => {
-        if (a === "etc") return 1;
-        if (b === "etc") return -1;
-        return a.localeCompare(b);
-    });
+    const options = [...new Set([...knownTags, ...selected])].sort(compareTags);
 
     function toggle(tag: string) {
         onChange(selected.includes(tag) ? selected.filter((t) => t !== tag) : [...selected, tag]);
