@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CommentRow } from "./Comments.styled";
 import CommentBody from "./CommentBody";
 import CommentForm from "./CommentForm";
+import { useConfirm } from "@/providers/Confirm";
 import type { CommentNode } from "@/types/comment";
 
 function formatWhen(iso: string): string {
@@ -55,6 +56,7 @@ export default function CommentItem({
     hasNext = false,
 }: Props) {
     const [isEditing, setIsEditing] = useState(false);
+    const confirm = useConfirm();
 
     const rowClass = [
         isReply ? "reply" : "root",
@@ -147,8 +149,15 @@ export default function CommentItem({
                                         type="button"
                                         className="row-action danger"
                                         disabled={isMutating}
-                                        onClick={() => {
-                                            if (confirm("이 댓글을 삭제할까요?")) onDelete(comment.id);
+                                        onClick={async () => {
+                                            const ok = await confirm({
+                                                title: "이 댓글을 삭제할까요?",
+                                                description:
+                                                    "달린 답글은 남고, 이 댓글은 삭제된 표시로 바뀝니다.",
+                                                confirmLabel: "삭제",
+                                                danger: true,
+                                            });
+                                            if (ok) onDelete(comment.id);
                                         }}
                                     >
                                         삭제

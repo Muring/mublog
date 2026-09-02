@@ -436,6 +436,7 @@ src/
 │   ├── revalidate.ts
 │   └── date.ts / tags.ts / reading-time.ts / validation.ts   # 순수 함수
 ├── providers/            # RootProvider 가 감싸는 컨텍스트 트리
+│                         # Toast(알림) · Confirm(확인 대화상자) 포함
 ├── hooks/
 │   ├── useRecentPosts.tsx     # 최근 본 글 (localStorage)
 │   ├── useOptimisticList.ts   # 목록의 낙관적 갱신 + 롤백

@@ -7,6 +7,7 @@ import { Button } from "./Admin.styled";
 import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
 import { fetchJson } from "@/lib/fetcher";
+import { useConfirm } from "@/providers/Confirm";
 
 type Props = {
     post: {
@@ -23,13 +24,19 @@ type Props = {
 export default function PostTableRow({ post }: Props) {
     const router = useRouter();
     const toast = useToast();
+    const confirm = useConfirm();
     const [isPending, startTransition] = useTransition();
     const [isDeleting, setIsDeleting] = useState(false);
 
     async function remove() {
-        if (!confirm(`"${post.title}" 을(를) 삭제할까요?\n댓글도 함께 삭제되며 되돌릴 수 없습니다.`)) {
-            return;
-        }
+        const ok = await confirm({
+            title: `"${post.title}" 을(를) 삭제할까요?`,
+            description: "댓글도 함께 삭제되며 되돌릴 수 없습니다.",
+            confirmLabel: "삭제",
+            danger: true,
+        });
+        if (!ok) return;
+
         setIsDeleting(true);
         try {
             await fetchJson(`/api/admin/posts/${post.id}`, { method: "DELETE" });

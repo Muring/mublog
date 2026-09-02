@@ -4,6 +4,7 @@ import Theme from "./Theme";
 import { HeaderTitleProvider } from "./HeaderTitleProvider";
 import EmotionRegistry from "./EmotionRegistry";
 import ToastProvider from "./Toast";
+import ConfirmProvider from "./Confirm";
 
 export default function RootProvider({ children }: { children: ReactNode }) {
     return (
@@ -11,7 +12,9 @@ export default function RootProvider({ children }: { children: ReactNode }) {
             <HeaderTitleProvider>
                 <Theme>
                     <Query>
-                        <ToastProvider>{children}</ToastProvider>
+                        <ToastProvider>
+                            <ConfirmProvider>{children}</ConfirmProvider>
+                        </ToastProvider>
                     </Query>
                 </Theme>
             </HeaderTitleProvider>
