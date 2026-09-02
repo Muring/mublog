@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { CommentsWrapper, CommentList, SignInPrompt } from "./Comments.styled";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { useToast } from "@/providers/Toast";
+import { useOptimisticList } from "@/hooks/useOptimisticList";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import { commentsUrl, fetchComments, fetchMe, queryKeys } from "@/lib/queries";
 import type { CommentNode } from "@/types/comment";
@@ -15,7 +16,6 @@ import type { CommentNode } from "@/types/comment";
 export default function Comments({ slug }: { slug: string }) {
     const pathname = usePathname();
     const toast = useToast();
-    const queryClient = useQueryClient();
     const queryKey = queryKeys.comments(slug);
 
     const [replyTo, setReplyTo] = useState<string | null>(null);
@@ -28,80 +28,48 @@ export default function Comments({ slug }: { slug: string }) {
         isError,
     } = useQuery({ queryKey, queryFn: () => fetchComments(slug) });
 
-    const create = useMutation({
-        mutationFn: (input: { body: string; parentId: string | null }) =>
-            fetchJson<CommentNode>(commentsUrl(slug), jsonRequest("POST", input)),
-        // 응답을 기다리지 않고 화면에 먼저 올린다.
-        // 실패하면 onError 에서 스냅샷으로 되돌린다.
-        onMutate: async (input) => {
-            setFormError(null);
-            await queryClient.cancelQueries({ queryKey });
-            const snapshot = queryClient.getQueryData<CommentNode[]>(queryKey) ?? [];
-
-            if (me?.user) {
-                const optimistic: CommentNode = {
-                    id: `temp-${crypto.randomUUID()}`,
-                    parentId: input.parentId,
-                    body: input.body,
-                    author: me.user,
-                    createdAt: new Date().toISOString(),
-                    editedAt: null,
-                    deleted: false,
-                    pending: true,
-                };
-                queryClient.setQueryData<CommentNode[]>(queryKey, [...snapshot, optimistic]);
-            }
-            return { snapshot };
-        },
-        onError: (error, _input, context) => {
-            if (context) queryClient.setQueryData(queryKey, context.snapshot);
-            setFormError(error.message);
-        },
+    const create = useOptimisticList<CommentNode, { body: string; parentId: string | null }, CommentNode>({
+        queryKey,
+        mutationFn: (input) => fetchJson<CommentNode>(commentsUrl(slug), jsonRequest("POST", input)),
+        onStart: () => setFormError(null),
+        // 로그인 정보가 아직 없으면 작성자를 그릴 수 없으므로 목록을 그대로 둔다.
+        // 응답이 오면 onSettled 의 invalidate 가 채운다.
+        apply: (list, input) =>
+            me?.user
+                ? [
+                      ...list,
+                      {
+                          id: `temp-${crypto.randomUUID()}`,
+                          parentId: input.parentId,
+                          body: input.body,
+                          author: me.user,
+                          createdAt: new Date().toISOString(),
+                          editedAt: null,
+                          deleted: false,
+                          pending: true,
+                      },
+                  ]
+                : list,
+        onError: (message) => setFormError(message),
         onSuccess: () => setReplyTo(null),
-        onSettled: () => queryClient.invalidateQueries({ queryKey }),
     });
 
-    const update = useMutation({
-        mutationFn: (input: { id: string; body: string }) =>
-            fetchJson<CommentNode>(
-                `/api/comments/${input.id}`,
-                jsonRequest("PATCH", { body: input.body })
-            ),
-        onMutate: async ({ id, body }) => {
-            await queryClient.cancelQueries({ queryKey });
-            const snapshot = queryClient.getQueryData<CommentNode[]>(queryKey) ?? [];
-            queryClient.setQueryData<CommentNode[]>(
-                queryKey,
-                snapshot.map((c) => (c.id === id ? { ...c, body, pending: true } : c))
-            );
-            return { snapshot };
-        },
-        onError: (error, _input, context) => {
-            if (context) queryClient.setQueryData(queryKey, context.snapshot);
-            toast.error(error.message);
-        },
-        onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    const update = useOptimisticList<CommentNode, { id: string; body: string }, CommentNode>({
+        queryKey,
+        mutationFn: (input) =>
+            fetchJson<CommentNode>(`/api/comments/${input.id}`, jsonRequest("PATCH", { body: input.body })),
+        apply: (list, { id, body }) =>
+            list.map((c) => (c.id === id ? { ...c, body, pending: true } : c)),
+        onError: (message) => toast.error(message),
     });
 
-    const remove = useMutation({
-        mutationFn: (id: string) =>
-            fetchJson<{ ok: true }>(`/api/comments/${id}`, { method: "DELETE" }),
-        onMutate: async (id) => {
-            await queryClient.cancelQueries({ queryKey });
-            const snapshot = queryClient.getQueryData<CommentNode[]>(queryKey) ?? [];
-            queryClient.setQueryData<CommentNode[]>(
-                queryKey,
-                snapshot.map((c) =>
-                    c.id === id ? { ...c, deleted: true, body: null, author: null } : c
-                )
-            );
-            return { snapshot };
-        },
-        onError: (error, _id, context) => {
-            if (context) queryClient.setQueryData(queryKey, context.snapshot);
-            toast.error(error.message);
-        },
-        onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    const remove = useOptimisticList<CommentNode, string, { ok: true }>({
+        queryKey,
+        mutationFn: (id) => fetchJson<{ ok: true }>(`/api/comments/${id}`, { method: "DELETE" }),
+        // 답글이 고아가 되지 않도록 행은 남기고 본문과 작성자만 지운다
+        apply: (list, id) =>
+            list.map((c) => (c.id === id ? { ...c, deleted: true, body: null, author: null } : c)),
+        onError: (message) => toast.error(message),
     });
 
     // 서버는 평평한 배열을 주고 여기서 2단으로 묶는다
