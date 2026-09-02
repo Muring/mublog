@@ -1,4 +1,7 @@
 :root {
+  /* 본문 폰트. 서식 버튼(B/I)처럼 일부러 다른 폰트를 쓰는 자리에서
+     기본으로 되돌아올 때 이 값을 쓴다 */
+  --font-body: "NanumSquareNeo", "Noto Sans KR", "Pretendard", sans-serif;
   --background: #ffffff;
   --foreground: #171717;
   --hovercolor: #f4f4f4;
@@ -168,7 +171,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: "NanumSquareNeo", "Noto Sans KR", "Pretendard", sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -ms-overflow-style: none;

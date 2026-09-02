@@ -353,6 +353,13 @@ export const ToolbarButton = styled.button`
     border-radius: 0.35rem;
     background-color: var(--foreground);
     color: var(--background);
+    /*
+     * 버튼의 서식을 물려받지 않도록 되돌린다. ::after 는 버튼의 자식이라
+     * 기울임 버튼에서는 설명 문구까지 Georgia 기울임으로 나왔다.
+     * 설명은 어느 버튼에서든 같은 모양이어야 한다.
+     */
+    font-family: var(--font-body);
+    font-style: normal;
     font-size: 0.7rem;
     font-weight: 600;
     line-height: 1.4;
