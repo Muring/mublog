@@ -311,8 +311,41 @@ page.tsx (서버)  ──▶  DAL 조회  ──▶  props  ──▶  클라이
 
 - **서버 데이터** — TanStack Query. `QueryClient`는 `useState`로 컴포넌트 안에서 만듭니다.
   모듈 스코프에 두면 서버에서 동시 요청 간에 공유되어 A의 캐시가 B에게 갑니다.
-- **댓글** — `onMutate` 스냅샷 → 낙관적 추가 → `onError` 롤백 → `onSettled` invalidate
+- **댓글** — `useOptimisticList`. `cancelQueries` → 스냅샷 → 낙관적 갱신 →
+  `onError` 롤백 → `onSettled` invalidate. 작성·수정·삭제가 이 뼈대를 함께 씁니다.
+  `cancelQueries`를 먼저 부르지 않으면 이미 날아간 조회가 나중에 도착해
+  방금 올린 값을 도로 덮어씁니다
 - **테마** — next-themes가 `html`에 `.dark`를 붙이고, 색은 전부 CSS 변수로 갈립니다
+
+### 알림과 확인
+
+둘 다 컨텍스트 프로바이더로 두고 훅으로 부릅니다. 화면 어디서든 같은 모양이 나옵니다.
+
+| | 훅 | 쓰는 곳 |
+|---|---|---|
+| 알림 | `useToast()` | 저장·삭제 결과, 실패 문구 |
+| 확인 | `useConfirm()` | 되돌릴 수 없는 동작 앞 |
+
+```ts
+if (await confirm({ title: "...", description: "...", danger: true })) { ... }
+```
+
+**브라우저의 `confirm` / `alert` / `prompt`는 쓰지 않습니다.** 테마도 폰트도 우리 것이
+아니라 화면에서 혼자 튀고, 문구를 꾸밀 수 없어 "무엇이 함께 사라지는지"를 줄바꿈으로
+우겨넣게 됩니다. 무엇보다 **떠 있는 동안 페이지의 자바스크립트가 통째로 멈춥니다** —
+브라우저 자동화로 검증할 때 탭이 응답을 멈춰 세션이 끊깁니다.
+
+네이티브 창이 공짜로 주던 것은 직접 챙겨야 합니다.
+
+- `role="alertdialog"` + `aria-modal`, 제목과 설명을 `aria-labelledby` / `aria-describedby`로 연결
+- **포커스는 취소에 놓습니다.** Enter를 무심코 눌렀을 때 일어나는 일이 "아무 일도 없음"이어야 합니다
+- Tab을 대화상자 안에 가둡니다. 그러지 않으면 뒤에 가려진 페이지로 빠져나가 보이지 않는 곳에 포커스가 놓입니다
+- Escape와 바깥 클릭으로 취소하고, 닫을 때 열었던 버튼으로 포커스를 돌려줍니다
+
+토스트에 확인 버튼을 다는 방법도 있지만 지금의 두 자리(포스트 삭제·댓글 삭제)에는
+맞지 않습니다. 토스트는 스스로 사라지는 자리라 못 보고 지나가기도 실수로 누르기도 쉽고,
+포커스를 가져가지 않아 키보드로 도달하기 어렵습니다. 되돌릴 수 있는 동작이라면
+그때는 토스트 쪽이 낫습니다.
 
 ### 레이아웃 규칙
 
@@ -416,11 +449,12 @@ src/
 │   ├── layout/           # Header, Footer, SideMenu, ThemeSwitcher …
 │   ├── post/             # PostCard, PostGrid, PostContent, CarouselSlider …
 │   ├── about/            # Introduction, HistoryTimeline, ProjectTimeline
-│   ├── admin/            # 에디터·태그 선택기 (+ 에디터 전용 훅 3개)
+│   ├── admin/            # 에디터·태그 선택기
+│   │                     # useSlugCheck / useEditorUploads / usePostSave
 │   ├── comments/         # 댓글 스레드
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
 │   ├── trackers/         # 화면에 아무것도 그리지 않고 부수효과만 내는 null 컴포넌트
-│   ├── ui/               # 토스트 등 범용 조각
+│   ├── ui/               # Skeleton · Toast · ConfirmDialog 같은 범용 조각
 │   └── Profile.tsx       # 루트에는 두 영역 이상이 함께 쓰는 것만 둔다
 ├── lib/
 │   ├── markdown/         # 마크다운 → HTML 파이프라인
@@ -436,7 +470,9 @@ src/
 │   ├── revalidate.ts
 │   └── date.ts / tags.ts / reading-time.ts / validation.ts   # 순수 함수
 ├── providers/            # RootProvider 가 감싸는 컨텍스트 트리
-│                         # Toast(알림) · Confirm(확인 대화상자) 포함
+│   ├── Toast.tsx         # 알림 (useToast)
+│   ├── Confirm.tsx       # 확인 대화상자 (useConfirm)
+│   └── Query / Theme / EmotionRegistry / HeaderTitleProvider
 ├── hooks/
 │   ├── useRecentPosts.tsx     # 최근 본 글 (localStorage)
 │   ├── useOptimisticList.ts   # 목록의 낙관적 갱신 + 롤백
