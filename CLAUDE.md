@@ -3,6 +3,13 @@
 README는 **무엇이 어떻게 돼 있는지**를 설명한다. 이 문서는 **건드릴 때 지켜야 할 것**만 적는다.
 여기 있는 항목은 대부분 실제로 한 번씩 깨뜨려 본 것들이다.
 
+**이 파일은 매 요청마다 통째로 실린다.** 길어지면 비용도 늘지만 중요한 규칙이 묻힌다.
+새 항목은 셋을 **모두** 만족할 때만 넣는다 — ① `lint`·`tsc`·`build` 가 못 잡고,
+② 고치다 보면 실제로 마주치고, ③ 틀렸을 때 조용히 잘못된다.
+
+"버그를 고쳤으니 적어둔다" 로 늘리지 않는다(그건 git 로그가 한다).
+사연이 아니라 규칙으로 줄여 쓰고, 번호 절 안 제자리에 넣는다.
+
 ---
 
 ## 1. 절대 하면 안 되는 것
@@ -22,6 +29,10 @@ URL만 정규식으로 잘라 `<a>` **엘리먼트**로 만든다 — HTML 문�
 포스트 본문은 sanitize하지 않는데, 작성자가 소유자 한 명이고 서버에서 강제되기 때문이다.
 이 비대칭을 없애려 하지 않는다.
 
+**브라우저 기본 대화상자를 부르지 않는다.** `confirm`/`alert`/`prompt` 대신
+`useConfirm()`(providers/Confirm.tsx). 테마가 어긋나는 것도 문제지만,
+떠 있는 동안 페이지 자바스크립트가 멈춰 브라우저 자동화 검증이 끊긴다.
+
 **방문 통계에 요청당 행을 만들지 않는다.** 무료 티어 500MB를 갉아먹는 유일한 벡터다.
 `daily_stats`는 KST 하루 1행을 유지한다.
 
@@ -34,6 +45,13 @@ URL만 정규식으로 잘라 `<a>` **엘리먼트**로 만든다 — HTML 문�
 `.styled.tsx` 24개 중 16개에는 `"use client"`가 없다.
 **서버 컴포넌트에서 그런 파일을 import하면 `f.createContext is not a function`으로 죽는다.**
 서버에서 써야 하면 그 파일에 `"use client"`를 먼저 넣는다.
+
+### 태그 중첩
+
+**`<p>` 안에 `<div>` 를 넣지 않는다.** 파서가 `<p>` 를 강제로 닫아 서버 트리와
+DOM 이 갈리고, React 가 하이드레이션을 포기해 그 트리를 다시 그린다(#418).
+styled 는 태그가 안 보여서 밟기 쉽다 — 공용 조각은 `span` + `display: block` 으로 만든다.
+**빌드도 lint 도 못 잡는다.** 서버 HTML 을 파서에 넣어 확인한다.
 
 ### 마크다운 파이프라인
 
@@ -59,6 +77,10 @@ Supabase 대시보드가 보여주는 `schema.prisma` 예시를 그대로 쓰지
 
 `DATABASE_URL`은 6543 + `?pgbouncer=true&connection_limit=1`, `DIRECT_URL`은 5432다.
 `?pgbouncer=true`를 빠뜨리면 **로컬에서는 재현되지 않고 프로덕션에서만** 간헐적으로 터진다.
+
+`vercel.json` 의 `"regions": ["icn1"]` 을 지우지 않는다. Supabase 가 서울이라
+지우면 DB 쿼리마다 태평양을 왕복한다(`X-Vercel-Id` 가 `icn1::iad1::` 이면 그 상태다).
+이것도 로컬에서는 재현되지 않는다.
 
 ---
 
@@ -157,16 +179,6 @@ DB는 맞는데 페이지가 낡았으면 `.next/cache`를 지운다. `unstable_
 
 `pg` 드라이버는 `DATE` 컬럼을 로컬 시간 `Date`로 준다. ISO 문자열로 잘라 쓰면 날짜가 하루 어긋난다.
 
-### 프로덕션만 느릴 때
-
-로컬에서 10ms 인데 프로덕션에서 1~2초면 **리전부터 확인한다.**
-`X-Vercel-Id` 가 `icn1::iad1::` 이면 함수가 미국 동부에서 돌고 있고,
-Supabase 는 서울(`ap-northeast-2`)이라 DB 쿼리마다 태평양을 왕복한다.
-`vercel.json` 의 `"regions": ["icn1"]` 을 지우지 않는다.
-
-이 계열은 **로컬에서 절대 재현되지 않는다.** 태평양을 건너지 않기 때문이다.
-재현이 안 된다고 "문제 없음" 으로 결론내지 말고 배포본을 직접 측정한다.
-
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know
@@ -176,44 +188,3 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
-
-### 하이드레이션을 깨는 태그 중첩
-
-**`<p>` 안에 `<div>` 를 넣지 않는다.** 파서가 `<div>` 를 만나면 `<p>` 를 강제로 닫아서
-서버가 만든 트리와 브라우저의 DOM 이 갈린다. React 는 하이드레이션을 포기하고
-그 트리를 통째로 클라이언트에서 다시 그린다 — 콘솔에 #418, 화면은 늦게 뜬다.
-
-styled 컴포넌트는 태그가 눈에 안 보여서 밟기 쉽다. `styled.p` 안에 `styled.div` 를
-넣은 것이 실제로 이렇게 났다(`SiteStats` 의 `Skeleton`). 공용 조각은 어디에나
-놓일 수 있으므로 `span` + `display: block` 으로 만든다.
-
-**빌드도 lint 도 이걸 잡지 못한다.** 서버 HTML 을 파서에 넣어 확인한다.
-
-```bash
-curl -s http://localhost:3000/ > /tmp/ssr.html   # 그 뒤 HTMLParser 로 p/a/button 중첩 검사
-```
-
-React 오류 메시지는 "브라우저 확장 때문일 수도 있다" 고 하지만, 먼저 우리 마크업을 의심한다.
-
-### 브라우저 기본 대화상자를 쓰지 않는다
-
-`confirm` / `alert` / `prompt` 를 부르지 않는다. `useConfirm()` (providers/Confirm.tsx) 을 쓴다.
-
-브라우저가 그리는 창이라 테마도 폰트도 우리 것이 아니고 문구를 꾸밀 수 없다.
-그리고 **떠 있는 동안 페이지의 자바스크립트가 통째로 멈춘다** — 브라우저 자동화로
-검증할 때 탭이 응답을 멈춰 세션이 끊긴다. 실제로 여기서 한 번 막혔다.
-
-되돌릴 수 없는 동작에는 `danger: true` 를 주고, 무엇이 함께 사라지는지 `description` 에 적는다.
-포커스는 취소에 놓인다 — Enter 를 무심코 눌렀을 때 일어나는 일이 "아무 일도 없음" 이어야 한다.
-
-### loading.tsx 는 page.tsx 옆에만 둔다
-
-`page.tsx` 가 없는 세그먼트에 `loading.tsx` 만 두지 않는다.
-`admin/posts/` 가 그랬는데, 이 상태로 `.next` 를 비우고 dev 를 새로 띄우면
-그 아래 `new` 와 `[id]` 가 **통째로 404** 가 된다.
-
-증분 빌드에서는 드러나지 않아서 한참 몰랐다. 프로덕션 빌드는 멀쩡하다
-(`yarn build` 의 라우트 목록에도 나오고 `yarn start` 로도 열린다).
-그래서 배포는 되는데 캐시를 비운 뒤 로컬 개발만 막힌다.
-
-로딩 표시가 여러 잎에 필요하면 각 잎에 하나씩 둔다. 부모로 올리지 않는다.
