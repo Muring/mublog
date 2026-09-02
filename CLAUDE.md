@@ -166,3 +166,31 @@ Supabase 는 서울(`ap-northeast-2`)이라 DB 쿼리마다 태평양을 왕복�
 
 이 계열은 **로컬에서 절대 재현되지 않는다.** 태평양을 건너지 않기 때문이다.
 재현이 안 된다고 "문제 없음" 으로 결론내지 말고 배포본을 직접 측정한다.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
+
+### 하이드레이션을 깨는 태그 중첩
+
+**`<p>` 안에 `<div>` 를 넣지 않는다.** 파서가 `<div>` 를 만나면 `<p>` 를 강제로 닫아서
+서버가 만든 트리와 브라우저의 DOM 이 갈린다. React 는 하이드레이션을 포기하고
+그 트리를 통째로 클라이언트에서 다시 그린다 — 콘솔에 #418, 화면은 늦게 뜬다.
+
+styled 컴포넌트는 태그가 눈에 안 보여서 밟기 쉽다. `styled.p` 안에 `styled.div` 를
+넣은 것이 실제로 이렇게 났다(`SiteStats` 의 `Skeleton`). 공용 조각은 어디에나
+놓일 수 있으므로 `span` + `display: block` 으로 만든다.
+
+**빌드도 lint 도 이걸 잡지 못한다.** 서버 HTML 을 파서에 넣어 확인한다.
+
+```bash
+curl -s http://localhost:3000/ > /tmp/ssr.html   # 그 뒤 HTMLParser 로 p/a/button 중첩 검사
+```
+
+React 오류 메시지는 "브라우저 확장 때문일 수도 있다" 고 하지만, 먼저 우리 마크업을 의심한다.
