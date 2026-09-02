@@ -7,27 +7,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CommentsWrapper, CommentList, SignInPrompt } from "./Comments.styled";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
-import { fetchMe } from "@/components/layout/HeaderAuth";
 import { useToast } from "@/providers/Toast";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
+import { commentsUrl, fetchComments, fetchMe, queryKeys } from "@/lib/queries";
 import type { CommentNode } from "@/types/comment";
-
-const commentsUrl = (slug: string) => `/api/posts/${encodeURIComponent(slug)}/comments`;
-
-function fetchComments(slug: string): Promise<CommentNode[]> {
-    return fetchJson<CommentNode[]>(commentsUrl(slug));
-}
 
 export default function Comments({ slug }: { slug: string }) {
     const pathname = usePathname();
     const toast = useToast();
     const queryClient = useQueryClient();
-    const queryKey = ["comments", slug];
+    const queryKey = queryKeys.comments(slug);
 
     const [replyTo, setReplyTo] = useState<string | null>(null);
     const [formError, setFormError] = useState<string | null>(null);
 
-    const { data: me } = useQuery({ queryKey: ["me"], queryFn: fetchMe, staleTime: 60_000 });
+    const { data: me } = useQuery({ queryKey: queryKeys.me, queryFn: fetchMe });
     const {
         data: comments = [],
         isLoading,

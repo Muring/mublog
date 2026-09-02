@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { postViewsKey } from "@/components/post/PostViews";
+import { queryKeys } from "@/lib/queries";
 
 /** 포스트 상세 경로에서만 slug 를 뽑는다. /about 같은 정적 경로는 제외. */
 const RESERVED = new Set(["", "about", "login", "admin", "auth", "api"]);
@@ -48,14 +48,14 @@ export default function VisitTracker() {
                 // 여기서 심어두면 추가 요청 없이 바로 반영된다.
                 const data = await res.json().catch(() => null);
                 if (slug && typeof data?.views === "number") {
-                    queryClient.setQueryData(postViewsKey(slug), data.views);
+                    queryClient.setQueryData(queryKeys.postViews(slug), data.views);
                 }
                 if (data?.stats) {
                     // 먼저 진행 중인 /api/stats 요청을 끊는다. 그쪽은 60초 캐시라
                     // 방문이 반영되기 전의 값을 들고 있을 수 있는데, 그게 나중에
                     // 도착하면 방금 올린 숫자를 도로 내려버린다.
-                    await queryClient.cancelQueries({ queryKey: ["site-stats"] });
-                    queryClient.setQueryData(["site-stats"], data.stats);
+                    await queryClient.cancelQueries({ queryKey: queryKeys.siteStats });
+                    queryClient.setQueryData(queryKeys.siteStats, data.stats);
                 }
             })
             .catch(() => {

@@ -7,16 +7,12 @@ import { useRecentPosts } from "@/hooks/useRecentPosts";
 import SidePost from "./SidePost";
 import Link from "next/link";
 import type { PostSummary } from "@/types/post";
-import { fetchJson } from "@/lib/fetcher";
+import { fetchPostsSummary, queryKeys } from "@/lib/queries";
 
 type Props = {
   type?: string; // 기본값 없음, recent일 때만 최근 포스트
   onLinkClick?: () => void;
 };
-
-function fetchPosts(): Promise<PostSummary[]> {
-  return fetchJson<PostSummary[]>("/api/posts/summary");
-}
 
 export default function SideList({ type, onLinkClick }: Props) {
   const isRecent = type === "recent";
@@ -24,8 +20,8 @@ export default function SideList({ type, onLinkClick }: Props) {
 
   const { recentPosts, isLoading: isRecentLoading } = useRecentPosts();
   const { data: posts = [], isLoading: isPostsLoading } = useQuery({
-    queryKey: ["posts", "summary"],
-    queryFn: fetchPosts,
+    queryKey: queryKeys.postsSummary,
+    queryFn: fetchPostsSummary,
     staleTime: 5 * 60_000,
   });
 

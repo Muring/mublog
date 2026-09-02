@@ -4,25 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthWrapper } from "./HeaderAuth.styled";
-import { fetchJson } from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/Skeleton.styled";
-
-export type Me = {
-    user: { id: string; username: string; avatarUrl: string | null } | null;
-    isAdmin: boolean;
-};
-
-export function fetchMe(): Promise<Me> {
-    return fetchJson<Me>("/api/me");
-}
+import { fetchMe, queryKeys } from "@/lib/queries";
 
 export default function HeaderAuth() {
     const pathname = usePathname();
-    const { data, isLoading } = useQuery({
-        queryKey: ["me"],
-        queryFn: fetchMe,
-        staleTime: 60_000,
-    });
+    // staleTime 은 providers/Query.tsx 의 기본값(60초)을 그대로 쓴다
+    const { data, isLoading } = useQuery({ queryKey: queryKeys.me, queryFn: fetchMe });
 
     // 자리만 비워두면 헤더 오른쪽이 한동안 텅 비었다가 갑자기 채워진다.
     // 아바타·이름·버튼과 같은 모양을 미리 깔아 둔다 (실제 216x31).

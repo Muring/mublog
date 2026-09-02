@@ -1,16 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { fetchJson } from "@/lib/fetcher";
-
-export const postViewsKey = (slug: string) => ["post-views", slug];
-
-async function fetchViews(slug: string): Promise<number> {
-    const data = await fetchJson<{ views: number | null }>(
-        `/api/posts/${encodeURIComponent(slug)}/views`
-    );
-    return data.views ?? 0;
-}
+import { fetchPostViews, queryKeys } from "@/lib/queries";
 
 /**
  * 포스트 조회수.
@@ -21,8 +12,8 @@ async function fetchViews(slug: string): Promise<number> {
  */
 export default function PostViews({ slug, initialViews }: { slug: string; initialViews: number }) {
     const { data } = useQuery({
-        queryKey: postViewsKey(slug),
-        queryFn: () => fetchViews(slug),
+        queryKey: queryKeys.postViews(slug),
+        queryFn: () => fetchPostViews(slug),
         initialData: initialViews,
         staleTime: 0,
     });
