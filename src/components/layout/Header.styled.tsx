@@ -131,7 +131,9 @@ export const DiagonalLine = styled.div`
 export const Overlay = styled.div`
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.4); // 반투명 검정색
+    /* 토큰을 쓰지 않는 자리다. 뒤를 가리는 막이라 두 테마 모두 검정이어야 한다.
+       --shadowcolor 는 다크에서 흰색 계열이라 여기 쓰면 화면이 뿌옇게 밝아진다 */
+    background-color: rgba(0, 0, 0, 0.4);
     z-index: 99;
 `;
 

@@ -48,7 +48,7 @@ export const ToastItem = styled.div`
     border-left: 3px solid var(--desccolor);
 
     &.success {
-        border-left-color: #1a7f37;
+        border-left-color: var(--okcolor);
     }
     &.error {
         border-left-color: var(--dangercolor);

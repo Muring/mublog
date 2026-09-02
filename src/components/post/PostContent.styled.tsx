@@ -34,7 +34,7 @@ export const Article = styled.article`
     list-style-type: circle;
   }
   a {
-    color: #0070f3;
+    color: var(--linkcolor);
     text-decoration: none;
     &:hover {
       text-decoration: underline;
@@ -126,18 +126,21 @@ export const Article = styled.article`
     li {
       display: flex;
       align-items: center;
-      color: black;
+      color: var(--foreground);
       margin: 0;
     }
+    /* 색을 직접 적어두었던 자리다. 다크에서도 밝은 회색 칩이 그대로 떠서
+       페이지 혼자 라이트 테마처럼 보였다. 호버는 프로젝트 공용 짝을 쓴다 */
     a {
-      background-color: lightgray;
+      background-color: var(--codefontbgcolor);
       border-radius: 12px;
       padding: 0 0.5rem;
       font-size: 0.8rem;
-      color: #494949;
+      color: var(--foreground);
       font-weight: bold;
       &:hover {
-        background-color: #afafaf;
+        background-color: var(--hovercolor);
+        color: var(--hoverfontcolor);
         transition-duration: 0.2s;
         text-decoration: none;
       }
@@ -147,7 +150,7 @@ export const Article = styled.article`
   /* Notion 스타일의 callout 블록 */
   aside {
     gap: 0.75rem;
-    border-left: 0.5rem solid #ffd700;
+    border-left: 0.5rem solid var(--calloutaccent);
     border-right: 1px solid var(--calloutborder);
     border-top: 1px solid var(--calloutborder);
     border-bottom: 1px solid var(--calloutborder);

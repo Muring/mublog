@@ -12,6 +12,8 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
   left: 0;
   width: 420px;
   height: 100%;
+  /* 위 오버레이와 같은 이유로 토큰을 쓰지 않는다. 서랍이 어두운 막 위에 떠 있어야 해서
+     두 테마 모두 검정 그림자다 */
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
   z-index: 100;
   padding: 0 0.5rem;

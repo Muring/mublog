@@ -100,7 +100,7 @@ export const MetaGrid = styled.div`
   }
   .field-ok {
     font-size: 0.7rem;
-    color: #1a7f37;
+    color: var(--okcolor);
     font-weight: 500;
   }
   .field-hint {

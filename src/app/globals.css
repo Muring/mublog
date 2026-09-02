@@ -13,12 +13,18 @@
   --codefontbgcolor: #f4f4f4;
   /* 밝은 배경에서 #ff7b00 은 2.36:1 로 읽기 힘들다. 주황을 유지한 채 톤만 낮춘다 (5.02) */
   --codefontcolor: #a94f00;
+  /* 본문·댓글 안의 링크. 다크에서 이 파랑을 그대로 쓰면 4.18:1 로 미달해
+     테마마다 따로 준다 (라이트 4.55 / 다크 8.86) */
+  --linkcolor: #0070f3;
   --bordercolor: #e6e6e6;
   --cardbackground: #ffffff;
   --shadowcolor: rgba(0, 0, 0, 0.1);
   /* 흰 배경에서 #888 은 3.54:1 로 AA 미달이라 한 단계 어둡게 잡는다 (5.33:1) */
   --desccolor: #6b6b6b;
   --calloutborder: #ffee8a;
+  /* callout 왼쪽 강조 막대. 장식이라 양 테마 같은 금색을 쓰지만,
+     색을 컴포넌트에 적어두지 않기 위해 토큰으로 둔다 */
+  --calloutaccent: #ffd700;
   /* 밝은 배경용 빨강. 어두운 배경에서는 대비가 3:1 로 떨어지므로 다크에서 따로 준다 */
   --dangercolor: #d93025;
   /* 위 색으로 채웠을 때 올릴 글자색 */
@@ -43,10 +49,13 @@ html.dark {
   --codefontbgcolor: #303030;
   /* 어두운 배경에서는 원래의 밝은 주황이 5.08:1 로 충분하다 */
   --codefontcolor: #ff7b00;
+  /* 라이트용 #0070f3 은 어두운 바탕에서 4.18:1 로 미달이라 밝은 쪽으로 올린다 (8.86) */
+  --linkcolor: #6cb6ff;
   --bordercolor: #5c5c5c;
   --cardbackground: #27272a;
   --shadowcolor: rgba(255, 255, 255, 0.1);
   --calloutborder: #685800;
+  --calloutaccent: #ffd700;
   /* #d93025 는 다크 카드 위에서 3.09:1. #f85149 도 4.44 로 모자라 한 단계 더 올린다 (5.91) */
   /* 라이트용 회색을 그대로 쓰면 카드 위에서 4.20:1 로 미달한다 (6.76 / 5.29) */
   --desccolor: #9a9a9a;

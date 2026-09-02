@@ -245,7 +245,7 @@ export const CommentRow = styled.div`
         word-break: break-word;
 
         a {
-            color: #0070f3;
+            color: var(--linkcolor);
             text-decoration: none;
             &:hover {
                 text-decoration: underline;
