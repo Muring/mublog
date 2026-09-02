@@ -1,6 +1,8 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { surface } from "@/styles/surface";
+import { mobile } from "@/styles/breakpoints";
 
 export const ToastViewport = styled.div`
     position: fixed;
@@ -18,7 +20,7 @@ export const ToastViewport = styled.div`
     /* 목록 자체는 클릭을 가로채지 않고, 각 토스트만 받는다 */
     pointer-events: none;
 
-    @media (max-width: 640px) {
+    ${mobile} {
         left: 1rem;
         right: 1rem;
         transform: none;
@@ -33,9 +35,7 @@ export const ToastItem = styled.div`
     gap: 0.75rem;
     max-width: min(90vw, 28rem);
     padding: 0.7rem 0.9rem;
-    border: 1px solid var(--bordercolor);
-    border-radius: 0.65rem;
-    background-color: var(--cardbackground);
+    ${surface("0.65rem")}
     color: var(--foreground);
     box-shadow: 0 6px 20px var(--shadowcolor);
     font-size: 0.85rem;

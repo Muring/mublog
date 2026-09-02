@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { cardHoverLift } from "@/styles/surface";
 
 export const PostGridWrapper = styled.div`
   /*
@@ -38,8 +39,7 @@ export const GridList = styled.div`
     transition: all 0.2s ease-in-out;
 
     &:hover {
-      transform: translateY(-4px) !important;
-      box-shadow: 0px 6px 5px -2px var(--shadowcolor);
+      ${cardHoverLift}
     }
   }
 `;

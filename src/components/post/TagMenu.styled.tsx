@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { hoverSurface } from "@/styles/surface";
 
 export const TagWrapper = styled.div`
   display: flex;
@@ -23,8 +24,7 @@ export const TagWrapper = styled.div`
   }
 
   a:hover {
-    background-color: var(--hovercolor);
-    color: var(--hoverfontcolor);
+    ${hoverSurface}
     transition: 0.1s ease-in-out;
   }
 

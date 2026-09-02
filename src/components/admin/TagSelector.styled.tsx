@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { surface } from "@/styles/surface";
 
 export const TagSelectorWrapper = styled.div`
     display: flex;
@@ -29,9 +30,7 @@ export const TagSelectorWrapper = styled.div`
         align-items: center;
         gap: 0.25rem;
         padding: 0.3rem 0.7rem;
-        border: 1px solid var(--bordercolor);
-        border-radius: 999px;
-        background-color: var(--cardbackground);
+        ${surface("999px")}
         color: var(--foreground);
         font-family: inherit;
         font-size: 0.78rem;

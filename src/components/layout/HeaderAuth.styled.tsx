@@ -2,6 +2,8 @@
 
 import styled from "@emotion/styled";
 import { buttonQuiet } from "@/styles/button";
+import { truncate } from "@/styles/text";
+import { mobile } from "@/styles/breakpoints";
 
 /**
  * 헤더 우측 로그인 영역.
@@ -29,9 +31,7 @@ export const AuthWrapper = styled.div`
         font-size: 0.8rem;
         font-weight: 700;
         max-width: 7rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        ${truncate}
     }
 
     /* HeaderWrapper 의 a 규칙을 덮어쓰기 위해 클래스를 겹쳐 쓴다 */
@@ -54,7 +54,7 @@ export const AuthWrapper = styled.div`
     }
 
     /* 좁은 화면에서는 이름을 숨겨 아바타와 버튼만 남긴다 */
-    @media (max-width: 640px) {
+    ${mobile} {
         .name {
             display: none;
         }

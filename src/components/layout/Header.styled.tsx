@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { fadeSlide } from "@/styles/motion";
+import { truncate } from "@/styles/text";
 
 export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
     background-color: var(--background);
@@ -44,9 +45,7 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
             min-width: 0;
             text-align: center;
 
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            ${truncate}
 
             font-size: 0.95rem;
             font-weight: 600;

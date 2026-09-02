@@ -2,6 +2,8 @@
 
 import styled from "@emotion/styled";
 import { buttonQuiet } from "@/styles/button";
+import { surface } from "@/styles/surface";
+import { mobile } from "@/styles/breakpoints";
 
 /*
  * 스레드 기하 구조.
@@ -46,7 +48,7 @@ export const CommentsWrapper = styled.section`
     /* 바로 위 RelatedContent 의 hr 과 좌우를 맞추고, 상단은 넉넉히 띄운다 */
     padding: 2.5rem 2rem 3rem;
 
-    @media (max-width: 640px) {
+    ${mobile} {
         padding: 2rem 1rem 2.5rem;
     }
 
@@ -306,9 +308,7 @@ export const CommentFormWrapper = styled.form`
         min-height: 5.5rem;
         resize: vertical;
         padding: 0.8rem;
-        border: 1px solid var(--bordercolor);
-        border-radius: 0.75rem;
-        background-color: var(--cardbackground);
+        ${surface("0.75rem")}
         color: var(--foreground);
         font-family: inherit;
         font-size: 0.9rem;
@@ -377,9 +377,7 @@ export const SignInPrompt = styled.div`
     flex-wrap: wrap;
     gap: 0.75rem;
     padding: 1.1rem 1.25rem;
-    border: 1px solid var(--bordercolor);
-    border-radius: 0.75rem;
-    background-color: var(--cardbackground);
+    ${surface("0.75rem")}
 
     p {
         font-size: 0.85rem;

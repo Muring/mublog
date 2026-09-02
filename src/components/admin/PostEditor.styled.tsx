@@ -3,6 +3,8 @@
 import styled from "@emotion/styled";
 import { buttonBase } from "@/styles/button";
 import { Article } from "@/components/post/PostContent.styled";
+import { surface } from "@/styles/surface";
+import { hoverSurface } from "@/styles/surface";
 
 export const EditorWrapper = styled.div`
   max-width: 1400px;
@@ -71,9 +73,7 @@ export const MetaGrid = styled.div`
   input,
   select {
     padding: 0.5rem 0.6rem;
-    border: 1px solid var(--bordercolor);
-    border-radius: 0.4rem;
-    background-color: var(--cardbackground);
+    ${surface("0.4rem")}
     color: var(--foreground);
     font-family: inherit;
     font-size: 0.875rem;
@@ -308,8 +308,7 @@ export const ToolbarButton = styled.button`
   cursor: pointer;
 
   &:hover {
-    background-color: var(--hovercolor);
-    color: var(--hoverfontcolor);
+    ${hoverSurface}
   }
 `;
 

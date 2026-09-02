@@ -2,6 +2,8 @@
 
 import styled from "@emotion/styled";
 import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
+import { surface } from "@/styles/surface";
+import { truncate } from "@/styles/text";
 
 // 홈 헤더와 방문자 수도 같은 것을 쓰게 되어 ui/ 로 옮겼다. 기존 import 경로는 유지한다.
 export { Skeleton } from "@/components/ui/Skeleton.styled";
@@ -47,9 +49,7 @@ export const AdminWrapper = styled.div`
   }
 
   .stat {
-    border: 1px solid var(--bordercolor);
-    border-radius: 12px;
-    background-color: var(--cardbackground);
+    ${surface("12px")}
     padding: 1rem;
 
     .label {
@@ -131,9 +131,7 @@ export const PostTable = styled.table`
     color: var(--desccolor);
     font-family: "Consolas", monospace;
     /* 긴 slug 가 제목 열을 밀어 다른 열을 굶기던 것을 막는다 */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    ${truncate}
   }
 
   .badge {
@@ -221,9 +219,7 @@ export const PostTable = styled.table`
     }
 
     tr {
-      border: 1px solid var(--bordercolor);
-      border-radius: 12px;
-      background-color: var(--cardbackground);
+      ${surface("12px")}
       padding: 0.875rem 1rem;
       margin-bottom: 0.75rem;
     }

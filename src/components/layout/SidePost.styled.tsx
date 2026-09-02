@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { truncate } from "@/styles/text";
 
 export const SidePostWrapper = styled.div`
     display: flex;
@@ -33,8 +34,6 @@ export const SidePostWrapper = styled.div`
         font-size: 0.8rem;
         color: var(--desccolor);
         font-weight: 400;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        ${truncate}
     }
 `;

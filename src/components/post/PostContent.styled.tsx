@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { hoverSurface } from "@/styles/surface";
 
 export const Article = styled.article`
   /* 기본 레이아웃 설정 */
@@ -139,8 +140,7 @@ export const Article = styled.article`
       color: var(--foreground);
       font-weight: bold;
       &:hover {
-        background-color: var(--hovercolor);
-        color: var(--hoverfontcolor);
+        ${hoverSurface}
         transition-duration: 0.2s;
         text-decoration: none;
       }

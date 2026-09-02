@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import Image from "next/image";
+import { clampLines, truncate } from "@/styles/text";
 
 /**
  * 모든 카드는 같은 높이다.
@@ -103,11 +104,9 @@ const Tags = styled.div`
     color: var(--desccolor);
     font-weight: 700;
     line-height: 1.6;
-    white-space: nowrap;
     /* 태그 하나가 아주 길면 그것만 줄어들며 말줄임 된다 */
     min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    ${truncate}
   }
 
   .more {
@@ -148,32 +147,17 @@ const Tags = styled.div`
  * 잘린 전체 제목은 title 속성으로 볼 수 있고, 어차피 한 번 누르면 본문이다.
  */
 const Title = styled.h5`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+  ${clampLines(2)}
   color: var(--foreground);
   line-height: 1.35;
-  /*
-   * 한글은 기본적으로 음절 사이에서 끊겨 "뜯어보 / 기" 처럼 한 글자만 남는다.
-   * keep-all 로 띄어쓰기에서만 끊고, 혼자서도 한 줄에 못 들어가는
-   * 단어(ContentDocumentLink)는 break-word 가 받아준다.
-   */
-  word-break: keep-all;
-  overflow-wrap: break-word;
 `;
 
 /** 설명은 최대 세 줄. 넘치면 말줄임한다. */
 const Desc = styled.p`
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
+  ${clampLines(3)}
   color: var(--desccolor);
   font-size: 0.85rem;
   line-height: 1.45;
-  word-break: keep-all;
-  overflow-wrap: break-word;
 `;
 
 /**

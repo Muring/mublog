@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { buttonQuiet } from "@/styles/button";
+import { cardHoverLift } from "@/styles/surface";
 
 export const CARD_GAP = 20;
 
@@ -73,8 +74,7 @@ const Slide = styled.div`
   }
 
   &:hover {
-    transform: translateY(-4px) !important;
-    box-shadow: 0px 6px 5px -2px var(--shadowcolor);
+    ${cardHoverLift}
   }
 `;
 

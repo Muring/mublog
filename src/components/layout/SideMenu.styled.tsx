@@ -1,4 +1,6 @@
 import styled from "@emotion/styled";
+import { hoverSurface } from "@/styles/surface";
+import { mobile } from "@/styles/breakpoints";
 
 export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
   background-color: var(--background);
@@ -25,7 +27,7 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
       ? "slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"
       : "slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"};
 
-  @media (max-width: 640px) {
+  ${mobile} {
     width: 100% !important;
     border-radius: 0;
   }
@@ -53,8 +55,7 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
   }
 
   a:hover {
-    background-color: var(--hovercolor);
-    color: var(--hoverfontcolor);
+    ${hoverSurface}
 
     /*
      * 설명 줄은 스스로 색을 정하고 있어서 위 color 상속이 닿지 않는다.
