@@ -347,6 +347,23 @@ if (await confirm({ title: "...", description: "...", danger: true })) { ... }
 포커스를 가져가지 않아 키보드로 도달하기 어렵습니다. 되돌릴 수 있는 동작이라면
 그때는 토스트 쪽이 낫습니다.
 
+### 에디터 툴바
+
+서식 버튼은 아이콘이고, 호버·포커스하면 한글 설명이 뜹니다.
+
+글자로 두면 "인라인코드" 같은 긴 라벨이 툴바를 밀어내고 좁은 화면에서 줄바꿈됩니다.
+대신 아이콘만 두면 이름이 화면에서 사라지므로 **두 가지를 함께** 줍니다 —
+눈으로 보는 사람에게는 툴팁을, 스크린리더에는 `aria-label`을.
+툴팁만 두면 키보드·스크린리더 사용자는 버튼이 무엇인지 알 방법이 없습니다.
+
+`title` 속성을 쓰지 않는 이유는 브라우저가 그리는 것이라 테마를 따르지 않고,
+뜨기까지 1초 넘게 걸리기 때문입니다. `data-tip` + `::after`로 직접 그립니다.
+
+**`B` / `I` 만 글자로 남기되 세리프를 씁니다.** 산세리프 대문자 `I`는 곧게 서 있어서
+그냥 세로줄로 보이고 기울임이라는 것이 드러나지 않습니다.
+다만 툴팁은 그 서식을 물려받으면 안 되므로(`::after`는 버튼의 자식입니다)
+`--font-body`와 `font-style: normal`로 되돌립니다.
+
 ### 레이아웃 규칙
 
 반복해서 문제를 일으켰던 두 가지를 규칙으로 굳혔습니다.
@@ -392,9 +409,11 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 | `--activecolor` / `--activefontcolor`   | 선택·주요 동작                |
 | `--okcolor` / `--okbg` / `--okborder`   | 공개처럼 정상적으로 켜진 상태 |
 | `--warncolor` / `--warnbg` / `--warnborder` | 초안처럼 아직인 상태      |
-| `--calloutborder`                       | 본문 콜아웃 테두리            |
+| `--linkcolor`                           | 본문·댓글 안의 링크           |
+| `--calloutborder` / `--calloutaccent`   | 본문 콜아웃 테두리와 강조 막대 |
 | `--shadowcolor`                         | 그림자 (다크에서는 흰 글로우) |
 | `--card-width` / `--card-width-capped`  | 목록 카드 한 장의 폭          |
+| `--font-body`                           | 본문 폰트 (색이 아닌 유일한 토큰) |
 
 > `--hovercolor` 는 **양 테마 모두 밝은 회색**입니다(라이트 `#f4f4f4` / 다크 `#dadada`).
 > 다크인데 호버하면 면이 밝아지므로 그 위 글자는 전부 어두워져야 합니다.
@@ -441,6 +460,7 @@ src/
 ├── app/
 │   ├── [slug]/           # 포스트 상세 (SSG + ISR)
 │   ├── admin/            # 관리자 화면 (목록·에디터), force-dynamic
+│   │                     # loading.tsx 는 page.tsx 가 있는 세그먼트에만 둔다
 │   ├── api/              # 라우트 핸들러
 │   ├── auth/             # OAuth 콜백 · 로그아웃
 │   ├── login/
@@ -449,7 +469,7 @@ src/
 │   ├── layout/           # Header, Footer, SideMenu, ThemeSwitcher …
 │   ├── post/             # PostCard, PostGrid, PostContent, CarouselSlider …
 │   ├── about/            # Introduction, HistoryTimeline, ProjectTimeline
-│   ├── admin/            # 에디터·태그 선택기
+│   ├── admin/            # 에디터·태그 선택기·툴바 아이콘
 │   │                     # useSlugCheck / useEditorUploads / usePostSave
 │   ├── comments/         # 댓글 스레드
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
