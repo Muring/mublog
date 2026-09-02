@@ -5,6 +5,13 @@ import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
+import {
+    InlineCodeIcon,
+    CodeBlockIcon,
+    LinkIcon,
+    CalloutIcon,
+    QuoteIcon,
+} from "./ToolbarIcons";
 import { useDebouncedEffect } from "@/hooks/useDebouncedEffect";
 import { useSlugCheck } from "./useSlugCheck";
 import { useEditorUploads } from "./useEditorUploads";
@@ -252,40 +259,74 @@ export default function PostEditor({ initial, knownTags }: Props) {
 
                 <EditorColumn className={`pane-write ${isDragging ? "dragging" : ""}`}>
                     <div className="toolbar">
-                        <ToolbarButton onClick={() => insertAtCursor("## ", "", "제목")}>
+                        <ToolbarButton
+                            data-tip="큰 제목"
+                            aria-label="큰 제목"
+                            onClick={() => insertAtCursor("## ", "", "제목")}
+                        >
                             H2
                         </ToolbarButton>
-                        <ToolbarButton onClick={() => insertAtCursor("### ", "", "제목")}>
+                        <ToolbarButton
+                            data-tip="작은 제목"
+                            aria-label="작은 제목"
+                            onClick={() => insertAtCursor("### ", "", "제목")}
+                        >
                             H3
                         </ToolbarButton>
-                        <ToolbarButton onClick={() => insertAtCursor("**", "**", "굵게")}>
+                        <ToolbarButton
+                            className="mark"
+                            data-tip="굵게"
+                            aria-label="굵게"
+                            onClick={() => insertAtCursor("**", "**", "굵게")}
+                        >
                             B
                         </ToolbarButton>
-                        <ToolbarButton onClick={() => insertAtCursor("*", "*", "기울임")}>
+                        <ToolbarButton
+                            className="mark italic"
+                            data-tip="기울임"
+                            aria-label="기울임"
+                            onClick={() => insertAtCursor("*", "*", "기울임")}
+                        >
                             I
                         </ToolbarButton>
-                        <ToolbarButton onClick={() => insertAtCursor("`", "`", "코드")}>
-                            인라인코드
+                        <ToolbarButton
+                            data-tip="인라인 코드"
+                            aria-label="인라인 코드"
+                            onClick={() => insertAtCursor("`", "`", "코드")}
+                        >
+                            <InlineCodeIcon />
                         </ToolbarButton>
                         <ToolbarButton
+                            data-tip="코드블록"
+                            aria-label="코드블록"
                             onClick={() =>
                                 insertAtCursor("\n" + FENCE + "ts\n", "\n" + FENCE + "\n", "code")
                             }
                         >
-                            코드블록
-                        </ToolbarButton>
-                        <ToolbarButton onClick={() => insertAtCursor("[", "](url)", "링크")}>
-                            링크
+                            <CodeBlockIcon />
                         </ToolbarButton>
                         <ToolbarButton
+                            data-tip="링크"
+                            aria-label="링크"
+                            onClick={() => insertAtCursor("[", "](url)", "링크")}
+                        >
+                            <LinkIcon />
+                        </ToolbarButton>
+                        <ToolbarButton
+                            data-tip="콜아웃"
+                            aria-label="콜아웃"
                             onClick={() =>
                                 insertAtCursor("\n<aside>\n\n💡 ", "\n\n</aside>\n", "메모")
                             }
                         >
-                            콜아웃
+                            <CalloutIcon />
                         </ToolbarButton>
-                        <ToolbarButton onClick={() => insertAtCursor("\n> ", "", "인용")}>
-                            인용
+                        <ToolbarButton
+                            data-tip="인용"
+                            aria-label="인용"
+                            onClick={() => insertAtCursor("\n> ", "", "인용")}
+                        >
+                            <QuoteIcon />
                         </ToolbarButton>
                     </div>
 

@@ -296,7 +296,22 @@ export const EditorColumn = styled.div`
   }
 `;
 
+/**
+ * 툴바 버튼.
+ *
+ * 아이콘만 있는 버튼이라 이름이 화면에 없다. 그래서 두 가지를 함께 준다 —
+ * 눈으로 보는 사람에게는 호버 툴팁을, 스크린리더에는 aria-label 을.
+ * 툴팁만 두면 키보드나 스크린리더 사용자는 버튼이 무엇인지 알 방법이 없다.
+ *
+ * 툴팁 문구는 data-tip 에서 가져온다. title 속성을 쓰지 않는 이유는 브라우저가
+ * 그리는 것이라 테마를 따르지 않고, 뜨기까지 1초 넘게 걸리기 때문이다.
+ */
 export const ToolbarButton = styled.button`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
   padding: 0.3rem 0.55rem;
   border: 1px solid transparent;
   border-radius: 0.35rem;
@@ -309,6 +324,40 @@ export const ToolbarButton = styled.button`
 
   &:hover {
     ${hoverSurface}
+  }
+
+  /*
+   * 글자로 남긴 서식 버튼(B / I)은 그 서식대로 보여야 뜻이 읽힌다.
+   * 특히 산세리프 대문자 I 는 곧게 서 있어서 그냥 세로줄로 보이고
+   * 기울임이라는 것이 전혀 드러나지 않았다. 세리프를 써야 기울기가 눈에 띈다.
+   */
+  &.mark {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+  &.mark.italic {
+    font-style: italic;
+  }
+
+  /* 키보드로 옮겨왔을 때도 이름이 보여야 한다 */
+  &[data-tip]:hover::after,
+  &[data-tip]:focus-visible::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.35rem;
+    background-color: var(--foreground);
+    color: var(--background);
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
   }
 `;
 
