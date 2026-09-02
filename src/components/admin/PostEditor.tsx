@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
-import { useToast } from "@/providers/Toast";
-import { fetchJson, jsonRequest } from "@/lib/fetcher";
+import { useDebouncedEffect } from "@/hooks/useDebouncedEffect";
+import { useSlugCheck } from "./useSlugCheck";
+import { useEditorUploads } from "./useEditorUploads";
+import { usePostSave } from "./usePostSave";
 import {
     EditorWrapper,
     MetaGrid,
@@ -35,24 +36,14 @@ type Props = {
     knownTags: string[];
 };
 
-type SlugState = { checking: boolean; available: boolean | null; reason: string | null };
 
 const FENCE = "```";
 
 export default function PostEditor({ initial, knownTags }: Props) {
-    const router = useRouter();
-    const toast = useToast();
     const [post, setPost] = useState(initial);
     const [postId, setPostId] = useState(initial.id);
     const [html, setHtml] = useState("");
-    const [slugState, setSlugState] = useState<SlugState>({
-        checking: false,
-        available: null,
-        reason: null,
-    });
-    const [pending, setPending] = useState<"DRAFT" | "PUBLISHED" | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [isUploadingThumb, setIsUploadingThumb] = useState(false);
     const [tagError, setTagError] = useState<string | null>(null);
     // 좁은 화면에서만 쓰는 탭. 글을 쓰러 들어오는 화면이라 본문에서 시작한다.
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
@@ -64,58 +55,37 @@ export default function PostEditor({ initial, knownTags }: Props) {
 
     // 미리보기는 서버 왕복 없이 같은 renderMarkdown 을 브라우저에서 돌린다.
     // 동일 모듈이므로 미리보기와 발행 결과가 어긋날 수 없다.
-    useEffect(() => {
-        let cancelled = false;
-        const timer = setTimeout(async () => {
+    useDebouncedEffect(
+        async (isCancelled) => {
             try {
                 const rendered = await renderMarkdown(post.contentMd);
-                if (!cancelled) setHtml(rendered);
+                if (!isCancelled()) setHtml(rendered);
             } catch {
-                if (!cancelled) setHtml("<p>미리보기를 만들 수 없습니다.</p>");
+                if (!isCancelled()) setHtml("<p>미리보기를 만들 수 없습니다.</p>");
             }
-        }, 300);
-        return () => {
-            cancelled = true;
-            clearTimeout(timer);
-        };
-    }, [post.contentMd]);
+        },
+        [post.contentMd],
+        300
+    );
 
-    // slug 중복/형식 실시간 확인
-    useEffect(() => {
-        if (!post.slug) {
-            // 이 effect 는 디바운스 후 서버에 물어보는 외부 동기화다.
-            // slug 를 비웠을 때 직전 판정을 지우는 것도 그 동기화의 일부다.
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setSlugState({ checking: false, available: null, reason: null });
-            return;
-        }
-        let cancelled = false;
-        // 이전 판정을 지우지 않고 checking 만 켠다.
-        // 매 타이핑마다 결과를 비우면 "확인 중" 과 결과가 번갈아 나타나 깜빡인다.
-        setSlugState((state) => ({ ...state, checking: true }));
-        const timer = setTimeout(async () => {
-            const params = new URLSearchParams({ slug: post.slug });
-            if (postId) params.set("excludeId", postId);
-            try {
-                const data = await fetchJson<{ available: boolean; reason: string | null }>(
-                    "/api/admin/slug-check?" + params.toString()
-                );
-                if (!cancelled) {
-                    setSlugState({
-                        checking: false,
-                        available: data.available,
-                        reason: data.reason,
-                    });
-                }
-            } catch {
-                if (!cancelled) setSlugState({ checking: false, available: null, reason: null });
-            }
-        }, 500);
-        return () => {
-            cancelled = true;
-            clearTimeout(timer);
-        };
-    }, [post.slug, postId]);
+    const slugState = useSlugCheck(post.slug, postId);
+
+    const setContentMd = useCallback(
+        (update: (previous: string) => string) =>
+            setPost((prev) => ({ ...prev, contentMd: update(prev.contentMd) })),
+        []
+    );
+    const setThumbnail = useCallback(
+        (url: string) => setPost((prev) => ({ ...prev, thumbnail: url })),
+        []
+    );
+    const { isUploadingThumb, uploadIntoBody, uploadThumbnail } = useEditorUploads(
+        textareaRef,
+        setContentMd,
+        setThumbnail
+    );
+
+    const { save, pending, isSaving } = usePostSave(post, setPost, postId, setPostId, setTagError);
 
     /** 커서 위치에 텍스트를 끼워 넣는다 */
     const insertAtCursor = useCallback((before: string, after = "", placeholder = "") => {
@@ -131,122 +101,6 @@ export default function PostEditor({ initial, knownTags }: Props) {
         });
     }, []);
 
-    /** 공통 업로드. 실패하면 null 을 돌려준다. */
-    const upload = useCallback(async (file: File): Promise<string | null> => {
-        const body = new FormData();
-        body.append("file", file);
-        try {
-            const { url } = await fetchJson<{ url: string }>("/api/admin/upload", {
-                method: "POST",
-                body,
-            });
-            return url;
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "이미지 업로드에 실패했습니다.");
-            return null;
-        }
-    }, [toast]);
-
-    /** 본문 이미지: 업로드하고 커서 위치에 마크다운으로 삽입 */
-    const uploadIntoBody = useCallback(
-        async (files: File[]) => {
-            const el = textareaRef.current;
-            if (!el) return;
-
-            for (const file of files) {
-                if (!file.type.startsWith("image/")) continue;
-
-                const token = "![업로드 중 " + crypto.randomUUID().slice(0, 8) + "]()";
-                const { selectionStart: pos, value } = el;
-                setPost((prev) => ({
-                    ...prev,
-                    contentMd: value.slice(0, pos) + token + value.slice(pos),
-                }));
-
-                const url = await upload(file);
-                setPost((prev) => ({
-                    ...prev,
-                    contentMd: prev.contentMd.replace(token, url ? "![](" + url + ")" : ""),
-                }));
-                if (url) toast.success("이미지를 올렸습니다.");
-            }
-        },
-        [upload, toast]
-    );
-
-    /** 썸네일 업로드 */
-    async function uploadThumbnail(file: File) {
-        setIsUploadingThumb(true);
-        const url = await upload(file);
-        setIsUploadingThumb(false);
-        if (url) set("thumbnail", url);
-    }
-
-    async function save(status: "DRAFT" | "PUBLISHED") {
-        // 태그는 목록 필터의 기준이라 하나도 없으면 글이 어디에도 걸리지 않는다.
-        if (post.tags.length === 0) {
-            setTagError("태그를 하나 이상 선택하세요.");
-            return;
-        }
-
-        setPending(status);
-
-        const payload = {
-            slug: post.slug,
-            title: post.title,
-            description: post.description || null,
-            tags: post.tags,
-            thumbnail: post.thumbnail || null,
-            contentMd: post.contentMd,
-            status,
-            // 발행일은 서버가 발행 시점에 자동으로 넣는다.
-            // 이미 발행된 글은 기존 값을 그대로 유지한다.
-            publishedAt: post.publishedAt,
-        };
-
-        type Saved = { id?: string; slug?: string; publishedAt?: string | null };
-        let data: Saved;
-        try {
-            data = await fetchJson<Saved>(
-                postId ? "/api/admin/posts/" + postId : "/api/admin/posts",
-                jsonRequest(postId ? "PATCH" : "POST", payload)
-            );
-        } catch (error) {
-            setPending(null);
-            toast.error(error instanceof Error ? error.message : "저장에 실패했습니다.");
-            return;
-        }
-
-        // 발행 후에는 실제로 게시된 글을 바로 보여준다.
-        // 초안 저장은 이어서 쓰는 중이라 화면을 유지한다.
-        if (status === "PUBLISHED") {
-            // 결과를 먼저 알리고 이동한다. 이동이 끝날 때까지 pending 을 유지해
-            // 버튼이 "이동 중"으로 남아 있게 한다.
-            //
-            // 여기서 router.refresh() 를 부르지 않는다. 떠날 편집 화면을 다시
-            // 그리느라 이동이 눈에 띄게 느려지는데, 목적지는 이미 서버에서
-            // revalidatePath 로 무효화돼 있어 새로 받아온다.
-            toast.success("발행했습니다. 글로 이동합니다.");
-            router.push("/" + (data.slug ?? post.slug));
-            return;
-        }
-
-        setPending(null);
-        setPost((prev) => ({
-            ...prev,
-            status,
-            publishedAt: data.publishedAt ?? prev.publishedAt,
-        }));
-        toast.success("초안을 저장했습니다.");
-
-        // 새 글이면 이후 저장이 PATCH 로 가도록 주소와 id 를 맞춰둔다
-        if (!postId && data.id) {
-            setPostId(data.id);
-            router.replace("/admin/posts/" + data.id);
-        }
-    }
-
-    const isSaving = pending !== null;
     const canSave = Boolean(post.title.trim()) && slugState.available !== false && !isSaving;
 
     return (
