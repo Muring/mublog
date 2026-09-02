@@ -163,6 +163,10 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
   `HttpError(400)`을 던지면, `handleApiError`가 한 곳에서 응답으로 바꿉니다.
   요청을 **보내는** 쪽은 `lib/fetcher.ts`로 방향이 반대입니다.
 - **`lib/revalidate.ts`** — 포스트 변경 후 캐시 무효화
+- **`lib/queries.ts`** — 클라이언트 쿼리 키와 페처. 키를 컴포넌트마다 문자열로 적으면
+  같은 데이터를 두 이름으로 부르게 되고, 무엇보다 데이터 계약이 UI 파일에 얹힙니다.
+  실제로 `stats/VisitTracker`가 `post/PostViews`를, `comments/Comments`가
+  `layout/HeaderAuth`를 import하고 있었습니다. 계약을 여기 두면 그 화살표가 사라집니다.
 
 ### API
 
@@ -370,8 +374,23 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 본문 글자는 두 테마 모두 **WCAG AA**(일반 4.5:1, 큰 글자 3:1)를 넘도록 맞췄습니다.
 코드 하이라이팅은 색상(hue)을 유지한 채 명도만 올린 GitHub Primer 대응값을 씁니다.
 
-버튼 생김새는 `styles/button.ts`의 조각(`buttonBase` / `buttonQuiet` / `buttonPrimary` / `buttonDanger`)을
-깔고 크기만 각자 덧붙입니다. 토큰이 바뀌었을 때 일부만 어긋나는 것을 막기 위해서입니다.
+되풀이되는 스타일 조각은 `styles/`에 모아두고 각 컴포넌트가 깔아 씁니다.
+토큰이 바뀌었을 때 일부만 어긋나는 것을 막기 위해서입니다.
+
+| 파일 | 조각 |
+|---|---|
+| `button.ts` | `buttonBase` / `buttonQuiet` / `buttonPrimary` / `buttonDanger` |
+| `surface.ts` | `surface(radius)` (카드·입력창 면) / `hoverSurface` / `cardHoverLift` |
+| `text.ts` | `truncate` (한 줄 말줄임) / `clampLines(n)` |
+| `motion.ts` | `fadeSlide` |
+| `breakpoints.ts` | `mobile` (640px) |
+
+크기처럼 자리마다 달라야 하는 값은 조각에 넣지 않고 쓰는 쪽에서 덧붙입니다.
+
+`hoverSurface`가 두 줄을 한 덩어리로 묶는 데는 이유가 있습니다. `--hovercolor`는
+두 테마 모두 밝은 회색이라 다크에서도 호버하면 면이 밝아지고, 그 위 글자를 함께
+뒤집지 않으면 사라집니다. `clampLines`도 마찬가지로 `keep-all`과 `break-word`가
+늘 같이 가야 해서 함께 넣었습니다.
 
 <br>
 
@@ -397,7 +416,7 @@ src/
 │   ├── layout/           # Header, Footer, SideMenu, ThemeSwitcher …
 │   ├── post/             # PostCard, PostGrid, PostContent, CarouselSlider …
 │   ├── about/            # Introduction, HistoryTimeline, ProjectTimeline
-│   ├── admin/            # 에디터·태그 선택기
+│   ├── admin/            # 에디터·태그 선택기 (+ 에디터 전용 훅 3개)
 │   ├── comments/         # 댓글 스레드
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
 │   ├── trackers/         # 화면에 아무것도 그리지 않고 부수효과만 내는 null 컴포넌트
@@ -413,13 +432,20 @@ src/
 │   ├── auth.ts           # 세션·권한 확인
 │   ├── api.ts            # 라우트 헬퍼 (본문 검증 + 에러 응답)
 │   ├── fetcher.ts        # 클라이언트 fetch 래퍼
+│   ├── queries.ts        # 쿼리 키 + 페처 (UI 가 아니라 여기가 데이터 계약)
 │   ├── revalidate.ts
-│   └── date.ts / reading-time.ts / validation.ts   # 순수 함수
+│   └── date.ts / tags.ts / reading-time.ts / validation.ts   # 순수 함수
 ├── providers/            # RootProvider 가 감싸는 컨텍스트 트리
-├── hooks/                # useRecentPosts (최근 본 글)
+├── hooks/
+│   ├── useRecentPosts.tsx     # 최근 본 글 (localStorage)
+│   ├── useOptimisticList.ts   # 목록의 낙관적 갱신 + 롤백
+│   └── useDebouncedEffect.ts  # 디바운스 + 늦게 온 응답 버리기
 ├── styles/
-│   ├── button.ts         # 버튼 공통 스타일 조각
+│   ├── button.ts         # 버튼 공통 조각
+│   ├── surface.ts        # 면·호버·카드 들어올림
+│   ├── text.ts           # 말줄임·여러 줄 자르기
 │   ├── motion.ts         # 페이드·슬라이드 전환
+│   ├── breakpoints.ts    # 공용 미디어 기준선
 │   └── prism-notion-theme.css
 ├── types/                # post.ts / comment.ts
 ├── data/                 # about 페이지 정적 데이터
