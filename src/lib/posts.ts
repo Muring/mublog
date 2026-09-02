@@ -103,21 +103,6 @@ export const getAllTags = unstable_cache(
     { tags: ["posts:list"], revalidate: 3600 }
 );
 
-/** 사이드 메뉴의 "Latest posts" / "Recently viewed" 용 */
-export const getRecentPosts = unstable_cache(
-    async (limit = 5): Promise<PostSummary[]> => {
-        const rows = await prisma.post.findMany({
-            where: { status: "PUBLISHED" },
-            orderBy: { publishedAt: "desc" },
-            take: limit,
-            select: SUMMARY_SELECT,
-        });
-        return rows.map(toSummary);
-    },
-    ["posts-recent"],
-    { tags: ["posts:list"], revalidate: 3600 }
-);
-
 /**
  * 관리자 목록용. 초안까지 포함하며 캐시하지 않는다.
  * (관리자 화면은 force-dynamic 이라 항상 최신을 봐야 한다)

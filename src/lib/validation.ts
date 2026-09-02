@@ -44,5 +44,3 @@ export const commentInputSchema = z.object({
     body: z.string().trim().min(1, "내용을 입력하세요.").max(2000, "2000자를 넘을 수 없습니다."),
     parentId: z.string().cuid().nullish(),
 });
-
-export type PostInput = z.infer<typeof postInputSchema>;

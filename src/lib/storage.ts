@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 
-export const POST_IMAGE_BUCKET = "post-images";
+const POST_IMAGE_BUCKET = "post-images";
 
 function createStorageClient() {
     const secretKey = process.env.SUPABASE_SECRET_KEY;
@@ -76,7 +76,7 @@ async function collectReferencedPaths(): Promise<Set<string>> {
     return referenced;
 }
 
-export type SweepResult = {
+type SweepResult = {
     total: number;
     referenced: number;
     orphans: { path: string; size: number; createdAt: Date }[];

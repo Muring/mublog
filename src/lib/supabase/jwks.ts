@@ -17,7 +17,7 @@ let fetchedAt = 0;
 let inFlight: Promise<Jwks | null> | null = null;
 const TTL_MS = 10 * 60 * 1000;
 
-export async function loadJwks(): Promise<Jwks | null> {
+async function loadJwks(): Promise<Jwks | null> {
     if (cache && Date.now() - fetchedAt < TTL_MS) return cache;
     // 동시에 여러 요청이 들어와도 한 번만 받는다
     if (inFlight) return inFlight;
