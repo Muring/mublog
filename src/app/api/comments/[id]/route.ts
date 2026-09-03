@@ -3,6 +3,7 @@ import { requireUserApi, getProfile } from "@/lib/auth";
 import { handleApiError, parseBody } from "@/lib/api";
 import { commentInputSchema } from "@/lib/validation";
 import { deleteComment, updateComment } from "@/lib/comments";
+import { revalidatePost } from "@/lib/revalidate";
 
 export const dynamic = "force-dynamic";
 
@@ -34,11 +35,14 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
         const { id } = await params;
         const profile = await requireUserApi();
 
-        await deleteComment({
+        const { slug } = await deleteComment({
             id,
             actorId: profile.id,
             isAdmin: (await getProfile())?.role === "ADMIN",
         });
+
+        // 삭제도 카드의 댓글 수를 바꾼다
+        revalidatePost(slug);
 
         return NextResponse.json({ ok: true });
     } catch (error) {

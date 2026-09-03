@@ -154,12 +154,13 @@ export async function deleteComment(params: {
     id: string;
     actorId: string;
     isAdmin: boolean;
-}): Promise<void> {
+}): Promise<{ slug: string }> {
     const { id, actorId, isAdmin } = params;
 
     const existing = await prisma.comment.findUnique({
         where: { id },
-        select: { authorId: true, postId: true, deletedAt: true },
+        // slug 는 삭제 뒤 캐시를 지우는 데 쓴다. 카드의 댓글 수가 목록 캐시에 있다.
+        select: { authorId: true, postId: true, deletedAt: true, post: { select: { slug: true } } },
     });
     if (!existing || existing.deletedAt) throw new HttpError(404, "댓글을 찾을 수 없습니다.");
     // 삭제는 작성자 본인 또는 관리자
@@ -176,4 +177,6 @@ export async function deleteComment(params: {
             data: { commentCount: { decrement: 1 } },
         }),
     ]);
+
+    return { slug: existing.post.slug };
 }

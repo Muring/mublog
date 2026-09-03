@@ -3,6 +3,7 @@ import { requireUserApi } from "@/lib/auth";
 import { handleApiError, parseBody } from "@/lib/api";
 import { commentInputSchema } from "@/lib/validation";
 import { createComment, getCommentsByPostSlug } from "@/lib/comments";
+import { revalidatePost } from "@/lib/revalidate";
 
 // 사용자별로 다르고 낙관적 갱신과 충돌하므로 캐시하지 않는다
 export const dynamic = "force-dynamic";
@@ -33,6 +34,10 @@ export async function POST(request: NextRequest, { params }: Params) {
             body: input.body,
             parentId: input.parentId,
         });
+
+        // 카드에 보이는 댓글 수는 목록 캐시(posts:list)에서 온다.
+        // 여기서 지우지 않으면 DB 는 올랐는데 화면은 최대 1시간 동안 옛 숫자를 보여준다.
+        revalidatePost(slug);
 
         return NextResponse.json(comment, { status: 201 });
     } catch (error) {
