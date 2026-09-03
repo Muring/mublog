@@ -97,7 +97,14 @@ function bucketize(points: DailyPoint[], bucket: Bucket): Point[] {
  * 값은 막대마다 적지 않는다. 최댓값 하나만 눈금으로 세우고 나머지는
  * 호버·포커스 툴팁이 맡는다.
  */
-export default function VisitorChart({ points }: { points: DailyPoint[] }) {
+export default function VisitorChart({
+    points,
+    totalVisitors,
+}: {
+    points: DailyPoint[];
+    /** 집계를 시작한 뒤 지금까지의 누적. points 는 최대 1년이라 여기서 구할 수 없다 */
+    totalVisitors: number;
+}) {
     const [range, setRange] = useState<RangeKey>("30d");
     const active = RANGES.find((r) => r.key === range) ?? RANGES[0];
 
@@ -107,8 +114,6 @@ export default function VisitorChart({ points }: { points: DailyPoint[] }) {
         return bucketize(sliced, active.bucket);
     }, [points, active]);
 
-    const today = points.length > 0 ? points[points.length - 1].visitors : 0;
-    const total = bars.reduce((sum, b) => sum + b.visitors, 0);
     const max = Math.max(1, ...bars.map((b) => b.visitors));
 
     // 눈금 글자가 서로 겹치지 않을 만큼만 남긴다
@@ -119,8 +124,7 @@ export default function VisitorChart({ points }: { points: DailyPoint[] }) {
             <summary>
                 <span className="title">방문자 추이</span>
                 <span className="summary-value">
-                    오늘 <strong>{today.toLocaleString("ko-KR")}</strong>명 · {active.label}{" "}
-                    <strong>{total.toLocaleString("ko-KR")}</strong>명
+                    누적 <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>명
                 </span>
             </summary>
 

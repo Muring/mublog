@@ -1,6 +1,6 @@
 import { requireAdmin } from "@/lib/auth";
 import { getAllPostsForAdmin } from "@/lib/posts";
-import { getDailyVisitors } from "@/lib/stats";
+import { getDailyVisitors, getSiteStats } from "@/lib/stats";
 import { AdminShell } from "@/components/admin/AdminSkeleton";
 import PostTableView from "@/components/admin/PostTableView";
 import VisitorChart from "@/components/admin/VisitorChart";
@@ -21,7 +21,11 @@ export default async function AdminPage() {
     // 인가는 레이아웃이 아니라 여기서 확정한다 (layout.tsx 의 주석 참고)
     await requireAdmin();
 
-    const [posts, daily] = await Promise.all([getAllPostsForAdmin(), getDailyVisitors()]);
+    const [posts, daily, stats] = await Promise.all([
+        getAllPostsForAdmin(),
+        getDailyVisitors(),
+        getSiteStats(),
+    ]);
     const published = posts.filter((p) => p.status === "PUBLISHED").length;
     const comments = posts.reduce((sum, p) => sum + p.commentCount, 0);
 
@@ -46,7 +50,7 @@ export default async function AdminPage() {
                 </div>
             </div>
 
-            <VisitorChart points={daily} />
+            <VisitorChart points={daily} totalVisitors={stats.total} />
 
             <PostTableView posts={posts} />
         </AdminShell>

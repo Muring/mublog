@@ -81,6 +81,13 @@ export const PostTable = styled.table`
     top: 0;
     z-index: 1;
     background-color: var(--background);
+    /*
+     * 구분선을 border 가 아니라 inset 그림자로 그린다.
+     * border-collapse: collapse 인 표에서 sticky 로 띄운 칸의 border 는
+     * 스크롤하면 원래 자리에 남아 헤더에서 떨어져 나간다.
+     * 그림자는 칸에 붙어 따라오므로 스크롤 중에도 경계가 유지된다.
+     */
+    box-shadow: inset 0 -1px 0 var(--bordercolor);
   }
 
   th:nth-of-type(2) { width: 5rem; }    /* 상태 */
