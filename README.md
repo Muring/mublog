@@ -65,6 +65,8 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 - [x] 🖼 **이미지 업로드** — 드래그&드롭 / 붙여넣기
 - [x] 📝 **초안 / 공개** 상태 관리
 - [x] ⚡ **재배포 없이 반영** (`revalidateTag`)
+- [x] 🔎 **목록 검색** — 제목·주소·태그로 거르기 (표는 자기 안에서 스크롤)
+- [x] 📈 **방문자 추이 차트** — 30일·90일·올해, 기간에 따라 일/주/월로 묶음
 - [x] 🧭 **좁은 화면 대응** — 관리 표는 열을 접다 카드로, 에디터는 본문/미리보기 탭으로
 
 ### 참여
@@ -72,6 +74,7 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 - [x] 🔐 **GitHub 로그인**
 - [x] 💬 **댓글 · 답글** (2단, 낙관적 갱신)
 - [x] 📊 **방문자 수 · 조회수 집계**
+- [x] 🔒 **개인정보 처리방침** (`/privacy`) — 저장하는 것과 쿠키 세 개를 그대로 적음
 
 <br>
 
@@ -90,7 +93,7 @@ Supabase의 PostgreSQL 하나를 씁니다. `public` 스키마만 Prisma가 관�
 | ----------- | --------------------------------------------------------------- |
 | `Profile`   | `auth.users`의 미러. 사용자명·아바타·권한(`role`)                |
 | `Post`      | 포스트. 마크다운 원문과 렌더된 HTML을 함께 보관                  |
-| `Comment`   | 댓글. 자기참조 `parentId`로 답글, soft delete                    |
+| `Comment`   | 댓글. 자기참조 `parentId`로 답글, soft delete(`deletedBy`로 관리자 삭제 구분) |
 | `DailyStat` | 사이트 전체 방문 집계. KST 기준 **하루 1행**                     |
 
 ### 설계 결정과 근거
@@ -157,7 +160,7 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
   `posts:list` / `post:<slug>` 태그를 답니다. 여기서 `Date`를 ISO 문자열로 바꿔
   클라이언트 컴포넌트까지 `Date` 객체가 새어 hydration이 어긋나는 것을 막습니다.
 - **`lib/comments.ts`** — 댓글 CRUD, 2단 깊이 강제, soft delete, 도배 방지
-- **`lib/stats.ts`** — 방문·조회 집계, KST 날짜 키
+- **`lib/stats.ts`** — 방문·조회 집계, KST 날짜 키, 차트용 일별 추이
 - **`lib/auth.ts`** — 세션 조회와 권한 확인 (`requireAdmin` / `requireAdminApi`)
 - **`lib/api.ts`** — 라우트 헬퍼. `parseBody`가 zod로 본문을 검증하고 실패 시
   `HttpError(400)`을 던지면, `handleApiError`가 한 곳에서 응답으로 바꿉니다.
@@ -192,10 +195,11 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 | 라우트                       | 모드                                   | 무효화                              |
 | ---------------------------- | -------------------------------------- | ----------------------------------- |
 | `/`                          | Static + ISR 3600s                     | `posts:list` + `revalidatePath("/")` |
+| `/privacy`                   | 완전 정적                              | —                                   |
 | `/[slug]`                    | `generateStaticParams` + ISR 3600s     | `post:<slug>` (**이름 바꾸면 옛 slug도**) |
 | `/about`                     | 완전 정적                              | —                                   |
 | `/admin/**`                  | `force-dynamic`                        | —                                   |
-| `/api/posts/summary`         | ISR 3600s, `posts:list`                | 포스트 변경 시                      |
+| `/api/posts/summary`         | ISR 3600s, `posts:list`                | 포스트 변경 · **댓글 작성/삭제**    |
 | `/api/posts/[slug]/comments` | 캐시 안 함                             | TanStack Query                      |
 | `/api/stats`                 | ISR 60s                                | 시간                                |
 | `/api/visit`, `/api/me`      | `force-dynamic`                        | —                                   |
@@ -254,6 +258,13 @@ Supabase는 `public` 테이블을 PostgREST로 자동 노출합니다.
 Prisma는 `postgres` 롤로 붙어 RLS를 우회하므로 앱은 영향받지 않습니다.
 
 **`/admin`은 403이 아니라 404를 반환합니다.** public 저장소에서 존재를 확인시켜주지 않습니다.
+
+**인가는 `layout.tsx`가 아니라 각 `page.tsx`에서 합니다.** 레이아웃에서 `await`하면
+그것이 끝날 때까지 껍데기가 흘러나가지 못합니다. `loading.tsx`는 페이지의 Suspense
+폴백이라 레이아웃 안쪽에 있어서 함께 막히고, 그 사이 브라우저는 이전 화면에 머뭅니다 —
+"관리를 눌렀는데 홈에 몇 초 있다가 넘어간다"가 이것이었습니다.
+경계는 그대로입니다. 데이터를 그리는 것은 페이지이고, 그 전에 `requireAdmin()`이
+통과해야 하며, 로그인하지 않은 사람은 `proxy.ts`가 이미 `/login`으로 돌려보냅니다.
 
 **댓글은 평문으로 저장·렌더합니다.** (`white-space: pre-wrap`)
 URL만 정규식으로 분리해 `<a rel="nofollow ugc noopener noreferrer">` **엘리먼트**를 만듭니다 — HTML 문자열이 아닙니다.
@@ -364,6 +375,38 @@ if (await confirm({ title: "...", description: "...", danger: true })) { ... }
 다만 툴팁은 그 서식을 물려받으면 안 되므로(`::after`는 버튼의 자식입니다)
 `--font-body`와 `font-style: normal`로 되돌립니다.
 
+### 방문자 차트
+
+관리 화면의 추이 차트는 `daily_stats`에 이미 쌓여 있는 값을 그립니다.
+새로 모으는 것은 없습니다.
+
+**기간에 따라 묶는 단위를 바꿉니다.** 1년치를 하루 한 칸으로 그리면 850px 안에서
+한 칸이 2.3px가 되어 읽을 수도 조준할 수도 없습니다. 막대를 30개 남짓으로 붙잡습니다.
+
+| 기간 | 단위 | 막대 수 |
+| --- | --- | --- |
+| 30일 | 일별 | 30 |
+| 90일 | 주별 | 13 |
+| 올해 | 월별 | 최대 12 |
+
+**"올해"는 달력 해로 끊습니다.** 최근 365일로 하면 볼 때마다 시작 달이 밀려
+두 시점을 비교할 수 없습니다. 기간 전환은 서버로 왕복하지 않습니다 —
+하루 1행이라 1년이 365행이고 날짜와 숫자뿐이라 한 번에 받아도 20KB가 안 됩니다.
+
+**집계를 시작하기 전 날짜는 0으로 채우지 않습니다.** 그 0은 "아무도 안 왔다"가
+아니라 "세지 않았다"라서, 그리면 없던 사실을 만듭니다. 창의 시작은 요청한 일수
+전과 첫 기록일 중 더 늦은 쪽입니다. 그 안쪽의 빈 날은 진짜 0이므로 채웁니다.
+
+**막대 색은 눈으로 고르지 않았습니다.** `--chartbar`는 카드 배경 위에서 OKLCH
+명도대와 3:1 대비를 통과하는 값입니다(라이트 `#0d9488` / 다크 `#14a89a`).
+상태색(`--okcolor` 등)을 데이터 계열에 돌려쓰지 않습니다 — 그쪽은 "정상/주의"라는
+뜻을 이미 갖고 있어서, 막대에 쓰면 없는 의미가 생깁니다.
+
+계열이 하나라 범례를 두지 않습니다(제목이 무엇을 그린 것인지 이미 말합니다).
+값도 막대마다 적지 않고 최댓값만 눈금으로 세운 뒤 나머지는 호버·포커스 툴팁이
+맡습니다. 늘 보는 값이 아니라 `details`로 접어두되, 접힌 줄에 오늘과 누적을 남겨
+펼치지 않아도 알 것은 알게 했습니다.
+
 ### 레이아웃 규칙
 
 반복해서 문제를 일으켰던 두 가지를 규칙으로 굳혔습니다.
@@ -413,6 +456,7 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 | `--calloutborder` / `--calloutaccent`   | 본문 콜아웃 테두리와 강조 막대 |
 | `--shadowcolor`                         | 그림자 (다크에서는 흰 글로우) |
 | `--card-width` / `--card-width-capped`  | 목록 카드 한 장의 폭          |
+| `--chartbar`                            | 차트 막대 (상태색과 겹치지 않게 따로) |
 | `--font-body`                           | 본문 폰트 (색이 아닌 유일한 토큰) |
 
 > `--hovercolor` 는 **양 테마 모두 밝은 회색**입니다(라이트 `#f4f4f4` / 다크 `#dadada`).
@@ -464,12 +508,13 @@ src/
 │   ├── api/              # 라우트 핸들러
 │   ├── auth/             # OAuth 콜백 · 로그아웃
 │   ├── login/
+│   ├── privacy/          # 개인정보 처리방침
 │   └── globals.css       # 테마 토큰
 ├── components/           # X.tsx + X.styled.tsx 짝
 │   ├── layout/           # Header, Footer, SideMenu, ThemeSwitcher …
 │   ├── post/             # PostCard, PostGrid, PostContent, CarouselSlider …
 │   ├── about/            # Introduction, HistoryTimeline, ProjectTimeline
-│   ├── admin/            # 에디터·태그 선택기·툴바 아이콘
+│   ├── admin/            # 목록·검색·차트·에디터·태그 선택기·툴바 아이콘
 │   │                     # useSlugCheck / useEditorUploads / usePostSave
 │   ├── comments/         # 댓글 스레드
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
