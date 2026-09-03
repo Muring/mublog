@@ -12,38 +12,101 @@ import { surface } from "@/styles/surface";
  * 상태색(--okcolor 등)을 데이터에 돌려쓰지 않는다. 그쪽은 "정상/주의" 라는
  * 뜻을 이미 갖고 있어서, 막대에 쓰면 없는 의미가 생긴다.
  */
-export const ChartCard = styled.section`
+export const ChartCard = styled.details`
     ${surface("12px")}
-    padding: 1.25rem;
-    margin-bottom: 2rem;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.5rem;
     container-type: inline-size;
 
-    .chart-head {
+    /*
+     * 접힌 상태에서도 요약은 보인다. 늘 확인하는 값이 아니라 접어두지만,
+     * 굳이 펼치지 않아도 오늘과 최근 합계는 알 수 있어야 한다.
+     */
+    summary {
         display: flex;
         align-items: baseline;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 0.5rem;
+        gap: 0.5rem 0.75rem;
+        cursor: pointer;
+        list-style: none;
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+        &:focus-visible {
+            outline: 2px solid var(--bordercolor);
+            outline-offset: 3px;
+            border-radius: 4px;
+        }
     }
 
-    h3 {
-        font-size: 0.95rem;
+    .title {
+        font-size: 0.9rem;
         font-weight: 800;
         color: var(--foreground);
+
+        /* 접힘/펼침을 알리는 삼각형. 기본 마커는 브라우저마다 달라 직접 그린다 */
+        &::before {
+            content: "▸";
+            display: inline-block;
+            margin-right: 0.4rem;
+            color: var(--desccolor);
+            transition: transform 0.15s ease;
+        }
+    }
+    &[open] .title::before {
+        transform: rotate(90deg);
     }
 
-    .range {
-        font-size: 0.75rem;
+    .summary-value {
+        font-size: 0.8rem;
         color: var(--desccolor);
         font-variant-numeric: tabular-nums;
+
+        strong {
+            color: var(--foreground);
+            font-weight: 800;
+        }
+    }
+
+    .body {
+        margin-top: 1rem;
     }
 
     .empty {
-        margin-top: 1.5rem;
         padding: 2rem 0;
         text-align: center;
         font-size: 0.85rem;
         color: var(--desccolor);
+    }
+`;
+
+/** 기간 선택. 차트 위 한 줄에 둔다 */
+export const RangeTabs = styled.div`
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+
+    button {
+        padding: 0.25rem 0.6rem;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        background: none;
+        color: var(--desccolor);
+        font-family: inherit;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:hover {
+            color: var(--foreground);
+        }
+
+        &.active {
+            background-color: var(--activecolor);
+            color: var(--activefontcolor);
+        }
     }
 `;
 
@@ -55,18 +118,20 @@ export const ChartCard = styled.section`
  */
 export const Plot = styled.div`
     position: relative;
-    margin-top: 1.25rem;
+    /* 최댓값 눈금 글자가 위 기간 탭에 붙지 않도록 자리를 준다 */
+    margin-top: 1.1rem;
     /* 눈금선이 축 글자 위로 넘치지 않도록 그림 영역과 축을 나눈다 */
     height: 168px;
     display: grid;
     grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
     align-items: end;
     /*
-     * 막대가 몇 개뿐일 때 카드 전체로 퍼지면 허전하다.
-     * 한 칸이 2.5rem 을 넘지 않게 상한을 걸어 왼쪽부터 채운다.
-     * 날이 쌓여 30개가 되면 이 값이 컨테이너보다 커져 자연히 꽉 찬다.
+     * 막대가 몇 개뿐일 때 카드 전체로 퍼지면 허전하다. 한 칸의 상한을 걸어
+     * 왼쪽부터 채운다. 4rem 인 이유는 개수별로 이렇게 떨어지기 때문이다 —
+     * 4개면 256px 로 뭉치고, 월별(12~13개)이면 830px 로 카드를 거의 채우며,
+     * 일별 30개면 상한이 컨테이너를 넘어 자연히 꽉 찬다.
      */
-    max-width: calc(var(--bars) * 2.5rem);
+    max-width: calc(var(--bars) * 4rem);
     /* 막대 사이 2px 는 배경색이 벌리는 간격이다. 테두리를 그리지 않는다 */
     gap: 2px;
 
@@ -156,7 +221,7 @@ export const Axis = styled.div`
     grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
     gap: 2px;
     /* Plot 과 같은 상한이어야 눈금이 막대와 어긋나지 않는다 */
-    max-width: calc(var(--bars) * 2.5rem);
+    max-width: calc(var(--bars) * 4rem);
 
     span {
         font-size: 0.65rem;

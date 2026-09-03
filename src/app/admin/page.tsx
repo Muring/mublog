@@ -21,7 +21,7 @@ export default async function AdminPage() {
     // 인가는 레이아웃이 아니라 여기서 확정한다 (layout.tsx 의 주석 참고)
     await requireAdmin();
 
-    const [posts, daily] = await Promise.all([getAllPostsForAdmin(), getDailyVisitors(30)]);
+    const [posts, daily] = await Promise.all([getAllPostsForAdmin(), getDailyVisitors()]);
     const published = posts.filter((p) => p.status === "PUBLISHED").length;
     const comments = posts.reduce((sum, p) => sum + p.commentCount, 0);
 

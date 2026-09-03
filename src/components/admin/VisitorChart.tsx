@@ -1,85 +1,167 @@
 "use client";
 
-import { ChartCard, Plot, Bar, Axis } from "./VisitorChart.styled";
+import { useMemo, useState } from "react";
+import { ChartCard, Plot, Bar, Axis, RangeTabs } from "./VisitorChart.styled";
 import type { DailyPoint } from "@/lib/stats";
+
+/**
+ * 기간과 묶는 단위.
+ *
+ * 막대를 30개 남짓으로 유지하는 것이 목적이다. 1년치를 하루 한 칸으로 그리면
+ * 850px 안에서 한 칸이 2.3px 가 되어 읽을 수도, 조준할 수도 없다.
+ * 기간이 길어지면 단위를 키워 개수를 붙잡아 둔다.
+ */
+const RANGES = [
+    { key: "30d", label: "30일", days: 30, bucket: "day" },
+    { key: "90d", label: "90일", days: 90, bucket: "week" },
+    { key: "1y", label: "1년", days: 365, bucket: "month" },
+] as const;
+
+type RangeKey = (typeof RANGES)[number]["key"];
+type Bucket = (typeof RANGES)[number]["bucket"];
+type Point = { key: string; label: string; tip: string; visitors: number };
+
+/** 그 주의 월요일 (ISO 주 시작) */
+function weekStart(iso: string): string {
+    const d = new Date(`${iso}T00:00:00Z`);
+    const day = (d.getUTCDay() + 6) % 7; // 월=0
+    d.setUTCDate(d.getUTCDate() - day);
+    return d.toISOString().slice(0, 10);
+}
+
+const md = (iso: string) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
+
+function bucketize(points: DailyPoint[], bucket: Bucket): Point[] {
+    if (bucket === "day") {
+        return points.map((p) => ({
+            key: p.date,
+            label: md(p.date),
+            tip: `${p.visitors}명 · ${p.date}`,
+            visitors: p.visitors,
+        }));
+    }
+
+    const sums = new Map<string, number>();
+    for (const p of points) {
+        const k = bucket === "week" ? weekStart(p.date) : p.date.slice(0, 7);
+        sums.set(k, (sums.get(k) ?? 0) + p.visitors);
+    }
+
+    return [...sums.entries()].map(([k, visitors]) => {
+        if (bucket === "week") {
+            const end = new Date(`${k}T00:00:00Z`);
+            end.setUTCDate(end.getUTCDate() + 6);
+            return {
+                key: k,
+                label: md(k),
+                tip: `${visitors}명 · ${md(k)}~${md(end.toISOString().slice(0, 10))}`,
+                visitors,
+            };
+        }
+        return {
+            key: k,
+            label: `${Number(k.slice(5, 7))}월`,
+            tip: `${visitors}명 · ${k}`,
+            visitors,
+        };
+    });
+}
 
 /**
  * 날짜별 방문자 추이.
  *
- * 계열이 하나라 범례를 두지 않는다 — 제목이 무엇을 그린 것인지 이미 말한다.
- * 값은 막대마다 적지 않는다. 30개에 숫자를 다 적으면 아무도 읽지 않는다.
- * 최댓값 하나만 눈금으로 세우고 나머지는 호버·포커스 툴팁이 맡는다.
+ * 늘 확인하는 값이 아니라 접어 둔다. 접힌 상태에서도 요약 한 줄은 보이므로
+ * 굳이 펼치지 않아도 오늘과 최근 합계는 알 수 있다.
+ * details/summary 를 쓰는 이유는 열고 닫기와 키보드 조작을 브라우저가 이미
+ * 해주기 때문이다. 여기에 상태를 따로 들 이유가 없다.
  *
- * 표(아래 목록)를 함께 두는 이유는 호버가 값을 가두면 안 되기 때문이다.
- * 마우스를 못 쓰는 사람도 모든 값에 닿을 수 있어야 한다.
+ * 계열이 하나라 범례를 두지 않는다 — 제목이 무엇을 그린 것인지 이미 말한다.
+ * 값은 막대마다 적지 않는다. 최댓값 하나만 눈금으로 세우고 나머지는
+ * 호버·포커스 툴팁이 맡는다.
  */
 export default function VisitorChart({ points }: { points: DailyPoint[] }) {
-    if (points.length === 0) {
-        return (
-            <ChartCard>
-                <div className="chart-head">
-                    <h3>날짜별 방문자</h3>
-                </div>
-                <p className="empty">아직 집계된 날이 없습니다.</p>
-            </ChartCard>
-        );
-    }
+    const [range, setRange] = useState<RangeKey>("30d");
+    const active = RANGES.find((r) => r.key === range) ?? RANGES[0];
 
-    const max = Math.max(...points.map((p) => p.visitors));
-    // 눈금은 깔끔한 수로 올린다. 0 만 있는 날들뿐이면 1 을 천장으로 둔다.
-    const ceiling = Math.max(1, max);
+    const bars = useMemo(() => {
+        const sliced = points.slice(-active.days);
+        return bucketize(sliced, active.bucket);
+    }, [points, active]);
 
-    const first = points[0].date;
-    const last = points[points.length - 1].date;
-    const total = points.reduce((sum, p) => sum + p.visitors, 0);
+    const today = points.length > 0 ? points[points.length - 1].visitors : 0;
+    const total = bars.reduce((sum, b) => sum + b.visitors, 0);
+    const max = Math.max(1, ...bars.map((b) => b.visitors));
 
     // 눈금 글자가 서로 겹치지 않을 만큼만 남긴다
-    const step = Math.max(1, Math.ceil(points.length / 8));
-
-    const label = (iso: string) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
+    const step = Math.max(1, Math.ceil(bars.length / 8));
 
     return (
         <ChartCard>
-            <div className="chart-head">
-                <h3>날짜별 방문자</h3>
-                <span className="range">
-                    {label(first)} ~ {label(last)} · 합계 {total.toLocaleString("ko-KR")}명
+            <summary>
+                <span className="title">방문자 추이</span>
+                <span className="summary-value">
+                    오늘 <strong>{today.toLocaleString("ko-KR")}</strong>명 · {active.label}{" "}
+                    <strong>{total.toLocaleString("ko-KR")}</strong>명
                 </span>
+            </summary>
+
+            <div className="body">
+                <RangeTabs role="group" aria-label="기간 선택">
+                    {RANGES.map((r) => (
+                        <button
+                            key={r.key}
+                            type="button"
+                            className={r.key === range ? "active" : undefined}
+                            aria-pressed={r.key === range}
+                            onClick={() => setRange(r.key)}
+                        >
+                            {r.label}
+                        </button>
+                    ))}
+                </RangeTabs>
+
+                {bars.length === 0 ? (
+                    <p className="empty">아직 집계된 날이 없습니다.</p>
+                ) : (
+                    <>
+                        <Plot style={{ "--bars": bars.length } as React.CSSProperties}>
+                            {/* 최댓값 눈금 하나. 그 아래 값들은 툴팁이 받는다 */}
+                            <div className="gridline" style={{ bottom: "100%" }} aria-hidden>
+                                <span>{max}</span>
+                            </div>
+
+                            {bars.map((b) => (
+                                <Bar
+                                    key={b.key}
+                                    tabIndex={0}
+                                    role="img"
+                                    data-zero={b.visitors === 0}
+                                    data-tip={b.tip}
+                                    aria-label={b.tip}
+                                    style={
+                                        {
+                                            "--h": `${Math.round((b.visitors / max) * 100)}%`,
+                                        } as React.CSSProperties
+                                    }
+                                />
+                            ))}
+                        </Plot>
+
+                        <Axis style={{ "--bars": bars.length } as React.CSSProperties}>
+                            {bars.map((b, i) => (
+                                <span
+                                    key={b.key}
+                                    data-show={
+                                        i === 0 || i === bars.length - 1 || i % step === 0
+                                    }
+                                >
+                                    {b.label}
+                                </span>
+                            ))}
+                        </Axis>
+                    </>
+                )}
             </div>
-
-            <Plot style={{ "--bars": points.length } as React.CSSProperties}>
-                {/* 최댓값 눈금 하나. 그 아래 값들은 툴팁과 표가 받는다 */}
-                <div className="gridline" style={{ bottom: "100%" }} aria-hidden>
-                    <span>{ceiling}</span>
-                </div>
-
-                {points.map((p) => (
-                    <Bar
-                        key={p.date}
-                        tabIndex={0}
-                        role="img"
-                        data-zero={p.visitors === 0}
-                        data-tip={`${p.visitors}명 · ${p.date}`}
-                        aria-label={`${p.date} ${p.visitors}명`}
-                        style={
-                            {
-                                "--h": `${Math.round((p.visitors / ceiling) * 100)}%`,
-                            } as React.CSSProperties
-                        }
-                    />
-                ))}
-            </Plot>
-
-            <Axis style={{ "--bars": points.length } as React.CSSProperties}>
-                {points.map((p, i) => (
-                    <span
-                        key={p.date}
-                        data-show={i === 0 || i === points.length - 1 || i % step === 0}
-                    >
-                        {label(p.date)}
-                    </span>
-                ))}
-            </Axis>
         </ChartCard>
     );
 }
