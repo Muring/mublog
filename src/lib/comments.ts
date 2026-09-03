@@ -10,6 +10,8 @@ const COMMENT_SELECT = {
     createdAt: true,
     editedAt: true,
     deletedAt: true,
+    deletedBy: true,
+    authorId: true,
     author: { select: { id: true, username: true, avatarUrl: true } },
 } as const;
 
@@ -20,12 +22,17 @@ type CommentRow = {
     createdAt: Date;
     editedAt: Date | null;
     deletedAt: Date | null;
+    deletedBy: string | null;
+    authorId: string;
     author: { id: string; username: string; avatarUrl: string | null };
 };
 
 /** 삭제된 댓글의 본문과 작성자는 응답에 담지 않는다. */
 function toNode(row: CommentRow): CommentNode {
     const deleted = row.deletedAt !== null;
+    // 지운 사람이 작성자가 아니면 관리자다. deletedBy 가 없는 것은
+    // 이 컬럼이 생기기 전에 지워진 댓글이라 본인 삭제로 본다.
+    const deletedByAdmin = deleted && row.deletedBy !== null && row.deletedBy !== row.authorId;
     return {
         id: row.id,
         parentId: row.parentId,
@@ -34,6 +41,7 @@ function toNode(row: CommentRow): CommentNode {
         createdAt: row.createdAt.toISOString(),
         editedAt: row.editedAt?.toISOString() ?? null,
         deleted,
+        deletedByAdmin,
     };
 }
 
@@ -171,7 +179,10 @@ export async function deleteComment(params: {
     // hard delete 하면 달려 있던 답글이 함께 사라진다.
     // 행은 남기고 본문만 가려서 대화 흐름을 유지한다.
     await prisma.$transaction([
-        prisma.comment.update({ where: { id }, data: { deletedAt: new Date() } }),
+        prisma.comment.update({
+            where: { id },
+            data: { deletedAt: new Date(), deletedBy: actorId },
+        }),
         prisma.post.update({
             where: { id: existing.postId },
             data: { commentCount: { decrement: 1 } },

@@ -74,7 +74,11 @@ export default function CommentItem({
                     <div className="avatar avatar-fallback">-</div>
                 </div>
                 <div className="content">
-                    <p className="body deleted">삭제된 댓글입니다.</p>
+                    <p className="body deleted">
+                        {comment.deletedByAdmin
+                            ? "관리자에 의해 삭제된 댓글입니다."
+                            : "삭제된 댓글입니다."}
+                    </p>
                 </div>
             </CommentRow>
         );

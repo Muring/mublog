@@ -67,8 +67,20 @@ export default function Comments({ slug }: { slug: string }) {
         queryKey,
         mutationFn: (id) => fetchJson<{ ok: true }>(`/api/comments/${id}`, { method: "DELETE" }),
         // 답글이 고아가 되지 않도록 행은 남기고 본문과 작성자만 지운다
+        // 낙관적 갱신에서도 "관리자가 지웠는가" 를 함께 채운다.
+        // 안 채우면 서버 응답이 오는 순간 문구가 바뀌어 깜빡인다.
         apply: (list, id) =>
-            list.map((c) => (c.id === id ? { ...c, deleted: true, body: null, author: null } : c)),
+            list.map((c) =>
+                c.id === id
+                    ? {
+                          ...c,
+                          deleted: true,
+                          body: null,
+                          deletedByAdmin: c.author?.id !== me?.user?.id,
+                          author: null,
+                      }
+                    : c
+            ),
         onError: (message) => toast.error(message),
     });
 

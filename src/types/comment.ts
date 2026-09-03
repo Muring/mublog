@@ -18,6 +18,8 @@ export type CommentNode = {
     createdAt: string;
     editedAt: string | null;
     deleted: boolean;
+    /** 작성자 본인이 아니라 관리자가 지운 경우. 화면 문구가 달라진다 */
+    deletedByAdmin?: boolean;
     /** 낙관적 갱신으로 화면에만 먼저 올라간 항목 */
     pending?: boolean;
 };
