@@ -79,6 +79,43 @@ export async function getSiteStats(): Promise<SiteStats> {
     };
 }
 
+export type DailyPoint = { date: string; visitors: number };
+
+/**
+ * 최근 방문자 추이. 관리 화면의 차트가 쓴다.
+ *
+ * 집계를 시작하기 전 날짜를 0 으로 채우지 않는다. 그 0 은 "아무도 안 왔다" 가
+ * 아니라 "세지 않았다" 라서, 그려두면 없던 사실을 만들어낸다.
+ * 그래서 창의 시작은 `요청한 일수 전` 과 `첫 기록일` 중 더 늦은 쪽이다.
+ *
+ * 그 안쪽의 빈 날은 진짜 0 이므로 채운다. 행이 없다는 건 그날 아무도
+ * 오지 않아 recordVisit 이 한 번도 불리지 않았다는 뜻이다.
+ */
+export async function getDailyVisitors(days = 30): Promise<DailyPoint[]> {
+    const rows = await prisma.dailyStat.findMany({
+        orderBy: { date: "asc" },
+        select: { date: true, visitors: true },
+    });
+    if (rows.length === 0) return [];
+
+    const key = (d: Date) => d.toISOString().slice(0, 10);
+    const byDate = new Map(rows.map((r) => [key(r.date), r.visitors]));
+
+    const today = new Date(`${seoulDateKey()}T00:00:00Z`);
+    const windowStart = new Date(today);
+    windowStart.setUTCDate(windowStart.getUTCDate() - (days - 1));
+
+    const first = rows[0].date;
+    const start = windowStart > first ? windowStart : first;
+
+    const points: DailyPoint[] = [];
+    for (const cursor = new Date(start); cursor <= today; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
+        const k = key(cursor);
+        points.push({ date: k, visitors: byDate.get(k) ?? 0 });
+    }
+    return points;
+}
+
 /** 다음 KST 자정까지 남은 초. 방문 쿠키의 수명으로 쓴다. */
 export function secondsUntilSeoulMidnight(now: Date = new Date()): number {
     // KST 는 UTC+9 로 고정이라 서머타임을 고려할 필요가 없다
