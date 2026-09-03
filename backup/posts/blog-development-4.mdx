@@ -20,7 +20,7 @@ Notion에서 글을 쓰고 → 마크다운으로 내보내고 → `mdx` 파일�
 
 맞는 말이다. 애초에 Contentlayer로 빌드 타임에 `mdx`를 읽는 구조였으니 당연한 결과였다. 그래서 이번에 아예 뒤집기로 했다. **포스트를 DB에 넣고, 브라우저에서 쓰고 발행하면 재배포 없이 반영되게.**
 
-이 글은 그 과정을 정리한 것이다. 5일 동안 74개의 커밋이 쌓였다.
+이 글은 그 과정을 정리한 것이다. 실제로 손댄 날로만 세면 나흘, 커밋은 76개가 쌓였다.
 
 ---
 
@@ -79,15 +79,31 @@ Postgres의 배열 컬럼에 GIN 인덱스를 걸면 태그 검색은 충분히 
 그래서 KST 기준 하루에 딱 한 행만 유지하기로 했다.
 
 ```sql
-INSERT INTO daily_stats (date, visitors, page_views) VALUES ($1, 1, 1)
+INSERT INTO daily_stats (date, visitors)
+VALUES ($1::date, 1)
 ON CONFLICT (date) DO UPDATE
-  SET visitors = daily_stats.visitors + 1,
-      page_views = daily_stats.page_views + 1;
+    SET visitors = daily_stats.visitors + 1
 ```
 
 연 365행이면 20KB 정도다. 그리고 방문자당 하루 한 번만 쓰도록 쿠키로 막았다. 누적 방문자는 `SUM(visitors)`로 구한다.
 
-Prisma의 `upsert` 대신 raw SQL을 쓴 이유는 이게 **레이스 없는 단일 문장**임이 보장되기 때문이다.
+이 문장이 **하나**라는 점이 중요하다. 방문자 수 올리기를 "읽고 → 더하고 → 쓴다" 로 나누면
+읽은 시점과 쓰는 시점 사이에 틈이 생긴다. 그 틈에 다른 요청이 끼어들면 이렇게 된다.
+
+```
+A: 읽는다 → 5
+B: 읽는다 → 5      ← A 가 쓰기 전에 끼어듦
+A: 쓴다   → 6
+B: 쓴다   → 6      ← 방문 하나가 사라짐
+```
+
+`ON CONFLICT DO UPDATE` 에는 그 틈이 없다. "없으면 넣고 있으면 고친다" 를 Postgres 가
+한 번에, 행에 잠금을 걸고 처리한다. 게다가 `daily_stats.visitors + 1` 은 앱이 아까 읽어둔
+값이 아니라 **지금 그 행의 값**에 1을 더한다. 그래서 몇 개가 동시에 들어와도 전부 반영된다.
+
+> 처음엔 "Prisma의 `upsert` 는 이걸 보장 못 하니까 raw 로 썼다" 고 적었는데,
+> 찍어보니 Prisma 7 도 똑같은 단일 문장으로 컴파일하고 있었다. 사실이 아니어서 지웠다.
+> raw 를 유지하는 이유는 그 보장이 ORM 의 컴파일 결과가 아니라 **우리 코드에서 바로 보이기** 때문이다.
 
 ### 관리자 판별은 DB 컬럼으로만
 
@@ -146,7 +162,7 @@ unified()
 ```ts
 import { refractor } from "refractor/lib/core.js";
 // 필요한 언어만 명시적으로 등록한다
-[markup, css, clike, javascript, jsx, typescript, tsx, bash, yaml, sql]
+[markup, css, clike, javascript, jsx, typescript, tsx, bash, yaml, sql, /* … */]
   .forEach((l) => refractor.register(l));
 ```
 
@@ -209,15 +225,29 @@ import { refractor } from "refractor/lib/core.js";
 
 저장형 XSS를 sanitize로 막는 게 아니라 **표면 자체를 없앤** 것이다. 나중에 댓글에 마크다운을 허용하고 싶어지면 별도 프로세서를 새로 만들 생각이다. `renderMarkdown`을 재사용하면 안 된다.
 
-도배 방지도 넣었다. Upstash 같은 걸 붙이기는 개인 블로그에 과했고, 인메모리 `Map`은 서버리스에서 인스턴스마다 따로 놀아서 의미가 없다. 그냥 insert 직전에 쿼리 두 개를 더 날린다.
+도배 방지도 넣었다. Upstash 같은 걸 붙이기는 개인 블로그에 과했고, 인메모리 카운터는 서버리스에서 인스턴스마다 따로 놀아서 의미가 없다. 그냥 insert 직전에 세 가지를 함께 확인한다.
 
-```sql
--- 1분에 3건 이상이면 거부
-SELECT count(*) FROM comments
-WHERE author_id = $1 AND created_at > now() - interval '1 minute';
+```ts
+const [lastMinute, lastHour, previous] = await Promise.all([
+    prisma.comment.count({
+        where: { authorId, createdAt: { gt: new Date(now - 60_000) } },
+    }),
+    prisma.comment.count({
+        where: { authorId, createdAt: { gt: new Date(now - 3_600_000) } },
+    }),
+    prisma.comment.findFirst({
+        where: { authorId, deletedAt: null },
+        orderBy: { createdAt: "desc" },
+        select: { body: true },
+    }),
+]);
+
+if (lastMinute >= 3) throw new HttpError(429, "잠시 후 다시 시도해 주세요.");
+if (lastHour >= 20) throw new HttpError(429, "한 시간에 20개까지 작성할 수 있습니다.");
+if (previous?.body === body) throw new HttpError(429, "직전 댓글과 내용이 같습니다.");
 ```
 
-이미 `@@index([authorId, createdAt])`가 있어서 밀리초 수준이다.
+이미 `@@index([authorId, createdAt])`가 있어서 밀리초 수준이다. 직전 댓글과 내용이 같은 것도 함께 막는다.
 
 ---
 
