@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { requireAdmin } from "@/lib/auth";
 import { getAllTags, getPostForEdit } from "@/lib/posts";
 import PostEditor from "@/components/admin/PostEditor";
 
@@ -7,6 +8,8 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditPostPage({ params }: Props) {
+    await requireAdmin();
+
     const { id } = await params;
     const [post, knownTags] = await Promise.all([getPostForEdit(id), getAllTags()]);
 

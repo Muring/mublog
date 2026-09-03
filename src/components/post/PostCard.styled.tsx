@@ -111,23 +111,41 @@ const Tags = styled.div`
 
   .more {
     cursor: default;
+    /* 팝오버가 태그 줄이 아니라 이 칩을 기준으로 열리게 한다 */
+    position: relative;
+    /*
+     * .chip 의 말줄임에는 overflow: hidden 이 들어 있어서, 그대로 두면
+     * 이 칩이 자기 팝오버를 잘라버린다. "+3" 은 잘릴 일이 없으므로 푼다.
+     */
+    overflow: visible;
   }
 
-  /* 카드가 overflow: hidden 이므로 팝오버는 카드 안쪽(태그 줄 바로 아래)에 띄운다 */
+  /*
+   * 숨은 태그 목록. +N 칩의 바로 오른쪽에서 펼쳐진다.
+   * 태그 줄을 기준으로 잡으면 카드 왼쪽 끝에서 열려 무엇에 딸린 것인지 안 보였다.
+   *
+   * 색은 다른 툴팁(툴바·차트)과 같은 짝을 쓴다. 배경에 --foreground,
+   * 글자에 --background 라 두 테마 모두 확실히 떠 보인다.
+   */
   .popover {
     position: absolute;
-    top: calc(100% + 0.25rem);
-    left: 0;
-    z-index: 2;
+    top: 50%;
+    left: calc(100% + 0.35rem);
+    transform: translateY(-50%);
+    z-index: 3;
     display: none;
     padding: 0.25rem 0.5rem;
-    border: 1px solid var(--bordercolor);
     border-radius: 8px;
-    background-color: var(--background);
-    color: var(--desccolor);
+    background-color: var(--foreground);
+    color: var(--background);
+    font-weight: 700;
     box-shadow: 0px 3px 8px -2px var(--shadowcolor);
-    /* 카드가 overflow: hidden 이라 폭을 넘기면 잘린다. 넘치면 줄바꿈시킨다 */
-    max-width: 100%;
+    /*
+     * 기준 상자가 +N 칩(20px 남짓)이라 백분율 폭을 쓰면 그만큼으로 짜부라진다.
+     * 내용에 맞춰 늘리되 상한을 둬서, 태그가 많아도 카드 밖으로 길게 뻗지 않게 한다.
+     */
+    width: max-content;
+    max-width: 11rem;
     white-space: normal;
     font-weight: 700;
   }

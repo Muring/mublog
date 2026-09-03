@@ -1,9 +1,12 @@
+import { requireAdmin } from "@/lib/auth";
 import { getAllTags } from "@/lib/posts";
 import PostEditor from "@/components/admin/PostEditor";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewPostPage() {
+    await requireAdmin();
+
     const knownTags = await getAllTags();
 
     return (

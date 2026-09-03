@@ -1,7 +1,9 @@
+import { requireAdmin } from "@/lib/auth";
 import { getAllPostsForAdmin } from "@/lib/posts";
-import { PostTable } from "@/components/admin/Admin.styled";
+import { getDailyVisitors } from "@/lib/stats";
 import { AdminShell } from "@/components/admin/AdminSkeleton";
-import PostTableRow from "@/components/admin/PostTableRow";
+import PostTableView from "@/components/admin/PostTableView";
+import VisitorChart from "@/components/admin/VisitorChart";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +18,10 @@ export const dynamic = "force-dynamic";
  * 둘이 조금이라도 다르면 넘어가는 순간 한 번 더 튄다.
  */
 export default async function AdminPage() {
-    const posts = await getAllPostsForAdmin();
+    // 인가는 레이아웃이 아니라 여기서 확정한다 (layout.tsx 의 주석 참고)
+    await requireAdmin();
+
+    const [posts, daily] = await Promise.all([getAllPostsForAdmin(), getDailyVisitors(30)]);
     const published = posts.filter((p) => p.status === "PUBLISHED").length;
     const comments = posts.reduce((sum, p) => sum + p.commentCount, 0);
 
@@ -41,23 +46,9 @@ export default async function AdminPage() {
                 </div>
             </div>
 
-            <PostTable>
-                <thead>
-                    <tr>
-                        <th>제목</th>
-                        <th>상태</th>
-                        <th>태그</th>
-                        <th>발행일</th>
-                        <th>댓글</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {posts.map((post) => (
-                        <PostTableRow key={post.id} post={post} />
-                    ))}
-                </tbody>
-            </PostTable>
+            <VisitorChart points={daily} />
+
+            <PostTableView posts={posts} />
         </AdminShell>
     );
 }

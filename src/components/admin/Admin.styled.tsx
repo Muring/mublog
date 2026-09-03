@@ -39,7 +39,7 @@ export const AdminWrapper = styled.div`
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
   }
 
   @container admin (max-width: 620px) {
@@ -74,6 +74,14 @@ export const PostTable = styled.table`
    * 세로로 쪼개졌다. 각 열이 필요한 만큼을 미리 정해준다.
    */
   table-layout: fixed;
+
+  /* 스크롤해도 열 이름이 남아야 어느 열인지 알 수 있다 */
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--background);
+  }
 
   th:nth-of-type(2) { width: 5rem; }    /* 상태 */
   th:nth-of-type(3) { width: 14rem; }   /* 태그 */
@@ -123,6 +131,16 @@ export const PostTable = styled.table`
 
   .title-cell {
     font-weight: 700;
+  }
+
+  .title-link {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
   }
 
   .slug {
@@ -291,5 +309,64 @@ export const Button = styled.button`
   }
   &.danger {
     ${buttonDanger}
+  }
+`;
+
+/**
+ * 표만 스크롤한다.
+ *
+ * 페이지 전체를 스크롤하면 통계와 차트가 위로 밀려 나가고, 목록 끝에서 다시
+ * 올라와야 한다. 표에 높이를 주고 그 안에서만 굴리면 화면 구성이 그대로 남는다.
+ *
+ * 높이는 뷰포트 기준이다. 픽셀로 고정하면 큰 화면에서 남는 자리를 못 쓰고
+ * 작은 화면에서는 넘친다.
+ */
+export const TableScroll = styled.div`
+  max-height: min(60vh, 40rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-top: 1px solid var(--bordercolor);
+
+  .empty {
+    padding: 2.5rem 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--desccolor);
+  }
+
+  /* 좁은 화면에서는 행이 카드로 바뀌어 세로로 길어지므로 높이를 풀어준다 */
+  @container admin (max-width: 560px) {
+    max-height: none;
+    overflow-y: visible;
+  }
+`;
+
+/** 검색 줄. 표 바로 위에 두어 무엇을 거르는지 분명히 한다 */
+export const TableToolbar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.45rem 0.65rem;
+    ${surface("0.5rem")}
+    color: var(--foreground);
+    font-family: inherit;
+    font-size: 0.85rem;
+
+    &:focus {
+      outline: 2px solid var(--bordercolor);
+      outline-offset: 1px;
+    }
+  }
+
+  .count {
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    color: var(--desccolor);
+    font-variant-numeric: tabular-nums;
   }
 `;

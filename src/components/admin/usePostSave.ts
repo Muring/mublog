@@ -70,19 +70,10 @@ export function usePostSave(
             return;
         }
 
-        setPending(null);
-        setPost((prev) => ({
-            ...prev,
-            status,
-            publishedAt: data.publishedAt ?? prev.publishedAt,
-        }));
+        // 초안도 저장하고 나면 목록으로 돌아간다.
+        // 발행과 마찬가지로 pending 을 유지해 이동이 끝날 때까지 버튼이 눌린 상태로 남는다.
         toast.success("초안을 저장했습니다.");
-
-        // 새 글이면 이후 저장이 PATCH 로 가도록 주소와 id 를 맞춰둔다
-        if (!postId && data.id) {
-            setPostId(data.id);
-            router.replace("/admin/posts/" + data.id);
-        }
+        router.push("/admin");
     }
 
     return { save, pending, isSaving: pending !== null };

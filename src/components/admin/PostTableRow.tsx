@@ -55,7 +55,16 @@ export default function PostTableRow({ post }: Props) {
         <tr style={busy ? { opacity: 0.5 } : undefined}>
             {/* data-label 은 좁은 화면에서 행이 카드로 바뀔 때 각 값 앞에 붙는 이름표다 */}
             <td className="title-cell">
-                {post.title}
+                {/*
+                  초안은 공개 주소가 없다(공개 사이트에서 404). 그래서 공개글은 글로,
+                  초안은 편집 화면으로 보낸다 — 어느 쪽이든 "그 글" 로 가는 것이 목적이다.
+                */}
+                <Link
+                    href={post.status === "PUBLISHED" ? `/${post.slug}` : `/admin/posts/${post.id}`}
+                    className="title-link"
+                >
+                    {post.title}
+                </Link>
                 <span className="slug">/{post.slug}</span>
             </td>
             <td data-label="상태">
