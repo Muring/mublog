@@ -26,6 +26,21 @@ export const LoginWrapper = styled.div`
     font-size: 0.85rem;
     color: var(--dangercolor);
   }
+
+  /* 버튼 아래 안내. 결정에 필요한 정보지만 버튼보다 앞서 읽힐 필요는 없다 */
+  .notice {
+    max-width: 24rem;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: var(--desccolor);
+    word-break: keep-all;
+
+    a {
+      color: var(--linkcolor);
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+  }
 `;
 
 export const GithubButton = styled.button`

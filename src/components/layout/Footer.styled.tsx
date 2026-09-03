@@ -22,4 +22,15 @@ export const FooterWrapper = styled.footer`
     align-items: center;
     min-width: 25rem;
   }
+
+  .privacy {
+    font-size: 0.75rem;
+    color: var(--desccolor);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--foreground);
+      text-decoration: underline;
+    }
+  }
 `;

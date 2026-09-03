@@ -2,11 +2,15 @@
 "use client";
 import { FooterWrapper } from "./Footer.styled";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   return (
     <FooterWrapper>
       <p>© {new Date().getFullYear()} Mublog. All rights reserved. Developed by MuRing.</p>
+      <Link href="/privacy" className="privacy">
+        개인정보 처리방침
+      </Link>
       <div className="stack">
         <Image
           src="/icons/next.svg"

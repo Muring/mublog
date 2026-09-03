@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { LoginWrapper, GithubButton } from "./Login.styled";
@@ -61,6 +62,11 @@ export default function LoginForm() {
             </GithubButton>
 
             {message && <p className="error">{message}</p>}
+
+            {/* 무엇이 저장되는지는 누르기 전에 알아야 한다 */}
+            <p className="notice">
+                로그인하면 GitHub 사용자명과 프로필 이미지가 저장됩니다. 이메일과 비밀번호는
+                받지 않습니다. <Link href="/privacy">개인정보 처리방침</Link></p>
         </LoginWrapper>
     );
 }
