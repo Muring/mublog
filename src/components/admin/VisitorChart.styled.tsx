@@ -125,13 +125,6 @@ export const Plot = styled.div`
     display: grid;
     grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
     align-items: end;
-    /*
-     * 막대가 몇 개뿐일 때 카드 전체로 퍼지면 허전하다. 한 칸의 상한을 걸어
-     * 왼쪽부터 채운다. 4rem 인 이유는 개수별로 이렇게 떨어지기 때문이다 —
-     * 4개면 256px 로 뭉치고, 월별(12~13개)이면 830px 로 카드를 거의 채우며,
-     * 일별 30개면 상한이 컨테이너를 넘어 자연히 꽉 찬다.
-     */
-    max-width: calc(var(--bars) * 4rem);
     /* 막대 사이 2px 는 배경색이 벌리는 간격이다. 테두리를 그리지 않는다 */
     gap: 2px;
 
@@ -186,8 +179,14 @@ export const Bar = styled.div`
         inset: -4px -6px 0;
     }
 
+    /*
+     * z-index 를 함께 올린다. filter 는 새 쌓임 맥락을 만들기 때문에,
+     * 이것만 걸면 툴팁의 z-index 가 그 안에 갇혀 뒤에 오는 막대에 가린다.
+     * (DOM 순서상 뒤 형제가 위에 그려진다)
+     */
     &:hover,
     &:focus-visible {
+        z-index: 6;
         filter: brightness(1.12);
         outline: none;
     }
@@ -220,8 +219,6 @@ export const Axis = styled.div`
     display: grid;
     grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
     gap: 2px;
-    /* Plot 과 같은 상한이어야 눈금이 막대와 어긋나지 않는다 */
-    max-width: calc(var(--bars) * 4rem);
 
     span {
         font-size: 0.65rem;

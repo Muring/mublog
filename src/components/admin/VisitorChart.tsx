@@ -12,10 +12,28 @@ import type { DailyPoint } from "@/lib/stats";
  * 기간이 길어지면 단위를 키워 개수를 붙잡아 둔다.
  */
 const RANGES = [
-    { key: "30d", label: "30일", days: 30, bucket: "day" },
-    { key: "90d", label: "90일", days: 90, bucket: "week" },
-    { key: "1y", label: "1년", days: 365, bucket: "month" },
+    { key: "30d", label: "30일", bucket: "day" },
+    { key: "90d", label: "90일", bucket: "week" },
+    { key: "1y", label: "올해", bucket: "month" },
 ] as const;
+
+/** 최근 n일. 30일·90일은 오늘에서 거꾸로 센다 */
+const lastDays = (points: DailyPoint[], n: number) => points.slice(-n);
+
+/**
+ * 올해 1월 1일부터.
+ *
+ * 달력 해로 끊어야 "1월, 2월 …" 이 해마다 같은 자리에 온다. 최근 365일로 하면
+ * 볼 때마다 시작 달이 밀려 두 시점을 비교할 수 없다.
+ *
+ * 집계를 시작하기 전 달은 만들지 않는다. 1월부터 재기 시작한 해에는 자연히
+ * 1월부터 나오고, 8월에 시작한 해에는 8월부터 나온다. 없는 0 을 그리지 않는다.
+ */
+function thisYear(points: DailyPoint[]): DailyPoint[] {
+    if (points.length === 0) return points;
+    const year = points[points.length - 1].date.slice(0, 4);
+    return points.filter((p) => p.date.startsWith(year));
+}
 
 type RangeKey = (typeof RANGES)[number]["key"];
 type Bucket = (typeof RANGES)[number]["bucket"];
@@ -84,7 +102,8 @@ export default function VisitorChart({ points }: { points: DailyPoint[] }) {
     const active = RANGES.find((r) => r.key === range) ?? RANGES[0];
 
     const bars = useMemo(() => {
-        const sliced = points.slice(-active.days);
+        const sliced =
+            active.key === "1y" ? thisYear(points) : lastDays(points, active.key === "30d" ? 30 : 90);
         return bucketize(sliced, active.bucket);
     }, [points, active]);
 
