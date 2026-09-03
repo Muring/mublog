@@ -114,6 +114,7 @@ export default function VisitorChart({
         return bucketize(sliced, active.bucket);
     }, [points, active]);
 
+    const today = points.length > 0 ? points[points.length - 1].visitors : 0;
     const max = Math.max(1, ...bars.map((b) => b.visitors));
 
     // 눈금 글자가 서로 겹치지 않을 만큼만 남긴다
@@ -123,8 +124,10 @@ export default function VisitorChart({
         <ChartCard>
             <summary>
                 <span className="title">방문자 추이</span>
+                {/* 기간 탭과 무관한 두 값이라 탭을 눌러도 바뀌지 않는다 */}
                 <span className="summary-value">
-                    누적 <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>명
+                    오늘 <strong>{today.toLocaleString("ko-KR")}</strong>명 · 누적{" "}
+                    <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>명
                 </span>
             </summary>
 
