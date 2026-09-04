@@ -500,7 +500,7 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 | `--activecolor` / `--activefontcolor`   | 선택·주요 동작                |
 | `--okcolor` / `--okbg` / `--okborder`   | 공개처럼 정상적으로 켜진 상태 |
 | `--warncolor` / `--warnbg` / `--warnborder` | 초안처럼 아직인 상태      |
-| `--linkcolor`                           | 본문·댓글 안의 링크           |
+| `--linkcolor` / `--linkhovercolor`      | 링크와 가리켰을 때의 링크     |
 | `--calloutborder` / `--calloutaccent`   | 본문 콜아웃 테두리와 강조 막대 |
 | `--shadowcolor`                         | 그림자 (다크에서는 흰 글로우) |
 | `--card-width` / `--card-width-capped`  | 목록 카드 한 장의 폭          |

@@ -150,10 +150,28 @@ export const PostTable = styled.table`
   .title-link {
     color: inherit;
     text-decoration: none;
+    transition: color 0.15s ease;
 
-    &:hover,
+    /*
+     * 밑줄 대신 색이 바뀐다. 밑줄은 그어지는 순간 글자 아래 여백을 먹어
+     * 두 줄짜리 제목에서 행이 미세하게 흔들린다.
+     *
+     * --linkhovercolor 는 행 호버면(--codefontbgcolor) 위에서 AA 를 넘긴다.
+     * 행 배경이 함께 바뀌는 자리라 기본 배경만 보고 고르면 안 된다.
+     */
+    &:hover {
+      color: var(--linkhovercolor);
+    }
+
+    /*
+     * 키보드에는 색만으로 알리지 않는다. 색 변화는 초점이 어디 있는지를
+     * 가리키기에 약하고, 색을 구분하지 못하면 아무 신호도 남지 않는다.
+     */
     &:focus-visible {
-      text-decoration: underline;
+      color: var(--linkhovercolor);
+      outline: 2px solid var(--linkhovercolor);
+      outline-offset: 2px;
+      border-radius: 2px;
     }
   }
 
