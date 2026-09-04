@@ -152,34 +152,56 @@ export const RangeTabs = styled.div`
  * 폭 계산을 CSS 에 맡긴다. 막대 수를 --bars 로만 넘기고 나머지는 grid 가 나눈다.
  * 측정값을 JS 상태로 들면 하이드레이션 전에 폭이 0 이라 납작하게 그려진다.
  */
+/**
+ * 그림 영역.
+ *
+ * 왼쪽에 y축 눈금이 붙는 자리를 두고, 그 오른쪽을 막대가 나눠 갖는다.
+ * 축 글자 폭을 --axis-w 한 곳에서 정해 눈금선과 막대의 시작점이 어긋나지 않게 한다.
+ */
 export const Plot = styled.div`
+    --axis-w: 2rem;
     position: relative;
-    /* 최댓값 눈금 글자가 위 기간 탭에 붙지 않도록 자리를 준다 */
-    margin-top: 1.1rem;
-    /* 눈금선이 축 글자 위로 넘치지 않도록 그림 영역과 축을 나눈다 */
-    height: 168px;
-    display: grid;
-    grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
-    align-items: end;
-    /* 막대 사이 2px 는 배경색이 벌리는 간격이다. 테두리를 그리지 않는다 */
-    gap: 2px;
+    height: 172px;
+    /* 최댓값 라벨이 막대 위에 앉을 자리 */
+    padding-top: 1.1rem;
 
     /* 눈금선. 데이터가 아니므로 한 단계 물러난 실선 1px */
     .gridline {
         position: absolute;
-        left: 0;
+        left: var(--axis-w);
         right: 0;
         height: 1px;
         background-color: var(--bordercolor);
+        opacity: 0.5;
         pointer-events: none;
+    }
+    /* 0 선은 기준선이라 조금 더 또렷하게 둔다 */
+    .gridline[data-base="true"] {
+        opacity: 1;
     }
     .gridline span {
         position: absolute;
-        top: -0.85rem;
-        left: 0;
+        right: calc(100% + 0.4rem);
+        top: -0.5em;
         font-size: 0.65rem;
+        line-height: 1;
         color: var(--desccolor);
         font-variant-numeric: tabular-nums;
+    }
+
+    /* 막대가 놓이는 격자. 축 자리만큼 왼쪽을 비운다 */
+    .bars {
+        position: absolute;
+        left: var(--axis-w);
+        right: 0;
+        top: 1.1rem;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
+        align-items: end;
+        /* 막대 사이는 어느 단위에서도 같은 4px 다. 배경이 벌리는 간격이라
+           테두리를 그리지 않는다 */
+        gap: 4px;
     }
 `;
 
@@ -192,10 +214,9 @@ export const Plot = styled.div`
 export const Bar = styled.div`
     position: relative;
     align-self: end;
+    /* 칸을 그대로 채운다. 폭에 상한을 두면 막대 수에 따라 남는 자리가 달라져
+       Monthly 만 간격이 벌어져 보였다. 간격은 격자의 gap 하나로만 정한다 */
     width: 100%;
-    /* 24px 을 넘기지 않는다. 칸을 가득 채우지 않고 남는 자리는 여백으로 둔다 */
-    max-width: 24px;
-    justify-self: center;
     height: var(--h);
     /* 값이 0 이어도 자리는 보이게 한다 (그날 아무도 오지 않았다는 사실도 데이터다) */
     min-height: 2px;
@@ -204,16 +225,23 @@ export const Bar = styled.div`
     border-radius: 4px 4px 0 0;
     cursor: default;
 
+    transform-origin: bottom;
+
     /*
-     * 단위를 바꾸면 막대의 key 가 달라져 다시 마운트되므로 이 애니메이션이
-     * 새로 돈다. --i 로 조금씩 늦춰 왼쪽에서 오른쪽으로 차오른다.
+     * 단위를 바꿀 때만 자란다.
+     *
+     * 카드를 열 때는 돌리지 않는다. 그때는 ::details-content 가 상자 높이를
+     * 늘리는 중이라, 막대가 동시에 자라면 두 움직임이 겹쳐 위아래로 흔들려 보인다.
+     * 그래서 Plot 에 data-animate 가 붙었을 때만(= 사용자가 단위나 연도를
+     * 바꿨을 때만) 애니메이션을 건다.
      *
      * fill-mode 를 주지 않는다. 끝난 뒤 transform 이 none 으로 돌아가야
      * 쌓임 맥락이 남지 않고, 호버 툴팁이 뒤 막대에 가리지 않는다.
      */
-    transform-origin: bottom;
-    animation: bar-grow 0.32s ease-out;
-    animation-delay: calc(var(--i, 0) * 12ms);
+    [data-animate="true"] & {
+        animation: bar-grow 0.32s ease-out;
+        animation-delay: calc(var(--i, 0) * 12ms);
+    }
 
     @keyframes bar-grow {
         from {
@@ -225,7 +253,9 @@ export const Bar = styled.div`
     }
 
     @media (prefers-reduced-motion: reduce) {
-        animation: none;
+        [data-animate="true"] & {
+            animation: none;
+        }
     }
 
     &[data-zero="true"] {
@@ -236,6 +266,27 @@ export const Bar = styled.div`
      * 기록이 없는 달. 0 과 다르다 — "아무도 안 왔다" 가 아니라 "세지 않았다" 다.
      * 막대를 그리지 않고 바닥에 점선만 남겨 자리는 지키되 값이 있는 척하지 않는다.
      */
+    /*
+     * 가장 높은 막대만 도드라지게 한다. ::before 는 히트 영역이, ::after 는
+     * 툴팁이 이미 쓰고 있어 라벨은 진짜 자식 요소로 넣는다.
+     */
+    &[data-peak="true"] {
+        filter: saturate(1.25);
+    }
+    .peak-value {
+        position: absolute;
+        bottom: calc(100% + 0.25rem);
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.68rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--foreground);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
     &[data-empty="true"] {
         background-color: transparent;
         border-bottom: 1px dashed var(--bordercolor);
@@ -288,7 +339,9 @@ export const Axis = styled.div`
     margin-top: 0.4rem;
     display: grid;
     grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
-    gap: 2px;
+    /* Plot 의 격자와 같은 간격·같은 왼쪽 여백이어야 눈금이 막대와 맞는다 */
+    gap: 4px;
+    margin-left: 2rem;
 
     span {
         font-size: 0.65rem;

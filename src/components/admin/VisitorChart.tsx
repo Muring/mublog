@@ -25,6 +25,22 @@ type BucketKey = (typeof BUCKETS)[number]["key"];
 /** visitors 가 null 이면 "그 달은 기록 밖" 이라는 뜻이다. 0 과 구분한다. */
 type Point = { key: string; label: string; tip: string; visitors: number | null };
 
+/**
+ * 눈금 천장을 깔끔한 수로 올린다.
+ *
+ * 실제 최댓값이 그대로 천장이면 눈금이 7, 13 처럼 읽기 나쁜 수가 된다.
+ * 1·2·5 의 배수로 올려 0 / 절반 / 천장 세 눈금이 항상 정수로 떨어지게 한다.
+ */
+function niceCeil(value: number): number {
+    if (value <= 4) return 4;
+    const mag = 10 ** Math.floor(Math.log10(value));
+    for (const step of [1, 2, 4, 5, 10]) {
+        const candidate = step * mag;
+        if (candidate >= value) return candidate;
+    }
+    return 10 * mag;
+}
+
 const md = (iso: string) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
 
 /** 그 주의 월요일 (ISO 주 시작) */
@@ -110,6 +126,15 @@ export default function VisitorChart({
 }) {
     const [bucket, setBucket] = useState<BucketKey>("daily");
 
+    /*
+     * 막대를 자라게 할지.
+     *
+     * 카드를 여는 동안에는 끈다. 그때는 카드 높이가 전환 중이라 막대가 동시에
+     * 자라면 두 움직임이 겹쳐 위아래로 흔들려 보인다. 사용자가 단위나 연도를
+     * 바꿨을 때만 켜고, 카드를 닫으면 다시 끈다.
+     */
+    const [animate, setAnimate] = useState(false);
+
     // 기록이 있는 해만 고를 수 있다. 없는 해를 열어 빈 차트를 보여줄 이유가 없다.
     const years = useMemo(() => {
         const set = new Set(points.map((p) => p.date.slice(0, 4)));
@@ -127,12 +152,15 @@ export default function VisitorChart({
 
     const today = points.length > 0 ? points[points.length - 1].visitors : 0;
     const max = Math.max(1, ...bars.map((b) => b.visitors ?? 0));
+    // 눈금은 깔끔한 수까지 올리고, 막대 높이도 그 천장을 기준으로 잰다
+    const ceiling = niceCeil(max);
+    const ticks = [ceiling, ceiling / 2, 0];
 
     // 눈금 글자가 서로 겹치지 않을 만큼만 남긴다
     const step = Math.max(1, Math.ceil(bars.length / 8));
 
     return (
-        <ChartCard>
+        <ChartCard onToggle={(e) => !e.currentTarget.open && setAnimate(false)}>
             <summary>
                 <span className="title">방문자 추이</span>
                 {/* 집계 단위와 무관한 두 값이라 탭을 눌러도 바뀌지 않는다 */}
@@ -151,7 +179,10 @@ export default function VisitorChart({
                                 type="button"
                                 className={b.key === bucket ? "active" : undefined}
                                 aria-pressed={b.key === bucket}
-                                onClick={() => setBucket(b.key)}
+                                onClick={() => {
+                                    setAnimate(true);
+                                    setBucket(b.key);
+                                }}
                             >
                                 {b.label}
                             </button>
@@ -163,7 +194,10 @@ export default function VisitorChart({
                         <YearSelect
                             value={activeYear}
                             aria-label="연도 선택"
-                            onChange={(e) => setYear(e.target.value)}
+                            onChange={(e) => {
+                                setAnimate(true);
+                                setYear(e.target.value);
+                            }}
                         >
                             {years.map((y) => (
                                 <option key={y} value={y}>
@@ -178,30 +212,48 @@ export default function VisitorChart({
                     <p className="empty">아직 집계된 날이 없습니다.</p>
                 ) : (
                     <>
-                        <Plot style={{ "--bars": bars.length } as React.CSSProperties}>
-                            {/* 최댓값 눈금 하나. 그 아래 값들은 툴팁이 받는다 */}
-                            <div className="gridline" style={{ bottom: "100%" }} aria-hidden>
-                                <span>{max}</span>
-                            </div>
-
-                            {bars.map((b, i) => (
-                                <Bar
-                                    key={b.key}
-                                    tabIndex={0}
-                                    role="img"
-                                    data-zero={b.visitors === 0}
-                                    data-empty={b.visitors === null}
-                                    data-tip={b.tip}
-                                    aria-label={b.tip}
-                                    style={
-                                        {
-                                            "--h": `${Math.round(((b.visitors ?? 0) / max) * 100)}%`,
-                                            // 왼쪽에서 오른쪽으로 차오르도록 조금씩 늦춘다
-                                            "--i": i,
-                                        } as React.CSSProperties
-                                    }
-                                />
+                        <Plot
+                            data-animate={animate}
+                            style={{ "--bars": bars.length } as React.CSSProperties}
+                        >
+                            {/* y축 눈금. 값을 읽는 기준이라 늘 보인다 */}
+                            {ticks.map((t) => (
+                                <div
+                                    key={t}
+                                    className="gridline"
+                                    data-base={t === 0}
+                                    style={{ bottom: `${(t / ceiling) * 100}%` }}
+                                    aria-hidden
+                                >
+                                    <span>{t}</span>
+                                </div>
                             ))}
+
+                            <div className="bars">
+                                {bars.map((b, i) => (
+                                    <Bar
+                                        key={b.key}
+                                        tabIndex={0}
+                                        role="img"
+                                        data-zero={b.visitors === 0}
+                                        data-empty={b.visitors === null}
+                                        data-peak={b.visitors !== null && b.visitors === max && max > 0}
+                                        data-tip={b.tip}
+                                        aria-label={b.tip}
+                                        style={
+                                            {
+                                                "--h": `${Math.round(((b.visitors ?? 0) / ceiling) * 100)}%`,
+                                                // 왼쪽에서 오른쪽으로 차오르도록 조금씩 늦춘다
+                                                "--i": i,
+                                            } as React.CSSProperties
+                                        }
+                                    >
+                                        {b.visitors !== null && b.visitors === max && max > 0 && (
+                                            <span className="peak-value">{b.visitors}</span>
+                                        )}
+                                    </Bar>
+                                ))}
+                            </div>
                         </Plot>
 
                         <Axis style={{ "--bars": bars.length } as React.CSSProperties}>
