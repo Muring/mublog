@@ -184,7 +184,7 @@ export default function VisitorChart({
                                 <span>{max}</span>
                             </div>
 
-                            {bars.map((b) => (
+                            {bars.map((b, i) => (
                                 <Bar
                                     key={b.key}
                                     tabIndex={0}
@@ -196,6 +196,8 @@ export default function VisitorChart({
                                     style={
                                         {
                                             "--h": `${Math.round(((b.visitors ?? 0) / max) * 100)}%`,
+                                            // 왼쪽에서 오른쪽으로 차오르도록 조금씩 늦춘다
+                                            "--i": i,
                                         } as React.CSSProperties
                                     }
                                 />

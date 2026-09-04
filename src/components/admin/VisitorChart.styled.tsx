@@ -70,6 +70,33 @@ export const ChartCard = styled.details`
         }
     }
 
+    /*
+     * 열고 닫을 때 높이가 전환된다.
+     *
+     * details 의 내용은 ::details-content 라는 한 상자로 묶여 있어서, 여기에
+     * transition 을 걸면 열림과 닫힘이 **둘 다** 움직인다. [open] 에 keyframe 을
+     * 거는 흔한 방법은 열릴 때만 움직이고 닫힐 때는 뚝 끊긴다.
+     *
+     * content-visibility 는 값이 띄엄띄엄한(discrete) 속성이라 그냥은 전환되지
+     * 않는다. allow-discrete 를 줘야 닫히는 동안 내용이 남아 같이 접힌다.
+     */
+    &::details-content {
+        block-size: 0;
+        overflow: hidden;
+        transition:
+            block-size 0.25s ease,
+            content-visibility 0.25s allow-discrete;
+    }
+    &[open]::details-content {
+        block-size: auto;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::details-content {
+            transition: none;
+        }
+    }
+
     .body {
         margin-top: 1rem;
     }
@@ -176,6 +203,30 @@ export const Bar = styled.div`
     /* 위쪽만 둥글고 바닥은 각지게 — 기준선에서 자란다 */
     border-radius: 4px 4px 0 0;
     cursor: default;
+
+    /*
+     * 단위를 바꾸면 막대의 key 가 달라져 다시 마운트되므로 이 애니메이션이
+     * 새로 돈다. --i 로 조금씩 늦춰 왼쪽에서 오른쪽으로 차오른다.
+     *
+     * fill-mode 를 주지 않는다. 끝난 뒤 transform 이 none 으로 돌아가야
+     * 쌓임 맥락이 남지 않고, 호버 툴팁이 뒤 막대에 가리지 않는다.
+     */
+    transform-origin: bottom;
+    animation: bar-grow 0.32s ease-out;
+    animation-delay: calc(var(--i, 0) * 12ms);
+
+    @keyframes bar-grow {
+        from {
+            transform: scaleY(0);
+        }
+        to {
+            transform: scaleY(1);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
 
     &[data-zero="true"] {
         background-color: var(--bordercolor);

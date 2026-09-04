@@ -165,6 +165,15 @@ button.auto-dark:hover {
   font-display: swap;
 }
 
+/*
+  height: auto 로/에서 전환할 수 있게 한다.
+  details 를 열고 닫을 때 내용 높이를 모르는 채로 애니메이션하려면 이것이 필요하다.
+  지원하지 않는 브라우저에서는 전환 없이 즉시 열리고 닫힌다 — 동작은 같다.
+*/
+:root {
+  interpolate-size: allow-keywords;
+}
+
 html,
 body {
   margin: 0;
