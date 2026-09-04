@@ -147,22 +147,20 @@ export const RangeTabs = styled.div`
 `;
 
 /**
- * 막대 영역.
- *
- * 폭 계산을 CSS 에 맡긴다. 막대 수를 --bars 로만 넘기고 나머지는 grid 가 나눈다.
- * 측정값을 JS 상태로 들면 하이드레이션 전에 폭이 0 이라 납작하게 그려진다.
- */
-/**
  * 그림 영역.
  *
- * 왼쪽에 y축 눈금이 붙는 자리를 두고, 그 오른쪽을 막대가 나눠 갖는다.
- * 축 글자 폭을 --axis-w 한 곳에서 정해 눈금선과 막대의 시작점이 어긋나지 않게 한다.
+ * 꺾은선을 쓴다. 막대로 그리면 Daily(30개)와 Monthly(12개)의 두께가 크게 달라지는데,
+ * 폭에 상한을 두면 남는 자리가 단위마다 달라져 간격이 어긋나고, 상한을 없애면
+ * Monthly 가 슬래브처럼 두꺼워진다. 선은 점 개수와 무관하게 같은 굵기라
+ * 세 단위가 같은 그림으로 보인다. 애초에 시간 추이는 선이 맞는 형태다.
+ *
+ * 폭 계산은 CSS 와 SVG 의 viewBox 에 맡긴다. 점 개수만 --pts 로 넘긴다.
  */
 export const Plot = styled.div`
     --axis-w: 2rem;
     position: relative;
     height: 172px;
-    /* 최댓값 라벨이 막대 위에 앉을 자리 */
+    /* 최댓값 라벨이 꼭짓점 위에 앉을 자리 */
     padding-top: 1.1rem;
 
     /* 눈금선. 데이터가 아니므로 한 단계 물러난 실선 1px */
@@ -189,95 +187,113 @@ export const Plot = styled.div`
         font-variant-numeric: tabular-nums;
     }
 
-    /* 막대가 놓이는 격자. 축 자리만큼 왼쪽을 비운다 */
-    .bars {
+    /*
+     * 선·점·툴팁이 함께 놓이는 상자. 축 자리만큼 왼쪽을 비운다.
+     *
+     * 단위를 바꿀 때만 왼쪽에서 오른쪽으로 드러난다. 카드를 여는 동안에는
+     * ::details-content 가 상자 높이를 늘리는 중이라, 그림이 동시에 움직이면
+     * 두 전환이 겹쳐 흔들려 보인다.
+     */
+    .series {
         position: absolute;
         left: var(--axis-w);
         right: 0;
         top: 1.1rem;
         bottom: 0;
-        display: grid;
-        grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
-        align-items: end;
-        /* 막대 사이는 어느 단위에서도 같은 4px 다. 배경이 벌리는 간격이라
-           테두리를 그리지 않는다 */
-        gap: 4px;
     }
-`;
-
-/**
- * 막대 하나.
- *
- * 클릭 대상이 아니라 button 이 아니지만, 키보드로도 값에 닿아야 하므로
- * tabIndex 를 주고 focus-visible 에서도 툴팁이 뜬다.
- */
-export const Bar = styled.div`
-    position: relative;
-    align-self: end;
-    /* 칸을 그대로 채운다. 폭에 상한을 두면 막대 수에 따라 남는 자리가 달라져
-       Monthly 만 간격이 벌어져 보였다. 간격은 격자의 gap 하나로만 정한다 */
-    width: 100%;
-    height: var(--h);
-    /* 값이 0 이어도 자리는 보이게 한다 (그날 아무도 오지 않았다는 사실도 데이터다) */
-    min-height: 2px;
-    background-color: var(--chartbar);
-    /* 위쪽만 둥글고 바닥은 각지게 — 기준선에서 자란다 */
-    border-radius: 4px 4px 0 0;
-    cursor: default;
-
-    transform-origin: bottom;
-
-    /*
-     * 단위를 바꿀 때만 자란다.
-     *
-     * 카드를 열 때는 돌리지 않는다. 그때는 ::details-content 가 상자 높이를
-     * 늘리는 중이라, 막대가 동시에 자라면 두 움직임이 겹쳐 위아래로 흔들려 보인다.
-     * 그래서 Plot 에 data-animate 가 붙었을 때만(= 사용자가 단위나 연도를
-     * 바꿨을 때만) 애니메이션을 건다.
-     *
-     * fill-mode 를 주지 않는다. 끝난 뒤 transform 이 none 으로 돌아가야
-     * 쌓임 맥락이 남지 않고, 호버 툴팁이 뒤 막대에 가리지 않는다.
-     */
-    [data-animate="true"] & {
-        animation: bar-grow 0.32s ease-out;
-        animation-delay: calc(var(--i, 0) * 12ms);
+    [data-animate="true"] & .series {
+        animation: series-reveal 0.45s ease-out;
     }
 
-    @keyframes bar-grow {
+    @keyframes series-reveal {
         from {
-            transform: scaleY(0);
+            clip-path: inset(0 100% 0 0);
         }
         to {
-            transform: scaleY(1);
+            clip-path: inset(0 0 0 0);
         }
     }
 
     @media (prefers-reduced-motion: reduce) {
-        [data-animate="true"] & {
+        [data-animate="true"] & .series {
             animation: none;
         }
     }
 
-    &[data-zero="true"] {
-        background-color: var(--bordercolor);
+    /*
+     * preserveAspectRatio 를 none 으로 두고 0~100 좌표계를 상자에 늘려 붙인다.
+     * 선까지 같이 늘어나면 굵기가 단위마다 달라지므로 non-scaling-stroke 로 막는다.
+     * 끝점의 선 굵기 절반이 잘리지 않도록 overflow 는 열어 둔다.
+     */
+    svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+    .line {
+        fill: none;
+        stroke: var(--chartbar);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+    /* 채움은 선 아래가 "쌓인 양" 임을 거들 뿐이라 아주 옅게만 깐다 */
+    .area {
+        fill: var(--chartbar);
+        opacity: 0.14;
+        stroke: none;
+    }
+`;
+
+/**
+ * 값 하나에 대응하는 세로 띠.
+ *
+ * 선 위의 점은 지름 8px 라 그대로는 조준할 수 없다. 그래서 점이 아니라
+ * 위아래로 꽉 찬 띠가 히트 영역이 된다 — 커서를 세로로 맞출 필요가 없다.
+ * 클릭 대상이 아니라 button 이 아니지만, 키보드로도 값에 닿아야 하므로
+ * tabIndex 를 주고 focus-visible 에서도 툴팁이 뜬다.
+ */
+export const Hit = styled.div`
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x);
+    width: var(--w);
+    transform: translateX(-50%);
+    cursor: default;
+
+    &:focus-visible {
+        outline: none;
     }
 
-    /*
-     * 기록이 없는 달. 0 과 다르다 — "아무도 안 왔다" 가 아니라 "세지 않았다" 다.
-     * 막대를 그리지 않고 바닥에 점선만 남겨 자리는 지키되 값이 있는 척하지 않는다.
-     */
-    /*
-     * 가장 높은 막대만 도드라지게 한다. ::before 는 히트 영역이, ::after 는
-     * 툴팁이 이미 쓰고 있어 라벨은 진짜 자식 요소로 넣는다.
-     */
-    &[data-peak="true"] {
-        filter: saturate(1.25);
+    /* 꼭짓점. 평소에는 숨고 가리킬 때만 뜬다 — 30개를 늘 찍으면 선이 안 보인다 */
+    .dot {
+        position: absolute;
+        top: var(--y);
+        left: 50%;
+        width: 8px;
+        height: 8px;
+        margin: -4px 0 0 -4px;
+        border-radius: 50%;
+        background-color: var(--chartbar);
+        /* 선과 겹치는 자리라 배경색 링으로 한 겹 띄운다 */
+        border: 2px solid var(--cardbackground);
+        opacity: 0;
+        pointer-events: none;
     }
+    &:hover .dot,
+    &:focus-visible .dot,
+    &[data-peak="true"] .dot {
+        opacity: 1;
+    }
+
+    /* 최댓값만 숫자를 적는다. 서른 개에 다 적으면 아무도 읽지 않는다 */
     .peak-value {
         position: absolute;
-        bottom: calc(100% + 0.25rem);
+        top: var(--y);
         left: 50%;
-        transform: translateX(-50%);
+        transform: translate(-50%, calc(-100% - 0.7rem));
         font-size: 0.68rem;
         font-weight: 800;
         line-height: 1;
@@ -287,39 +303,14 @@ export const Bar = styled.div`
         pointer-events: none;
     }
 
-    &[data-empty="true"] {
-        background-color: transparent;
-        border-bottom: 1px dashed var(--bordercolor);
-        border-radius: 0;
-    }
-
-    /* 히트 영역을 막대보다 넓게 잡는다. 2px 막대는 조준할 수 없다 */
-    &::before {
-        content: "";
-        position: absolute;
-        inset: -4px -6px 0;
-    }
-
-    /*
-     * z-index 를 함께 올린다. filter 는 새 쌓임 맥락을 만들기 때문에,
-     * 이것만 걸면 툴팁의 z-index 가 그 안에 갇혀 뒤에 오는 막대에 가린다.
-     * (DOM 순서상 뒤 형제가 위에 그려진다)
-     */
-    &:hover,
-    &:focus-visible {
-        z-index: 6;
-        filter: brightness(1.12);
-        outline: none;
-    }
-
     /* 툴팁. 값이 먼저 읽히고 날짜가 뒤따른다 */
     &:hover::after,
     &:focus-visible::after {
         content: attr(data-tip);
         position: absolute;
-        bottom: calc(100% + 6px);
+        top: var(--y);
         left: 50%;
-        transform: translateX(-50%);
+        transform: translate(-50%, calc(-100% - 0.85rem));
         z-index: 5;
         padding: 0.3rem 0.5rem;
         border-radius: 0.35rem;
@@ -334,26 +325,38 @@ export const Bar = styled.div`
     }
 `;
 
-/** 날짜 축. 막대와 같은 격자를 써야 눈금이 어긋나지 않는다 */
+/**
+ * 날짜 축.
+ *
+ * 눈금은 선의 꼭짓점 바로 아래 와야 한다. 점은 i/(n-1) 자리에 있으므로
+ * 격자로 나누지 않고 같은 식으로 절대 배치한다. 양 끝은 반쯤 잘리지 않도록
+ * 가운데 정렬을 풀어 안쪽으로 붙인다.
+ */
 export const Axis = styled.div`
+    position: relative;
+    height: 0.9rem;
     margin-top: 0.4rem;
-    display: grid;
-    grid-template-columns: repeat(var(--bars), minmax(0, 1fr));
-    /* Plot 의 격자와 같은 간격·같은 왼쪽 여백이어야 눈금이 막대와 맞는다 */
-    gap: 4px;
     margin-left: 2rem;
 
     span {
+        position: absolute;
+        left: var(--x);
+        transform: translateX(-50%);
         font-size: 0.65rem;
         color: var(--desccolor);
-        text-align: center;
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
-        /* 눈금을 전부 적으면 서로 겹친다. 표시할 것만 남기고 자리는 지킨다 */
-        visibility: hidden;
+        /* 눈금을 전부 적으면 서로 겹친다. 표시할 것만 남긴다 */
+        display: none;
     }
     span[data-show="true"] {
-        visibility: visible;
+        display: block;
+    }
+    span[data-edge="first"] {
+        transform: none;
+    }
+    span[data-edge="last"] {
+        transform: translateX(-100%);
     }
 `;
 

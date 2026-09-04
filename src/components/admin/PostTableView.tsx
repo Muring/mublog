@@ -48,9 +48,8 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                     placeholder="제목 · 주소 · 태그로 거르기"
                     aria-label="포스트 검색"
                 />
-                <span className="count">
-                    {query.trim() ? `${filtered.length} / ${posts.length}` : `${posts.length}개`}
-                </span>
+                {/* 전체 개수는 위 통계 카드가 이미 말한다. 여기서는 걸러진 수만 */}
+                <span className="count">{filtered.length}개</span>
             </TableToolbar>
 
             {/* 표만 스크롤한다. 머리글은 sticky 라 스크롤해도 열 이름이 남는다 */}

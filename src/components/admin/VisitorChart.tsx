@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChartCard, Plot, Bar, Axis, RangeTabs, YearSelect } from "./VisitorChart.styled";
+import { ChartCard, Plot, Hit, Axis, RangeTabs, YearSelect } from "./VisitorChart.styled";
 import type { DailyPoint } from "@/lib/stats";
 
 /**
  * 묶는 단위.
  *
- * 막대를 30개 남짓으로 유지하는 것이 목적이다. 1년치를 하루 한 칸으로 그리면
+ * 점을 30개 남짓으로 유지하는 것이 목적이다. 1년치를 하루 한 점으로 그리면
  * 850px 안에서 한 칸이 2.3px 가 되어 읽을 수도, 조준할 수도 없다.
  *
  * Yearly 는 두지 않는다. 집계를 시작한 해가 하나뿐이라 막대가 1개고, 해가
@@ -39,6 +39,27 @@ function niceCeil(value: number): number {
         if (candidate >= value) return candidate;
     }
     return 10 * mag;
+}
+
+/**
+ * 꼭짓점을 잇는 선.
+ *
+ * 점이 하나뿐인 덩어리는 선이 그려지지 않아 보이지 않는다. 그 자리에
+ * 아주 짧은 가로 선을 그어 "여기 값이 있다" 는 것만 남긴다.
+ */
+function linePath(seg: { x: number; y: number }[]): string {
+    if (seg.length === 1) {
+        const { x, y } = seg[0];
+        return `M${x - 0.6},${y} L${x + 0.6},${y}`;
+    }
+    return seg.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+}
+
+/** 선 아래를 바닥까지 닫은 면 */
+function areaPath(seg: { x: number; y: number }[]): string {
+    const first = seg[0];
+    const last = seg[seg.length - 1];
+    return `${linePath(seg)} L${last.x},100 L${first.x},100 Z`;
 }
 
 const md = (iso: string) => `${Number(iso.slice(5, 7))}/${Number(iso.slice(8, 10))}`;
@@ -113,8 +134,7 @@ function monthly(points: DailyPoint[], year: string): Point[] {
  * 열고 닫기와 키보드 조작을 브라우저가 이미 해주기 때문이다.
  *
  * 계열이 하나라 범례를 두지 않는다 — 제목이 무엇을 그린 것인지 이미 말한다.
- * 값도 막대마다 적지 않는다. 최댓값 하나만 눈금으로 세우고 나머지는
- * 호버·포커스 툴팁이 맡는다.
+ * 값도 점마다 적지 않는다. 최댓값 하나만 적고 나머지는 호버·포커스 툴팁이 맡는다.
  */
 export default function VisitorChart({
     points,
@@ -127,10 +147,10 @@ export default function VisitorChart({
     const [bucket, setBucket] = useState<BucketKey>("daily");
 
     /*
-     * 막대를 자라게 할지.
+     * 그림을 드러내는 애니메이션을 켤지.
      *
-     * 카드를 여는 동안에는 끈다. 그때는 카드 높이가 전환 중이라 막대가 동시에
-     * 자라면 두 움직임이 겹쳐 위아래로 흔들려 보인다. 사용자가 단위나 연도를
+     * 카드를 여는 동안에는 끈다. 그때는 카드 높이가 전환 중이라 그림이 동시에
+     * 움직이면 두 전환이 겹쳐 흔들려 보인다. 사용자가 단위나 연도를
      * 바꿨을 때만 켜고, 카드를 닫으면 다시 끈다.
      */
     const [animate, setAnimate] = useState(false);
@@ -156,8 +176,48 @@ export default function VisitorChart({
     const ceiling = niceCeil(max);
     const ticks = [ceiling, ceiling / 2, 0];
 
-    // 눈금 글자가 서로 겹치지 않을 만큼만 남긴다
+    /*
+     * 최댓값이 같은 점이 여럿이면 첫 번째에만 숫자를 적는다.
+     * 둘 다 적으면 "100" 이 두 번 떠서 어느 쪽을 말하는지 흐려진다.
+     */
+    const peakIndex = max > 0 ? bars.findIndex((b) => b.visitors === max) : -1;
+
+    /*
+     * 눈금 글자가 서로 겹치지 않을 만큼만 남긴다.
+     *
+     * 오른쪽 끝에서부터 거꾸로 세어 자리를 잡는다. 앞에서부터 세면 마지막 눈금이
+     * 바로 앞 눈금에 붙어버린다 (30개를 4칸씩 세면 28 과 29 가 나란히 선다).
+     * 맨 왼쪽 눈금은 간격의 절반은 떨어져 있을 때만 남긴다.
+     */
     const step = Math.max(1, Math.ceil(bars.length / 8));
+    const shown = new Set<number>();
+    for (let i = bars.length - 1; i >= 0; i -= step) shown.add(i);
+    if (!shown.has(0) && Math.min(...shown) >= step * 0.6) shown.add(0);
+
+    // 점은 0~100 안에 고르게 놓는다. 하나뿐이면 가운데
+    const xAt = (i: number) => (bars.length === 1 ? 50 : (i / (bars.length - 1)) * 100);
+
+    /*
+     * 기록이 없는 구간에서 선을 끊는다.
+     *
+     * 앞뒤를 이어버리면 "그 사이에도 이만큼 왔다" 는 없는 사실이 그려진다.
+     * 값이 있는 점만 모아 이어진 덩어리로 나누고, 덩어리마다 선을 따로 그린다.
+     */
+    const segments = useMemo(() => {
+        const out: { x: number; y: number }[][] = [];
+        let cur: { x: number; y: number }[] = [];
+        bars.forEach((b, i) => {
+            if (b.visitors === null) {
+                if (cur.length > 0) out.push(cur);
+                cur = [];
+                return;
+            }
+            cur.push({ x: xAt(i), y: 100 - (b.visitors / ceiling) * 100 });
+        });
+        if (cur.length > 0) out.push(cur);
+        return out;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [bars, ceiling]);
 
     return (
         <ChartCard onToggle={(e) => !e.currentTarget.open && setAnimate(false)}>
@@ -212,10 +272,7 @@ export default function VisitorChart({
                     <p className="empty">아직 집계된 날이 없습니다.</p>
                 ) : (
                     <>
-                        <Plot
-                            data-animate={animate}
-                            style={{ "--bars": bars.length } as React.CSSProperties}
-                        >
+                        <Plot data-animate={animate}>
                             {/* y축 눈금. 값을 읽는 기준이라 늘 보인다 */}
                             {ticks.map((t) => (
                                 <div
@@ -229,38 +286,53 @@ export default function VisitorChart({
                                 </div>
                             ))}
 
-                            <div className="bars">
+                            <div className="series">
+                                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
+                                    {segments.map((seg) => (
+                                        <path key={`a${seg[0].x}`} className="area" d={areaPath(seg)} />
+                                    ))}
+                                    {segments.map((seg) => (
+                                        <path
+                                            key={`l${seg[0].x}`}
+                                            className="line"
+                                            d={linePath(seg)}
+                                            vectorEffect="non-scaling-stroke"
+                                        />
+                                    ))}
+                                </svg>
+
                                 {bars.map((b, i) => (
-                                    <Bar
+                                    <Hit
                                         key={b.key}
                                         tabIndex={0}
                                         role="img"
-                                        data-zero={b.visitors === 0}
-                                        data-empty={b.visitors === null}
-                                        data-peak={b.visitors !== null && b.visitors === max && max > 0}
+                                        data-peak={i === peakIndex}
                                         data-tip={b.tip}
                                         aria-label={b.tip}
                                         style={
                                             {
-                                                "--h": `${Math.round(((b.visitors ?? 0) / ceiling) * 100)}%`,
-                                                // 왼쪽에서 오른쪽으로 차오르도록 조금씩 늦춘다
-                                                "--i": i,
+                                                "--x": `${xAt(i)}%`,
+                                                "--y": `${b.visitors === null ? 100 : 100 - (b.visitors / ceiling) * 100}%`,
+                                                "--w": `${Math.max(100 / bars.length, 6)}%`,
                                             } as React.CSSProperties
                                         }
                                     >
-                                        {b.visitors !== null && b.visitors === max && max > 0 && (
-                                            <span className="peak-value">{b.visitors}</span>
-                                        )}
-                                    </Bar>
+                                        {b.visitors !== null && <span className="dot" />}
+                                        {i === peakIndex && <span className="peak-value">{max}</span>}
+                                    </Hit>
                                 ))}
                             </div>
                         </Plot>
 
-                        <Axis style={{ "--bars": bars.length } as React.CSSProperties}>
+                        <Axis>
                             {bars.map((b, i) => (
                                 <span
                                     key={b.key}
-                                    data-show={i === 0 || i === bars.length - 1 || i % step === 0}
+                                    style={{ "--x": `${xAt(i)}%` } as React.CSSProperties}
+                                    data-show={shown.has(i)}
+                                    data-edge={
+                                        i === 0 ? "first" : i === bars.length - 1 ? "last" : undefined
+                                    }
                                 >
                                     {b.label}
                                 </span>

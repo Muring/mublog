@@ -331,6 +331,11 @@ export const Button = styled.button`
 export const TableScroll = styled.div`
   max-height: min(60vh, 40rem);
   overflow-y: auto;
+  /*
+   * 스크롤바 자리를 늘 비워 둔다. 걸러진 행이 줄어 스크롤이 사라지면 표가
+   * 스크롤바 폭만큼 넓어지는데, 그때 헤더와 열 경계가 한 번 튄다.
+   */
+  scrollbar-gutter: stable;
   overscroll-behavior: contain;
   border-top: 1px solid var(--bordercolor);
 
@@ -370,8 +375,15 @@ export const TableToolbar = styled.div`
     }
   }
 
+  /*
+   * 폭을 고정한다. 개수 글자가 길어지면 flex:1 인 입력창이 그만큼 줄어들어,
+   * 타자를 칠 때마다 검색창이 조금씩 움찔거린다. 자리를 미리 잡아두면
+   * 숫자만 바뀌고 레이아웃은 그대로다.
+   */
   .count {
     flex-shrink: 0;
+    width: 4rem;
+    text-align: right;
     font-size: 0.78rem;
     color: var(--desccolor);
     font-variant-numeric: tabular-nums;
