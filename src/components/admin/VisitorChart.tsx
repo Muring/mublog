@@ -263,11 +263,12 @@ export default function VisitorChart({
                         ))}
                     </RangeTabs>
 
-                    {/* 연도는 Monthly 에서만 뜻이 있다 */}
-                    {bucket === "monthly" && years.length > 0 && (
+                    {/* 연도는 Monthly 에서만 뜻이 있다. 자리는 늘 지킨다 */}
+                    {years.length > 0 && (
                         <YearSelect
                             value={activeYear}
                             aria-label="연도 선택"
+                            data-hidden={bucket !== "monthly"}
                             onChange={(e) => {
                                 setAnimate(true);
                                 setYear(e.target.value);

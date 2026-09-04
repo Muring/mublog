@@ -13,6 +13,15 @@ import { surface } from "@/styles/surface";
  * 뜻을 이미 갖고 있어서, 막대에 쓰면 없는 의미가 생긴다.
  */
 export const ChartCard = styled.details`
+    /*
+     * 그림이 차지하는 높이를 한 곳에서 정한다.
+     *
+     * 선이 그려질 때와 "쌓인 게 없다" 는 글이 뜰 때의 높이가 다르면, 단위를
+     * 오갈 때 카드가 움찔한다. Plot 과 .empty 가 같은 값에서 나오게 묶는다.
+     */
+    --plot-h: 172px;
+    --axis-h: calc(0.4rem + 0.9rem);
+
     ${surface("12px")}
     padding: 0.85rem 1.25rem;
     margin-bottom: 1.5rem;
@@ -116,7 +125,7 @@ export const ChartCard = styled.details`
         display: flex;
         flex-direction: column;
         justify-content: center;
-        height: 186px;
+        height: calc(var(--plot-h) + var(--axis-h));
         text-align: center;
         font-size: 0.85rem;
         line-height: 1.8;
@@ -170,7 +179,7 @@ export const RangeTabs = styled.div`
 export const Plot = styled.div`
     --axis-w: 2rem;
     position: relative;
-    height: 172px;
+    height: var(--plot-h);
     /* 최댓값 라벨이 꼭짓점 위에 앉을 자리 */
     padding-top: 1.1rem;
 
@@ -345,6 +354,7 @@ export const Hit = styled.div`
  */
 export const Axis = styled.div`
     position: relative;
+    /* --axis-h 와 같은 값이어야 .empty 가 그림과 정확히 같은 높이가 된다 */
     height: 0.9rem;
     margin-top: 0.4rem;
     margin-left: 2rem;
@@ -373,6 +383,15 @@ export const Axis = styled.div`
 
 /** 연도 선택. Monthly 에서만 뜬다 */
 export const YearSelect = styled.select`
+    /*
+     * Monthly 에서만 뜻이 있지만 자리는 늘 차지한다. 아예 빼면 컨트롤 줄
+     * 높이가 탭 버튼 기준으로 2px 줄어들어 단위를 오갈 때 카드가 움찔한다.
+     * visibility 는 자리를 남기면서 탭 순서에서도 빠진다.
+     */
+    &[data-hidden="true"] {
+        visibility: hidden;
+    }
+
     padding: 0.25rem 0.5rem;
     border: 1px solid var(--bordercolor);
     border-radius: 0.4rem;
