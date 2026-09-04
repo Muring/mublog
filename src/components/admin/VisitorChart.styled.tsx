@@ -111,11 +111,22 @@ export const ChartCard = styled.details`
         margin-bottom: 0.5rem;
     }
 
+    /* 그림 자리를 그대로 차지해, 단위를 오갈 때 카드 높이가 튀지 않는다 */
     .empty {
-        padding: 2rem 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 186px;
         text-align: center;
         font-size: 0.85rem;
+        line-height: 1.8;
         color: var(--desccolor);
+
+        strong {
+            color: var(--foreground);
+            font-size: 0.95rem;
+            font-variant-numeric: tabular-nums;
+        }
     }
 `;
 

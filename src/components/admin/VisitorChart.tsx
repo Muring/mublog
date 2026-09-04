@@ -15,9 +15,10 @@ import type { DailyPoint } from "@/lib/stats";
  * 그 숫자는 이미 접힌 줄의 "누적" 이 말하고 있다.
  */
 const BUCKETS = [
-    { key: "daily", label: "Daily" },
-    { key: "weekly", label: "Weekly" },
-    { key: "monthly", label: "Monthly" },
+    // unit 은 조사까지 붙여 둔다. "주" + "이" 는 "주이" 가 된다
+    { key: "daily", label: "Daily", unit: "날이" },
+    { key: "weekly", label: "Weekly", unit: "주가" },
+    { key: "monthly", label: "Monthly", unit: "달이" },
 ] as const;
 
 type BucketKey = (typeof BUCKETS)[number]["key"];
@@ -183,6 +184,19 @@ export default function VisitorChart({
     const peakIndex = max > 0 ? bars.findIndex((b) => b.visitors === max) : -1;
 
     /*
+     * 점이 하나뿐이면 선을 긋지 않는다.
+     *
+     * 이을 상대가 없어 아주 짧은 가로 선이 되고, 그 아래를 바닥까지 채운 면이
+     * 바늘처럼 솟은 막대가 된다 — 없는 추이를 그린 것처럼 보인다. 집계를 막
+     * 시작해 하루치밖에 없을 때 Weekly·Monthly 가 늘 이 상태다.
+     *
+     * Yearly 를 두지 않은 것과 같은 이유다. 점 하나짜리 차트는 차트가 아니라
+     * 그냥 숫자이고, 그러면 숫자로 적는 편이 정직하다.
+     */
+    const known = bars.filter((b) => b.visitors !== null);
+    const only = known.length === 1 ? known[0] : null;
+
+    /*
      * 눈금 글자가 서로 겹치지 않을 만큼만 남긴다.
      *
      * 오른쪽 끝에서부터 거꾸로 세어 자리를 잡는다. 앞에서부터 세면 마지막 눈금이
@@ -268,8 +282,15 @@ export default function VisitorChart({
                     )}
                 </div>
 
-                {bars.length === 0 ? (
+                {known.length === 0 ? (
                     <p className="empty">아직 집계된 날이 없습니다.</p>
+                ) : only ? (
+                    <p className="empty">
+                        <strong>{only.tip}</strong>
+                        <br />
+                        추이를 그리려면 {BUCKETS.find((b) => b.key === bucket)?.unit} 둘 이상
+                        쌓여야 합니다.
+                    </p>
                 ) : (
                     <>
                         <Plot data-animate={animate}>
