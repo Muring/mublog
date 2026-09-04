@@ -84,18 +84,16 @@ export type DailyPoint = { date: string; visitors: number };
 /**
  * 방문자 추이의 원본. 관리 화면의 차트가 쓴다.
  *
- * 기간을 서버에서 자르지 않고 최대치(1년)를 한 번에 준다. 하루 1행이라
- * 365행이 최대이고 날짜와 숫자뿐이라 payload 가 20KB 도 되지 않는다.
- * 기간 전환마다 왕복하는 것보다 이 편이 빠르고 단순하다.
+ * 기간을 서버에서 자르지 않고 기록 전체를 준다. 하루 1행이라 한 해가 365행이고
+ * 날짜와 숫자뿐이라, 몇 해가 쌓여도 payload 가 수십 KB 를 넘지 않는다.
+ * 관리자만 보는 화면이고 기간·연도 전환이 잦아, 매번 왕복하는 것보다 낫다.
  *
- * 집계 시작 전 날짜를 0 으로 채우지 않는다. 그 0 은 "아무도 안 왔다" 가
- * 아니라 "세지 않았다" 라서, 그려두면 없던 사실을 만들어낸다.
- * 그래서 창의 시작은 `요청한 일수 전` 과 `첫 기록일` 중 더 늦은 쪽이다.
- *
- * 그 안쪽의 빈 날은 진짜 0 이므로 채운다. 행이 없다는 건 그날 아무도
- * 오지 않아 recordVisit 이 한 번도 불리지 않았다는 뜻이다.
+ * 첫 기록일부터 오늘까지를 하루도 빠짐없이 채운다. 행이 없다는 건 그날 아무도
+ * 오지 않아 recordVisit 이 한 번도 불리지 않았다는 뜻이라 진짜 0 이다.
+ * 다만 첫 기록일 **이전**은 만들지 않는다. 그 0 은 "아무도 안 왔다" 가 아니라
+ * "세지 않았다" 라서, 그려두면 없던 사실을 만들어낸다.
  */
-export async function getDailyVisitors(days = 365): Promise<DailyPoint[]> {
+export async function getDailyVisitors(): Promise<DailyPoint[]> {
     const rows = await prisma.dailyStat.findMany({
         orderBy: { date: "asc" },
         select: { date: true, visitors: true },
@@ -106,14 +104,8 @@ export async function getDailyVisitors(days = 365): Promise<DailyPoint[]> {
     const byDate = new Map(rows.map((r) => [key(r.date), r.visitors]));
 
     const today = new Date(`${seoulDateKey()}T00:00:00Z`);
-    const windowStart = new Date(today);
-    windowStart.setUTCDate(windowStart.getUTCDate() - (days - 1));
-
-    const first = rows[0].date;
-    const start = windowStart > first ? windowStart : first;
-
     const points: DailyPoint[] = [];
-    for (const cursor = new Date(start); cursor <= today; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
+    for (const cursor = new Date(rows[0].date); cursor <= today; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
         const k = key(cursor);
         points.push({ date: k, visitors: byDate.get(k) ?? 0 });
     }

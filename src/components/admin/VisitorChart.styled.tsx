@@ -74,6 +74,16 @@ export const ChartCard = styled.details`
         margin-top: 1rem;
     }
 
+    /* 집계 단위와 연도를 한 줄에 둔다 */
+    .controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
     .empty {
         padding: 2rem 0;
         text-align: center;
@@ -86,7 +96,6 @@ export const ChartCard = styled.details`
 export const RangeTabs = styled.div`
     display: flex;
     gap: 0.25rem;
-    margin-bottom: 0.5rem;
 
     button {
         padding: 0.25rem 0.6rem;
@@ -172,6 +181,16 @@ export const Bar = styled.div`
         background-color: var(--bordercolor);
     }
 
+    /*
+     * 기록이 없는 달. 0 과 다르다 — "아무도 안 왔다" 가 아니라 "세지 않았다" 다.
+     * 막대를 그리지 않고 바닥에 점선만 남겨 자리는 지키되 값이 있는 척하지 않는다.
+     */
+    &[data-empty="true"] {
+        background-color: transparent;
+        border-bottom: 1px dashed var(--bordercolor);
+        border-radius: 0;
+    }
+
     /* 히트 영역을 막대보다 넓게 잡는다. 2px 막대는 조준할 수 없다 */
     &::before {
         content: "";
@@ -231,5 +250,23 @@ export const Axis = styled.div`
     }
     span[data-show="true"] {
         visibility: visible;
+    }
+`;
+
+/** 연도 선택. Monthly 에서만 뜬다 */
+export const YearSelect = styled.select`
+    padding: 0.25rem 0.5rem;
+    border: 1px solid var(--bordercolor);
+    border-radius: 0.4rem;
+    background-color: var(--cardbackground);
+    color: var(--foreground);
+    font-family: inherit;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--bordercolor);
+        outline-offset: 1px;
     }
 `;
