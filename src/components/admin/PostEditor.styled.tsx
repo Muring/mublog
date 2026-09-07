@@ -145,10 +145,41 @@ export const MetaGrid = styled.div`
    * 카드의 썸네일과 같은 비율·같은 폭이라 목록에서 어떻게 잘릴지 그대로 보인다.
    * 한 열로 접히면 열이 넓어지므로 카드 폭을 상한으로 걸어 크기를 유지한다.
    */
-  .thumb-preview {
+  /*
+   * 썸네일을 끌어다 놓는 자리. 미리보기 상자가 곧 드롭 영역이다 —
+   * 점선 상자를 따로 두면 이미지가 들어온 뒤에는 놓을 자리가 없어진다.
+   * 폭과 위 여백은 여기가 갖는다. 안쪽 둘이 각각 들면 어느 쪽이 보이느냐에 따라
+   * 여백이 겹치거나 무너진다.
+   */
+  .thumb-drop {
     margin-top: 0.35rem;
     width: 100%;
     max-width: var(--card-width-capped);
+    border-radius: 12px;
+  }
+
+  /*
+   * 가리키는 색을 그대로 쓴다. 목록 제목·추이 그래프와 같은 "여기" 라는 신호다.
+   *
+   * 테두리 색만 바꾸면 밝은 썸네일 위에서는 1px 이 묻혀 거의 보이지 않는다.
+   * 상자 바깥에 윤곽선을 더한다 — outline 은 자리를 차지하지 않아 끌어오는 동안
+   * 폼이 밀리지 않는다. 초점 표시와 같은 방식이다.
+   */
+  .thumb-drop.dragging {
+    outline: 2px solid var(--linkhovercolor);
+    outline-offset: 2px;
+  }
+
+  .thumb-drop.dragging .thumb-preview,
+  .thumb-drop.dragging .thumb-empty {
+    border-color: var(--linkhovercolor);
+    background-color: var(--codefontbgcolor);
+  }
+
+  .thumb-preview {
+    /* inline 이면 글꼴 베이스라인만큼 상자 아래에 빈 줄이 생긴다 */
+    display: block;
+    width: 100%;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     object-position: center;
@@ -159,18 +190,28 @@ export const MetaGrid = styled.div`
 
   /* 이미지가 없을 때도 자리를 지켜 폼이 위아래로 튀지 않는다 */
   .thumb-empty {
-    margin-top: 0.35rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.15rem;
     width: 100%;
-    max-width: var(--card-width-capped);
     aspect-ratio: 16 / 9;
+    padding: 0 0.75rem;
     border: 1px dashed var(--bordercolor);
     border-radius: 12px;
     color: var(--desccolor);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 400;
+    text-align: center;
+  }
+
+  /*
+   * 크기로만 층을 나눈다. opacity 로 낮추면 감사기는 color 만 보므로
+   * 측정에는 안 잡히고 실제로는 안 보이는 상태가 된다.
+   */
+  .thumb-empty .hint {
+    font-size: 0.7rem;
   }
 
 
@@ -183,8 +224,7 @@ export const MetaGrid = styled.div`
     grid-template-columns: minmax(0, 1fr);
 
     .thumb-row,
-    .thumb-preview,
-    .thumb-empty {
+    .thumb-drop {
       max-width: none;
     }
   }

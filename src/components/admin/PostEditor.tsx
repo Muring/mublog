@@ -52,6 +52,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
     const [postId, setPostId] = useState(initial.id);
     const [html, setHtml] = useState("");
     const [isDragging, setIsDragging] = useState(false);
+    const [isThumbDragging, setIsThumbDragging] = useState(false);
     const [tagError, setTagError] = useState<string | null>(null);
     // 좁은 화면에서만 쓰는 탭. 글을 쓰러 들어오는 화면이라 본문에서 시작한다.
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
@@ -117,7 +118,15 @@ export default function PostEditor({ initial, knownTags }: Props) {
     const canSave = Boolean(post.title.trim()) && slugState.available !== false && !isSaving;
 
     return (
-        <EditorWrapper>
+        <EditorWrapper
+            /*
+             * 빗나간 드롭을 브라우저가 처리하면 그 이미지 파일로 페이지가 넘어가
+             * 쓰던 글이 통째로 날아간다. 받는 자리는 아래 두 곳뿐이고,
+             * 나머지 어디에 떨어뜨리든 아무 일도 일어나지 않게 막는다.
+             */
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => event.preventDefault()}
+        >
             <div className="editor-head">
                 <h2>{postId ? "포스트 수정" : "새 글 쓰기"}</h2>
                 <div className="actions">
@@ -229,13 +238,45 @@ export default function PostEditor({ initial, knownTags }: Props) {
                             }}
                         />
                     </div>
-                    {post.thumbnail ? (
-                        // 미리보기용이라 next/image 최적화를 태우지 않는다
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img className="thumb-preview" src={post.thumbnail} alt="썸네일 미리보기" />
-                    ) : (
-                        <div className="thumb-empty">목록에 보일 크기 그대로 미리 봅니다</div>
-                    )}
+                    {/*
+                      미리보기 상자가 곧 드롭 영역이다. 점선 상자를 따로 두면
+                      이미지가 들어온 뒤에는 놓을 자리가 없어진다.
+                    */}
+                    <div
+                        className={`thumb-drop ${isThumbDragging ? "dragging" : ""}`}
+                        onDragOver={(event) => {
+                            event.preventDefault();
+                            setIsThumbDragging(true);
+                        }}
+                        onDragLeave={(event) => {
+                            // 안쪽 이미지로 옮겨갈 때도 dragleave 가 온다.
+                            // 정말 상자를 벗어났을 때만 표시를 끈다.
+                            if (!event.currentTarget.contains(event.relatedTarget as Node)) {
+                                setIsThumbDragging(false);
+                            }
+                        }}
+                        onDrop={(event) => {
+                            event.preventDefault();
+                            setIsThumbDragging(false);
+                            const file = event.dataTransfer.files[0];
+                            if (file) void uploadThumbnail(file);
+                        }}
+                    >
+                        {post.thumbnail ? (
+                            // 미리보기용이라 next/image 최적화를 태우지 않는다
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                className="thumb-preview"
+                                src={post.thumbnail}
+                                alt="썸네일 미리보기"
+                            />
+                        ) : (
+                            <div className="thumb-empty">
+                                <span>이미지를 끌어다 놓으세요</span>
+                                <span className="hint">목록에 보일 크기 그대로 보입니다</span>
+                            </div>
+                        )}
+                    </div>
                 </label>
                 </div>
             </MetaGrid>

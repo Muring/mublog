@@ -64,12 +64,18 @@ export function useEditorUploads(
 
     const uploadThumbnail = useCallback(
         async (file: File) => {
+            // 파일 선택창은 accept 로 걸러지지만 끌어다 놓는 길에는 무엇이든 온다
+            if (!file.type.startsWith("image/")) {
+                toast.error("이미지 파일만 올릴 수 있습니다.");
+                return;
+            }
+
             setIsUploadingThumb(true);
             const url = await upload(file);
             setIsUploadingThumb(false);
             if (url) setThumbnail(url);
         },
-        [upload, setThumbnail]
+        [upload, setThumbnail, toast]
     );
 
     return { isUploadingThumb, uploadIntoBody, uploadThumbnail };
