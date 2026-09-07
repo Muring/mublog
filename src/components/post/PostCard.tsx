@@ -1,6 +1,10 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
 import Card from "./PostCard.styled";
 import type { PostSummary } from "@/types/post";
 import { formatCardDate } from "@/lib/date";
+import { fetchPostViewCounts, queryKeys } from "@/lib/queries";
 
 /**
  * 목록·캐러셀에서 쓰는 포스트 카드.
@@ -59,6 +63,21 @@ export default function PostCard({
     post: PostSummary;
     style?: React.CSSProperties;
 }) {
+    /*
+     * 조회수만 따로 받아온다. 목록은 ISR 로 캐시돼 서버가 그려준 값은 최대 1시간
+     * 전 것인데, 조회는 그 캐시를 깨지 않는다(깨면 방문 한 번마다 목록 전체가
+     * 다시 만들어진다). 상세 페이지의 PostViews 와 같은 방식이다.
+     *
+     * 카드가 모두 같은 키를 쓰므로 화면당 요청은 하나다. 실패하거나 아직 안 왔으면
+     * 서버가 준 값을 그대로 쓴다 — 조금 낡을 뿐 화면이 비지 않는다.
+     */
+    const { data: liveViews } = useQuery({
+        queryKey: queryKeys.postViewCounts,
+        queryFn: fetchPostViewCounts,
+        staleTime: 0,
+    });
+    const viewCount = liveViews?.[post.slug] ?? post.viewCount;
+
     const formattedDate = formatCardDate(post.publishedAt);
     const shownTags = post.tags.slice(0, VISIBLE_TAGS);
     const hiddenTags = post.tags.slice(VISIBLE_TAGS);
@@ -109,9 +128,9 @@ export default function PostCard({
                         </span>
                     </div>
                     <div className="group">
-                        <span className="item" title={`조회 ${post.viewCount}`}>
+                        <span className="item" title={`조회 ${viewCount}`}>
                             <EyeIcon />
-                            {post.viewCount.toLocaleString("ko-KR")}
+                            {viewCount.toLocaleString("ko-KR")}
                         </span>
                         <span className="item" title={`댓글 ${post.commentCount}`}>
                             <CommentIcon />

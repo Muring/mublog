@@ -30,6 +30,7 @@ export const queryKeys = {
     siteStats: ["site-stats"] as const,
     postsSummary: ["posts", "summary"] as const,
     postViews: (slug: string) => ["post-views", slug] as const,
+    postViewCounts: ["post-view-counts"] as const,
     comments: (slug: string) => ["comments", slug] as const,
 };
 
@@ -54,6 +55,16 @@ export async function fetchPostViews(slug: string): Promise<number> {
         `/api/posts/${encodeURIComponent(slug)}/views`
     );
     return data.views ?? 0;
+}
+
+/**
+ * 목록 카드의 조회수 전부.
+ *
+ * 카드마다 따로 부르면 홈에서만 스무 번이 넘는다. 한 번에 받아 나눠 쓴다 —
+ * 카드들이 모두 이 키를 쓰므로 화면당 요청은 하나다.
+ */
+export function fetchPostViewCounts(): Promise<Record<string, number>> {
+    return fetchJson<Record<string, number>>("/api/posts/views");
 }
 
 /** 한 포스트의 댓글. 서버는 평평한 배열을 주고 화면에서 2단으로 묶는다. */
