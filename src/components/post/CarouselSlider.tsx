@@ -33,6 +33,11 @@ function visibleCountFor(width: number) {
   return Math.max(1, Math.min(MAX_VISIBLE, fits));
 }
 
+/** 음수에서도 도는 나머지. JS 의 % 는 -1 % 5 를 -1 로 준다. */
+function wrapIndex(value: number, size: number) {
+  return ((value % size) + size) % size;
+}
+
 function Chevron({ direction }: { direction: "left" | "right" }) {
   return (
     // currentColor 라서 테마 토큰을 그대로 따른다 (auto-dark 반전 불필요)
@@ -132,8 +137,12 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
   useEffect(() => {
     if (!isLooping) return;
 
-    const atClone = currentIndex === 0 || currentIndex === slides.length - visible;
-    if (!atClone) {
+    // 카드가 실제로 있는 구간. 여기를 넘어가면 화면이 빈다.
+    const lastDrawable = slides.length - visible;
+    const atClone = currentIndex === 0 || currentIndex === lastDrawable;
+    const isBlank = currentIndex < 0 || currentIndex > lastDrawable;
+
+    if (!atClone && !isBlank) {
       // 복제 구간에서 조용히 되돌린 직후 다시 애니메이션을 켜는 자리다.
       // 파생값으로 뺄 수 없다 - 끄는 시점이 타이머에 달려 있어서
       // 되돌린 "다음" 이동부터 켜져야 한다.
@@ -142,10 +151,25 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
       return;
     }
 
+    // 같은 그림을 주는 진짜 카드 자리. 몇 칸을 벗어났든 한 번에 접힌다.
+    const wrapped = visible + wrapIndex(currentIndex - visible, totalSlides);
+
+    if (isBlank) {
+      /*
+       * 되돌리기를 기다리는 500ms 안에 화살표를 또 누르면 복제 구간(visible 장)을
+       * 지나쳐 카드가 없는 자리로 나간다. 여기서 타이머를 걸면 빈 화면이 그대로
+       * 남고, 다음 클릭이 그 타이머를 또 지워 영영 돌아오지 못한다.
+       * 그래서 기다리지 않고 즉시 접는다 - 그 한 칸만 미끄러지지 않을 뿐 그림은 맞다.
+       */
+      setIsTransitioning(false);
+      setCurrentIndex(wrapped);
+      return;
+    }
+
     // 복제 구간 끝에 닿으면 애니메이션이 끝난 뒤 진짜 위치로 조용히 되돌린다
     const id = setTimeout(() => {
       setIsTransitioning(false);
-      setCurrentIndex(currentIndex === 0 ? totalSlides : visible);
+      setCurrentIndex(wrapped);
     }, SLIDE_MS);
     return () => clearTimeout(id);
   }, [currentIndex, slides.length, totalSlides, visible, isLooping]);
