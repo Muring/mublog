@@ -1,0 +1,240 @@
+---
+title: "Shopify 섹션 하나 갈아엎어보기"
+date: "2026-09-07"
+description: "image-with-text 섹션에 레이아웃 옵션을 직접 추가한 연습 - 어느 섹션을 고를지부터 기존 CSS 와 부딪힌 자리까지"
+tags:
+    - frontend
+    - shopify
+    - etc
+---
+
+테마 구조를 한 번 훑고 나니 머리로는 정리가 됐다. `.json` 은 조립도고 `.liquid` 는 부품이고, section 과 snippet 을 가르는 건 `{% schema %}` 의 유무다.
+
+그런데 아는 것과 고쳐본 것은 다르다. 지금까지 내가 실제로 바꾼 건 상품 카드 제목에 `font-style: italic` 하나 넣은 게 전부였다. 한 줄짜리다. 그걸로는 이 테마에서 디자인을 바꾼다는 게 어떤 일인지 감이 안 왔다.
+
+> *"시안 받으면 이 구조에서 진짜 만들 수 있나?"*
+
+그래서 섹션 하나를 골라서 레이아웃째로 바꿔보기로 했다. 색이나 폰트가 아니라 배치를 뒤집는 쪽으로. 이 글은 그 연습 기록이다.
+
+---
+
+## 어느 섹션을 건드릴 것인가
+
+의외로 여기서 제일 오래 고민했다. 아무거나 잡으면 되는 줄 알았는데 아니었다.
+
+### CSS 를 몇 개 섹션이 공유하는지부터 셌다
+
+기준을 세우기 전에 후보를 늘어놓고 각각의 CSS 가 어디서 불리는지 grep 했다.
+
+| 후보 | 파일 크기 | 그 CSS 를 읽는 섹션 | JS 결합 |
+| --- | --- | --- | --- |
+| image-with-text | 473줄 | **2개** | 없음 |
+| featured-collection | 402줄 | 10개 이상 | slider, quick-add |
+| main-collection-product-grid | 333줄 | 10개 이상 | facets.js |
+| image-banner | 494줄 | base.css 에 섞여 있음 | 없음 |
+
+`component-image-with-text.css` 369줄은 딱 두 곳에서만 불린다. `image-with-text.liquid` 의 1번 줄, 그리고 `multirow.liquid` 의 1번 줄. 파일을 통째로 갈아엎어도 망가질 수 있는 화면이 둘뿐이고 둘 다 눈으로 확인 가능하다.
+
+반대로 `component-card.css` 는 상품 카드·컬렉션 카드·블로그 카드가 전부 물려 있다. 지난번에 `italic` 한 줄 넣었다가 카드란 카드는 다 기울어졌던 그 파일이다. **한 줄에서 그랬는데 레이아웃을 갈아엎으면 어떻게 될지는 안 봐도 안다.**
+
+그래서 기준은 파일 크기가 아니라 **CSS 의 사유 범위**로 잡았다. 첫 연습은 파급이 좁은 데서 하는 게 맞다.
+
+`main-collection-product-grid` 를 뺀 이유는 따로 있다. 여기는 필터를 걸면 `facets.js` 가 컨테이너의 `innerHTML` 을 통째로 갈아끼운다. CSS 를 고쳤는데 필터 이후에만 깨지는 상황이 나올 수 있다. 지금 붙을 자리가 아니다.
+
+`image-with-text` 로 정했다. 홈에 이미 깔려 있어서 확인도 빠르다.
+
+---
+
+## 마크업은 한 줄도 안 고쳤다
+
+목표는 매거진식 레이아웃이었다. 이미지를 화면 폭 가득 깔고, 텍스트 카드를 그 위에 얹는 형태.
+
+작업을 시작하려고 `.liquid` 를 열었는데, 열자마자 고칠 게 없다는 걸 알았다.
+
+```liquid
+<div class="image-with-text image-with-text--{{ section.settings.content_layout }} page-width ...">
+```
+
+래퍼 클래스가 이미 설정값을 그대로 받아 찍고 있었다. 지금 값은 `no-overlap` 과 `overlap` 둘. **값을 하나 늘리면 `.image-with-text--magazine` 이 자동으로 붙는다.**
+
+그래서 schema 에 옵션 한 덩어리만 추가했다.
+
+```json
+{
+  "value": "overlap",
+  "label": "t:sections.image-with-text.settings.content_layout.options__2.label"
+},
+{
+  "value": "magazine",
+  "label": "t:sections.image-with-text.settings.content_layout.options__3.label"
+}
+```
+
+이게 이 구조에서 제일 마음에 든 지점이다. 마크업이 `image-with-text__grid`, `__media-item`, `__text-item`, `__content` 로 잘게 쪼개져 있어서 CSS 만으로 배치를 뒤집을 수 있었다. 반대로 말하면 **마크업을 고쳐야만 되는 상황이 오면 그건 신호다.** 정말 필요한지 한 번 더 볼 만하다.
+
+### 라벨은 문자열이 아니라 번역 키였다
+
+`"label"` 에 그냥 `"Magazine"` 을 쓰려다 옆줄을 보니 `t:sections....options__2.label` 이었다. 번역 키다.
+
+키만 넣고 실제 문자열을 안 만들면 관리자 화면에 키가 그대로 노출된다. `locales/en.default.schema.json` 에서 짝을 찾아 하나 더 넣었다.
+
+```json
+"options__2": {
+  "label": "Overlap"
+},
+"options__3": {
+  "label": "Magazine"
+},
+```
+
+여기서 처음 알았는데, `locales` 에는 `ko.json` 과 `ko.schema.json` 이 따로 있다. **앞쪽은 고객이 보는 스토어프론트 문구고, `.schema` 가 붙은 쪽이 관리자 설정 화면 문구다.** 내가 건드릴 건 뒤쪽이다.
+
+---
+
+## 기존 규칙이 새 규칙을 이긴 자리
+
+CSS 는 새 블록으로만 추가했다. 기존 규칙은 한 줄도 수정하지 않고, 전부 `.image-with-text--magazine` 아래로 스코프했다. 그래야 같은 파일을 읽는 `multirow` 가 안 다친다.
+
+그런데 세 군데서 기존 코드에 걸렸다.
+
+### z-index 2 가 텍스트를 덮고 있었다
+
+두 아이템을 같은 그리드 칸에 겹쳐 놓고 텍스트를 위로 올렸는데, 텍스트가 안 보였다.
+
+원인은 파일 276번 줄에 있었다.
+
+```css
+.image-with-text:not(.collapse-corners, .image-with-text--overlap)
+  .image-with-text__media-item {
+  z-index: 2;
+}
+```
+
+`:not()` 안에 `--overlap` 은 있는데 내가 만든 `--magazine` 은 당연히 없다. **기존 레이아웃 두 개만 알고 쓰인 예외 목록에, 세 번째가 그냥 걸린 것이다.**
+
+여기서 선택지가 두 개였다. `:not()` 안에 `--magazine` 을 끼워넣거나, 새 블록에서 되돌리거나. 전자가 깔끔해 보였지만 기존 줄을 건드리게 된다. 후자를 골랐다.
+
+```css
+.image-with-text--magazine .image-with-text__media-item {
+  z-index: 0;
+}
+```
+
+> *"내 규칙만 지우면 원래대로 돌아가는 상태를 유지하자."*
+
+### 인라인 스타일은 !important 아니면 못 이긴다
+
+이미지 높이를 잡으려는데 안 먹었다. DevTools 로 보니 요소에 `style="padding-bottom: 62.5%"` 가 박혀 있었다.
+
+`.liquid` 를 보니 이유가 있었다.
+
+```liquid
+{% if section.settings.height == 'adapt' and section.settings.image != blank %}
+  style="padding-bottom: {{ 1 | divided_by: section.settings.image.aspect_ratio | times: 100 }}%;"
+{% endif %}
+```
+
+이미지 높이 설정이 `adapt` 면 **원본 비율을 Liquid 가 계산해서 인라인으로 찍는다.** 인라인 스타일은 선택자 특정도로는 못 이긴다. `!important` 밖에 없다.
+
+쓰기 전에 이 파일에 선례가 있는지 찾아봤다. 127번 줄에 `overflow: hidden !important` 가 이미 있었다. 같은 종류의 이유였다. 그래서 썼다.
+
+### page-width 를 벗기면 정렬선이 사라진다
+
+이미지를 화면 끝까지 늘리려면 래퍼의 `page-width` 를 벗겨야 한다. `max-width` 와 좌우 패딩을 지우는 것이다.
+
+지웠더니 이미지는 잘 늘어났는데 텍스트 카드가 화면 왼쪽 끝에 딱 붙어버렸다. 위아래 다른 섹션들은 여전히 안쪽 정렬선을 지키고 있으니 저 하나만 튀어나온 꼴이다.
+
+```css
+padding-inline: max(1.5rem, calc((100vw - var(--page-width)) / 2));
+```
+
+`--page-width` 는 `layout/theme.liquid` 에서 관리자 설정값으로 만들어지는 변수다. 그래서 숫자를 박지 않아도 된다. 나중에 누가 관리자에서 페이지 폭을 바꿔도 이 카드는 알아서 따라간다.
+
+**전체 폭을 쓰면서 정렬선은 지키는 게 매거진 레이아웃의 핵심이었다.** 이미지만 늘려놓고 텍스트를 방치하면 그냥 어긋난 화면이다.
+
+---
+
+## 옵션이 안 보였다
+
+코드를 다 넣고 관리자 화면을 열었다. Content layout 에 여전히 `No overlap` 과 `Overlap` 둘뿐이었다.
+
+![*"관리자 설정 화면 - 옵션이 아직 둘"*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/shopify-image-with-text-magazine/image-1-37079eed.png)
+*"관리자 설정 화면 - 옵션이 아직 둘"*
+
+문법 오류인가 싶어 schema 블록과 locale 파일을 각각 JSON 파서에 넣어봤다. 둘 다 통과했다. 애초에 문법이 깨졌으면 옵션 하나가 빠지는 게 아니라 **섹션 전체가 에러로 뜬다.** 둘이 멀쩡히 보인다는 건 서버가 읽는 파일이 내 파일이 아니라는 뜻이었다.
+
+프로젝트 루트를 봤다.
+
+```
+assets/  config/  layout/  locales/  sections/  snippets/  templates/
+```
+
+`.shopify/` 가 없었다. 스토어 연결 정보를 담는 디렉토리다. **이 디렉토리에서는 개발 서버를 한 번도 띄운 적이 없었다.** `pull` 로 받아만 놓고 계속 로컬에서 파일만 읽고 있었던 것이다.
+
+여기서 구조가 하나 더 정리됐다.
+
+```
+내 로컬 파일 ──(아직 아무 데도 안 감)
+               ├─ 개발 테마    → dev 서버를 띄우면 여기로 동기화
+               └─ 라이브 테마  → 손 안 댐. 계속 옵션 2개
+```
+
+`{% schema %}` 는 테마 파일 안에 있고, 관리자 편집기는 **지금 편집 중인 그 테마의 파일**을 읽어서 우측 패널을 그린다. 그러니 옵션이 보이는 범위는 그 파일이 올라간 테마 하나뿐이다.
+
+`shopify theme dev` 는 스토어에 숨김 개발 테마를 따로 만들고 로컬 파일을 거기로 보낸다. 라이브 테마는 건드리지 않는다. 고객이 보는 화면이 깨질 일이 없다는 것, 그게 이 명령을 쓰는 이유였다.
+
+그리고 반영 방식이 둘로 갈린다는 것도 알았다.
+
+| 고친 것 | 반영 |
+| --- | --- |
+| CSS | 저장 즉시 |
+| `{% schema %}` | 편집기 탭을 새로고침해야 함 |
+
+관리자 UI 자체를 다시 그려야 하니 당연한 얘기인데, 모르고 있으면 "저장했는데 왜 안 바뀌지" 로 한참 헤맬 자리다.
+
+![*"개발 테마 편집기 - 옵션이 셋으로"*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/shopify-image-with-text-magazine/image-2-451f3a3a.png)
+*"개발 테마 편집기 - 옵션이 셋으로"*
+
+---
+
+## 결과
+
+들어간 건 세 파일이다.
+
+| 파일 | 변경 |
+| --- | --- |
+| `sections/image-with-text.liquid` | schema 에 옵션 값 하나 (4줄) |
+| `locales/en.default.schema.json` | 라벨 문자열 하나 (3줄) |
+| `assets/component-image-with-text.css` | 새 블록 하나 (약 55줄) |
+
+마크업은 0줄이다. 기존 CSS 규칙을 수정한 것도 0줄이다. **새로 추가한 블록만 통째로 지우면 원래 화면으로 돌아간다.**
+
+바뀐 화면은 이렇다.
+
+![*"기본 레이아웃 - 이미지와 텍스트가 2단"*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/shopify-image-with-text-magazine/image-3-6c77f4cd.png)
+*"기본 레이아웃 - 이미지와 텍스트가 2단"*
+
+![*"magazine - 이미지 위에 텍스트 카드"*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/shopify-image-with-text-magazine/image-4-a5df9c52.png)
+*"magazine - 이미지 위에 텍스트 카드"*
+
+990px 미만은 손대지 않았다. 겹침을 풀고 기존 레이아웃 그대로 간다. 좁은 화면에서 이미지 위에 텍스트를 얹으면 읽기가 힘들어진다.
+
+![*"좁은 화면 - 겹침 없이 기존 레이아웃"*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/shopify-image-with-text-magazine/image-5-ac182a52.png)
+*"좁은 화면 - 겹침 없이 기존 레이아웃"*
+
+같은 CSS 파일을 읽는 `multirow` 섹션은 그대로다. 그쪽 래퍼에는 `image-with-text--` 로 시작하는 모디파이어가 애초에 안 붙는다. 새 규칙을 전부 그 클래스 아래로 넣은 게 여기서 값을 했다.
+
+---
+
+## 느낀점
+
+- **첫 연습 대상은 코드가 예쁜 곳이 아니라 파급이 좁은 곳으로 고른다.** 같은 CSS 를 몇 개 섹션이 읽는지 세는 데 grep 한 번이면 되는데, 이 한 번이 작업 범위를 정한다.
+- **기존 규칙을 고치는 대신 내 블록에서 되돌렸다.** `:not()` 목록에 내 이름을 끼워넣는 게 더 짧았지만, 내가 추가한 것만 지우면 원상복구되는 상태가 더 중요했다.
+- **안 먹는 CSS 는 대개 특정도 싸움이 아니라 출처 싸움이다.** 인라인 스타일이면 `!important` 말고는 방법이 없다. 그게 어디서 박히는지는 `.liquid` 를 봐야 안다.
+- **로컬에서 파일이 맞다고 서버가 아는 건 아니다.** 관리자 화면이 안 바뀌면 내 코드부터 의심하기 전에, 그 코드가 거기 올라가 있는지부터 확인하는 게 빠르다.
+
+이번 연습에서 실제로 타이핑한 양은 60줄 남짓이다. 그런데 그 60줄을 쓰기 전에 읽은 건 369줄짜리 CSS 한 파일과 473줄짜리 섹션 하나였다. **비율이 이렇게 기울어지는 게 정상인 것 같다.** 남의 테마에서 일한다는 건 결국 이미 있는 규칙과 안 부딪히는 자리를 찾는 일이었다.
+
+시안이 오면 만들 수 있겠느냐는 처음 질문에는, 이제 조건부로 답할 수 있다. 클래스가 잘게 쪼개져 있고 설정값이 클래스로 나오는 구간이면 CSS 만으로 된다. 그렇지 않은 시안이 오면 그때는 마크업을 손대야 하고, 그건 다음 연습거리다.
+
+읽어주셔서 감사합니다.

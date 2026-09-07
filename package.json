@@ -16,6 +16,7 @@
         "sweep:images": "tsx scripts/sweep-images.mts",
         "backup:posts": "tsx scripts/backup-posts.mts",
         "draft:post": "tsx scripts/draft-post.mts",
+        "migrate:images": "tsx scripts/migrate-images.mts",
         "lint:fix": "eslint . --fix"
     },
     "dependencies": {
