@@ -334,6 +334,8 @@ export const EditorColumn = styled.div`
     min-height: 0;
     resize: none;
     overflow-y: auto;
+    /* 입력란 끝에서 굴려도 페이지가 따라 움직이지 않게 한다 */
+    overscroll-behavior: contain;
     border: none;
     padding: 1rem;
     background-color: var(--cardbackground);

@@ -189,8 +189,31 @@ body {
   margin: 0;
   padding: 0;
   width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  /*
+   * hidden 이 아니라 clip 이다. hidden 은 스크롤 상자를 만들고, 그 안의
+   * position: sticky 는 페이지가 아니라 그 상자를 기준으로 삼아 아무 데도
+   * 붙지 못한다(에디터의 저장 줄이 이것 때문에 그냥 밀려 나갔다).
+   * clip 은 넘치는 것을 잘라내기만 하고 스크롤 상자를 만들지 않는다.
+   *
+   * overflow-y 는 지정하지 않는다. 한 축이 hidden/auto 면 다른 축의 visible 이
+   * auto 로 올라가 같은 문제가 돌아온다. clip 에는 그 승격이 없다.
+   */
+  overflow-x: clip;
+}
+
+/*
+ * 페이지 스크롤 막대를 감춘다. 스크롤 상자가 body 가 아니라 뷰포트(html)이므로
+ * 둘 다 지정해야 한다 - body 에만 걸면 막대가 도로 보인다.
+ */
+html,
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -199,13 +222,7 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
   transition: background-color 0.3s, color 0.3s;
-}
-
-body::-webkit-scrollbar {
-  display: none;
 }
 
 * {
