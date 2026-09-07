@@ -1,12 +1,25 @@
 import { readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 
 const POST_IMAGE_BUCKET = "post-images";
 
-/** 저장소에 함께 커밋된 정적 썸네일. public/ 아래라 주소가 곧 경로다. */
-const STATIC_THUMBNAIL_DIR = "public/thumbnails";
+/**
+ * 저장소에 함께 커밋된 이미지. public/ 아래라 주소가 곧 경로다.
+ *
+ * 마이그레이션으로 넘어온 옛 본문 이미지가 public/images 에 있어서, 여기를
+ * 빠뜨리면 "본문" 태그가 Storage 에 올린 것만 세게 된다 (45개 중 5개였다).
+ *
+ * 깊이를 고정하지 않는다. images 아래는 글마다 폴더가 한 겹인 줄 알았는데
+ * docker-gcp 만 그 안에 01/02/04 로 한 겹이 더 있어서 10장이 조용히 빠졌다.
+ */
+const STATIC_DIRS = [
+    { dir: "public/thumbnails", url: "/thumbnails" },
+    { dir: "public/images", url: "/images" },
+] as const;
+
+const IMAGE_FILE = /[.](png|jpe?g|webp|gif|svg)$/i;
 
 function createStorageClient() {
     const secretKey = process.env.SUPABASE_SECRET_KEY;
@@ -211,27 +224,21 @@ export async function listImageLibrary(): Promise<LibraryImage[]> {
         });
     }
 
-    // 저장소 파일은 배포본에도 그대로 있으므로 목록에서 빠지면 안 된다.
-    // 폴더가 없는 환경(예: 일부 CI)에서는 조용히 건너뛴다.
-    let files: string[] = [];
-    try {
-        files = readdirSync(STATIC_THUMBNAIL_DIR);
-    } catch {
-        files = [];
-    }
-
-    for (const file of files) {
-        if (!/\.(png|jpe?g|webp|gif|svg)$/i.test(file)) continue;
-        const url = `/thumbnails/${file}`;
-        const stats = statSync(join(STATIC_THUMBNAIL_DIR, file));
-        images.push({
-            url,
-            name: file,
-            source: "static",
-            size: stats.size,
-            createdAt: stats.mtime.toISOString(),
-            ...usersOf(url),
-        });
+    // 저장소 파일은 배포본에도 그대로 있으므로 목록에서 빠지면 안 된다
+    for (const { dir, url: urlBase } of STATIC_DIRS) {
+        for (const relative of listStaticFiles(dir)) {
+            const url = urlBase + "/" + relative;
+            const stats = statSync(join(dir, relative));
+            images.push({
+                url,
+                // 글 폴더가 있으면 그것까지 보여준다 (blog-development-4/editor.jpg)
+                name: relative,
+                source: "static",
+                size: stats.size,
+                createdAt: stats.mtime.toISOString(),
+                ...usersOf(url),
+            });
+        }
     }
 
     // 최근에 올린 것을 먼저 본다
@@ -242,4 +249,21 @@ export async function listImageLibrary(): Promise<LibraryImage[]> {
 function publicUrlOf(path: string): string {
     const supabase = createStorageClient();
     return supabase.storage.from(POST_IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+/**
+ * public/ 아래의 이미지 파일을 폴더 기준 상대 경로로 돌려준다.
+ *
+ * 폴더가 없는 환경(예: 일부 CI)에서는 조용히 건너뛴다.
+ * 이미지 목록이 비는 것과 화면이 죽는 것 중에는 전자가 낫다.
+ */
+function listStaticFiles(dir: string): string[] {
+    try {
+        return readdirSync(dir, { recursive: true, encoding: "utf8" })
+            .filter((entry) => IMAGE_FILE.test(entry))
+            // Windows 는 구분자가 역슬래시라 그대로 주소에 쓰면 깨진다
+            .map((entry) => entry.split(sep).join("/"));
+    } catch {
+        return [];
+    }
 }
