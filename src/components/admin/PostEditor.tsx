@@ -5,6 +5,7 @@ import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
+import ImagePicker from "./ImagePicker";
 import {
     InlineCodeIcon,
     CodeBlockIcon,
@@ -53,6 +54,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
     const [html, setHtml] = useState("");
     const [isDragging, setIsDragging] = useState(false);
     const [isThumbDragging, setIsThumbDragging] = useState(false);
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [tagError, setTagError] = useState<string | null>(null);
     // 좁은 화면에서만 쓰는 탭. 글을 쓰러 들어오는 화면이라 본문에서 시작한다.
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
@@ -218,6 +220,13 @@ export default function PostEditor({ initial, knownTags }: Props) {
                             onChange={(e) => set("thumbnail", e.target.value)}
                             placeholder="업로드하거나 /thumbnails/... 경로"
                         />
+                        <button
+                            type="button"
+                            className="thumb-upload"
+                            onClick={() => setIsPickerOpen(true)}
+                        >
+                            찾아보기
+                        </button>
                         <button
                             type="button"
                             className="thumb-upload"
@@ -412,6 +421,18 @@ export default function PostEditor({ initial, knownTags }: Props) {
                     </PreviewArticle>
                 </div>
             </SplitPane>
+
+            {/*
+              열려 있을 때만 그린다. 늘 두고 감추면 목록을 미리 받아오게 되는데,
+              글을 쓰는 대부분의 경우에는 열지 않는다.
+            */}
+            {isPickerOpen && (
+                <ImagePicker
+                    current={post.thumbnail}
+                    onSelect={(url) => set("thumbnail", url)}
+                    onClose={() => setIsPickerOpen(false)}
+                />
+            )}
         </EditorWrapper>
     );
 }
