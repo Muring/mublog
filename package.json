@@ -15,6 +15,7 @@
         "audit:render": "tsx scripts/audit-render.mts",
         "sweep:images": "tsx scripts/sweep-images.mts",
         "backup:posts": "tsx scripts/backup-posts.mts",
+        "draft:post": "tsx scripts/draft-post.mts",
         "lint:fix": "eslint . --fix"
     },
     "dependencies": {
