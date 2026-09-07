@@ -162,8 +162,10 @@ export type LibraryImage = {
     source: "storage" | "static";
     size: number;
     createdAt: string;
-    /** 이 이미지를 쓰고 있는 글의 slug. 비어 있으면 아무도 안 쓴다. */
-    usedBy: string[];
+    /** 이 이미지를 대표 이미지로 쓰는 글 */
+    usedAsThumbnail: string[];
+    /** 이 이미지를 본문에 끼워 넣은 글 */
+    usedInBody: string[];
 };
 
 /**
@@ -181,13 +183,17 @@ export async function listImageLibrary(): Promise<LibraryImage[]> {
     const posts = await prisma.post.findMany({
         select: { slug: true, contentMd: true, thumbnail: true },
     });
-    const haystacks = posts.map((post) => ({
-        slug: post.slug,
-        // 사이에 공백을 끼워 두 값이 붙어 없던 문자열이 생기지 않게 한다
-        text: [post.contentMd, post.thumbnail ?? ""].join(" "),
-    }));
-    const usersOf = (needle: string) =>
-        haystacks.filter((h) => h.text.includes(needle)).map((h) => h.slug);
+    /*
+     * 쓰임을 본문과 썸네일로 나눠 본다. 합쳐서 세면 "이 이미지가 무엇으로 쓰이는지"
+     * 를 알 수 없는데, 고르는 사람에게는 그게 파일 위치보다 중요한 정보다.
+     * 한 이미지가 둘 다일 수도 있다 - 그때는 둘 다 표시된다.
+     */
+    const usersOf = (needle: string) => ({
+        usedAsThumbnail: posts
+            .filter((post) => (post.thumbnail ?? "").includes(needle))
+            .map((post) => post.slug),
+        usedInBody: posts.filter((post) => post.contentMd.includes(needle)).map((post) => post.slug),
+    });
 
     const images: LibraryImage[] = [];
 
@@ -201,7 +207,7 @@ export async function listImageLibrary(): Promise<LibraryImage[]> {
             size: object.size,
             createdAt: object.createdAt.toISOString(),
             // 주소 전체가 아니라 버킷 안 경로로 찾는다. 프로젝트 주소가 바뀌어도 걸린다.
-            usedBy: usersOf(object.path),
+            ...usersOf(object.path),
         });
     }
 
@@ -224,7 +230,7 @@ export async function listImageLibrary(): Promise<LibraryImage[]> {
             source: "static",
             size: stats.size,
             createdAt: stats.mtime.toISOString(),
-            usedBy: usersOf(url),
+            ...usersOf(url),
         });
     }
 

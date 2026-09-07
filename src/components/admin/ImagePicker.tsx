@@ -13,18 +13,32 @@ type LibraryImage = {
     source: "storage" | "static";
     size: number;
     createdAt: string;
-    usedBy: string[];
+    usedAsThumbnail: string[];
+    usedInBody: string[];
 };
 
-type Source = "all" | "storage" | "static";
+/**
+ * 무엇으로 쓰이는지로 거른다. 어디에 저장돼 있는지(올린 것 / 저장소 파일)로
+ * 거르지 않는 이유는, 썸네일을 고르러 온 사람에게 그 구분이 아무 의미가 없기
+ * 때문이다. 저장 위치는 이름 옆 툴팁에 남겨 둔다.
+ */
+type Filter = "all" | "thumbnail" | "body" | "unused";
 
-const SOURCES: { key: Source; label: string }[] = [
+const FILTERS: { key: Filter; label: string }[] = [
     { key: "all", label: "전체" },
-    { key: "storage", label: "올린 이미지" },
-    { key: "static", label: "저장소 파일" },
+    { key: "thumbnail", label: "썸네일" },
+    { key: "body", label: "본문" },
+    { key: "unused", label: "미사용" },
 ];
 
+const SOURCE_LABEL = { storage: "올린 이미지", static: "저장소 파일" } as const;
+
 const kb = (bytes: number) => (bytes / 1024).toFixed(0) + "KB";
+
+/** 이 이미지를 쓰는 글. 썸네일로도 본문에도 쓰는 글은 한 번만 센다. */
+const usersOf = (image: LibraryImage) => [
+    ...new Set([...image.usedAsThumbnail, ...image.usedInBody]),
+];
 
 type Props = {
     /** 지금 골라져 있는 주소. 목록에서 표시한다 */
@@ -47,7 +61,7 @@ export default function ImagePicker({ current, onSelect, onClose }: Props) {
     const toast = useToast();
     const [images, setImages] = useState<LibraryImage[] | null>(null);
     const [query, setQuery] = useState("");
-    const [source, setSource] = useState<Source>("all");
+    const [filter, setFilter] = useState<Filter>("all");
     const searchRef = useRef<HTMLInputElement>(null);
     // 이 화면을 연 버튼. 닫을 때 포커스를 돌려줘야 키보드 사용자가 자리를 잃지 않는다.
     const openerRef = useRef<HTMLElement | null>(null);
@@ -118,17 +132,20 @@ export default function ImagePicker({ current, onSelect, onClose }: Props) {
         if (!images) return [];
         const q = query.trim().toLowerCase();
         return images.filter((image) => {
-            if (source !== "all" && image.source !== source) return false;
+            const users = usersOf(image);
+            if (filter === "thumbnail" && image.usedAsThumbnail.length === 0) return false;
+            if (filter === "body" && image.usedInBody.length === 0) return false;
+            if (filter === "unused" && users.length > 0) return false;
             if (!q) return true;
             return (
                 image.name.toLowerCase().includes(q) ||
                 image.url.toLowerCase().includes(q) ||
-                image.usedBy.some((slug) => slug.toLowerCase().includes(q))
+                users.some((slug) => slug.toLowerCase().includes(q))
             );
         });
-    }, [images, query, source]);
+    }, [images, query, filter]);
 
-    const unused = filtered.filter((image) => image.usedBy.length === 0).length;
+    const unused = filtered.filter((image) => usersOf(image).length === 0).length;
 
     return (
         <PickerOverlay
@@ -149,13 +166,13 @@ export default function ImagePicker({ current, onSelect, onClose }: Props) {
                         aria-label="이미지 검색"
                     />
                     <div className="sources">
-                        {SOURCES.map(({ key, label }) => (
+                        {FILTERS.map(({ key, label }) => (
                             <SourceTab
                                 key={key}
                                 type="button"
-                                className={source === key ? "active" : ""}
-                                aria-pressed={source === key}
-                                onClick={() => setSource(key)}
+                                className={filter === key ? "active" : ""}
+                                aria-pressed={filter === key}
+                                onClick={() => setFilter(key)}
                             >
                                 {label}
                             </SourceTab>
@@ -183,19 +200,29 @@ export default function ImagePicker({ current, onSelect, onClose }: Props) {
                                     {/* 목록 미리보기라 next/image 최적화를 태우지 않는다 */}
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={image.url} alt="" loading="lazy" />
-                                    <span className="name" title={image.name}>
+                                    <span
+                                        className="name"
+                                        title={image.name + " · " + SOURCE_LABEL[image.source]}
+                                    >
                                         {image.name}
                                     </span>
                                     <span className="meta">
-                                        {image.usedBy.length > 0 ? (
-                                            <>
-                                                <span className="badge">사용 중</span>
-                                                {image.usedBy.join(", ")}
-                                            </>
-                                        ) : (
+                                        {/*
+                                          썸네일·본문은 분류라 중립색을 쓴다. globals.css 의
+                                          상태색(ok/warn)은 "정상/주의" 라는 뜻을 이미 갖고 있어
+                                          분류에 돌려쓰면 안 된다. 손볼 거리인 "미사용" 만
+                                          상태색을 쓴다 — 그건 실제로 상태다.
+                                        */}
+                                        {image.usedAsThumbnail.length > 0 && (
+                                            <span className="badge">썸네일</span>
+                                        )}
+                                        {image.usedInBody.length > 0 && (
+                                            <span className="badge">본문</span>
+                                        )}
+                                        {usersOf(image).length === 0 && (
                                             <span className="badge unused">미사용</span>
                                         )}
-                                        <span>{kb(image.size)}</span>
+                                        <span>{usersOf(image).join(", ") || kb(image.size)}</span>
                                     </span>
                                 </ImageCard>
                             ))}

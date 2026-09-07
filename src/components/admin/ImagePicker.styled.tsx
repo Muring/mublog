@@ -161,18 +161,23 @@ export const ImageCard = styled.button`
     white-space: nowrap;
   }
 
+  /*
+   * 썸네일·본문은 "무엇으로 쓰이는지" 라는 분류다. 상태색(--okcolor 등)을
+   * 여기 돌려쓰지 않는다 - 그쪽은 "정상/주의" 라는 뜻을 이미 갖고 있다
+   * (globals.css 의 --chartbar 주석과 같은 이유).
+   */
   .badge {
     flex-shrink: 0;
     padding: 0.05rem 0.35rem;
     border-radius: 999px;
     font-size: 0.6rem;
     font-weight: 700;
-    border: 1px solid var(--okborder);
-    background-color: var(--okbg);
-    color: var(--okcolor);
+    border: 1px solid var(--bordercolor);
+    background-color: var(--codefontbgcolor);
+    color: var(--foreground);
   }
 
-  /* 아무 글도 안 쓰는 이미지. 지워도 되는 것이라 눈에 걸려야 한다 */
+  /* 이건 분류가 아니라 손볼 거리다. 그래서 상태색을 쓴다 */
   .badge.unused {
     border-color: var(--warnborder);
     background-color: var(--warnbg);
