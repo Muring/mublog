@@ -40,40 +40,40 @@ function toDate(value: string | null): Date {
     return value ? new Date(value) : new Date();
 }
 
-/** 버킷 안의 모든 객체를 훑는다. 업로드 경로가 `YYYY-MM/파일명` 이라 한 단계만 내려간다. */
+/**
+ * 버킷 안의 모든 객체를 훑는다.
+ *
+ * 깊이를 고정하지 않는다. 예전에는 업로드 경로가 YYYY-MM/파일명 한 단계뿐이라
+ * 한 겹만 내려갔는데, 지금은 thumbnails/<slug>/파일 처럼 두 단계다. 고정해 두면
+ * 새 구조의 파일이 통째로 안 보이고, 그러면 sweep 이 "고아 0개" 라고 답하면서
+ * 아무것도 정리하지 않는다. 조용히 틀리는 쪽이라 깊이에 기대지 않는다.
+ */
 async function listAllObjects(): Promise<StoredObject[]> {
     const supabase = createStorageClient();
     const objects: StoredObject[] = [];
 
-    const { data: entries, error } = await supabase.storage
-        .from(POST_IMAGE_BUCKET)
-        .list("", { limit: 1000 });
-    if (error) throw new Error(`버킷 목록 조회 실패: ${error.message}`);
+    const walk = async (prefix: string) => {
+        const { data: entries, error } = await supabase.storage
+            .from(POST_IMAGE_BUCKET)
+            .list(prefix, { limit: 1000 });
+        if (error) throw new Error(`버킷 목록 조회 실패(${prefix || "/"}): ${error.message}`);
 
-    for (const entry of entries ?? []) {
-        // id 가 null 이면 폴더다
-        if (entry.id === null) {
-            const { data: inner, error: innerError } = await supabase.storage
-                .from(POST_IMAGE_BUCKET)
-                .list(entry.name, { limit: 1000 });
-            if (innerError) throw new Error(`폴더 조회 실패: ${innerError.message}`);
-
-            for (const file of inner ?? []) {
-                objects.push({
-                    path: `${entry.name}/${file.name}`,
-                    size: file.metadata?.size ?? 0,
-                    createdAt: toDate(file.created_at),
-                });
+        for (const entry of entries ?? []) {
+            const path = prefix ? `${prefix}/${entry.name}` : entry.name;
+            // id 가 null 이면 폴더다
+            if (entry.id === null) {
+                await walk(path);
+                continue;
             }
-        } else {
             objects.push({
-                path: entry.name,
+                path,
                 size: entry.metadata?.size ?? 0,
                 createdAt: toDate(entry.created_at),
             });
         }
-    }
+    };
 
+    await walk("");
     return objects;
 }
 

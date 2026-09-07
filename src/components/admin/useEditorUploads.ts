@@ -10,20 +10,26 @@ import { fetchJson } from "@/lib/fetcher";
  *
  * 본문에 넣을 때는 먼저 자리표시자를 꽂고, 올라온 뒤 주소로 바꾼다.
  * 그러지 않으면 큰 파일에서 몇 초 동안 아무 일도 없는 것처럼 보인다.
+ *
+ * slug 와 쓰임을 함께 보낸다 — 라우트가 그것으로 저장 경로를 정한다.
+ * slug 는 타자를 치는 동안 계속 바뀌므로 매번 지금 값을 넘긴다.
  */
 export function useEditorUploads(
     textareaRef: RefObject<HTMLTextAreaElement | null>,
     setContentMd: (update: (previous: string) => string) => void,
-    setThumbnail: (url: string) => void
+    setThumbnail: (url: string) => void,
+    slug: string
 ) {
     const toast = useToast();
     const [isUploadingThumb, setIsUploadingThumb] = useState(false);
 
     /** 실패하면 문구를 띄우고 null 을 돌려준다. */
     const upload = useCallback(
-        async (file: File): Promise<string | null> => {
+        async (file: File, kind: "thumbnail" | "body"): Promise<string | null> => {
             const body = new FormData();
             body.append("file", file);
+            body.append("kind", kind);
+            body.append("slug", slug);
             try {
                 const { url } = await fetchJson<{ url: string }>("/api/admin/upload", {
                     method: "POST",
@@ -37,7 +43,7 @@ export function useEditorUploads(
                 return null;
             }
         },
-        [toast]
+        [toast, slug]
     );
 
     const uploadIntoBody = useCallback(
@@ -52,7 +58,7 @@ export function useEditorUploads(
                 const { selectionStart: pos, value } = el;
                 setContentMd(() => value.slice(0, pos) + token + value.slice(pos));
 
-                const url = await upload(file);
+                const url = await upload(file, "body");
                 setContentMd((previous) =>
                     previous.replace(token, url ? "![](" + url + ")" : "")
                 );
@@ -71,7 +77,7 @@ export function useEditorUploads(
             }
 
             setIsUploadingThumb(true);
-            const url = await upload(file);
+            const url = await upload(file, "thumbnail");
             setIsUploadingThumb(false);
             if (url) setThumbnail(url);
         },

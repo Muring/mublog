@@ -98,7 +98,8 @@ export default function PostEditor({ initial, knownTags }: Props) {
     const { isUploadingThumb, uploadIntoBody, uploadThumbnail } = useEditorUploads(
         textareaRef,
         setContentMd,
-        setThumbnail
+        setThumbnail,
+        post.slug
     );
 
     const { save, pending, isSaving } = usePostSave(post, setPost, postId, setPostId, setTagError);
