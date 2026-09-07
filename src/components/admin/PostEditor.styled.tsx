@@ -12,13 +12,26 @@ export const EditorWrapper = styled.div`
   /* 헤더가 position: fixed / height 64px 이므로 그만큼 비워준다 */
   padding: 6rem 1rem 3rem;
 
+  /*
+   * 저장·발행을 화면에 붙여 둔다. 본문 끝에서 저장하려고 맨 위까지 되돌아가야 했다.
+   *
+   * top 은 헤더 높이(position: fixed / 64px)와 같아야 그 바로 아래에 걸린다.
+   * 아래 여백을 margin 이 아니라 padding 으로 두는 이유는, margin 은 배경이 없어
+   * 그 틈으로 밑에서 올라오는 내용이 비쳐 보이기 때문이다.
+   */
   .editor-head {
+    position: sticky;
+    top: 64px;
+    z-index: 5;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 1rem;
-    margin-bottom: 1.25rem;
+    padding: 0.75rem 0 1rem;
+    margin-bottom: 0.5rem;
+    background-color: var(--background);
+    border-bottom: 1px solid var(--bordercolor);
   }
 
   .actions {
@@ -185,10 +198,45 @@ export const MetaGrid = styled.div`
  * 사실상 보이지 않았다. 좁아지면 탭으로 바꿔 한 번에 하나만 보여준다.
  */
 export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
+  /*
+   * 두 칸의 높이를 화면 높이로 고정하고 각자 제 안에서 스크롤한다.
+   *
+   * 예전에는 미리보기가 내용만큼 늘어나 글이 길어질수록 페이지가 함께 길어졌고,
+   * 본문 입력란은 60vh 에 멈춰 있었다. 그래서 아래를 보려면 페이지를 한참 내리고
+   * 쓰려면 다시 올라와야 했다. 높이는 바깥 상자가 잡고 글은 제 높이대로 둔다.
+   *
+   * 빼는 값은 위아래로 고정된 것들의 합이다 — 헤더 64px, 붙어 있는 저장 줄,
+   * 아래 여백. 저 줄의 높이를 바꾸면 이 값도 함께 봐야 한다.
+   *
+   * vh 가 아니라 dvh 다. 모바일에서 주소창이 접혔다 펴지면 vh 는 그대로라
+   * 칸의 아래쪽이 잘린다. 사용자 정의 속성에는 "모르면 앞 줄로 되돌아가기" 가
+   * 없으므로(파싱 단계에서는 무엇이든 유효하다) vh 를 앞에 덧대지 않는다 —
+   * 이 저장소는 이미 컨테이너 쿼리를 쓰고 있고 그쪽 지원선이 dvh 보다 높다.
+   */
+  --pane-height: calc(100dvh - 13rem);
+
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
   align-items: start;
+
+  .pane-write,
+  .pane-preview {
+    height: var(--pane-height);
+    /* 화면이 아주 낮아도 몇 줄은 보여야 한다 */
+    min-height: 22rem;
+  }
+
+  /*
+   * 테두리를 안쪽 PreviewArticle 이 아니라 여기가 갖는다.
+   * 스크롤하는 상자가 테두리를 가져야 위아래 선이 제자리에 남는다.
+   */
+  .pane-preview {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--bordercolor);
+    border-radius: 0.75rem;
+  }
 
   /* 넓을 때는 탭이 필요 없다 */
   .pane-tabs {
@@ -272,10 +320,20 @@ export const EditorColumn = styled.div`
     border-bottom: 1px solid var(--bordercolor);
   }
 
+  /*
+   * 칸이 이미 화면 높이만큼 잡혀 있으므로 남는 자리를 전부 쓴다.
+   * min-height 를 함께 두면 flex 아이템의 기본값(auto)이 내용 높이를 바닥으로
+   * 삼아 줄어들지 못하고, 스크롤이 입력란이 아니라 페이지에 생긴다.
+   *
+   * 손으로 늘리는 것은 막는다. 상자 높이는 위에서 정해지므로 여기서 늘리면
+   * 칸을 삐져나가고, 이제는 늘릴 이유도 없다.
+   */
   textarea {
     width: 100%;
-    min-height: 60vh;
-    resize: vertical;
+    flex: 1;
+    min-height: 0;
+    resize: none;
+    overflow-y: auto;
     border: none;
     padding: 1rem;
     background-color: var(--cardbackground);
@@ -379,7 +437,5 @@ export const PreviewArticle = styled(Article)`
   min-height: 0;
   max-width: 100%;
   padding: 1rem;
-  border: 1px solid var(--bordercolor);
-  border-radius: 0.75rem;
   animation: none;
 `;
