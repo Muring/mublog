@@ -59,9 +59,15 @@ async function listAllObjects(): Promise<StoredObject[]> {
     return objects;
 }
 
-/** 모든 포스트(초안 포함)의 본문에서 이 버킷을 가리키는 경로를 모은다. */
+/**
+ * 모든 포스트(초안 포함)에서 이 버킷을 가리키는 경로를 모은다.
+ *
+ * 본문과 썸네일을 둘 다 본다. 썸네일 주소는 본문에 나타나지 않으므로 빠뜨리면
+ * 쓰고 있는 대표 이미지가 고아로 잡혀 --apply 에서 지워진다.
+ * 이미지를 담는 컬럼이 늘어나면 여기에도 함께 더해야 한다.
+ */
 async function collectReferencedPaths(): Promise<Set<string>> {
-    const posts = await prisma.post.findMany({ select: { contentMd: true } });
+    const posts = await prisma.post.findMany({ select: { contentMd: true, thumbnail: true } });
     const pattern = new RegExp(
         `/storage/v1/object/public/${POST_IMAGE_BUCKET}/([^)\\s"'<>]+)`,
         "g"
@@ -69,8 +75,10 @@ async function collectReferencedPaths(): Promise<Set<string>> {
 
     const referenced = new Set<string>();
     for (const post of posts) {
-        for (const match of post.contentMd.matchAll(pattern)) {
-            referenced.add(decodeURIComponent(match[1]));
+        for (const text of [post.contentMd, post.thumbnail ?? ""]) {
+            for (const match of text.matchAll(pattern)) {
+                referenced.add(decodeURIComponent(match[1]));
+            }
         }
     }
     return referenced;
