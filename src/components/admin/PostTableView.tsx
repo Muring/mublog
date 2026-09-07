@@ -11,6 +11,7 @@ type Row = {
     tags: string[];
     status: "DRAFT" | "PUBLISHED";
     publishedAt: string | null;
+    updatedAt: string;
     commentCount: number;
 };
 
@@ -61,6 +62,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                             <th>상태</th>
                             <th>태그</th>
                             <th>발행일</th>
+                            <th>수정일</th>
                             <th>댓글</th>
                             <th></th>
                         </tr>

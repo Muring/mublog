@@ -100,13 +100,15 @@ export const PostTable = styled.table`
 
   th:nth-of-type(2) { width: 5rem; }    /* 상태 */
   th:nth-of-type(3) { width: 14rem; }   /* 태그 */
-  th:nth-of-type(4) { width: 8rem; }    /* 발행일 */
-  th:nth-of-type(5) { width: 4rem; }    /* 댓글 */
-  th:nth-of-type(6) { width: 9.5rem; }  /* 수정·삭제 */
+  th:nth-of-type(4) { width: 7.5rem; }  /* 발행일 */
+  th:nth-of-type(5) { width: 7.5rem; }  /* 수정일 */
+  th:nth-of-type(6) { width: 4rem; }    /* 댓글 */
+  th:nth-of-type(7) { width: 9.5rem; }  /* 수정·삭제 */
 
-  /* 날짜와 버튼은 한 덩어리다. 쪼개지느니 열을 넓힌다 */
+  /* 날짜와 수는 한 덩어리다. 쪼개지느니 열을 넓힌다 */
   td:nth-of-type(4),
-  td:nth-of-type(5) {
+  td:nth-of-type(5),
+  td:nth-of-type(6) {
     white-space: nowrap;
   }
 
@@ -115,7 +117,7 @@ export const PostTable = styled.table`
    * 카드 모드에서는 td 가 flex 라 justify-content 가 자리를 정하므로 영향이 없다.
    */
   td:nth-of-type(2),
-  td:nth-of-type(5) {
+  td:nth-of-type(6) {
     text-align: center;
   }
 
@@ -227,18 +229,31 @@ export const PostTable = styled.table`
   /*
    * 좁아진다고 바로 카드로 바꾸지 않는다. 표는 여러 글을 한눈에 훑는 데 유리하므로
    * 먼저 덜 중요한 열부터 접어서 표 모양을 최대한 오래 유지한다.
-   * 접는 순서는 태그 -> 댓글 이고, 둘 다 수정 화면에서 다시 볼 수 있는 정보다.
+   *
+   * 접는 순서는 태그 -> 수정일 -> 댓글 이다. 태그와 댓글은 수정 화면에서 다시
+   * 볼 수 있지만 수정일은 거기에도 없어서, 둘 사이에 둔다.
+   *
+   * 폭 기준은 고정 열의 합에서 나온다. 일곱 열이 47.5rem 을 먼저 가져가므로
+   * 컨테이너가 1000px 밑으로 내려가면 제목에 두 줄도 남지 않는다.
+   * 열을 더하거나 폭을 바꾸면 이 숫자들도 같이 바꿔야 한다.
    */
-  @container admin (max-width: 900px) {
+  @container admin (max-width: 1000px) {
     th:nth-of-type(3),
     td:nth-of-type(3) {
       display: none;
     }
   }
 
-  @container admin (max-width: 720px) {
+  @container admin (max-width: 860px) {
     th:nth-of-type(5),
     td:nth-of-type(5) {
+      display: none;
+    }
+  }
+
+  @container admin (max-width: 720px) {
+    th:nth-of-type(6),
+    td:nth-of-type(6) {
       display: none;
     }
   }
@@ -264,7 +279,8 @@ export const PostTable = styled.table`
 
     /* 접었던 열을 카드에서는 다시 보여준다. 세로로는 자리가 있다 */
     td:nth-of-type(3),
-    td:nth-of-type(5) {
+    td:nth-of-type(5),
+    td:nth-of-type(6) {
       display: flex;
     }
 

@@ -121,6 +121,11 @@ export async function getAllPostsForAdmin() {
     return rows.map((row) => ({
         ...row,
         publishedAt: row.publishedAt?.toISOString() ?? null,
+        /*
+         * 여기가 진짜 "고친 날" 인 것은 조회수·댓글 수 증가가 raw SQL 이라
+         * @updatedAt 을 건드리지 않기 때문이다 (stats.ts / comments.ts 주석 참고).
+         * 그 둘을 prisma.post.update 로 되돌리면 이 열은 조용히 "마지막 조회일" 이 된다.
+         */
         updatedAt: row.updatedAt.toISOString(),
     }));
 }

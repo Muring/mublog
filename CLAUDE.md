@@ -70,6 +70,13 @@ styled 는 태그가 안 보여서 밟기 쉽다 — 공용 조각은 `span` + `
 포스트를 고쳤으면 `revalidatePost(slug, previousSlug)`를 부른다.
 **slug를 바꿨을 때 `previousSlug`를 빠뜨리면 옛 URL에 낡은 페이지가 영원히 남는다.**
 
+### 조회수·댓글 수는 raw SQL 로 올린다
+
+`prisma.post.update` 계열을 쓰면 `@updatedAt` 이 함께 올라가 `updated_at` 이
+"고친 날" 이 아니라 **"마지막으로 읽힌 날"** 이 된다. 트래픽이 없을 때는 그럴듯해 보인다.
+해당하는 곳은 `stats.ts` 의 `recordPostView` 와 `comments.ts` 의 카운트 증감 두 곳이고,
+관리 목록의 수정일 열이 이 사실에 기대고 있다. 되돌려도 오류는 나지 않는다 — 값만 조용히 틀린다.
+
 ### DB 접속
 
 Prisma 7은 접속 URL을 스키마가 아니라 `prisma.config.ts`에 둔다.

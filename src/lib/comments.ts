@@ -119,16 +119,14 @@ export async function createComment(params: {
 
     await assertNotFlooding(authorId, body);
 
-    // 카운트가 어긋나지 않도록 삽입과 증가를 한 트랜잭션으로 묶는다
+    // 카운트가 어긋나지 않도록 삽입과 증가를 한 트랜잭션으로 묶는다.
+    // 증가를 raw SQL 로 두는 이유는 recordPostView 와 같다 — @updatedAt 을 피한다.
     const [created] = await prisma.$transaction([
         prisma.comment.create({
             data: { postId: post.id, authorId, body, parentId: parentId ?? null },
             select: COMMENT_SELECT,
         }),
-        prisma.post.update({
-            where: { id: post.id },
-            data: { commentCount: { increment: 1 } },
-        }),
+        prisma.$executeRaw`UPDATE posts SET comment_count = comment_count + 1 WHERE id = ${post.id}`,
     ]);
 
     return toNode(created);
@@ -183,10 +181,7 @@ export async function deleteComment(params: {
             where: { id },
             data: { deletedAt: new Date(), deletedBy: actorId },
         }),
-        prisma.post.update({
-            where: { id: existing.postId },
-            data: { commentCount: { decrement: 1 } },
-        }),
+        prisma.$executeRaw`UPDATE posts SET comment_count = comment_count - 1 WHERE id = ${existing.postId}`,
     ]);
 
     return { slug: existing.post.slug };

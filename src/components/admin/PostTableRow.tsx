@@ -17,6 +17,7 @@ type Props = {
         tags: string[];
         status: "DRAFT" | "PUBLISHED";
         publishedAt: string | null;
+        updatedAt: string;
         commentCount: number;
     };
 };
@@ -73,9 +74,11 @@ export default function PostTableRow({ post }: Props) {
                 </span>
             </td>
             <td data-label="태그">{post.tags.join(", ") || "-"}</td>
+            {/* 초안은 발행된 적이 없다. 만든 날로 메우지 않고 비운 채로 둔다 */}
             <td data-label="발행일">
                 {post.publishedAt ? formatCardDate(post.publishedAt) : "-"}
             </td>
+            <td data-label="수정일">{formatCardDate(post.updatedAt)}</td>
             <td data-label="댓글">{post.commentCount}</td>
             <td className="actions">
                 <div className="action-buttons">

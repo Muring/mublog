@@ -47,12 +47,18 @@ export async function recordVisit(dateKey: string): Promise<void> {
  * 사이트 방문 집계와 달리 날짜별로 쌓지 않고 포스트 행의 누적값만 올린다.
  * post_views 같은 별도 테이블을 두면 25개 x 365일로 연 9천 행이 쌓이는데,
  * 지금 필요한 것은 "이 글이 몇 번 읽혔나" 하나뿐이라 그만한 값을 하지 않는다.
+ *
+ * prisma.post.update 계열을 쓰지 않는다. @updatedAt 이 함께 딸려 올라가
+ * updated_at 이 "고친 날" 이 아니라 "마지막으로 읽힌 날" 이 되기 때문이다.
+ * @updatedAt 은 클라이언트가 붙이는 값이라 raw SQL 에는 따라오지 않는다.
+ * (관리 화면의 수정일 열이 이 사실에 기대고 있다)
  */
 export async function recordPostView(slug: string): Promise<void> {
-    await prisma.post.updateMany({
-        where: { slug, status: "PUBLISHED" },
-        data: { viewCount: { increment: 1 } },
-    });
+    await prisma.$executeRaw`
+        UPDATE posts
+           SET view_count = view_count + 1
+         WHERE slug = ${slug} AND status = 'PUBLISHED'
+    `;
 }
 
 /**
