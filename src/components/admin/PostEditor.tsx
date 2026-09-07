@@ -16,6 +16,7 @@ import { useDebouncedEffect } from "@/hooks/useDebouncedEffect";
 import { useSlugCheck } from "./useSlugCheck";
 import { useEditorUploads } from "./useEditorUploads";
 import { usePostSave } from "./usePostSave";
+import { useScrollSync } from "./useScrollSync";
 import {
     EditorWrapper,
     MetaGrid,
@@ -55,7 +56,11 @@ export default function PostEditor({ initial, knownTags }: Props) {
     // 좁은 화면에서만 쓰는 탭. 글을 쓰러 들어오는 화면이라 본문에서 시작한다.
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const previewRef = useRef<HTMLDivElement>(null);
     const thumbInputRef = useRef<HTMLInputElement>(null);
+
+    // 한쪽을 굴리면 다른 쪽도 같은 자리를 보게 따라간다
+    useScrollSync(textareaRef, previewRef);
 
     const set = <K extends keyof EditablePost>(key: K, value: EditablePost[K]) =>
         setPost((prev) => ({ ...prev, [key]: value }));
@@ -356,7 +361,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
                     />
                 </EditorColumn>
 
-                <div className="pane-preview">
+                <div className="pane-preview" ref={previewRef}>
                     <PreviewArticle>
                         <h1>{post.title || "제목 없음"}</h1>
                         <h5>{post.description}</h5>
