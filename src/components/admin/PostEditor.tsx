@@ -57,10 +57,11 @@ export default function PostEditor({ initial, knownTags }: Props) {
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
+    const previewContentRef = useRef<HTMLDivElement>(null);
     const thumbInputRef = useRef<HTMLInputElement>(null);
 
     // 한쪽을 굴리면 다른 쪽도 같은 자리를 보게 따라간다
-    useScrollSync(textareaRef, previewRef);
+    useScrollSync(textareaRef, previewRef, previewContentRef, html);
 
     const set = <K extends keyof EditablePost>(key: K, value: EditablePost[K]) =>
         setPost((prev) => ({ ...prev, [key]: value }));
@@ -366,7 +367,7 @@ export default function PostEditor({ initial, knownTags }: Props) {
                         <h1>{post.title || "제목 없음"}</h1>
                         <h5>{post.description}</h5>
                         <hr />
-                        <div dangerouslySetInnerHTML={{ __html: html }} />
+                        <div ref={previewContentRef} dangerouslySetInnerHTML={{ __html: html }} />
                     </PreviewArticle>
                 </div>
             </SplitPane>
