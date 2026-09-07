@@ -30,6 +30,8 @@ import json from "refractor/lang/json.js";
 import diff from "refractor/lang/diff.js";
 import apex from "refractor/lang/apex.js";
 import docker from "refractor/lang/docker.js";
+// markup-templating 을 스스로 등록하므로 따로 import 하지 않는다
+import liquid from "refractor/lang/liquid.js";
 
 const languages = [
     markup,
@@ -48,6 +50,8 @@ const languages = [
     diff,
     apex,
     docker,
+    // shopify 글의 {% schema %} 블록용. 없으면 오류 없이 색만 빠진다.
+    liquid,
 ];
 
 languages.forEach((language) => refractor.register(language));
