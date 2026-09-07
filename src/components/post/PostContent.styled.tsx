@@ -196,18 +196,26 @@ export const Article = styled.article`
     }
   }
 
-  /* 인라인 코드 */
-  code {
+  /*
+   * 인라인 코드.
+   *
+   * pre 안쪽은 제외해야 한다. 그냥 code 로 두면 이 규칙(0,1,1)이 prism 테마의
+   * pre code(0,0,2)를 특이도로 이겨, 코드블록이 인라인용 padding 과 색을 쓴다.
+   * 언어 태그가 붙은 블록만 code[class*="language-"](0,1,1) 로 동점을 이뤄
+   * 살아남았고, 태그 없는 블록은 라이트에서 주황 글씨에 여백 없이 나왔다.
+   * (다크는 html.dark pre code 가 0,1,2 라 색만 우연히 맞았다)
+   *
+   * & 를 반드시 붙인다. : 로 시작하면 stylis 가 &:hover 처럼 뿌리 클래스에
+   * 이어붙여 .css-xxx:not(pre) > code 가 되고, 그러면 article 의 직계 자식만
+   * 잡혀 <p> 안의 인라인 코드가 통째로 빠진다. 오류는 나지 않는다.
+   */
+  & :not(pre) > code {
     background: var(--codefontbgcolor);
     padding: 0.1rem 0.3em;
     border-radius: 4px;
     font-size: 0.85rem;
     font-family: "Consolas";
     color: var(--codefontcolor);
-  }
-
-  .code-highlight {
-    padding: none !important;
   }
 
   /* 구분선 */
