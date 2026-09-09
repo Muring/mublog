@@ -35,6 +35,12 @@ export const metadata: Metadata = {
     },
     // 이미지는 og:image 를 그대로 쓴다. 페이지가 twitter 를 덮어쓰지 않으므로 전역으로 둔다.
     twitter: { card: "summary_large_image" },
+    /*
+     * Search Console 소유 확인용. HTML 에 그대로 나가는 공개 값이라 비밀이 아니다.
+     * 확인이 끝난 뒤에도 지우지 않는다 — 태그가 사라지면 소유권이 풀려
+     * 색인 보고서와 실적 데이터를 함께 잃는다.
+     */
+    verification: { google: "kGbNBEYanSm9iwXFVrOXhA9qzO1cntycveob4pv2iJQ" },
 };
 
 export default function RootLayout({
