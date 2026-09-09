@@ -13,6 +13,25 @@ export const POST_VIEW_COOKIE_PREFIX = "mublog_p_";
  */
 export const POST_VIEW_WINDOW_MS = 30 * 60 * 1000;
 
+/*
+ * IP 기준 상한.
+ *
+ * 쿠키만으로는 셀 수 없다. httpOnly 라 스크립트가 읽지는 못하지만 **안 보내면
+ * 그만이고**, 그러면 매 요청이 새 방문·새 조회가 된다. UA 도 자가신고라
+ * isBot 은 브라우저 UA 하나로 통과한다.
+ *
+ * 그렇다고 IP 하나를 1회로 묶지는 않는다. 회사나 통신사 NAT 뒤의 서로 다른
+ * 사람이 한 명으로 세어지기 때문이다. 위조를 "무제한"에서 "몇 번"으로 낮추는
+ * 것이 목적이지 정확한 식별이 아니다.
+ */
+/** 한 IP 가 /api/visit 을 두드릴 수 있는 빈도. 넘으면 429 로 끊는다 */
+export const VISIT_RATE_LIMIT = 60;
+export const VISIT_RATE_WINDOW_MS = 60 * 1000;
+/** 한 IP 가 하루에 새 방문자로 잡힐 수 있는 횟수 */
+export const VISIT_PER_IP_DAILY = 5;
+/** 한 IP 가 같은 글의 조회수를 올릴 수 있는 횟수 (POST_VIEW_WINDOW_MS 기준) */
+export const POST_VIEW_PER_IP = 3;
+
 export type SiteStats = {
     /** 오늘(KST) 순 방문자 */
     today: number;
