@@ -7,6 +7,7 @@ import RelatedContent from "@/components/post/RelatedContent";
 import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
 import Comments from "@/components/comments/Comments";
 import { getPostBySlug, getPublishedPosts, getPublishedSlugs } from "@/lib/posts";
+import { baseOpenGraph } from "../shared-metadata";
 
 type Props = {
     params: Promise<{ slug: string }>;
@@ -32,9 +33,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!post) return {};
 
+    const url = `/${post.slug}`;
+    const description = post.description ?? undefined;
     return {
         title: post.title, // RootLayout 의 template 에 의해 "Mublog | title" 이 된다
-        description: post.description ?? undefined,
+        description,
+        alternates: { canonical: url },
+        openGraph: {
+            ...baseOpenGraph,
+            /*
+             * 썸네일은 "/thumbnails/x.png" 상대경로이거나 Supabase 절대 URL 이다.
+             * metadataBase 는 상대경로만 절대화하므로 둘 다 그대로 넘기면 된다.
+             * 없을 때 `images: undefined` 로 덮어쓰면 baseOpenGraph 의 기본 카드까지
+             * 같이 지워지므로, 있을 때만 키를 얹는다.
+             */
+            ...(post.thumbnail ? { images: [post.thumbnail] } : {}),
+            type: "article",
+            url,
+            title: post.title,
+            description,
+            publishedTime: post.publishedAt,
+            tags: post.tags,
+        },
     };
 }
 

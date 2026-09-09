@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { PostGridWrapper, GridList } from "./PostGrid.styled";
-import { useSearchParams } from "next/navigation";
 import TagMenu from "@/components/post/TagMenu";
 import Link from "next/link";
 import PostCard from "./PostCard";
@@ -14,12 +13,15 @@ type Props = {
   /** 서버에서 최신순으로 정렬해 내려준다 */
   posts: PostSummary[];
   tags: string[];
+  /**
+   * 선택된 태그. 여기서 useSearchParams 로 직접 읽지 않는다 —
+   * 읽는 순간 이 컴포넌트가 정적 셸에서 빠져 서버 HTML 에 카드가 사라진다.
+   * page.tsx 가 searchParams 에서 뽑아 내려준다.
+   */
+  selectedTag: string | null;
 };
 
-export default function PostGrid({ posts, tags }: Props) {
-  const searchParams = useSearchParams();
-  const selectedTag = searchParams.get("tag");
-
+export default function PostGrid({ posts, tags, selectedTag }: Props) {
   // 포스트 필터링
   const filteredPosts =
     !selectedTag || selectedTag === "all"

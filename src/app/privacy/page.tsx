@@ -4,6 +4,7 @@ import { PrivacyWrapper } from "./Privacy.styled";
 export const metadata: Metadata = {
     title: "개인정보 처리방침",
     description: "이 블로그가 저장하는 정보와 그 이유",
+    alternates: { canonical: "/privacy" },
 };
 
 /**

@@ -87,6 +87,27 @@ export function getPostBySlug(slug: string): Promise<PostDetail | null> {
     )();
 }
 
+/**
+ * sitemap.xml 용. slug 와 수정일만 가져온다.
+ *
+ * `updatedAt` 을 lastModified 로 쓸 수 있는 것은 조회수·댓글 수 증가가 raw SQL 이라
+ * `@updatedAt` 을 건드리지 않기 때문이다(stats.ts / comments.ts 주석 참고).
+ * 그 둘을 prisma.post.update 로 되돌리면 여기 날짜가 "마지막 조회일" 이 되고,
+ * 크롤러는 안 바뀐 글을 계속 다시 읽는다.
+ */
+export const getSitemapEntries = unstable_cache(
+    async (): Promise<{ slug: string; updatedAt: string }[]> => {
+        const rows = await prisma.post.findMany({
+            where: { status: "PUBLISHED" },
+            orderBy: { publishedAt: "desc" },
+            select: { slug: true, updatedAt: true },
+        });
+        return rows.map((r) => ({ slug: r.slug, updatedAt: r.updatedAt.toISOString() }));
+    },
+    ["posts-sitemap"],
+    { tags: ["posts:list"], revalidate: 3600 }
+);
+
 /** 태그 목록. "etc" 는 항상 마지막으로 민다. */
 export const getAllTags = unstable_cache(
     async (): Promise<string[]> => {
