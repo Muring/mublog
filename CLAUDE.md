@@ -152,6 +152,10 @@ OS 설정을 보면 사용자가 고른 테마와 어긋난다 — 라이트를 
 `yarn build`는 `prisma generate && eslint . && next build`다.
 Vercel이 이 스크립트를 그대로 돌리므로 **lint 오류는 배포를 막는다**(경고는 막지 않는다).
 
+**`npm`/`npx` 를 이 저장소에서 쓰지 않는다.** npm 은 `package.json` 의 `resolutions` 를 읽지 않아
+이미 닫은 취약점을 다시 보고하고, 그 "수정" 으로 Prisma 를 6 으로 내리며 `yarn.lock` 을 v1 로 바꾼다.
+감사는 `yarn npm audit --all --recursive` 로 한다.
+
 **`yarn start`가 떠 있는 채로 다시 빌드하지 않는다.** 청크가 어긋나 클라이언트 예외가 나고,
 Windows에서는 sharp DLL이 잠겨 `EPERM`으로 설치가 실패한다. 먼저 서버를 내린다.
 
