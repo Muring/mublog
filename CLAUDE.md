@@ -21,6 +21,8 @@ README는 **무엇이 어떻게 돼 있는지**를 설명한다. 이 문서는 *
   막는 유일한 장치다. Prisma는 `postgres` 롤이라 RLS를 우회하므로 앱은 영향받지 않는다.
 - 관리자 판별은 **`profiles.role` 컬럼만** 쓴다. `user_metadata`는 사용자가 직접 쓸 수 있어서
   거기서 권한을 도출하면 아무나 관리자가 된다.
+- `SECURITY DEFINER` 함수를 만들면 `anon`/`authenticated`에서 `EXECUTE`를 회수한다.
+  기본값이 `PUBLIC`이고 PostgREST가 `/rpc/`로 노출하며 RLS를 우회한다.
 - 비밀값을 커밋하거나 터미널에 출력하지 않는다. 커밋 전 `sb_secret_`, DB 비밀번호,
   `postgres.<ref>:` 패턴을 훑는다.
 

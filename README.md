@@ -257,6 +257,12 @@ Supabase는 `public` 테이블을 PostgREST로 자동 노출합니다.
 정책이 하나도 없는 RLS를 켜면 익명 접근이 전부 막히고,
 Prisma는 `postgres` 롤로 붙어 RLS를 우회하므로 앱은 영향받지 않습니다.
 
+**`SECURITY DEFINER` 함수는 `anon`/`authenticated`에서 `EXECUTE`를 회수합니다.**
+Postgres는 함수의 `EXECUTE`를 기본으로 `PUBLIC`에 주고, PostgREST는 `public` 함수를
+`/rest/v1/rpc/<name>`으로 노출합니다. `SECURITY DEFINER`면 위의 RLS까지 우회하므로
+익명이 함수를 통해 테이블을 읽는 구멍이 됩니다. 트리거 함수(`handle_new_user`)는
+트리거를 발화시키는 `supabase_auth_admin`에만 남기고, 쓰지 않는 함수는 두지 않습니다.
+
 **`/admin`은 403이 아니라 404를 반환합니다.** public 저장소에서 존재를 확인시켜주지 않습니다.
 
 **인가는 `layout.tsx`가 아니라 각 `page.tsx`에서 합니다.** 레이아웃에서 `await`하면
