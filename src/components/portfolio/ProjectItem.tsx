@@ -65,18 +65,21 @@ export default function ProjectItem({ project, first = false }: { project: Proje
                             <li key={tech}>{tech}</li>
                         ))}
                     </P.Stack>
+                    {/* 시연 영상 같은 링크는 기술 스택 아래 같은 열에 둔다 */}
+                    {others.length > 0 && (
+                        <>
+                            <h4>Links</h4>
+                            <P.Links>
+                                {others.map((link) => (
+                                    <a key={link.href} href={link.href} {...external}>
+                                        {link.label} ↗
+                                    </a>
+                                ))}
+                            </P.Links>
+                        </>
+                    )}
                 </div>
             </P.Details>
-
-            {others.length > 0 && (
-                <P.Links>
-                    {others.map((link) => (
-                        <a key={link.href} href={link.href} {...external}>
-                            {link.label} ↗
-                        </a>
-                    ))}
-                </P.Links>
-            )}
         </P.Item>
     );
 }

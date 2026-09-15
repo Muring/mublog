@@ -30,7 +30,13 @@ export const Track = styled.div`
     }
 `;
 
+/**
+ * 좌우에 화살표가 앉을 홈통(--gutter)을 비워 둔다.
+ * 화살표를 그림 위에 얹으면 어떤 장면에서는 내용을 가린다 — 그래서 그림은
+ * 홈통 안쪽에만 그리고 화살표는 홈통에만 둔다. 둘이 겹칠 일이 없다.
+ */
 export const Slide = styled.div`
+    --gutter: 2.75rem;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -38,12 +44,13 @@ export const Slide = styled.div`
     flex: 0 0 100%;
     width: 100%;
     height: 100%;
-    padding: 1.25rem;
+    padding: 1.25rem var(--gutter) 1.75rem;
     scroll-snap-align: start;
 
     ${mobile} {
+        --gutter: 2rem;
         gap: 0.6rem;
-        padding: 0.75rem;
+        padding: 0.75rem var(--gutter) 1.5rem;
     }
 `;
 
@@ -58,44 +65,42 @@ export const Shot = styled(Image)`
     border-radius: 6px;
 `;
 
-/**
- * 양쪽 화살표. 사진 위에 얹히므로 배경·글자 짝을 반드시 함께 준다 —
- * 그림 색을 따라가면 어느 슬라이드에서는 사라진다.
- */
+/** 홈통 한가운데 놓이는 맨 화살표. 면도 테두리도 없이 선만 둔다 */
 export const Arrow = styled.button`
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    bottom: 0;
     z-index: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border: 1px solid var(--bordercolor);
-    border-radius: 50%;
-    background-color: var(--cardbackground);
-    color: var(--foreground);
+    width: 2.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--desccolor);
     cursor: pointer;
-    box-shadow: 0px 3px 5px -2px var(--shadowcolor);
-    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+    transition: color 0.15s ease-in-out;
 
     &:hover:not(:disabled) {
-        background-color: var(--hovercolor);
-        color: var(--hoverfontcolor);
+        color: var(--foreground);
     }
 
     &:disabled {
-        opacity: 0.35;
+        opacity: 0.25;
         cursor: default;
     }
 
     &[data-dir="prev"] {
-        left: 0.75rem;
+        left: 0;
     }
 
     &[data-dir="next"] {
-        right: 0.75rem;
+        right: 0;
+    }
+
+    ${mobile} {
+        width: 2rem;
     }
 `;
 

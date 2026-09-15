@@ -100,6 +100,11 @@ const Details = styled.div`
         font-weight: 800;
     }
 
+    /* 같은 열에 두 번째로 오는 제목(Links)은 위 내용과 간격을 둔다 */
+    h4 + * + h4 {
+        margin-top: 1.5rem;
+    }
+
     ul.did {
         ${bulletList}
     }
@@ -129,11 +134,12 @@ const Stack = styled.ul`
 
 const Links = styled.div`
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.25rem;
+    flex-direction: column;
+    gap: 0.5rem;
     font-size: 0.9rem;
 
     a {
+        align-self: flex-start;
         color: var(--linkcolor);
         font-weight: 700;
         text-decoration-line: underline;

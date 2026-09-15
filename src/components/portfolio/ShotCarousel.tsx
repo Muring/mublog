@@ -77,7 +77,7 @@ export default function ShotCarousel({ shots, label, priority = false }: { shots
             {slides.length > 1 && (
                 <>
                     <Arrow type="button" data-dir="prev" aria-label="이전 화면" disabled={index === 0} onClick={() => goTo(index - 1)}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M15 5l-7 7 7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </Arrow>
@@ -88,7 +88,7 @@ export default function ShotCarousel({ shots, label, priority = false }: { shots
                         disabled={index === slides.length - 1}
                         onClick={() => goTo(index + 1)}
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                     </Arrow>
