@@ -38,7 +38,6 @@ export const Section = styled.section`
     > .intro {
         margin: -1rem 0 2rem;
         color: var(--desccolor);
-        font-size: 1.05rem;
         line-height: 1.8;
         word-break: keep-all;
     }
@@ -62,8 +61,8 @@ export const bulletList = css`
 
     li {
         position: relative;
-        font-size: 1.05rem;
-        line-height: 1.75;
+        font-size: 0.95rem;
+        line-height: 1.7;
         word-break: keep-all;
         overflow-wrap: break-word;
     }
@@ -97,7 +96,7 @@ export const SkillGroup = styled.article`
     padding: 2rem 0;
 
     h3 {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         font-weight: 900;
     }
 
@@ -116,7 +115,6 @@ export const ContactList = styled.dl`
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        font-size: 1.05rem;
         font-weight: 800;
     }
 
@@ -127,7 +125,6 @@ export const ContactList = styled.dl`
 
     a {
         color: var(--linkcolor);
-        font-size: 1.05rem;
         font-weight: 700;
         text-decoration-line: underline;
         text-underline-offset: 0.2em;
