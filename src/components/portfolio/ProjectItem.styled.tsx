@@ -20,7 +20,7 @@ const Title = styled.div`
     gap: 0.6rem;
 
     h3 {
-        font-size: 1.7rem;
+        font-size: 1.85rem;
         font-weight: 900;
         line-height: 1.3;
         word-break: keep-all;
@@ -55,12 +55,12 @@ const Facts = styled.dl`
     display: flex;
     flex-direction: column;
     gap: 0.9rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
     line-height: 1.5;
 
     dt {
         color: var(--desccolor);
-        font-size: 0.75rem;
+        font-size: 0.8rem;
         font-weight: 700;
     }
 
@@ -76,12 +76,13 @@ const Description = styled.div`
     gap: 0.6rem;
 
     .tagline {
-        font-size: 1.05rem;
+        font-size: 1.15rem;
         font-weight: 800;
         word-break: keep-all;
     }
 
     p {
+        font-size: 1.05rem;
         line-height: 1.8;
         word-break: keep-all;
         overflow-wrap: break-word;
@@ -96,7 +97,7 @@ const Details = styled.div`
 
     h4 {
         margin-bottom: 0.9rem;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         font-weight: 800;
     }
 
@@ -125,7 +126,7 @@ const Stack = styled.ul`
         border: 1px solid var(--linkcolor);
         border-radius: 999px;
         color: var(--linkcolor);
-        font-size: 0.8rem;
+        font-size: 0.875rem;
         font-weight: 700;
         line-height: 1.6;
         white-space: nowrap;
@@ -136,7 +137,7 @@ const Links = styled.div`
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
 
     a {
         align-self: flex-start;

@@ -33,7 +33,7 @@ export const Value = styled.div`
     gap: 0.75rem;
 
     h4 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         font-weight: 800;
         line-height: 1.6;
     }
@@ -47,7 +47,7 @@ export const Value = styled.div`
     }
 
     p {
-        font-size: 1.05rem;
+        font-size: 1.15rem;
         line-height: 1.9;
         word-break: keep-all;
         overflow-wrap: break-word;
