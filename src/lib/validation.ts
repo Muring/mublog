@@ -13,6 +13,7 @@ const RESERVED_SLUGS = new Set([
     "auth",
     "api",
     "about",
+    "portfolio-codex",
     "_next",
     "favicon.ico",
     "robots.txt",

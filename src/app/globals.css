@@ -27,6 +27,8 @@
   --shadowcolor: rgba(0, 0, 0, 0.1);
   /* 흰 배경에서 #888 은 3.54:1 로 AA 미달이라 한 단계 어둡게 잡는다 (5.33:1) */
   --desccolor: #6b6b6b;
+  --portfolio-description: #6b6b6b;
+  --portfolio-description-highlight: #171717;
   --calloutborder: #ffee8a;
   /* callout 왼쪽 강조 막대. 장식이라 양 테마 같은 금색을 쓰지만,
      색을 컴포넌트에 적어두지 않기 위해 토큰으로 둔다 */
@@ -75,6 +77,8 @@ html.dark {
   /* #d93025 는 다크 카드 위에서 3.09:1. #f85149 도 4.44 로 모자라 한 단계 더 올린다 (5.91) */
   /* 라이트용 회색을 그대로 쓰면 카드 위에서 4.20:1 로 미달한다 (6.76 / 5.29) */
   --desccolor: #9a9a9a;
+  --portfolio-description: #b7bdc6;
+  --portfolio-description-highlight: #ffffff;
   --dangercolor: #ff7b72;
   /* 밝아진 빨강 위에 흰 글자를 올리면 3.3:1 로 더 나빠진다. 어두운 글자가 5.7:1 로 안전하다 */
   --dangerfontcolor: #101010;
