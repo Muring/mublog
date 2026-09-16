@@ -221,6 +221,55 @@ export const Article = styled.article`
     color: var(--codefontcolor);
   }
 
+  /*
+   * 코드블록 도구(언어 라벨 + 복사 버튼). CodeBlockTools 가 브라우저에서 붙인다.
+   * 가로 스크롤은 안쪽 code 가 하므로, pre 에 절대 배치하면 스크롤해도 제자리다.
+   * 라벨은 늘 보이고, 버튼은 평소 숨기되(opacity 0) 호버 없는 터치 기기에서는 항상 보인다.
+   */
+  pre {
+    position: relative;
+  }
+  .code-tools {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    line-height: 1;
+  }
+  .code-lang {
+    color: var(--desccolor);
+    text-transform: lowercase;
+  }
+  .code-copy {
+    border: 1px solid var(--bordercolor);
+    border-radius: 4px;
+    padding: 4px 8px;
+    background: var(--background);
+    color: var(--foreground);
+    font: inherit;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .code-copy:hover,
+  .code-copy.copied {
+    color: var(--linkhovercolor);
+    border-color: var(--linkhovercolor);
+  }
+  pre:hover .code-copy,
+  pre:focus-within .code-copy {
+    opacity: 1;
+  }
+  @media (hover: none) {
+    .code-copy {
+      opacity: 1;
+    }
+  }
+
   /* 구분선 */
   hr {
     border: none;

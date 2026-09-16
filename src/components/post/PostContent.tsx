@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatPostDate } from "@/lib/date";
 import PostViews from "./PostViews";
 import PostNavigation from "./PostNavigation";
+import CodeBlockTools from "./CodeBlockTools";
 
 type Props = {
     title: string;
@@ -24,6 +25,7 @@ export default function PostContent({ title, date, slug, viewCount, description,
     return (
         <>
             <PostNavigation key={slug} html={html} />
+            <CodeBlockTools html={html} />
             <Article id="post-top">
                 <h1>{title}</h1>
                 <h5>{description}</h5>
