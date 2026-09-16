@@ -1,0 +1,66 @@
+.navigation {
+    max-height: calc(100dvh - 144px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    line-height: 1.7;
+    color: var(--foreground);
+    padding: 14px;
+    border: 1px solid var(--bordercolor);
+    border-radius: 12px;
+    background: var(--background);
+    font-size: 12px;
+}
+.navigationTitle {
+    margin-bottom: 10px;
+    font-weight: 800;
+    text-align: center;
+}
+.navigationList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.navigationList a {
+    display: block;
+    padding: 3px 8px;
+    border-left: 2px solid transparent;
+    color: var(--portfolio-description);
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+.navigationList a:hover {
+    color: var(--linkhovercolor);
+}
+.navigationList a[aria-current="location"] {
+    border-left-color: var(--linkhovercolor);
+    color: var(--linkhovercolor);
+    background: color-mix(in srgb, var(--linkhovercolor) 8%, transparent);
+    font-weight: 700;
+}
+.navigationTop {
+    display: block;
+    margin-top: 12px;
+    padding-top: 10px;
+    text-align: center;
+    border-top: 1px solid var(--bordercolor);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.navigationList .navigationList {
+    margin-left: 10px;
+    padding-left: 8px;
+    border-left: 1px solid var(--bordercolor);
+}
+.navigation a:focus-visible {
+    outline: 2px solid var(--linkhovercolor);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+:global(html):has(.navigation) {
+    scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+    :global(html):has(.navigation) {
+        scroll-behavior: auto;
+    }
+}

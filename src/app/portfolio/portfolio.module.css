@@ -40,43 +40,6 @@
 }
 .portfolioNavigation {
     margin-top: 28px;
-    padding: 18px;
-    border: 1px solid var(--bordercolor);
-    border-radius: 12px;
-    background: var(--background);
-    font-size: 12px;
-}
-.navigationTitle {
-    margin-bottom: 10px;
-    font-weight: 800;
-}
-.navigationList {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 4px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-.navigationList a {
-    display: block;
-    padding: 7px 10px;
-    border-left: 2px solid transparent;
-    color: var(--desccolor);
-}
-.navigationList a[aria-current="location"] {
-    border-left-color: var(--accent);
-    color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 8%, transparent);
-    font-weight: 700;
-}
-.navigationTop {
-    display: block;
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid var(--bordercolor);
-    text-decoration: underline;
-    text-underline-offset: 4px;
 }
 .expertise,
 .contact {
@@ -93,9 +56,6 @@
         overscroll-behavior: contain;
         margin-top: 0;
         z-index: 10;
-    }
-    .navigationList {
-        grid-template-columns: 1fr;
     }
 }
 .eyebrow {

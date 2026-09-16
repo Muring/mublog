@@ -14,9 +14,12 @@ const description =
 const navigationItems = [
     { id: "portfolio-top", label: "소개" },
     { id: "skills", label: "Skills" },
-    { id: "projects", label: "프로젝트" },
-    ...portfolioProjects.map(({ id, name }) => ({ id, label: name })),
-    { id: "contact", label: "연락" },
+    {
+        id: "projects",
+        label: "프로젝트",
+        children: portfolioProjects.map(({ id, name }) => ({ id, label: name })),
+    },
+    { id: "contact", label: "연락처" },
 ];
 export const metadata: Metadata = {
     title,

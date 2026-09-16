@@ -14,6 +14,9 @@ export const Article = styled.article`
   animation-fill-mode: forwards;
 
   /* 타이포그래피 기본 구조 */
+  #post-body :is(h1, h2, h3, h4, h5, h6) {
+    scroll-margin-top: 90px;
+  }
   h1 {
     margin-bottom: 0.5rem;
     line-height: 1.5;

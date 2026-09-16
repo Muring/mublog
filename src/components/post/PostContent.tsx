@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatPostDate } from "@/lib/date";
 import PostViews from "./PostViews";
+import PostNavigation from "./PostNavigation";
 
 type Props = {
     title: string;
@@ -21,45 +22,48 @@ export default function PostContent({ title, date, slug, viewCount, description,
     const formattedDate = formatPostDate(date);
 
     return (
-        <Article>
-            <h1>{title}</h1>
-            <h5>{description}</h5>
-            <div className="article-detail">
-                <div className="article-item">
-                    <Image
-                        src="/icons/calendar.svg"
-                        alt="calendar icon"
-                        width={16}
-                        height={16}
-                        className="article-detail-icon auto-dark"
-                    />
-                    <p className="desc">{formattedDate}</p>
-                    <p className="desc views">
-                        <PostViews slug={slug} initialViews={viewCount} />
-                    </p>
-                </div>
+        <>
+            <PostNavigation key={slug} html={html} />
+            <Article id="post-top">
+                <h1>{title}</h1>
+                <h5>{description}</h5>
+                <div className="article-detail">
+                    <div className="article-item">
+                        <Image
+                            src="/icons/calendar.svg"
+                            alt="calendar icon"
+                            width={16}
+                            height={16}
+                            className="article-detail-icon auto-dark"
+                        />
+                        <p className="desc">{formattedDate}</p>
+                        <p className="desc views">
+                            <PostViews slug={slug} initialViews={viewCount} />
+                        </p>
+                    </div>
 
-                <div className="article-item">
-                    <Image
-                        src="/icons/tag.svg"
-                        alt="tag icon"
-                        width={16}
-                        height={16}
-                        className="article-detail-icon auto-dark"
-                    />
-                    <ul>
-                        {tags?.map((tag) => (
-                            <li key={tag}>
-                                <Link href={`/?tag=${encodeURIComponent(tag)}`}>
-                                    <h4 className=" tag">{"#" + tag}</h4>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="article-item">
+                        <Image
+                            src="/icons/tag.svg"
+                            alt="tag icon"
+                            width={16}
+                            height={16}
+                            className="article-detail-icon auto-dark"
+                        />
+                        <ul>
+                            {tags?.map((tag) => (
+                                <li key={tag}>
+                                    <Link href={`/?tag=${encodeURIComponent(tag)}`}>
+                                        <h4 className=" tag">{"#" + tag}</h4>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <hr />
-            <div dangerouslySetInnerHTML={{ __html: html }} />
-        </Article>
+                <hr />
+                <div id="post-body" dangerouslySetInnerHTML={{ __html: html }} />
+            </Article>
+        </>
     );
 }
