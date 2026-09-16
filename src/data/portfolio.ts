@@ -30,6 +30,46 @@ export type PortfolioProject = {
 // Dates describe the project period, and contributions describe individual work.
 export const portfolioProjects: PortfolioProject[] = [
     {
+        id: "mublog",
+        name: "Mublog",
+        category: "BLOG · FULL-STACK",
+        period: "2025.04 — 진행 중",
+        team: "1명",
+        role: "설계 · 개발 · 운영",
+        summary:
+            "Next.js App Router 기반 기술 블로그. 포스트는 DB에 있고 브라우저에서 쓰고 발행하면 재배포 없이 반영됩니다. 방문자는 GitHub 로그인으로 댓글을 남길 수 있습니다.",
+        contributions: [
+            {
+                title: "정적 블로그에서 DB 기반으로",
+                description:
+                    "Contentlayer 정적 블로그를 Supabase + Prisma 구조로 옮기고, 마크다운 → HTML 파이프라인을 직접 구성해 기존 글의 렌더 결과가 바뀌지 않도록 회귀 검사를 두었습니다.",
+            },
+            {
+                title: "쓰기부터 발행까지 한 화면에서",
+                description:
+                    "소유자 전용 에디터와 이미지 업로드, 발행 시 ISR 캐시 무효화를 구현했습니다. GitHub OAuth 로그인과 댓글, 관리자 권한 분리를 붙였습니다.",
+            },
+            {
+                title: "무료 티어에서 돌아가는 설계",
+                description:
+                    "Supabase Free · Vercel Hobby 제약에 맞춰 방문 통계를 하루 1행으로 집계하고, 조회수·댓글 수는 raw SQL로 올려 수정일이 오염되지 않게 했습니다.",
+            },
+        ],
+        stack: [
+            "Next.js 16",
+            "React 19",
+            "TypeScript",
+            "Emotion",
+            "Prisma 7",
+            "Supabase",
+            "TanStack Query",
+            "Vercel",
+        ],
+        repository: "https://github.com/Muring/mublog",
+        videos: [{ label: "배포된 사이트", url: "https://muring-blog.vercel.app/" }],
+        images: portfolioImages.mublog,
+    },
+    {
         id: "ohana",
         name: "Ohana Liquor",
         category: "SALESFORCE · CRM",

@@ -118,7 +118,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                     <div>
                         <p>{image.caption}</p>
                         <button type="button" onClick={open}>
-                            전체 화면으로 확대 ↗
+                            전체 화면으로 확대
                         </button>
                         {image.originalUrl && (
                             <a
@@ -126,7 +126,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                GIF 시연 보기 ↗
+                                GIF 시연 보기
                             </a>
                         )}
                     </div>
@@ -203,7 +203,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    이미지 파일 ↗
+                                    이미지 파일
                                 </a>
                                 <button
                                     type="button"
@@ -238,7 +238,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    GIF 시연 보기 ↗
+                                    GIF 시연 보기
                                 </a>
                             )}
                         </footer>

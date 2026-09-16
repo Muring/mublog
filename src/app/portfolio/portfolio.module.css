@@ -8,7 +8,7 @@
     line-height: 1.7;
 }
 .page :is(
-    .edition, .intro, .heroBottom, .skills p, .sectionHeading > p,
+    .intro, .heroBottom, .skills p,
     .projectNav a span, .projectNumber, .period, .projectMeta dt,
     .contributions p, .contactBottom, .galleryHeading > span,
     .viewerNavigation > span > span, .dialogToolbar p
@@ -16,7 +16,7 @@
     transition: color 150ms ease;
 }
 .page :is(
-    .edition, .intro, .heroBottom, .skills p, .sectionHeading > p,
+    .intro, .heroBottom, .skills p,
     .projectNav a span, .projectNumber, .period, .projectMeta dt,
     .contributions p, .contactBottom, .galleryHeading > span,
     .viewerNavigation > span > span, .dialogToolbar p
@@ -51,10 +51,6 @@
     height: 7px;
     background: var(--accent);
     border-radius: 50%;
-}
-.edition {
-    margin-left: auto;
-    color: var(--desccolor);
 }
 .greeting {
     margin-top: 65px;
@@ -182,18 +178,6 @@
     font-size: 36px;
     letter-spacing: -0.055em;
     margin-top: 10px;
-}
-.count {
-    vertical-align: top;
-    margin-left: 12px;
-    font-size: 15px;
-    color: var(--accent);
-    letter-spacing: 0;
-}
-.sectionHeading > p {
-    font-size: 12px;
-    color: var(--desccolor);
-    padding-bottom: 9px;
 }
 .projectNav {
     display: flex;
@@ -441,9 +425,6 @@
     .sectionHeading h2 {
         font-size: 29px;
     }
-    .sectionHeading > p {
-        margin-top: 10px;
-    }
     .projectNav {
         gap: 4px 18px;
         padding: 18px 0 24px;
@@ -511,14 +492,44 @@
     margin-left: 8px;
     color: var(--accent);
 }
-.galleryHeading select {
-    max-width: 190px;
-    padding: 9px 12px;
-    border: 1px solid var(--bordercolor);
-    border-radius: 6px;
-    background: var(--background);
+.galleryHeading label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
     color: var(--foreground);
+    transition: color 150ms ease;
+}
+.galleryHeading label:hover {
+    color: var(--accent);
+}
+.galleryHeading select {
+    appearance: none;
+    max-width: 190px;
+    padding: 9px 36px 9px 16px;
+    border: 1px solid var(--bordercolor);
+    border-radius: 999px;
+    background: var(--background);
+    color: inherit;
     font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 150ms ease;
+}
+.galleryHeading select:hover {
+    border-color: var(--accent);
+}
+/* 셰브런. 이미지 대신 테두리 두 변을 돌려 그려서 currentColor 로 테마를 따라간다. */
+.galleryHeading label::after {
+    content: "";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
 }
 .mainImage {
     display: block;

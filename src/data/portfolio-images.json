@@ -406,5 +406,47 @@
             "height": 868,
             "source": "https://raw.githubusercontent.com/Muring/Ohana/HEAD/images/oppty-quote-comparison.png"
         }
+    ],
+    "mublog": [
+        {
+            "file": "mublog-home",
+            "caption": "포스트 목록 · 태그 필터",
+            "group": "메인",
+            "width": 1400,
+            "height": 800,
+            "source": "https://muring-blog.vercel.app/"
+        },
+        {
+            "file": "mublog-home-dark",
+            "caption": "다크 모드",
+            "group": "메인",
+            "width": 1400,
+            "height": 800,
+            "source": "https://muring-blog.vercel.app/"
+        },
+        {
+            "file": "mublog-mobile",
+            "caption": "모바일 목록",
+            "group": "메인",
+            "width": 420,
+            "height": 900,
+            "source": "https://muring-blog.vercel.app/?tag=frontend"
+        },
+        {
+            "file": "mublog-post",
+            "caption": "포스트 상세",
+            "group": "포스트",
+            "width": 1400,
+            "height": 800,
+            "source": "https://muring-blog.vercel.app/blog-development-5"
+        },
+        {
+            "file": "mublog-comments",
+            "caption": "댓글 · 연관된 글",
+            "group": "포스트",
+            "width": 1400,
+            "height": 800,
+            "source": "https://muring-blog.vercel.app/blog-development-5"
+        }
     ]
 }

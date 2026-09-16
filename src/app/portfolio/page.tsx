@@ -8,7 +8,7 @@ import ProjectGallery from "./ProjectGallery";
 
 const title = "엄세현 포트폴리오";
 const description =
-    "화면을 만들고, 경험을 연결합니다. 개발자 엄세현의 2023–2024 프로젝트 기록.";
+    "화면을 만들고, 경험을 연결합니다. 개발자 엄세현의 프로젝트 기록.";
 export const metadata: Metadata = {
     title,
     description,
@@ -29,8 +29,7 @@ export default function PortfolioPage() {
             <HeaderTitleSetter title={title} />
             <header className={styles.hero}>
                 <div className={styles.eyebrow}>
-                    <span className={styles.dot} /> MURING · PORTFOLIO{" "}
-                    <span className={styles.edition}>2023 — 2024</span>
+                    <span className={styles.dot} /> MURING · PORTFOLIO
                 </div>
                 <p className={styles.greeting}>
                     안녕하세요, 개발자 엄세현입니다.
@@ -43,7 +42,7 @@ export default function PortfolioPage() {
                 <p className={styles.intro}>
                     사용자가 마주하는 화면부터 그 뒤의 업무 흐름까지.
                     <br className={styles.desktopBreak} /> 웹 프론트엔드와
-                    Salesforce를 넘나들며 만든 다섯 프로젝트를 소개합니다.
+                    Salesforce를 넘나들며 만든 프로젝트를 소개합니다.
                 </p>
                 <div className={styles.heroLinks}>
                     <a className={styles.primaryLink} href="#projects">
@@ -55,10 +54,10 @@ export default function PortfolioPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        GitHub <span aria-hidden="true">↗</span>
+                        GitHub
                     </a>
                     <a className={styles.animatedLink} href="mailto:esh5218@gmail.com">
-                        Email <span aria-hidden="true">↗</span>
+                        Email
                     </a>
                 </div>
                 <div className={styles.heroBottom}>
@@ -78,12 +77,13 @@ export default function PortfolioPage() {
                 <div className={styles.skills}>
                     <div>
                         <h3>React · Next.js</h3>
-                        <p>React · Next.js · Zustand · Axios · PWA</p>
+                        <p>React · Next.js · Prisma · Supabase · Zustand · PWA</p>
                         <ul>
-                            <li>서비스 화면을 구현하고 랭킹·게임 결과·아이템 구매 API를 연결했습니다.</li>
-                            <li>공통 통신 환경과 이미지 참조를 구성하고, PWA를 적용해 설치 가능한 웹앱을 만들었습니다.</li>
+                            <li>App Router 기반 블로그를 설계·운영하며 DB, 인증, 캐시 무효화까지 직접 다뤘습니다.</li>
+                            <li>서비스 화면을 구현하고 API를 연결했으며, PWA를 적용해 설치 가능한 웹앱을 만들었습니다.</li>
                         </ul>
-                        <a href="#vita">적용 프로젝트 · Vita ↗</a>
+                        <a href="#mublog">Mublog</a>
+                        <a href="#vita">Vita</a>
                     </div>
                     <div>
                         <h3>Vue · Nuxt</h3>
@@ -94,7 +94,7 @@ export default function PortfolioPage() {
                         </ul>
                         <a href="#momo">MOMO Bank</a>
                         <a href="#seas">SEAS</a>
-                        <a href="#ghiburi">집우리 ↗</a>
+                        <a href="#ghiburi">집우리</a>
                     </div>
                     <div>
                         <h3>UI · 인터랙션</h3>
@@ -103,7 +103,7 @@ export default function PortfolioPage() {
                             <li>서비스 페이지와 캐릭터·배경·아이콘·로고를 디자인했습니다.</li>
                             <li>캐릭터의 걷기·운동 애니메이션을 제작하고 서비스 화면에 적용했습니다.</li>
                         </ul>
-                        <a href="#vita">적용 프로젝트 · Vita ↗</a>
+                        <a href="#vita">적용 프로젝트 · Vita</a>
                     </div>
                     <div>
                         <h3>Salesforce</h3>
@@ -112,7 +112,7 @@ export default function PortfolioPage() {
                             <li>LWC로 캐러셀·리드 입력 폼·주문·지도 컴포넌트를 구현했습니다.</li>
                             <li>영업 단계별 필드와 Path를 구성하고, Flow와 Validation Rule로 업무 흐름을 자동화했습니다.</li>
                         </ul>
-                        <a href="#ohana">적용 프로젝트 · Ohana Liquor ↗</a>
+                        <a href="#ohana">적용 프로젝트 · Ohana Liquor</a>
                     </div>
                 </div>
             </section>
@@ -127,10 +127,8 @@ export default function PortfolioPage() {
                         <p className={styles.kicker}>SELECTED WORK</p>
                         <h2 id="projects-title">
                             프로젝트
-                            <span className={styles.count}>05</span>
                         </h2>
                     </div>
-                    <p>취업 전 프로젝트 · 2023–2024</p>
                 </div>
                 <nav
                     className={styles.projectNav}
@@ -174,8 +172,7 @@ export default function PortfolioPage() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    GitHub / 프로젝트 기록{" "}
-                                    <span aria-hidden="true">↗</span>
+                                    GitHub / 프로젝트 기록
                                 </a>
                                 {project.videos?.map((video) => (
                                     <a
@@ -185,8 +182,7 @@ export default function PortfolioPage() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        {video.label}{" "}
-                                        <span aria-hidden="true">↗</span>
+                                        {video.label}
                                     </a>
                                 ))}
                             </div>
@@ -229,10 +225,10 @@ export default function PortfolioPage() {
                     함께 나누고 싶습니다.
                 </h2>
                 <a className={styles.email} href="mailto:esh5218@gmail.com">
-                    esh5218@gmail.com <span aria-hidden="true">↗</span>
+                    esh5218@gmail.com
                 </a>
                 <div className={styles.contactBottom}>
-                    <Link href="/">블로그에서 더 읽기 ↗</Link>
+                    <Link href="/">블로그에서 더 읽기</Link>
                     <a href="#portfolio-top">맨 위로 ↑</a>
                 </div>
             </section>
