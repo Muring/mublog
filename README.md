@@ -776,6 +776,9 @@ icn1 (현재)         0.15~0.20s   0.14s
 | 무작위 로그아웃                          | `@supabase/ssr`에서 만든 응답 객체를 그대로 반환하지 않음  |
 | 옛 URL에 낡은 페이지가 남음              | slug 변경 시 이전 slug의 태그·경로를 무효화하지 않음      |
 | 프로덕션에서만 나는 prepared statement 오류 | `?pgbouncer=true` 누락                                  |
+| `$queryRaw` 에 `Prisma.sql` 조각을 겹치면 `invalid input syntax for type boolean` | Prisma 7 드라이버 어댑터가 조각을 JSON 으로 직렬화. 문장은 손으로, 입력은 `$n` 으로 |
+| og 카드에 한글이 네모로 나옴             | satori 는 woff2 를 못 읽음. `assets/fonts` 의 TTF 를 쓴다 |
+| `eslint . ` 이 `getFilename is not a function` 으로 죽음 | ESLint 10. `eslint-config-next` 16.3 의 `eslint-plugin-react` 가 아직 9 까지. 감사가 9 를 "지원 종료" 로 표시해도 올리지 않는다 |
 
 <br>
 
