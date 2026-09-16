@@ -20,17 +20,20 @@
     padding: 0;
     margin: 0;
 }
-/* 왼쪽 세로 레일 하나에 현재 위치 마커가 붙는다. 깊이는 들여쓰기(padding)로만 구분하고
-   레일은 최상위 목록 하나만 가져서 마커가 항상 같은 선 위에 놓인다. */
+/* 상위는 본문색·굵게, 하위는 보조색·가늘게로 나누고, 하위 묶음은 안쪽 레일로 한 번 더 감싼다.
+   현재 위치 마커는 그 항목에서 가장 가까운 레일 위에 붙는다. */
 .navigation > .navigationList {
     border-left: 1px solid var(--bordercolor);
+}
+.navigation > .navigationList > li + li {
+    margin-top: 6px;
 }
 .navigationList a {
     position: relative;
     display: block;
     padding: 3px 6px 3px 12px;
-    font-weight: 600;
-    color: var(--portfolio-description);
+    font-weight: 700;
+    color: var(--foreground);
     overflow-wrap: anywhere;
     text-decoration: none;
     transition: color 150ms ease;
@@ -56,20 +59,19 @@
 .navigationList a[aria-current="location"]::before {
     background: var(--linkhovercolor);
 }
-/* 하위 항목이 현재 위치면 그 부모는 본문색으로 한 단계 올려 어느 절 안인지 보이게 한다. */
-.navigationList li:has(> .navigationList a[aria-current="location"]) > a {
-    color: var(--foreground);
-}
 .navigationList .navigationList {
-    margin: 0;
+    margin: 2px 0 4px 12px;
+    border-left: 1px solid var(--bordercolor);
 }
 .navigationList .navigationList a {
-    padding-left: 24px;
+    padding: 2px 6px 2px 10px;
     font-size: 11px;
     font-weight: 400;
+    color: var(--portfolio-description);
 }
-.navigationList .navigationList .navigationList a {
-    padding-left: 36px;
+.navigationList .navigationList a::before {
+    top: 4px;
+    bottom: 4px;
 }
 .navigationTop {
     display: block;
