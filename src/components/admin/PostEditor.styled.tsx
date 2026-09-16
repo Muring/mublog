@@ -127,10 +127,13 @@ export const MetaGrid = styled.div`
     display: flex;
     gap: 0.35rem;
   }
-  .series-row select,
+  .series-row > :first-child,
   .series-row input:not([type="number"]) {
     flex: 1;
     min-width: 0;
+  }
+  .series-row > :first-child > button {
+    width: 100%;
   }
   .series-row input[type="number"] {
     width: 4.5rem;

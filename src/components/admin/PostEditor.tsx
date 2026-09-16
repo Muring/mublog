@@ -5,6 +5,7 @@ import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
+import Dropdown from "@/components/ui/Dropdown";
 import ImagePicker from "./ImagePicker";
 import {
     InlineCodeIcon,
@@ -227,10 +228,15 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                 <div className="field">
                     <span className="field-label">시리즈</span>
                     <div className="series-row">
-                        <select
+                        <Dropdown
+                            label="시리즈"
                             value={seriesChoice}
-                            onChange={(e) => {
-                                const value = e.target.value;
+                            options={[
+                                { value: "", label: "없음" },
+                                ...knownSeries.map((name) => ({ value: name, label: name })),
+                                { value: NEW_SERIES, label: "+ 새 시리즈" },
+                            ]}
+                            onChange={(value) => {
                                 if (value === NEW_SERIES) {
                                     setIsNewSeries(true);
                                     set("series", "");
@@ -240,16 +246,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                                 }
                                 if (!value) set("seriesOrder", "");
                             }}
-                            aria-label="시리즈"
-                        >
-                            <option value="">없음</option>
-                            {knownSeries.map((name) => (
-                                <option key={name} value={name}>
-                                    {name}
-                                </option>
-                            ))}
-                            <option value={NEW_SERIES}>+ 새 시리즈</option>
-                        </select>
+                        />
                         {isNewSeries && (
                             <input
                                 value={post.series}

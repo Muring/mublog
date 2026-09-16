@@ -381,29 +381,3 @@ export const Axis = styled.div`
     }
 `;
 
-/** 연도 선택. Monthly 에서만 뜬다 */
-export const YearSelect = styled.select`
-    /*
-     * Monthly 에서만 뜻이 있지만 자리는 늘 차지한다. 아예 빼면 컨트롤 줄
-     * 높이가 탭 버튼 기준으로 2px 줄어들어 단위를 오갈 때 카드가 움찔한다.
-     * visibility 는 자리를 남기면서 탭 순서에서도 빠진다.
-     */
-    &[data-hidden="true"] {
-        visibility: hidden;
-    }
-
-    padding: 0.25rem 0.5rem;
-    border: 1px solid var(--bordercolor);
-    border-radius: 0.4rem;
-    background-color: var(--cardbackground);
-    color: var(--foreground);
-    font-family: inherit;
-    font-size: 0.75rem;
-    font-weight: 700;
-    cursor: pointer;
-
-    &:focus-visible {
-        outline: 2px solid var(--bordercolor);
-        outline-offset: 1px;
-    }
-`;

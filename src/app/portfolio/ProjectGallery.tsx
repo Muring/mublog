@@ -1,128 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Dropdown from "@/components/ui/Dropdown";
 import type { PortfolioProject } from "@/data/portfolio";
 import styles from "./portfolio.module.css";
 
 type GalleryProject = Pick<PortfolioProject, "id" | "name" | "images">;
-
-type GroupOption = { value: string; label: string };
-
-/**
- * 화면 종류 고르기. 네이티브 select 는 펼쳐진 목록에 스타일이 닿지 않아
- * 버튼 + listbox 로 직접 그린다. 키보드(화살표·Enter·Escape)와 바깥 클릭을 처리한다.
- */
-function GroupSelect({
-    label,
-    value,
-    options,
-    onChange,
-}: {
-    label: string;
-    value: string;
-    options: GroupOption[];
-    onChange: (value: string) => void;
-}) {
-    const [open, setOpen] = useState(false);
-    const [focused, setFocused] = useState(0);
-    const root = useRef<HTMLDivElement>(null);
-    const listId = useId();
-    const current = options.find((option) => option.value === value) ?? options[0];
-
-    useEffect(() => {
-        if (!open) return;
-        const close = (event: PointerEvent) => {
-            if (!root.current?.contains(event.target as Node)) setOpen(false);
-        };
-        document.addEventListener("pointerdown", close);
-        return () => document.removeEventListener("pointerdown", close);
-    }, [open]);
-
-    function openList() {
-        setFocused(Math.max(0, options.findIndex((option) => option.value === value)));
-        setOpen(true);
-    }
-
-    function choose(index: number) {
-        onChange(options[index].value);
-        setOpen(false);
-    }
-
-    function onKeyDown(event: React.KeyboardEvent) {
-        if (!open) {
-            if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
-                event.preventDefault();
-                openList();
-            }
-            return;
-        }
-        switch (event.key) {
-            case "ArrowDown":
-                event.preventDefault();
-                setFocused((i) => Math.min(options.length - 1, i + 1));
-                break;
-            case "ArrowUp":
-                event.preventDefault();
-                setFocused((i) => Math.max(0, i - 1));
-                break;
-            case "Home":
-                event.preventDefault();
-                setFocused(0);
-                break;
-            case "End":
-                event.preventDefault();
-                setFocused(options.length - 1);
-                break;
-            case "Enter":
-            case " ":
-                event.preventDefault();
-                choose(focused);
-                break;
-            case "Escape":
-            case "Tab":
-                setOpen(false);
-                break;
-        }
-    }
-
-    return (
-        <div className={styles.groupSelect} ref={root} onKeyDown={onKeyDown}>
-            <button
-                type="button"
-                className={styles.groupSelectButton}
-                aria-label={label}
-                aria-haspopup="listbox"
-                aria-expanded={open}
-                aria-controls={listId}
-                onClick={() => (open ? setOpen(false) : openList())}
-            >
-                {current.label}
-            </button>
-            {open && (
-                <ul
-                    id={listId}
-                    role="listbox"
-                    aria-label={label}
-                    className={styles.groupSelectList}
-                >
-                    {options.map((option, index) => (
-                        <li
-                            key={option.value}
-                            role="option"
-                            aria-selected={option.value === value}
-                            className={index === focused ? styles.groupSelectFocused : undefined}
-                            onPointerEnter={() => setFocused(index)}
-                            onClick={() => choose(index)}
-                        >
-                            {option.label}
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
-}
 
 function GalleryViewer({ project }: { project: GalleryProject }) {
     const [index, setIndex] = useState(0);
@@ -388,8 +272,9 @@ export default function ProjectGallery({
                 <span>
                     서비스 화면 <strong>{project.images.length}</strong>
                 </span>
-                <GroupSelect
+                <Dropdown
                     label={`${project.name} 화면 종류`}
+                    align="right"
                     value={group}
                     options={[
                         { value: "전체", label: "전체 화면" },

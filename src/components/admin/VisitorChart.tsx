@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChartCard, Plot, Hit, Axis, RangeTabs, YearSelect } from "./VisitorChart.styled";
+import { ChartCard, Plot, Hit, Axis, RangeTabs } from "./VisitorChart.styled";
+import Dropdown from "@/components/ui/Dropdown";
 import type { DailyPoint } from "@/lib/stats";
 
 /**
@@ -265,21 +266,17 @@ export default function VisitorChart({
 
                     {/* 연도는 Monthly 에서만 뜻이 있다. 자리는 늘 지킨다 */}
                     {years.length > 0 && (
-                        <YearSelect
+                        <Dropdown
+                            size="sm"
+                            label="연도 선택"
+                            hidden={bucket !== "monthly"}
                             value={activeYear}
-                            aria-label="연도 선택"
-                            data-hidden={bucket !== "monthly"}
-                            onChange={(e) => {
+                            options={years.map((y) => ({ value: y, label: `${y}년` }))}
+                            onChange={(y) => {
                                 setAnimate(true);
-                                setYear(e.target.value);
+                                setYear(y);
                             }}
-                        >
-                            {years.map((y) => (
-                                <option key={y} value={y}>
-                                    {y}년
-                                </option>
-                            ))}
-                        </YearSelect>
+                        />
                     )}
                 </div>
 
