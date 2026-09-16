@@ -10,6 +10,8 @@ import Comments from "@/components/comments/Comments";
 import { getPostBySlug, getPublishedPosts, getPublishedSlugs } from "@/lib/posts";
 import { baseOpenGraph } from "../shared-metadata";
 
+const { images: _defaultCard, ...baseOpenGraphWithoutImages } = baseOpenGraph;
+
 type Props = {
     params: Promise<{ slug: string }>;
 };
@@ -41,14 +43,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         alternates: { canonical: url },
         openGraph: {
-            ...baseOpenGraph,
             /*
-             * 썸네일은 "/thumbnails/x.png" 상대경로이거나 Supabase 절대 URL 이다.
-             * metadataBase 는 상대경로만 절대화하므로 둘 다 그대로 넘기면 된다.
-             * 없을 때 `images: undefined` 로 덮어쓰면 baseOpenGraph 의 기본 카드까지
-             * 같이 지워지므로, 있을 때만 키를 얹는다.
+             * images 는 일부러 넣지 않는다. 글마다 opengraph-image.tsx 가 제목·요약·썸네일을
+             * 담은 카드를 굽는데, 여기서 images 를 정하면 그 파일 규약이 밀린다.
+             * (baseOpenGraph 의 기본 카드도 같은 이유로 뺀다)
              */
-            ...(post.thumbnail ? { images: [post.thumbnail] } : {}),
+            ...baseOpenGraphWithoutImages,
             type: "article",
             url,
             title: post.title,
