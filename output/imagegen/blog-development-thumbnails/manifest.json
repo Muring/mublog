@@ -1,0 +1,40 @@
+{
+  "generator": "Built-in image_gen",
+  "entries": [
+    {
+      "episode": 1,
+      "path": "/home/muring/.codex/generated_images/01a0a7c9-d42d-7ac0-9b0e-374b5366fa0c/exec-7ecd5618-47ed-4473-9f51-edc12fe86643.png",
+      "prompt": "Minimal editorial illustration of a browser wireframe, planning notebook, task cards and pencil. Warm ivory, navy, cobalt, teal, orange accents; paper texture; landscape 16:9; no text or logos."
+    },
+    {
+      "episode": 2,
+      "path": "/home/muring/.codex/generated_images/01a0a7c9-d42d-7ac0-9b0e-374b5366fa0c/exec-60c27a1b-862e-4c67-9e0d-1200e02b2b3f.png",
+      "prompt": "Create ONE new finished landscape 16:9 blog thumbnail for episode 2 of a developer blog-building series. Use the attached image ONLY as a visual style reference; create a distinctly new composition for this topic: UI design: a single browser window with neatly arranged modular cards, a small color-swatch fan and a cursor adjusting one selected card. No notebook. Emphasize composition, spacing, interface design. Match its warm ivory background, navy outlines, muted cobalt and teal palette with a tiny orange accent, clean flat geometric editorial illustration and subtle paper texture. Few large readable objects, elegant restraint, generous negative space, thumbnail readable at 320px. Important objects within central 75 percent. No text, lettering, logos, watermark or people. This is a separate standalone image, not a collage of episodes."
+    },
+    {
+      "episode": 3,
+      "path": "/home/muring/.codex/generated_images/01a0a7c9-d42d-7ac0-9b0e-374b5366fa0c/exec-9cbdadfb-31ed-48eb-a0b0-285f6ef74443.png",
+      "prompt": "Create ONE new finished landscape 16:9 blog thumbnail for episode 3 of a developer blog-building series. Use the attached image ONLY as a visual style reference; create a distinctly new composition for this topic: Dark mode: a single browser interface divided into a cream daylight half and a deep navy nighttime half, with a simple sun and crescent moon above the halves, and a small theme toggle in front. Clear balanced light/dark contrast. Match its warm ivory background, navy outlines, muted cobalt and teal palette with a tiny orange accent, clean flat geometric editorial illustration and subtle paper texture. Few large readable objects, elegant restraint, generous negative space, thumbnail readable at 320px. Important objects within central 75 percent. No text, lettering, logos, watermark or people. This is a separate standalone image, not a collage of episodes."
+    },
+    {
+      "episode": 4,
+      "path": "/home/muring/.codex/generated_images/01a0a7c9-d42d-7ac0-9b0e-374b5366fa0c/exec-6cc19ab6-27fb-4af6-978d-b649e987ec97.png",
+      "prompt": "Create ONE new finished landscape 16:9 blog thumbnail for episode 4 of a developer blog-building series. Use the attached image ONLY as a visual style reference; create a distinctly new composition for this topic: Backend: a browser window linked by clean lines to a small stack of database cylinders and a compact server unit. A few tidy rows convey stored posts. Emphasize moving from static pages to a database. Match its warm ivory background, navy outlines, muted cobalt and teal palette with a tiny orange accent, clean flat geometric editorial illustration and subtle paper texture. Few large readable objects, elegant restraint, generous negative space, thumbnail readable at 320px. Important objects within central 75 percent. No text, lettering, logos, watermark or people. This is a separate standalone image, not a collage of episodes."
+    },
+    {
+      "episode": 5,
+      "path": "/home/muring/.codex/generated_images/01a0a7c9-d42d-7ac0-9b0e-374b5366fa0c/exec-4e6077eb-8317-4abc-9f67-0fbea3f647b8.png",
+      "prompt": "Create ONE new finished landscape 16:9 blog thumbnail for episode 5 of a developer blog-building series. Use the attached image ONLY as a visual style reference; create a distinctly new composition for this topic: Quiet software bugs: a tidy browser window that appears normal, a large magnifying glass revealing one small orange bug hidden among interface cards, with a small repair/check symbol nearby. Playful but professional, not threatening. Match its warm ivory background, navy outlines, muted cobalt and teal palette with a tiny orange accent, clean flat geometric editorial illustration and subtle paper texture. Few large readable objects, elegant restraint, generous negative space, thumbnail readable at 320px. Important objects within central 75 percent. No text, lettering, logos, watermark or people. This is a separate standalone image, not a collage of episodes."
+    },
+    {
+      "episode": 6,
+      "path": "/home/muring/.codex/generated_images/01a0a7c9-d42d-7ac0-9b0e-374b5366fa0c/exec-95dfa4b7-f863-4a54-abdb-42bd688f0141.png",
+      "prompt": "Create ONE new finished landscape 16:9 blog thumbnail for episode 6 of a developer blog-building series. Use the attached image ONLY as a visual style reference; create a distinctly new composition for this topic: Search and discoverability: a browser search field with a magnifying glass and three simplified result cards; one highlighted blog result is connected to a small branching sitemap. No literal query text. Emphasize finding the blog. Match its warm ivory background, navy outlines, muted cobalt and teal palette with a tiny orange accent, clean flat geometric editorial illustration and subtle paper texture. Few large readable objects, elegant restraint, generous negative space, thumbnail readable at 320px. Important objects within central 75 percent. No text, lettering, logos, watermark or people. This is a separate standalone image, not a collage of episodes."
+    },
+    {
+      "episode": 7,
+      "path": "/home/muring/.codex/generated_images/01a0a7c9-d42d-7ac0-9b0e-374b5366fa0c/exec-36dc8fef-43a2-4976-a558-3f084ec56eb2.png",
+      "prompt": "Create ONE new finished landscape 16:9 blog thumbnail for episode 7 of a developer blog-building series. Use the attached image ONLY as a visual style reference; create a distinctly new composition for this topic: Portfolio and table of contents: a portfolio browser window with project image cards and a clearly separate compact floating navigation panel on the right with indented lines and one teal highlighted row. A subtle curved arrow connects that row to the matching project card. No notebook. Match its warm ivory background, navy outlines, muted cobalt and teal palette with a tiny orange accent, clean flat geometric editorial illustration and subtle paper texture. Few large readable objects, elegant restraint, generous negative space, thumbnail readable at 320px. Important objects within central 75 percent. No text, lettering, logos, watermark or people. This is a separate standalone image, not a collage of episodes."
+    }
+  ]
+}

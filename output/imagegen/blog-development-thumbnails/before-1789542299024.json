@@ -1,0 +1,44 @@
+[
+  {
+    "id": "cmtch1imv00017knnv0a5wayu",
+    "slug": "blog-development-1",
+    "thumbnail": "/thumbnails/blog-development-1.jpg",
+    "updated_at": "2026-09-03T20:53:08.807Z"
+  },
+  {
+    "id": "cmtch1iox00027knnqvlw0kl3",
+    "slug": "blog-development-2",
+    "thumbnail": "/thumbnails/blog-development-1.jpg",
+    "updated_at": "2026-08-27T20:47:13.934Z"
+  },
+  {
+    "id": "cmtch1it500037knny9gbmdys",
+    "slug": "blog-development-3",
+    "thumbnail": "/thumbnails/blog-development-1.jpg",
+    "updated_at": "2026-08-30T15:52:28.005Z"
+  },
+  {
+    "id": "cmtjf3qqn0000tcnnvsb2mtdi",
+    "slug": "blog-development-4",
+    "thumbnail": "/thumbnails/prisma.jpg",
+    "updated_at": "2026-09-02T17:03:21.185Z"
+  },
+  {
+    "id": "cmtqy81yd0000n8nnh9oh4uq9",
+    "slug": "blog-development-5",
+    "thumbnail": "/thumbnails/blog-development-1.jpg",
+    "updated_at": "2026-09-06T23:16:29.548Z"
+  },
+  {
+    "id": "cmttmz1j80000itnn98gmjdwy",
+    "slug": "blog-development-6",
+    "thumbnail": "/thumbnails/blog-development-1.jpg",
+    "updated_at": "2026-09-08T20:14:15.098Z"
+  },
+  {
+    "id": "cmu3lvken0000zlnn88pejj7s",
+    "slug": "blog-development-7",
+    "thumbnail": "/thumbnails/blog-development-1.jpg",
+    "updated_at": "2026-09-15T19:42:09.277Z"
+  }
+]
