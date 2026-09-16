@@ -74,31 +74,6 @@
     line-height: 1.9;
     word-break: keep-all;
 }
-.heroLinks {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 28px;
-    margin-top: 35px;
-    font-size: 14px;
-    font-weight: 700;
-}
-.heroLinks a {
-    display: inline-flex;
-    gap: 18px;
-    align-items: center;
-    min-height: 44px;
-}
-.heroLinks .primaryLink {
-    background: var(--foreground);
-    color: var(--background);
-    padding: 12px 20px;
-    border-radius: 4px;
-}
-.heroLinks .primaryLink:hover {
-    background: var(--accent);
-    color: var(--background);
-}
 .heroBottom {
     display: flex;
     justify-content: space-between;
@@ -156,12 +131,25 @@
 .skills li + li {
     margin-top: 7px;
 }
-.skills a {
-    display: inline-block;
-    margin-right: 14px;
-    padding: 4px 0;
+.skillProjects {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 14px;
     font-size: 12px;
+}
+.skillProjectsLabel {
+    flex-basis: 100%;
     color: var(--desccolor);
+    font-weight: 700;
+}
+.skillProjects a {
+    display: inline-block;
+    padding: 4px 0;
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
 }
 .projects {
     scroll-margin-top: 95px;
@@ -393,13 +381,6 @@
     }
     .desktopBreak {
         display: none;
-    }
-    .heroLinks {
-        gap: 20px;
-        font-size: 12px;
-    }
-    .heroLinks .primaryLink {
-        padding: 10px 14px;
     }
     .heroBottom {
         margin-top: 44px;

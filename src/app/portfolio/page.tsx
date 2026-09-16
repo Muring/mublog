@@ -44,22 +44,6 @@ export default function PortfolioPage() {
                     <br className={styles.desktopBreak} /> 웹 프론트엔드와
                     Salesforce를 넘나들며 만든 프로젝트를 소개합니다.
                 </p>
-                <div className={styles.heroLinks}>
-                    <a className={styles.primaryLink} href="#projects">
-                        프로젝트 살펴보기 <span aria-hidden="true">↘</span>
-                    </a>
-                    <a
-                        className={styles.animatedLink}
-                        href="https://github.com/Muring"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        GitHub
-                    </a>
-                    <a className={styles.animatedLink} href="mailto:esh5218@gmail.com">
-                        Email
-                    </a>
-                </div>
                 <div className={styles.heroBottom}>
                     <span>프론트엔드에서 시작해, 더 넓은 개발 경험으로.</span>
                     <span>SCROLL TO EXPLORE ↓</span>
@@ -82,8 +66,11 @@ export default function PortfolioPage() {
                             <li>App Router 기반 블로그를 설계·운영하며 DB, 인증, 캐시 무효화까지 직접 다뤘습니다.</li>
                             <li>서비스 화면을 구현하고 API를 연결했으며, PWA를 적용해 설치 가능한 웹앱을 만들었습니다.</li>
                         </ul>
-                        <a href="#mublog">Mublog</a>
-                        <a href="#vita">Vita</a>
+                        <div className={styles.skillProjects}>
+                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
+                            <a href="#mublog">Mublog 보기</a>
+                            <a href="#vita">Vita 보기</a>
+                        </div>
                     </div>
                     <div>
                         <h3>Vue · Nuxt</h3>
@@ -92,9 +79,12 @@ export default function PortfolioPage() {
                             <li>계좌 개설·송금·퀴즈·지도 등 서비스 화면과 재사용 컴포넌트를 구현했습니다.</li>
                             <li>Axios 공통 설정과 API 연동, 비로그인 사용자의 페이지 접근 흐름을 구성했습니다.</li>
                         </ul>
-                        <a href="#momo">MOMO Bank</a>
-                        <a href="#seas">SEAS</a>
-                        <a href="#ghiburi">집우리</a>
+                        <div className={styles.skillProjects}>
+                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
+                            <a href="#momo">MOMO Bank 보기</a>
+                            <a href="#seas">SEAS 보기</a>
+                            <a href="#ghiburi">집우리 보기</a>
+                        </div>
                     </div>
                     <div>
                         <h3>UI · 인터랙션</h3>
@@ -103,7 +93,10 @@ export default function PortfolioPage() {
                             <li>서비스 페이지와 캐릭터·배경·아이콘·로고를 디자인했습니다.</li>
                             <li>캐릭터의 걷기·운동 애니메이션을 제작하고 서비스 화면에 적용했습니다.</li>
                         </ul>
-                        <a href="#vita">적용 프로젝트 · Vita</a>
+                        <div className={styles.skillProjects}>
+                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
+                            <a href="#vita">Vita 보기</a>
+                        </div>
                     </div>
                     <div>
                         <h3>Salesforce</h3>
@@ -112,7 +105,10 @@ export default function PortfolioPage() {
                             <li>LWC로 캐러셀·리드 입력 폼·주문·지도 컴포넌트를 구현했습니다.</li>
                             <li>영업 단계별 필드와 Path를 구성하고, Flow와 Validation Rule로 업무 흐름을 자동화했습니다.</li>
                         </ul>
-                        <a href="#ohana">적용 프로젝트 · Ohana Liquor</a>
+                        <div className={styles.skillProjects}>
+                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
+                            <a href="#ohana">Ohana Liquor 보기</a>
+                        </div>
                     </div>
                 </div>
             </section>
