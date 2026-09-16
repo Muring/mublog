@@ -447,6 +447,22 @@
             "width": 1400,
             "height": 800,
             "source": "https://muring-blog.vercel.app/blog-development-5"
+        },
+        {
+            "file": "mublog-admin",
+            "caption": "포스트 관리 · 방문자 추이",
+            "group": "관리",
+            "width": 1112,
+            "height": 578,
+            "source": "https://muring-blog.vercel.app/admin"
+        },
+        {
+            "file": "mublog-editor",
+            "caption": "에디터 · 미리보기 · 발행",
+            "group": "관리",
+            "width": 1429,
+            "height": 683,
+            "source": "https://muring-blog.vercel.app/admin"
         }
     ]
 }
