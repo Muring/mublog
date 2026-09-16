@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { seoulDateKey } from "@/lib/date";
+import { compareTags } from "@/lib/tags";
 
 export const VISIT_COOKIE = "mublog_seen";
 /** 포스트별 중복 집계를 막는 쿠키 접두사 */
@@ -134,6 +135,44 @@ export async function getPostViewSeries(buckets = 20): Promise<PostViewSeries> {
         series.set(row.postId, line);
     }
     return { since: since.toISOString().slice(0, 10), bucketDays, series };
+}
+
+export type TagDailyViews = { tag: string; points: DailyPoint[]; total: number };
+
+/**
+ * 태그별 일일 조회. 글의 태그마다 그 글의 일일 조회를 더한다 — 태그가 둘인 글은 둘 다에 들어간다.
+ * 기록 시작일부터 오늘까지 하루도 빠짐없이 채운다(getDailyVisitors 와 같은 규칙).
+ * 합산은 DB 에서 하고(unnest), 돌아오는 건 태그 x 날짜 행뿐이다.
+ */
+export async function getTagDailyViews(): Promise<TagDailyViews[]> {
+    const rows = await prisma.$queryRaw<{ tag: string; date: Date; views: number }[]>`
+        SELECT t.tag, v.date, SUM(v.views)::int AS views
+          FROM post_daily_views v
+          JOIN posts p ON p.id = v.post_id, unnest(p.tags) AS t(tag)
+         GROUP BY t.tag, v.date
+    `;
+    if (rows.length === 0) return [];
+
+    const key = (d: Date) => d.toISOString().slice(0, 10);
+    const since = rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date);
+    const today = new Date(`${seoulDateKey()}T00:00:00Z`);
+    const days: string[] = [];
+    for (const cursor = new Date(since); cursor <= today; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
+        days.push(key(cursor));
+    }
+
+    const byTag = new Map<string, Map<string, number>>();
+    for (const r of rows) {
+        const m = byTag.get(r.tag) ?? new Map<string, number>();
+        m.set(key(r.date), r.views);
+        byTag.set(r.tag, m);
+    }
+    return [...byTag.entries()]
+        .map(([tag, m]) => {
+            const points = days.map((d) => ({ date: d, visitors: m.get(d) ?? 0 }));
+            return { tag, points, total: points.reduce((sum, p) => sum + p.visitors, 0) };
+        })
+        .sort((a, b) => compareTags(a.tag, b.tag));
 }
 
 /**

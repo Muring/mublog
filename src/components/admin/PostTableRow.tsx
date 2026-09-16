@@ -24,11 +24,13 @@ type Props = {
         viewTrend: number[];
     };
     trendBucketDays: number;
+    /** 표 전체의 칸 최댓값. 모든 행의 선이 이 높이를 기준으로 그려진다 */
+    trendMax: number;
 };
 
 const TREND_POINTS = 20;
 
-export default function PostTableRow({ post, trendBucketDays }: Props) {
+export default function PostTableRow({ post, trendBucketDays, trendMax }: Props) {
     const router = useRouter();
     const toast = useToast();
     const confirm = useConfirm();
@@ -95,7 +97,10 @@ export default function PostTableRow({ post, trendBucketDays }: Props) {
                     title={`마지막 칸(${trendBucketDays}일) ${post.viewTrend.at(-1) ?? 0}회`}
                 >
                     <span className="views-total">{post.viewCount}</span>
-                    <Sparkline values={post.viewTrend.length ? post.viewTrend : new Array(TREND_POINTS).fill(0)} />
+                    <Sparkline
+                        values={post.viewTrend.length ? post.viewTrend : new Array(TREND_POINTS).fill(0)}
+                        max={trendMax}
+                    />
                 </span>
             </td>
             {/* 댓글이 있으면 그 글의 댓글만 걸러 보는 관리 화면으로 */}

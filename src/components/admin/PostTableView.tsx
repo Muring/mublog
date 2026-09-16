@@ -40,6 +40,8 @@ export default function PostTableView({
     trendBucketDays: number;
 }) {
     const [query, setQuery] = useState("");
+    // 스파크라인 높이 기준. 걸러진 행이 아니라 표 전체에서 잡아야 검색해도 높이가 안 바뀐다.
+    const trendMax = useMemo(() => Math.max(1, ...posts.flatMap((p) => p.viewTrend)), [posts]);
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -83,7 +85,7 @@ export default function PostTableView({
                     </thead>
                     <tbody>
                         {filtered.map((post) => (
-                            <PostTableRow key={post.id} post={post} trendBucketDays={trendBucketDays} />
+                            <PostTableRow key={post.id} post={post} trendBucketDays={trendBucketDays} trendMax={trendMax} />
                         ))}
                     </tbody>
                 </PostTable>

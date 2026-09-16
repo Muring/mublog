@@ -74,17 +74,17 @@ function weekStart(iso: string): string {
 }
 
 /** 최근 30일. 기록이 그보다 짧으면 있는 만큼만 */
-function daily(points: DailyPoint[]): Point[] {
+function daily(points: DailyPoint[], unit: string): Point[] {
     return points.slice(-30).map((p) => ({
         key: p.date,
         label: md(p.date),
-        tip: `${p.visitors}명 · ${p.date}`,
+        tip: `${p.visitors}${unit} · ${p.date}`,
         visitors: p.visitors,
     }));
 }
 
 /** 최근 12주. 주는 월요일에 시작한다 */
-function weekly(points: DailyPoint[]): Point[] {
+function weekly(points: DailyPoint[], unit: string): Point[] {
     const sums = new Map<string, number>();
     for (const p of points) {
         const k = weekStart(p.date);
@@ -96,7 +96,7 @@ function weekly(points: DailyPoint[]): Point[] {
         return {
             key: k,
             label: md(k),
-            tip: `${visitors}명 · ${md(k)}~${md(end.toISOString().slice(0, 10))}`,
+            tip: `${visitors}${unit} · ${md(k)}~${md(end.toISOString().slice(0, 10))}`,
             visitors,
         };
     });
@@ -109,7 +109,7 @@ function weekly(points: DailyPoint[]): Point[] {
  * "아무도 안 왔다" 가 아니라 "세지 않았다" 이고, 아직 오지 않은 달도 마찬가지다.
  * 열두 칸을 유지해야 해가 달라져도 같은 자리에서 같은 달을 비교할 수 있다.
  */
-function monthly(points: DailyPoint[], year: string): Point[] {
+function monthly(points: DailyPoint[], year: string, unit: string): Point[] {
     const sums = new Map<string, number>();
     for (const p of points) {
         if (!p.date.startsWith(year)) continue;
@@ -122,14 +122,14 @@ function monthly(points: DailyPoint[], year: string): Point[] {
         return {
             key: k,
             label: `${i + 1}월`,
-            tip: visitors === null ? `기록 없음 · ${k}` : `${visitors}명 · ${k}`,
+            tip: visitors === null ? `기록 없음 · ${k}` : `${visitors}${unit} · ${k}`,
             visitors,
         };
     });
 }
 
 /**
- * 날짜별 방문자 추이.
+ * 날짜별 추이 차트. 기본은 방문자이고, 태그별 조회(TagViewsChart)가 제목·단위·요약을 바꿔 같이 쓴다.
  *
  * 늘 확인하는 값이 아니라 접어 둔다. 접힌 줄에 오늘과 누적이 남아 있어
  * 굳이 펼치지 않아도 알 것은 알 수 있다. details/summary 를 쓰는 이유는
@@ -141,10 +141,20 @@ function monthly(points: DailyPoint[], year: string): Point[] {
 export default function VisitorChart({
     points,
     totalVisitors,
+    title = "방문자 추이",
+    unit = "명",
+    totalLabel = "누적",
+    controls,
 }: {
     points: DailyPoint[];
     /** 집계를 시작한 뒤 지금까지의 누적 */
     totalVisitors: number;
+    title?: string;
+    /** 값 뒤에 붙는 단위. 방문자는 명, 조회는 회 */
+    unit?: string;
+    totalLabel?: string;
+    /** 집계 단위 탭 옆에 더 놓을 조작(태그 선택 등) */
+    controls?: React.ReactNode;
 }) {
     const [bucket, setBucket] = useState<BucketKey>("daily");
 
@@ -167,10 +177,10 @@ export default function VisitorChart({
     const activeYear = years.includes(year) ? year : (years[0] ?? year);
 
     const bars = useMemo(() => {
-        if (bucket === "daily") return daily(points);
-        if (bucket === "weekly") return weekly(points);
-        return monthly(points, activeYear);
-    }, [points, bucket, activeYear]);
+        if (bucket === "daily") return daily(points, unit);
+        if (bucket === "weekly") return weekly(points, unit);
+        return monthly(points, activeYear, unit);
+    }, [points, bucket, activeYear, unit]);
 
     const today = points.length > 0 ? points[points.length - 1].visitors : 0;
     const max = Math.max(1, ...bars.map((b) => b.visitors ?? 0));
@@ -237,11 +247,12 @@ export default function VisitorChart({
     return (
         <ChartCard onToggle={(e) => !e.currentTarget.open && setAnimate(false)}>
             <summary>
-                <span className="title">방문자 추이</span>
+                <span className="title">{title}</span>
                 {/* 집계 단위와 무관한 두 값이라 탭을 눌러도 바뀌지 않는다 */}
                 <span className="summary-value">
-                    오늘 <strong>{today.toLocaleString("ko-KR")}</strong>명 · 누적{" "}
-                    <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>명
+                    오늘 <strong>{today.toLocaleString("ko-KR")}</strong>
+                    {unit} · {totalLabel} <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>
+                    {unit}
                 </span>
             </summary>
 
@@ -263,6 +274,8 @@ export default function VisitorChart({
                             </button>
                         ))}
                     </RangeTabs>
+
+                    {controls}
 
                     {/* 연도는 Monthly 에서만 뜻이 있다. 자리는 늘 지킨다 */}
                     {years.length > 0 && (
