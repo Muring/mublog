@@ -31,7 +31,9 @@
 .navigationList a {
     position: relative;
     display: block;
-    padding: 3px 6px 3px 12px;
+    padding: 4px 6px 4px 12px;
+    /* 항목 안의 줄은 촘촘히, 항목 사이는 넓게 — 접힌 둘째 줄과 다음 항목이 갈리도록. */
+    line-height: 1.4;
     font-weight: 700;
     color: var(--foreground);
     overflow-wrap: anywhere;
@@ -63,8 +65,13 @@
     margin: 2px 0 4px 12px;
     border-left: 1px solid var(--bordercolor);
 }
+.navigationList .navigationList li + li {
+    margin-top: 3px;
+}
 .navigationList .navigationList a {
-    padding: 2px 6px 2px 10px;
+    /* 접힌 둘째 줄부터 8px 더 들여 써서(hanging indent) 새 항목이 아니라 이어지는 줄로 읽히게 한다. */
+    padding: 3px 6px 3px 18px;
+    text-indent: -8px;
     font-size: 11px;
     font-weight: 400;
     color: var(--portfolio-description);
