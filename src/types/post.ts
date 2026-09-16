@@ -9,6 +9,9 @@ export type PostSummary = {
     /** ISO 문자열. 캐시 직렬화와 hydration 안정성을 위해 Date 를 노출하지 않는다. */
     publishedAt: string;
     readingTime: number;
+    /** 시리즈 이름. 없으면 null. 순서는 seriesOrder 로, 같으면 발행일순. */
+    series: string | null;
+    seriesOrder: number | null;
     viewCount: number;
     commentCount: number;
 };

@@ -34,6 +34,8 @@ export const postInputSchema = z.object({
     description: z.string().trim().max(300).nullish(),
     tags: z.array(z.string().trim().min(1).max(40)).max(10).default([]),
     thumbnail: z.string().trim().max(500).nullish(),
+    series: z.string().trim().max(60, "시리즈 이름이 너무 깁니다.").nullish(),
+    seriesOrder: z.number().int().min(1).max(999).nullish(),
     contentMd: z.string().max(200_000),
     status: z.enum(["DRAFT", "PUBLISHED"]),
     publishedAt: z.string().datetime().nullish(),

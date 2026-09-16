@@ -38,6 +38,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         if (input.description !== undefined) data.description = input.description ?? null;
         if (input.tags !== undefined) data.tags = input.tags;
         if (input.thumbnail !== undefined) data.thumbnail = input.thumbnail ?? null;
+        if (input.series !== undefined) {
+            data.series = input.series || null;
+            // 시리즈를 비우면 순서도 같이 비운다. 순서만 남으면 뜻이 없다.
+            if (!input.series) data.seriesOrder = null;
+        }
+        if (input.seriesOrder !== undefined && (input.series ?? true)) {
+            data.seriesOrder = input.seriesOrder ?? null;
+        }
         if (input.status !== undefined) data.status = input.status;
         if (input.publishedAt !== undefined) {
             data.publishedAt = input.publishedAt ? new Date(input.publishedAt) : null;

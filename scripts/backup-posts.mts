@@ -37,6 +37,8 @@ type PostRow = {
     description: string | null;
     tags: string[];
     thumbnail: string | null;
+    series: string | null;
+    seriesOrder: number | null;
     contentMd: string;
     status: "DRAFT" | "PUBLISHED";
     publishedAt: Date | null;
@@ -59,6 +61,10 @@ function toMdx(post: PostRow): string {
     }
 
     if (post.thumbnail) lines.push(`thumbnail: ${quote(post.thumbnail)}`);
+    if (post.series) {
+        lines.push(`series: ${quote(post.series)}`);
+        if (post.seriesOrder != null) lines.push(`seriesOrder: ${post.seriesOrder}`);
+    }
     // 발행글에는 넣지 않는다. 원래 형식 그대로 유지하기 위해서다.
     if (post.status === "DRAFT") lines.push("status: draft");
 
@@ -80,6 +86,8 @@ async function main() {
             description: true,
             tags: true,
             thumbnail: true,
+            series: true,
+            seriesOrder: true,
             contentMd: true,
             status: true,
             publishedAt: true,

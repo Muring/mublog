@@ -13,6 +13,8 @@ const SUMMARY_SELECT = {
     publishedAt: true,
     createdAt: true,
     readingTime: true,
+    series: true,
+    seriesOrder: true,
     viewCount: true,
     commentCount: true,
 } as const;
@@ -27,6 +29,8 @@ type SummaryRow = {
     publishedAt: Date | null;
     createdAt: Date;
     readingTime: number;
+    series: string | null;
+    seriesOrder: number | null;
     viewCount: number;
     commentCount: number;
 };
@@ -121,6 +125,21 @@ export const getAllTags = unstable_cache(
     { tags: ["posts:list"], revalidate: 3600 }
 );
 
+/** 시리즈 이름 목록. 에디터의 자동완성용이라 초안의 것도 포함한다. */
+export const getAllSeries = unstable_cache(
+    async (): Promise<string[]> => {
+        const rows = await prisma.post.findMany({
+            where: { series: { not: null } },
+            select: { series: true },
+            distinct: ["series"],
+            orderBy: { series: "asc" },
+        });
+        return rows.flatMap((r) => (r.series ? [r.series] : []));
+    },
+    ["posts-series"],
+    { tags: ["posts:list"], revalidate: 3600 }
+);
+
 /**
  * 관리자 목록용. 초안까지 포함하며 캐시하지 않는다.
  * (관리자 화면은 force-dynamic 이라 항상 최신을 봐야 한다)
@@ -162,6 +181,8 @@ export async function getPostForEdit(id: string) {
         description: row.description,
         tags: row.tags,
         thumbnail: row.thumbnail,
+        series: row.series,
+        seriesOrder: row.seriesOrder,
         contentMd: row.contentMd,
         status: row.status,
         publishedAt: row.publishedAt?.toISOString() ?? null,

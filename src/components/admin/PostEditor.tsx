@@ -35,6 +35,9 @@ export type EditablePost = {
     description: string;
     tags: string[];
     thumbnail: string;
+    /** 입력칸 값이라 문자열로 둔다. 저장할 때 숫자로 바꾼다. */
+    series: string;
+    seriesOrder: string;
     contentMd: string;
     status: "DRAFT" | "PUBLISHED";
     publishedAt: string | null;
@@ -43,12 +46,13 @@ export type EditablePost = {
 type Props = {
     initial: EditablePost;
     knownTags: string[];
+    knownSeries: string[];
 };
 
 
 const FENCE = "```";
 
-export default function PostEditor({ initial, knownTags }: Props) {
+export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
     const [post, setPost] = useState(initial);
     const [postId, setPostId] = useState(initial.id);
     const [html, setHtml] = useState("");
@@ -207,6 +211,36 @@ export default function PostEditor({ initial, knownTags }: Props) {
                             if (tags.length > 0) setTagError(null);
                         }}
                     />
+                </div>
+
+                {/* 시리즈는 선택이다. 이름을 비우면 순서도 저장되지 않는다. */}
+                <div className="field">
+                    <span className="field-label">시리즈</span>
+                    <div className="series-row">
+                        <input
+                            list="known-series"
+                            value={post.series}
+                            onChange={(e) => set("series", e.target.value)}
+                            placeholder="예: 블로그 개발기 (비우면 없음)"
+                            maxLength={60}
+                        />
+                        <datalist id="known-series">
+                            {knownSeries.map((name) => (
+                                <option key={name} value={name} />
+                            ))}
+                        </datalist>
+                        <input
+                            type="number"
+                            inputMode="numeric"
+                            min={1}
+                            max={999}
+                            value={post.seriesOrder}
+                            onChange={(e) => set("seriesOrder", e.target.value)}
+                            placeholder="순서"
+                            aria-label="시리즈 안 순서"
+                            disabled={!post.series.trim()}
+                        />
+                    </div>
                 </div>
                 </div>
 

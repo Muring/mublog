@@ -123,6 +123,21 @@ export const MetaGrid = styled.div`
   }
 
 
+  .series-row {
+    display: flex;
+    gap: 0.35rem;
+  }
+  .series-row input:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+  .series-row input[type="number"] {
+    width: 4.5rem;
+  }
+  .series-row input:disabled {
+    cursor: not-allowed;
+  }
+
   .thumb-row {
     display: flex;
     gap: 0.35rem;

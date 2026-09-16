@@ -58,6 +58,8 @@ async function main() {
             description: (data.description as string) ?? null,
             tags: (data.tags as string[]) ?? [],
             thumbnail: (data.thumbnail as string) ?? null,
+            series: (data.series as string) ?? null,
+            seriesOrder: data.series && Number.isInteger(data.seriesOrder) ? (data.seriesOrder as number) : null,
             contentMd: content,
             contentHtml,
             // backup:posts 가 초안에만 붙이는 표시. 없으면 발행글이다.

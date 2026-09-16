@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
                 description: input.description ?? null,
                 tags: input.tags,
                 thumbnail: input.thumbnail ?? null,
+                series: input.series || null,
+                seriesOrder: input.series ? (input.seriesOrder ?? null) : null,
                 contentMd: input.contentMd,
                 contentHtml: await renderMarkdown(input.contentMd),
                 status: input.status,

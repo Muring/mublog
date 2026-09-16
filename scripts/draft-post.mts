@@ -53,6 +53,8 @@ async function main(path: string) {
         description: (data.description as string) ?? null,
         tags,
         thumbnail: (data.thumbnail as string) ?? null,
+        series: (data.series as string) ?? null,
+        seriesOrder: data.series && Number.isInteger(data.seriesOrder) ? (data.seriesOrder as number) : null,
         contentMd: body,
         contentHtml: await renderMarkdown(body),
         // 초안이므로 publishedAt 은 비운다. 발행 시점에 에디터가 채운다.

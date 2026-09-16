@@ -4,6 +4,7 @@ import PostContent from "@/components/post/PostContent";
 import RecentPostTracker from "@/components/trackers/RecentPostTracker";
 import CarouselSlider from "@/components/post/CarouselSlider";
 import RelatedContent from "@/components/post/RelatedContent";
+import SeriesNav from "@/components/post/SeriesNav";
 import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
 import Comments from "@/components/comments/Comments";
 import { getPostBySlug, getPublishedPosts, getPublishedSlugs } from "@/lib/posts";
@@ -79,6 +80,7 @@ export default async function PostPage(props: Props) {
                 tags={post.tags}
                 html={post.contentHtml}
             />
+            <SeriesNav posts={posts} currentSlug={post.slug} />
             <RelatedContent />
             {/*
               댓글은 클라이언트에서 가져온다.

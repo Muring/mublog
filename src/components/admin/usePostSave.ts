@@ -39,6 +39,8 @@ export function usePostSave(
             description: post.description || null,
             tags: post.tags,
             thumbnail: post.thumbnail || null,
+            series: post.series.trim() || null,
+            seriesOrder: post.series.trim() && post.seriesOrder ? Number(post.seriesOrder) : null,
             contentMd: post.contentMd,
             status,
             // 발행일은 서버가 발행 시점에 자동으로 넣는다.
