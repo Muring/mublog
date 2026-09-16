@@ -51,6 +51,8 @@ type Props = {
 
 
 const FENCE = "```";
+/** select 의 "새 시리즈" 항목 값. 실제 이름과 겹치지 않게 한다. */
+const NEW_SERIES = "__new__";
 
 export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
     const [post, setPost] = useState(initial);
@@ -60,6 +62,11 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
     const [isThumbDragging, setIsThumbDragging] = useState(false);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [tagError, setTagError] = useState<string | null>(null);
+    // 기존 목록에 없는 이름으로 불러왔으면(다른 글에서만 지웠다든지) 새 시리즈 입력 상태로 연다.
+    const [isNewSeries, setIsNewSeries] = useState(
+        initial.series !== "" && !knownSeries.includes(initial.series)
+    );
+    const seriesChoice = isNewSeries ? NEW_SERIES : post.series;
     // 좁은 화면에서만 쓰는 탭. 글을 쓰러 들어오는 화면이라 본문에서 시작한다.
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -213,22 +220,45 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                     />
                 </div>
 
-                {/* 시리즈는 선택이다. 이름을 비우면 순서도 저장되지 않는다. */}
+                {/*
+                  시리즈는 선택이다. datalist 는 브라우저마다 생김새와 여는 조건이 달라
+                  select 로 고른다. "새 시리즈" 를 고르면 그때만 이름 입력칸이 나온다.
+                */}
                 <div className="field">
                     <span className="field-label">시리즈</span>
                     <div className="series-row">
-                        <input
-                            list="known-series"
-                            value={post.series}
-                            onChange={(e) => set("series", e.target.value)}
-                            placeholder="예: 블로그 개발기 (비우면 없음)"
-                            maxLength={60}
-                        />
-                        <datalist id="known-series">
+                        <select
+                            value={seriesChoice}
+                            onChange={(e) => {
+                                const value = e.target.value;
+                                if (value === NEW_SERIES) {
+                                    setIsNewSeries(true);
+                                    set("series", "");
+                                } else {
+                                    setIsNewSeries(false);
+                                    set("series", value);
+                                }
+                                if (!value) set("seriesOrder", "");
+                            }}
+                            aria-label="시리즈"
+                        >
+                            <option value="">없음</option>
                             {knownSeries.map((name) => (
-                                <option key={name} value={name} />
+                                <option key={name} value={name}>
+                                    {name}
+                                </option>
                             ))}
-                        </datalist>
+                            <option value={NEW_SERIES}>+ 새 시리즈</option>
+                        </select>
+                        {isNewSeries && (
+                            <input
+                                value={post.series}
+                                onChange={(e) => set("series", e.target.value)}
+                                placeholder="시리즈 이름"
+                                maxLength={60}
+                                autoFocus
+                            />
+                        )}
                         <input
                             type="number"
                             inputMode="numeric"
@@ -238,7 +268,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                             onChange={(e) => set("seriesOrder", e.target.value)}
                             placeholder="순서"
                             aria-label="시리즈 안 순서"
-                            disabled={!post.series.trim()}
+                            disabled={!isNewSeries && !post.series.trim()}
                         />
                     </div>
                 </div>

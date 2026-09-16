@@ -127,7 +127,8 @@ export const MetaGrid = styled.div`
     display: flex;
     gap: 0.35rem;
   }
-  .series-row input:first-child {
+  .series-row select,
+  .series-row input:not([type="number"]) {
     flex: 1;
     min-width: 0;
   }
