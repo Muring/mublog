@@ -6,6 +6,7 @@ import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
 import Dropdown from "@/components/ui/Dropdown";
+import type { SeriesSummary } from "@/lib/posts";
 import ImagePicker from "./ImagePicker";
 import {
     InlineCodeIcon,
@@ -47,7 +48,7 @@ export type EditablePost = {
 type Props = {
     initial: EditablePost;
     knownTags: string[];
-    knownSeries: string[];
+    knownSeries: SeriesSummary[];
 };
 
 
@@ -65,7 +66,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
     const [tagError, setTagError] = useState<string | null>(null);
     // 기존 목록에 없는 이름으로 불러왔으면(다른 글에서만 지웠다든지) 새 시리즈 입력 상태로 연다.
     const [isNewSeries, setIsNewSeries] = useState(
-        initial.series !== "" && !knownSeries.includes(initial.series)
+        initial.series !== "" && !knownSeries.some((s) => s.name === initial.series)
     );
     const seriesChoice = isNewSeries ? NEW_SERIES : post.series;
     // 좁은 화면에서만 쓰는 탭. 글을 쓰러 들어오는 화면이라 본문에서 시작한다.
@@ -233,18 +234,27 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                             value={seriesChoice}
                             options={[
                                 { value: "", label: "없음" },
-                                ...knownSeries.map((name) => ({ value: name, label: name })),
+                                ...knownSeries.map((s) => ({ value: s.name, label: s.name })),
                                 { value: NEW_SERIES, label: "+ 새 시리즈" },
                             ]}
                             onChange={(value) => {
+                                // 시리즈를 바꾸면 순서도 따라 바뀐다.
+                                // 원래 있던 시리즈로 돌아오면 원래 순서, 다른 시리즈면 그 시리즈의 다음 순서,
+                                // 새 시리즈면 1, 없음이면 비운다.
                                 if (value === NEW_SERIES) {
                                     setIsNewSeries(true);
                                     set("series", "");
-                                } else {
-                                    setIsNewSeries(false);
-                                    set("series", value);
+                                    set("seriesOrder", "1");
+                                    return;
                                 }
+                                setIsNewSeries(false);
+                                set("series", value);
                                 if (!value) set("seriesOrder", "");
+                                else if (value === initial.series) set("seriesOrder", initial.seriesOrder);
+                                else {
+                                    const next = knownSeries.find((s) => s.name === value)?.nextOrder ?? 1;
+                                    set("seriesOrder", String(next));
+                                }
                             }}
                         />
                         {isNewSeries && (
@@ -270,7 +280,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                     </div>
                     {(isNewSeries || post.series.trim()) && (
                         <span className="field-hint">
-                            순서를 비우면 발행일순으로 놓입니다. 읽는 순서가 다를 때만 번호를 적으세요.
+                            시리즈를 고르면 다음 순서가 채워집니다. 비우면 발행일순으로 놓입니다.
                         </span>
                     )}
                 </div>

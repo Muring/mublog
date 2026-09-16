@@ -125,16 +125,30 @@ export const getAllTags = unstable_cache(
     { tags: ["posts:list"], revalidate: 3600 }
 );
 
-/** 시리즈 이름 목록. 에디터의 자동완성용이라 초안의 것도 포함한다. */
+export type SeriesSummary = {
+    name: string;
+    /** 이 시리즈에 글을 하나 더 넣을 때 받을 순서. 가장 큰 순서 + 1, 순서가 없으면 편수 + 1. */
+    nextOrder: number;
+};
+
+/** 시리즈 목록. 에디터가 고르고 다음 순서를 채우는 데 쓰므로 초안의 것도 포함한다. */
 export const getAllSeries = unstable_cache(
-    async (): Promise<string[]> => {
+    async (): Promise<SeriesSummary[]> => {
         const rows = await prisma.post.findMany({
             where: { series: { not: null } },
-            select: { series: true },
-            distinct: ["series"],
-            orderBy: { series: "asc" },
+            select: { series: true, seriesOrder: true },
         });
-        return rows.flatMap((r) => (r.series ? [r.series] : []));
+        const map = new Map<string, { count: number; max: number }>();
+        for (const row of rows) {
+            if (!row.series) continue;
+            const entry = map.get(row.series) ?? { count: 0, max: 0 };
+            entry.count += 1;
+            entry.max = Math.max(entry.max, row.seriesOrder ?? 0);
+            map.set(row.series, entry);
+        }
+        return [...map.entries()]
+            .map(([name, { count, max }]) => ({ name, nextOrder: Math.max(max, count) + 1 }))
+            .sort((a, b) => a.name.localeCompare(b.name, "ko"));
     },
     ["posts-series"],
     { tags: ["posts:list"], revalidate: 3600 }
