@@ -13,7 +13,7 @@ export type PortfolioProject = {
     contributions: { title: string; description: string }[];
     stack: string[];
     repository: string;
-    videos?: { label: string; url: string }[];
+    links?: { label: string; url: string; kind: "site" | "video" }[];
     images: {
         file: string;
         caption: string;
@@ -66,7 +66,9 @@ export const portfolioProjects: PortfolioProject[] = [
             "Vercel",
         ],
         repository: "https://github.com/Muring/mublog",
-        videos: [{ label: "배포된 사이트", url: "https://muring-blog.vercel.app/" }],
+        links: [
+            { label: "배포된 사이트", url: "https://muring-blog.vercel.app/", kind: "site" },
+        ],
         images: portfolioImages.mublog,
     },
     {
@@ -97,9 +99,9 @@ export const portfolioProjects: PortfolioProject[] = [
         ],
         stack: ["Salesforce", "LWC", "Experience Cloud", "Sales Cloud", "Flow"],
         repository: "https://github.com/Muring/Ohana",
-        videos: [
-            { label: "신규 고객 데모", url: "https://youtu.be/Cv1ZEN650OQ" },
-            { label: "기존 고객 데모", url: "https://youtu.be/O4k55pAiSh4" },
+        links: [
+            { label: "신규 고객 데모", url: "https://youtu.be/Cv1ZEN650OQ", kind: "video" },
+            { label: "기존 고객 데모", url: "https://youtu.be/O4k55pAiSh4", kind: "video" },
         ],
         images: portfolioImages.ohana,
     },
@@ -131,7 +133,7 @@ export const portfolioProjects: PortfolioProject[] = [
         ],
         stack: ["Next.js 14", "React", "Zustand", "Sass", "Axios", "PWA"],
         repository: "https://github.com/Muring/Vita",
-        videos: [{ label: "서비스 데모", url: "https://youtu.be/MQWlIO3RVfY" }],
+        links: [{ label: "서비스 데모", url: "https://youtu.be/MQWlIO3RVfY", kind: "video" }],
         images: portfolioImages.vita,
     },
     {
@@ -222,7 +224,7 @@ export const portfolioProjects: PortfolioProject[] = [
         ],
         stack: ["Vue 3", "Pinia", "Ant Design Vue", "Axios", "Kakao Maps API"],
         repository: "https://github.com/Muring/GHIBURI",
-        videos: [{ label: "서비스 데모", url: "https://youtu.be/7_Uw3czcmZU" }],
+        links: [{ label: "서비스 데모", url: "https://youtu.be/7_Uw3czcmZU", kind: "video" }],
         images: portfolioImages.ghiburi,
     },
 ];

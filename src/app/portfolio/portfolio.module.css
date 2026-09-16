@@ -144,12 +144,27 @@
     font-weight: 700;
 }
 .skillProjects a {
+    position: relative;
     display: inline-block;
     padding: 4px 0;
     color: var(--foreground);
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 4px;
+    font-weight: 600;
+}
+/* 평소엔 밑줄이 없고, 호버하면 accent 선이 왼쪽에서 오른쪽으로 그어진다(.animatedLink 와 같은 움직임). */
+.skillProjects a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1px;
+    height: 1px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 280ms ease;
+}
+.skillProjects a:is(:hover, :focus-visible)::after {
+    transform: scaleX(1);
 }
 .projects {
     scroll-margin-top: 95px;
@@ -244,7 +259,10 @@
     min-height: 34px;
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
+}
+.projectLinks svg {
+    flex-shrink: 0;
 }
 .animatedLink {
     position: relative;
@@ -338,10 +356,29 @@
     align-items: center;
     gap: 35px;
 }
+.contactActions {
+    margin-top: 36px;
+}
+.page .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    background: var(--foreground);
+    color: var(--background);
+    font-size: 14px;
+    font-weight: 700;
+    transition: background-color 150ms ease;
+}
+.page .button:hover {
+    background: var(--accent);
+    color: var(--background);
+}
 .contactBottom {
     display: flex;
-    justify-content: space-between;
-    margin-top: 70px;
+    justify-content: flex-end;
+    margin-top: 60px;
     font-size: 12px;
     color: var(--desccolor);
 }
@@ -385,6 +422,10 @@
     .heroBottom {
         margin-top: 44px;
         font-size: 11px;
+    }
+    .page .button {
+        padding: 10px 14px;
+        font-size: 12px;
     }
     .heroBottom span:last-child {
         display: none;
@@ -804,7 +845,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
     .imageTrack,
-    .animatedLink::after {
+    .animatedLink::after,
+    .skillProjects a::after {
         transition: none;
     }
 }

@@ -5,6 +5,7 @@ import { portfolioProjects, PORTFOLIO_PATH } from "@/data/portfolio";
 import { baseOpenGraph } from "@/app/shared-metadata";
 import styles from "./portfolio.module.css";
 import ProjectGallery from "./ProjectGallery";
+import { GitHubIcon, GlobeIcon, VideoIcon } from "./icons";
 
 const title = "엄세현 포트폴리오";
 const description =
@@ -68,8 +69,8 @@ export default function PortfolioPage() {
                         </ul>
                         <div className={styles.skillProjects}>
                             <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#mublog">Mublog 보기</a>
-                            <a href="#vita">Vita 보기</a>
+                            <a href="#mublog">Mublog</a>
+                            <a href="#vita">Vita</a>
                         </div>
                     </div>
                     <div>
@@ -81,9 +82,9 @@ export default function PortfolioPage() {
                         </ul>
                         <div className={styles.skillProjects}>
                             <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#momo">MOMO Bank 보기</a>
-                            <a href="#seas">SEAS 보기</a>
-                            <a href="#ghiburi">집우리 보기</a>
+                            <a href="#momo">MOMO Bank</a>
+                            <a href="#seas">SEAS</a>
+                            <a href="#ghiburi">집우리</a>
                         </div>
                     </div>
                     <div>
@@ -95,7 +96,7 @@ export default function PortfolioPage() {
                         </ul>
                         <div className={styles.skillProjects}>
                             <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#vita">Vita 보기</a>
+                            <a href="#vita">Vita</a>
                         </div>
                     </div>
                     <div>
@@ -107,7 +108,7 @@ export default function PortfolioPage() {
                         </ul>
                         <div className={styles.skillProjects}>
                             <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#ohana">Ohana Liquor 보기</a>
+                            <a href="#ohana">Ohana Liquor</a>
                         </div>
                     </div>
                 </div>
@@ -168,17 +169,23 @@ export default function PortfolioPage() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
+                                    <GitHubIcon />
                                     GitHub / 프로젝트 기록
                                 </a>
-                                {project.videos?.map((video) => (
+                                {project.links?.map((link) => (
                                     <a
-                                        key={video.url}
+                                        key={link.url}
                                         className={styles.animatedLink}
-                                        href={video.url}
+                                        href={link.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                     >
-                                        {video.label}
+                                        {link.kind === "site" ? (
+                                            <GlobeIcon />
+                                        ) : (
+                                            <VideoIcon />
+                                        )}
+                                        {link.label}
                                     </a>
                                 ))}
                             </div>
@@ -223,8 +230,12 @@ export default function PortfolioPage() {
                 <a className={styles.email} href="mailto:esh5218@gmail.com">
                     esh5218@gmail.com
                 </a>
+                <div className={styles.contactActions}>
+                    <Link href="/" className={styles.button}>
+                        블로그에서 더 읽기
+                    </Link>
+                </div>
                 <div className={styles.contactBottom}>
-                    <Link href="/">블로그에서 더 읽기</Link>
                     <a href="#portfolio-top">맨 위로 ↑</a>
                 </div>
             </section>
