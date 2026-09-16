@@ -58,6 +58,8 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 - [x] 🐢 **Lazy Loading** (그리드 콘텐츠)
 - [x] 📱 **반응형** — 카드 최소 폭에서 열 수를 거꾸로 계산
 - [x] 🃏 **포스트 카드** — 썸네일·태그·제목·설명·날짜·조회수·댓글수를 담고 높이가 모두 같음
+- [x] 🧭 **본문 목차** — 제목 계층을 읽어 만들고, 넓은 화면에서는 옆에 떠서 현재 위치를 따라감
+- [x] 🗂 **포트폴리오** (`/portfolio`) — 프로젝트별 화면 갤러리(그룹 필터·확대), 같은 목차 컴포넌트를 씀
 
 ### 쓰기 (관리자 전용)
 
@@ -198,6 +200,7 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 | `/privacy`                   | 완전 정적                              | —                                   |
 | `/[slug]`                    | `generateStaticParams` + ISR 3600s     | `post:<slug>` (**이름 바꾸면 옛 slug도**) |
 | `/about`                     | 완전 정적                              | —                                   |
+| `/portfolio`                 | 완전 정적 (`noindex`)                  | —                                   |
 | `/admin/**`                  | `force-dynamic`                        | —                                   |
 | `/api/posts/summary`         | ISR 3600s, `posts:list`                | 포스트 변경 · **댓글 작성/삭제**    |
 | `/api/posts/[slug]/comments` | 캐시 안 함                             | TanStack Query                      |
@@ -566,6 +569,7 @@ src/
 │   ├── api/              # 라우트 핸들러
 │   ├── auth/             # OAuth 콜백 · 로그아웃
 │   ├── login/
+│   ├── portfolio/        # 포트폴리오. 페이지·갤러리·아이콘·CSS 모듈이 한 폴더에
 │   ├── privacy/          # 개인정보 처리방침
 │   └── globals.css       # 테마 토큰
 ├── components/           # X.tsx + X.styled.tsx 짝
@@ -575,6 +579,7 @@ src/
 │   ├── admin/            # 목록·검색·차트·에디터·태그 선택기·툴바 아이콘
 │   │                     # useSlugCheck / useEditorUploads / usePostSave
 │   ├── comments/         # 댓글 스레드
+│   ├── navigation/       # TableOfContents — 본문·포트폴리오가 같이 쓰는 목차
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
 │   ├── trackers/         # 화면에 아무것도 그리지 않고 부수효과만 내는 null 컴포넌트
 │   ├── ui/               # Skeleton · Toast · ConfirmDialog 같은 범용 조각
@@ -608,7 +613,7 @@ src/
 │   ├── breakpoints.ts    # 공용 미디어 기준선
 │   └── prism-notion-theme.css
 ├── types/                # post.ts / comment.ts
-├── data/                 # about 페이지 정적 데이터
+├── data/                 # about · portfolio 정적 데이터 (portfolio-images.json 은 이미지 치수)
 └── proxy.ts              # 세션 갱신 · /admin 가드
 ```
 
