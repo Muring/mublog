@@ -51,6 +51,13 @@ export default function RootLayout({
     return (
         // 본문이 한국어다. en 이면 한국어 질의에 대한 타겟팅이 어긋난다
         <html lang="ko" suppressHydrationWarning>
+            <head>
+                {/*
+                  피드 자동 발견. metadata.alternates 에 두면 canonical 을 적는 모든 페이지에서
+                  얕은 병합으로 사라지므로(위 주석) head 에 직접 둔다.
+                */}
+                <link rel="alternate" type="application/rss+xml" title={SITE_NAME} href="/feed.xml" />
+            </head>
             <body>
                 <RootProvider>
                     <VisitTracker />
