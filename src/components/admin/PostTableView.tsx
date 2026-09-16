@@ -15,8 +15,6 @@ type Row = {
     /** 발행 후 누적 조회수 */
     viewCount: number;
     commentCount: number;
-    /** 기록 시작일부터 오늘까지를 칸으로 나눈 조회 추이. 기록이 없으면 빈 배열 */
-    viewTrend: number[];
 };
 
 /**
@@ -29,19 +27,8 @@ type Row = {
  * 한 번에 받는 양이 눈에 띄게 무거워졌을 때다. 그때는 @@index([status, publishedAt desc])
  * 가 이미 있으므로 커서 방식으로 바꾸면 된다.
  */
-export default function PostTableView({
-    posts,
-    trendSince,
-    trendBucketDays,
-}: {
-    posts: Row[];
-    /** 추이선이 시작하는 날(KST). 열 머리의 툴팁에 쓴다 */
-    trendSince: string;
-    trendBucketDays: number;
-}) {
+export default function PostTableView({ posts }: { posts: Row[] }) {
     const [query, setQuery] = useState("");
-    // 스파크라인 높이 기준. 걸러진 행이 아니라 표 전체에서 잡아야 검색해도 높이가 안 바뀐다.
-    const trendMax = useMemo(() => Math.max(1, ...posts.flatMap((p) => p.viewTrend)), [posts]);
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -78,14 +65,14 @@ export default function PostTableView({
                             <th>태그</th>
                             <th>발행일</th>
                             <th>수정일</th>
-                            <th title={`선은 ${trendSince}부터 오늘까지, 한 칸 ${trendBucketDays}일`}>조회</th>
+                            <th>누적 조회</th>
                             <th>댓글</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {filtered.map((post) => (
-                            <PostTableRow key={post.id} post={post} trendBucketDays={trendBucketDays} trendMax={trendMax} />
+                            <PostTableRow key={post.id} post={post} />
                         ))}
                     </tbody>
                 </PostTable>

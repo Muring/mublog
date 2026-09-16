@@ -90,53 +90,6 @@ export async function recordPostView(slug: string, dateKey: string): Promise<voi
     `;
 }
 
-export type PostViewSeries = {
-    /** 기록이 시작된 날(KST). 이날부터 오늘까지를 칸으로 나눈다 */
-    since: string;
-    /** 한 칸이 며칠인지. 기록이 짧으면 1, 길어지면 늘어난다 */
-    bucketDays: number;
-    /** postId → 칸별 조회수 합. 기록이 없는 글은 없다(부르는 쪽이 0 으로 채운다) */
-    series: Map<string, number[]>;
-};
-
-/**
- * 글별 조회 추이. 관리 화면 표의 스파크라인이 쓴다.
- *
- * 기간을 "최근 N 일" 로 자르지 않는다. 그러면 N 일이 지난 글은 전부 평평해져
- * 옛 조회가 없던 일이 된다. 대신 기록이 시작된 날부터 오늘까지 전체를
- * 늘 같은 칸 수로 나눈다 — 기록이 길어질수록 한 칸이 며칠씩을 담는다.
- * 모든 글이 같은 구간·같은 칸을 쓰므로 행끼리 견줄 수 있다.
- *
- * 기록 시작일 이전은 그리지 않는다. 그 0 은 "안 읽혔다" 가 아니라 "안 셌다" 다.
- * 합산은 DB 에서 한다. 글 30편 x 몇 해라도 돌아오는 건 30 x 칸 수 행뿐이다.
- */
-export async function getPostViewSeries(buckets = 20): Promise<PostViewSeries> {
-    const first = await prisma.postDailyView.aggregate({ _min: { date: true } });
-    const today = new Date(`${seoulDateKey()}T00:00:00Z`);
-    const since = first._min.date ?? today;
-    const days = Math.round((today.getTime() - since.getTime()) / 86_400_000) + 1;
-    const bucketDays = Math.max(1, Math.ceil(days / buckets));
-
-    const rows = await prisma.$queryRaw<{ postId: string; bucket: number; views: number }[]>`
-        SELECT post_id AS "postId",
-               ((date - ${since}::date) / ${bucketDays})::int AS bucket,
-               SUM(views)::int AS views
-          FROM post_daily_views
-         WHERE date >= ${since}::date
-         GROUP BY post_id, bucket
-    `;
-
-    const width = Math.ceil(days / bucketDays);
-    const series = new Map<string, number[]>();
-    for (const row of rows) {
-        if (row.bucket < 0 || row.bucket >= width) continue;
-        const line = series.get(row.postId) ?? new Array<number>(width).fill(0);
-        line[row.bucket] = row.views;
-        series.set(row.postId, line);
-    }
-    return { since: since.toISOString().slice(0, 10), bucketDays, series };
-}
-
 export type TagDailyViews = { tag: string; points: DailyPoint[]; total: number };
 
 /**

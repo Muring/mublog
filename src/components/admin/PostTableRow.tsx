@@ -8,7 +8,6 @@ import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
 import { fetchJson } from "@/lib/fetcher";
 import { useConfirm } from "@/providers/Confirm";
-import Sparkline from "./Sparkline";
 
 type Props = {
     post: {
@@ -21,16 +20,10 @@ type Props = {
         updatedAt: string;
         viewCount: number;
         commentCount: number;
-        viewTrend: number[];
     };
-    trendBucketDays: number;
-    /** 표 전체의 칸 최댓값. 모든 행의 선이 이 높이를 기준으로 그려진다 */
-    trendMax: number;
 };
 
-const TREND_POINTS = 20;
-
-export default function PostTableRow({ post, trendBucketDays, trendMax }: Props) {
+export default function PostTableRow({ post }: Props) {
     const router = useRouter();
     const toast = useToast();
     const confirm = useConfirm();
@@ -87,21 +80,8 @@ export default function PostTableRow({ post, trendBucketDays, trendMax }: Props)
                 {post.publishedAt ? formatCardDate(post.publishedAt) : "-"}
             </td>
             <td data-label="수정일">{formatCardDate(post.updatedAt)}</td>
-            {/*
-              숫자는 발행 후 누적 조회수, 선은 기록 시작일부터 오늘까지의 추이(전체 글이 같은 구간·칸).
-              데이터가 없어도 같은 자리를 지킨다 — 선은 바닥에 흐리게, 숫자 자리는 폭을 고정한다.
-            */}
-            <td data-label="조회">
-                <span
-                    className="views-cell"
-                    title={`마지막 칸(${trendBucketDays}일) ${post.viewTrend.at(-1) ?? 0}회`}
-                >
-                    <span className="views-total">{post.viewCount}</span>
-                    <Sparkline
-                        values={post.viewTrend.length ? post.viewTrend : new Array(TREND_POINTS).fill(0)}
-                        max={trendMax}
-                    />
-                </span>
+            <td data-label="누적 조회" className="views-total">
+                {post.viewCount.toLocaleString("ko-KR")}
             </td>
             {/* 댓글이 있으면 그 글의 댓글만 걸러 보는 관리 화면으로 */}
             <td data-label="댓글">
