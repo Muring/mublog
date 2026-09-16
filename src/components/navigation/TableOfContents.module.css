@@ -20,22 +20,59 @@
     padding: 0;
     margin: 0;
 }
+/* 왼쪽 세로 레일 하나에 현재 위치 마커가 붙는다. 깊이는 들여쓰기(padding)로만 구분하고
+   레일은 최상위 목록 하나만 가져서 마커가 항상 같은 선 위에 놓인다. */
+.navigation > .navigationList {
+    border-left: 1px solid var(--bordercolor);
+}
 .navigationList a {
+    position: relative;
     display: block;
-    padding: 3px 8px;
-    border-radius: 5px;
+    padding: 3px 6px 3px 12px;
     font-weight: 600;
     color: var(--portfolio-description);
     overflow-wrap: anywhere;
     text-decoration: none;
+    transition: color 150ms ease;
+}
+.navigationList a::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    border-radius: 2px;
+    background: transparent;
+    transition: background-color 150ms ease;
 }
 .navigationList a:hover {
     color: var(--linkhovercolor);
 }
 .navigationList a[aria-current="location"] {
     color: var(--linkhovercolor);
-    background: color-mix(in srgb, var(--linkhovercolor) 8%, transparent);
     font-weight: 700;
+}
+.navigationList a[aria-current="location"]::before {
+    background: var(--linkhovercolor);
+}
+/* 하위 항목이 현재 위치면 그 부모는 본문색으로 한 단계 올려 어느 절 안인지 보이게 한다. */
+.navigationList li:has(> .navigationList a[aria-current="location"]) > a {
+    color: var(--foreground);
+}
+.navigationList .navigationList {
+    margin: 0;
+}
+.navigationList .navigationList a {
+    padding-left: 24px;
+    font-size: 11px;
+    font-weight: 400;
+}
+.navigationList .navigationList a[aria-current="location"] {
+    font-weight: 700;
+}
+.navigationList .navigationList .navigationList a {
+    padding-left: 36px;
 }
 .navigationTop {
     display: block;
@@ -45,23 +82,11 @@
     border-top: 1px solid var(--bordercolor);
     text-decoration: underline;
     text-underline-offset: 4px;
-    border-radius: 0 0 5px 5px;
-    transition: color 150ms ease, background-color 150ms ease;
+    transition: color 150ms ease;
 }
 .navigationTop:hover,
 .navigationTop:focus-visible {
     color: var(--linkhovercolor);
-    background: color-mix(in srgb, var(--linkhovercolor) 8%, transparent);
-}
-.navigationList .navigationList {
-    margin: 2px 0 4px 12px;
-}
-.navigationList .navigationList a {
-    font-size: 11px;
-    font-weight: 400;
-}
-.navigationList .navigationList a[aria-current="location"] {
-    font-weight: 700;
 }
 .navigation a:focus-visible {
     outline: 2px solid var(--linkhovercolor);
