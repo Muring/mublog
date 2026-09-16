@@ -53,6 +53,7 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
                     <th>태그</th>
                     <th>발행일</th>
                     <th>수정일</th>
+                    <th>조회 (14일)</th>
                     <th>댓글</th>
                     <th></th>
                 </tr>
@@ -79,6 +80,9 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
                         </td>
                         <td data-label="수정일">
                             <Skeleton style={{ width: "5.5rem", height: "0.8rem" }} />
+                        </td>
+                        <td data-label="조회">
+                            <Skeleton style={{ width: "5.5rem", height: "1.1rem" }} />
                         </td>
                         <td data-label="댓글">
                             <Skeleton style={{ width: "1rem", height: "0.8rem" }} />

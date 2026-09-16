@@ -61,6 +61,25 @@ export async function getCommentsByPostSlug(slug: string): Promise<CommentNode[]
     return rows.map(toNode);
 }
 
+export type AdminComment = CommentNode & {
+    post: { slug: string; title: string };
+};
+
+/**
+ * 관리 화면의 댓글 목록. 최신순, 삭제된 것도 포함한다(행이 남아 있다는 사실 자체가 정보다).
+ * 본문 가리기는 공개 화면과 같은 toNode 규칙을 쓴다 — 관리자라고 지운 본문을 다시 볼 이유가 없다.
+ * slug 를 주면 그 글의 것만 돌려준다.
+ */
+export async function getCommentsForAdmin(slug?: string): Promise<AdminComment[]> {
+    const rows = await prisma.comment.findMany({
+        where: slug ? { post: { slug } } : undefined,
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: { ...COMMENT_SELECT, post: { select: { slug: true, title: true } } },
+    });
+    return rows.map((row) => ({ ...toNode(row), post: row.post }));
+}
+
 /**
  * 도배 방지.
  *

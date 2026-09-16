@@ -8,6 +8,7 @@ import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
 import { fetchJson } from "@/lib/fetcher";
 import { useConfirm } from "@/providers/Confirm";
+import Sparkline from "./Sparkline";
 
 type Props = {
     post: {
@@ -19,6 +20,7 @@ type Props = {
         publishedAt: string | null;
         updatedAt: string;
         commentCount: number;
+        recentViews: number[];
     };
 };
 
@@ -79,7 +81,27 @@ export default function PostTableRow({ post }: Props) {
                 {post.publishedAt ? formatCardDate(post.publishedAt) : "-"}
             </td>
             <td data-label="수정일">{formatCardDate(post.updatedAt)}</td>
-            <td data-label="댓글">{post.commentCount}</td>
+            {/* 숫자는 최근 7일 합, 선은 14일. 한 번도 안 읽힌 글은 선 대신 – */}
+            <td data-label="조회">
+                {post.recentViews.some((v) => v > 0) ? (
+                    <span className="views-cell">
+                        <span className="views-week">{post.recentViews.slice(-7).reduce((a, b) => a + b, 0)}</span>
+                        <Sparkline values={post.recentViews} />
+                    </span>
+                ) : (
+                    "-"
+                )}
+            </td>
+            {/* 댓글이 있으면 그 글의 댓글만 걸러 보는 관리 화면으로 */}
+            <td data-label="댓글">
+                {post.commentCount > 0 ? (
+                    <Link href={`/admin/comments?post=${post.slug}`} className="title-link">
+                        {post.commentCount}
+                    </Link>
+                ) : (
+                    post.commentCount
+                )}
+            </td>
             <td className="actions">
                 <div className="action-buttons">
                     <Link href={`/admin/posts/${post.id}`}>

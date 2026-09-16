@@ -75,6 +75,8 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 - [x] ⚡ **재배포 없이 반영** (`revalidateTag`)
 - [x] 🔎 **목록 검색** — 제목·주소·태그로 거르기 (표는 자기 안에서 스크롤)
 - [x] 📈 **방문자 추이 차트** — Daily · Weekly · Monthly(연도 선택)
+- [x] 📉 **글별 조회 추이** — 표에 최근 7일 합과 14일 스파크라인. 글마다 KST 하루 1행(`post_daily_views`)
+- [x] 💬 **댓글 관리** (`/admin/comments`) — 전체 댓글을 최신순으로, 글별 필터, 삭제. "댓글" 카드와 표의 댓글 수에서 들어감
 - [x] 🧭 **좁은 화면 대응** — 관리 표는 열을 접다 카드로, 에디터는 본문/미리보기 탭으로
 
 ### 참여
@@ -103,6 +105,7 @@ Supabase의 PostgreSQL 하나를 씁니다. `public` 스키마만 Prisma가 관�
 | `Post`      | 포스트. 마크다운 원문과 렌더된 HTML을 함께 보관. `series`/`seriesOrder`로 묶음 |
 | `Comment`   | 댓글. 자기참조 `parentId`로 답글, soft delete(`deletedBy`로 관리자 삭제 구분) |
 | `DailyStat` | 사이트 전체 방문 집계. KST 기준 **하루 1행**                     |
+| `PostDailyView` | 글별 일일 조회. 글마다 KST **하루 1행** (30편 × 365일 ≈ 1만 행/년) |
 
 ### 설계 결정과 근거
 
@@ -317,7 +320,7 @@ secret key는 서버에서만 쓰이며 버킷에는 insert 정책이 없습니�
 | 지표          | 기준                                                             |
 | ------------- | ---------------------------------------------------------------- |
 | 오늘 / 누적 방문 | **순 방문자.** `mublog_seen` 쿠키가 오늘 날짜(KST)면 DB에 아예 안 씁니다 |
-| 포스트 조회수 | 같은 방문자는 **30분** 안에 다시 세지 않습니다                    |
+| 포스트 조회수 | 같은 방문자는 **30분** 안에 다시 세지 않습니다. 누적값(`view_count`)과 그날 행(`post_daily_views`)을 CTE 한 문장에서 같이 올립니다 |
 
 방문 기록은 `INSERT ... ON CONFLICT DO UPDATE` **단일 문장**입니다.
 `prisma.upsert`가 아니라 `$executeRaw`를 쓰는 이유는 raw 형태가 레이스 없는 한 문장임이 보장되기 때문입니다.
@@ -569,7 +572,7 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 
 ```
 prisma/
-├── schema.prisma         # Post / Comment / Profile / DailyStat
+├── schema.prisma         # Post / Comment / Profile / DailyStat / PostDailyView
 └── migrations/           # RLS·트리거 포함 마이그레이션
 
 scripts/                  # 일회성·운영 스크립트 (tsx 로 실행)
@@ -790,7 +793,6 @@ icn1 (현재)         0.15~0.20s   0.14s
 
 ## 📬 개선 예정
 
-- [ ] 📈 포스트별 통계 대시보드
 - [ ] 📦 블로그 템플릿화
 
 <br>

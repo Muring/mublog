@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { getAllPostsForAdmin } from "@/lib/posts";
-import { getDailyVisitors, getSiteStats } from "@/lib/stats";
+import { getDailyVisitors, getRecentPostViews, getSiteStats } from "@/lib/stats";
 import { AdminShell } from "@/components/admin/AdminSkeleton";
 import PostTableView from "@/components/admin/PostTableView";
 import VisitorChart from "@/components/admin/VisitorChart";
@@ -21,11 +22,13 @@ export default async function AdminPage() {
     // 인가는 레이아웃이 아니라 여기서 확정한다 (layout.tsx 의 주석 참고)
     await requireAdmin();
 
-    const [posts, daily, stats] = await Promise.all([
+    const [rows, daily, stats, recentViews] = await Promise.all([
         getAllPostsForAdmin(),
         getDailyVisitors(),
         getSiteStats(),
+        getRecentPostViews(),
     ]);
+    const posts = rows.map((row) => ({ ...row, recentViews: recentViews.get(row.id) ?? [] }));
     const published = posts.filter((p) => p.status === "PUBLISHED").length;
     const comments = posts.reduce((sum, p) => sum + p.commentCount, 0);
 
@@ -44,10 +47,11 @@ export default async function AdminPage() {
                     <p className="label">초안</p>
                     <p className="value">{posts.length - published}</p>
                 </div>
-                <div className="stat">
+                {/* 댓글 카드만 누를 수 있다 — 댓글 관리로 간다 */}
+                <Link href="/admin/comments" className="stat">
                     <p className="label">댓글</p>
                     <p className="value">{comments}</p>
-                </div>
+                </Link>
             </div>
 
             <VisitorChart points={daily} totalVisitors={stats.total} />

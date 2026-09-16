@@ -65,7 +65,8 @@ model Post {
   authorId String?  @map("author_id") @db.Uuid
   author   Profile? @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
-  comments Comment[]
+  comments   Comment[]
+  dailyViews PostDailyView[]
 
   @@index([status, publishedAt(sort: Desc)])
   @@index([tags], type: Gin)
@@ -100,6 +101,19 @@ model Comment {
   @@index([postId, createdAt])
   @@index([authorId, createdAt])
   @@map("comments")
+}
+
+/// 글별 일일 조회. KST 기준 글마다 하루 1행. posts.view_count 는 그대로 누적값이다.
+/// 30편 x 365일이면 연 1만 행 남짓, 수백 KB 다. 요청당 행은 만들지 않는다.
+model PostDailyView {
+  postId String   @map("post_id")
+  date   DateTime @db.Date
+  views  Int      @default(0)
+  post   Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([postId, date])
+  @@index([date])
+  @@map("post_daily_views")
 }
 
 /// 사이트 전체 방문 집계. KST 기준 하루 1행.

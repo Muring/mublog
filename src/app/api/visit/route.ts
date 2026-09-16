@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
             !overLimit(`view:${ip}:${slug}`, POST_VIEW_PER_IP, POST_VIEW_WINDOW_MS);
 
         if (slug && shouldCountView) {
-            await recordPostView(slug);
+            await recordPostView(slug, todayKey);
         }
 
         // 갱신된 수치를 함께 돌려준다.

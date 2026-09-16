@@ -61,23 +61,61 @@ export async function recordVisit(dateKey: string): Promise<void> {
 }
 
 /**
- * 포스트 조회수를 1 올린다.
+ * 포스트 조회수를 1 올린다 — 누적값(posts.view_count)과 그날 행(post_daily_views) 을 한 문장에서.
  *
- * 사이트 방문 집계와 달리 날짜별로 쌓지 않고 포스트 행의 누적값만 올린다.
- * post_views 같은 별도 테이블을 두면 25개 x 365일로 연 9천 행이 쌓이는데,
- * 지금 필요한 것은 "이 글이 몇 번 읽혔나" 하나뿐이라 그만한 값을 하지 않는다.
+ * 글별 일일 행은 사이트 방문 집계와 같은 규칙이다. 요청당 행이 아니라 글마다 KST 하루 1행.
+ * 30편 x 365일이면 연 1만 행 남짓이라 무료 한도에 닿지 않는다.
+ *
+ * CTE 하나로 묶어 둘 사이에 틈이 없게 한다. UPDATE 가 글을 못 찾으면(초안·없는 slug)
+ * RETURNING 이 비어 INSERT 도 아무것도 안 한다.
  *
  * prisma.post.update 계열을 쓰지 않는다. @updatedAt 이 함께 딸려 올라가
  * updated_at 이 "고친 날" 이 아니라 "마지막으로 읽힌 날" 이 되기 때문이다.
  * @updatedAt 은 클라이언트가 붙이는 값이라 raw SQL 에는 따라오지 않는다.
  * (관리 화면의 수정일 열이 이 사실에 기대고 있다)
  */
-export async function recordPostView(slug: string): Promise<void> {
+export async function recordPostView(slug: string, dateKey: string): Promise<void> {
     await prisma.$executeRaw`
-        UPDATE posts
-           SET view_count = view_count + 1
-         WHERE slug = ${slug} AND status = 'PUBLISHED'
+        WITH p AS (
+            UPDATE posts
+               SET view_count = view_count + 1
+             WHERE slug = ${slug} AND status = 'PUBLISHED'
+            RETURNING id
+        )
+        INSERT INTO post_daily_views (post_id, date, views)
+        SELECT id, ${dateKey}::date, 1 FROM p
+        ON CONFLICT (post_id, date) DO UPDATE
+            SET views = post_daily_views.views + 1
     `;
+}
+
+/**
+ * 글별 최근 N 일 조회. 관리 화면 표의 스파크라인이 쓴다.
+ *
+ * 오늘(KST)을 마지막 칸으로 두고 앞으로 N 칸. 행이 없는 날은 0 이다 —
+ * 그날 그 글을 아무도 안 열었다는 뜻이라 진짜 0 이다.
+ * 캐시하지 않는다. 관리 화면은 force-dynamic 이고 행이 30 x N 개뿐이다.
+ */
+export async function getRecentPostViews(days = 14): Promise<Map<string, number[]>> {
+    const today = new Date(`${seoulDateKey()}T00:00:00Z`);
+    const start = new Date(today);
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+
+    const rows = await prisma.postDailyView.findMany({
+        where: { date: { gte: start } },
+        select: { postId: true, date: true, views: true },
+    });
+
+    const result = new Map<string, number[]>();
+    const dayMs = 86_400_000;
+    for (const row of rows) {
+        const index = Math.round((row.date.getTime() - start.getTime()) / dayMs);
+        if (index < 0 || index >= days) continue;
+        const series = result.get(row.postId) ?? new Array<number>(days).fill(0);
+        series[index] = row.views;
+        result.set(row.postId, series);
+    }
+    return result;
 }
 
 /**
