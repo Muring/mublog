@@ -27,7 +27,7 @@ export default function PostContent({ title, date, slug, viewCount, description,
         <>
             <PostNavigation key={slug} html={html} />
             <CodeBlockTools html={html} />
-            <ImageLightbox html={html} />
+            <ImageLightbox title={title} html={html} />
             <Article id="post-top">
                 <h1>{title}</h1>
                 <h5>{description}</h5>

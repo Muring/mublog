@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import Dropdown from "@/components/ui/Dropdown";
+import ImageViewer from "@/components/ui/ImageViewer";
 import type { PortfolioProject } from "@/data/portfolio";
 import styles from "./portfolio.module.css";
 
@@ -10,13 +11,9 @@ type GalleryProject = Pick<PortfolioProject, "id" | "name" | "images">;
 
 function GalleryViewer({ project }: { project: GalleryProject }) {
     const [index, setIndex] = useState(0);
-    const [zoomed, setZoomed] = useState(false);
     const [opened, setOpened] = useState(false);
-    const dialog = useRef<HTMLDialogElement>(null);
     const thumbnails = useRef<HTMLDivElement>(null);
-    const canvas = useRef<HTMLDivElement>(null);
     const image = project.images[index];
-    const source = `/images/portfolio/${image.file}.webp`;
 
     useEffect(() => {
         const strip = thumbnails.current;
@@ -34,32 +31,19 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
         });
     }, [index]);
 
-    useEffect(() => {
-        if (!opened) return;
-        const previous = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = previous;
-        };
-    }, [opened]);
-
     function select(next: number) {
         setIndex(Math.max(0, Math.min(project.images.length - 1, next)));
-        setZoomed(false);
-        canvas.current?.scrollTo(0, 0);
     }
 
     function open() {
-        setZoomed(false);
-        dialog.current?.showModal();
         setOpened(true);
     }
 
-    const navigation = (fullscreen = false) => (
+    const navigation = () => (
         <div className={styles.viewerNavigation}>
             <button
                 type="button"
-                aria-label={`${project.name} 이전 화면${fullscreen ? " (전체 화면)" : ""}`}
+                aria-label={`${project.name} 이전 화면`}
                 disabled={index === 0}
                 onClick={() => select(index - 1)}
             >
@@ -71,7 +55,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
             </span>
             <button
                 type="button"
-                aria-label={`${project.name} 다음 화면${fullscreen ? " (전체 화면)" : ""}`}
+                aria-label={`${project.name} 다음 화면`}
                 disabled={index === project.images.length - 1}
                 onClick={() => select(index + 1)}
             >
@@ -161,91 +145,20 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                     ))}
                 </div>
             )}
-            <dialog
-                ref={dialog}
-                className={styles.imageDialog}
-                aria-label={`${project.name} 이미지 확대 보기`}
-                onClose={() => {
-                    setOpened(false);
-                    setZoomed(false);
-                }}
-                onKeyDown={(event) => {
-                    if (
-                        event.key === "ArrowLeft" ||
-                        event.key === "ArrowRight"
-                    ) {
-                        // Arrow keys pan the native scroll area when zoomed in.
-                        if (zoomed) return;
-                        event.preventDefault();
-                        select(index + (event.key === "ArrowRight" ? 1 : -1));
-                    }
-                }}
-            >
-                {opened && (
-                    <>
-                        <header className={styles.dialogToolbar}>
-                            <div>
-                                <strong>{project.name}</strong>
-                                <p>{image.caption}</p>
-                            </div>
-                            <div className={styles.dialogActions}>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setZoomed(!zoomed);
-                                        canvas.current?.scrollTo(0, 0);
-                                    }}
-                                    aria-pressed={zoomed}
-                                >
-                                    {zoomed ? "화면에 맞추기" : "더 크게 보기"}
-                                </button>
-                                <a
-                                    href={source}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    이미지 파일
-                                </a>
-                                <button
-                                    type="button"
-                                    onClick={() => dialog.current?.close()}
-                                    autoFocus
-                                    aria-label="확대 보기 닫기"
-                                >
-                                    닫기 ×
-                                </button>
-                            </div>
-                        </header>
-                        <div
-                            ref={canvas}
-                            className={`${styles.dialogCanvas} ${zoomed ? styles.zoomedCanvas : ""}`}
-                            tabIndex={0}
-                            aria-label="확대 이미지. 확대 상태에서는 스크롤하여 이동할 수 있습니다."
-                        >
-                            {/* Local optimized image; native dimensions also support the zoomed view. */}
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                                src={source}
-                                alt={image.caption}
-                                width={image.width}
-                                height={image.height}
-                            />
-                        </div>
-                        <footer className={styles.dialogFooter}>
-                            {navigation(true)}
-                            {image.originalUrl && (
-                                <a
-                                    href={image.originalUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    GIF 시연 보기
-                                </a>
-                            )}
-                        </footer>
-                    </>
-                )}
-            </dialog>
+            <ImageViewer
+                open={opened}
+                title={project.name}
+                images={project.images.map((item) => ({
+                    src: `/images/portfolio/${item.file}.webp`,
+                    caption: item.caption,
+                    width: item.width,
+                    height: item.height,
+                    extraLink: item.originalUrl ? { label: "GIF 시연 보기", url: item.originalUrl } : undefined,
+                }))}
+                index={index}
+                onIndexChange={select}
+                onClose={() => setOpened(false)}
+            />
         </div>
     );
 }
