@@ -116,6 +116,10 @@ Supabase의 PostgreSQL 하나를 씁니다. `public` 스키마만 Prisma가 관�
 조인 테이블은 모든 목록 쿼리에 조인을 더하고 컴포넌트가 쓰는 `tags: string[]` 형태를 깨뜨립니다.
 검색은 GIN 인덱스로 충분하고, 태그 이름 변경은 25행 `UPDATE` 하나입니다.
 
+태그 어휘는 두 층입니다. **주제**(`frontend` `backend` `devOps` `salesforce` `shopify` `security`)와
+**종류**(`project` — 무언가를 만든 기록). `etc`는 주제 태그가 하나도 안 붙을 때만 쓰고,
+다른 태그 옆에 덧붙이지 않습니다. 순서는 주제 → project → etc.
+
 **`Post.contentMd`와 `contentHtml`을 둘 다 저장합니다.**
 HTML은 저장 시점에 한 번만 렌더합니다. 읽기 경로에서 마크다운을 파싱하지 않습니다.
 
