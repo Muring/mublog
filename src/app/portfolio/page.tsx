@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
-import { portfolioProjects, PORTFOLIO_PATH } from "@/data/portfolio-codex";
+import { portfolioProjects, PORTFOLIO_PATH } from "@/data/portfolio";
 import { baseOpenGraph } from "@/app/shared-metadata";
 import styles from "./portfolio.module.css";
 import ProjectGallery from "./ProjectGallery";

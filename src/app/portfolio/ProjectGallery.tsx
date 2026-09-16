@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import type { PortfolioProject } from "@/data/portfolio-codex";
+import type { PortfolioProject } from "@/data/portfolio";
 import styles from "./portfolio.module.css";
 
 type GalleryProject = Pick<PortfolioProject, "id" | "name" | "images">;
@@ -15,7 +15,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
     const thumbnails = useRef<HTMLDivElement>(null);
     const canvas = useRef<HTMLDivElement>(null);
     const image = project.images[index];
-    const source = `/images/portfolio-codex/${image.file}.webp`;
+    const source = `/images/portfolio/${image.file}.webp`;
 
     useEffect(() => {
         const strip = thumbnails.current;
@@ -104,7 +104,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                                 aria-hidden={i !== index}
                             >
                                 <Image
-                                    src={`/images/portfolio-codex/${item.file}.webp`}
+                                    src={`/images/portfolio/${item.file}.webp`}
                                     alt={item.caption}
                                     fill
                                     sizes="(max-width: 640px) calc(100vw - 44px), (max-width: 1100px) 65vw, 740px"
@@ -149,7 +149,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                             aria-pressed={i === index}
                         >
                             <Image
-                                src={`/images/portfolio-codex/${item.file}.webp`}
+                                src={`/images/portfolio/${item.file}.webp`}
                                 alt=""
                                 width={item.width}
                                 height={item.height}
