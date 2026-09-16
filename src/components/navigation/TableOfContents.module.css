@@ -69,6 +69,11 @@
     font-weight: 400;
     color: var(--portfolio-description);
 }
+/* 위 규칙이 같은 우선순위로 뒤에 오므로, 하위의 현재·호버 색을 다시 명시해야 한다. */
+.navigationList .navigationList a:hover,
+.navigationList .navigationList a[aria-current="location"] {
+    color: var(--linkhovercolor);
+}
 .navigationTop {
     display: block;
     margin-top: 12px;
