@@ -65,28 +65,11 @@ function AdminCommentRow({ comment }: { comment: AdminComment }) {
         </Link>
     );
 
-    if (comment.deleted) {
-        return (
-            <CommentRow className="root">
-                <div className="avatar-col">
-                    <div className="avatar avatar-fallback">-</div>
-                </div>
-                <div className="content">
-                    <div className="meta">
-                        <span className="time">{formatRelative(comment.createdAt)}</span>
-                        {comment.parentId && <span className="badge">답글</span>}
-                    </div>
-                    <p className="body deleted">
-                        {comment.deletedByAdmin ? "관리자에 의해 삭제된 댓글입니다." : "삭제된 댓글입니다."}
-                    </p>
-                    <div className="row-actions">{postLink}</div>
-                </div>
-            </CommentRow>
-        );
-    }
+    // 지운 댓글도 본문과 작성자를 그대로 보여준다(공개 화면과 다른 점). 행만 흐리게, 배지로 누가 지웠는지.
+    const rowClass = ["root", busy || comment.deleted ? "pending" : ""].filter(Boolean).join(" ");
 
     return (
-        <CommentRow className={busy ? "root pending" : "root"}>
+        <CommentRow className={rowClass}>
             <div className="avatar-col">
                 {comment.author?.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -101,6 +84,9 @@ function AdminCommentRow({ comment }: { comment: AdminComment }) {
                 <div className="meta">
                     <span className="username">{comment.author?.username}</span>
                     {comment.parentId && <span className="badge">답글</span>}
+                    {comment.deleted && (
+                        <span className="badge">{comment.deletedByAdmin ? "관리자가 삭제" : "작성자가 삭제"}</span>
+                    )}
                     <span className="time">
                         {formatRelative(comment.createdAt)}
                         {comment.editedAt && " (수정됨)"}
@@ -111,9 +97,11 @@ function AdminCommentRow({ comment }: { comment: AdminComment }) {
                 </p>
                 <div className="row-actions">
                     {postLink}
-                    <button type="button" className="row-action danger" onClick={remove} disabled={busy}>
-                        {busy ? "삭제 중..." : "삭제"}
-                    </button>
+                    {!comment.deleted && (
+                        <button type="button" className="row-action danger" onClick={remove} disabled={busy}>
+                            {busy ? "삭제 중..." : "삭제"}
+                        </button>
+                    )}
                 </div>
             </div>
         </CommentRow>

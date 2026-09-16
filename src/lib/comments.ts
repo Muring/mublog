@@ -66,8 +66,11 @@ export type AdminComment = CommentNode & {
 };
 
 /**
- * 관리 화면의 댓글 목록. 최신순, 삭제된 것도 포함한다(행이 남아 있다는 사실 자체가 정보다).
- * 본문 가리기는 공개 화면과 같은 toNode 규칙을 쓴다 — 관리자라고 지운 본문을 다시 볼 이유가 없다.
+ * 관리 화면의 댓글 목록. 최신순, 삭제된 것도 포함한다.
+ *
+ * 공개 화면(toNode)과 달리 지운 댓글의 본문과 작성자를 **가리지 않는다.**
+ * 관리자는 무엇이 왜 지워졌는지 봐야 한다 — 도배·욕설이면 작성자를 알아야 하고,
+ * 본인이 지운 거면 그냥 넘기면 된다. 공개 API 로는 여전히 안 나간다(getCommentsByPostSlug 는 그대로).
  * slug 를 주면 그 글의 것만 돌려준다.
  */
 export async function getCommentsForAdmin(slug?: string): Promise<AdminComment[]> {
@@ -77,7 +80,13 @@ export async function getCommentsForAdmin(slug?: string): Promise<AdminComment[]
         take: 100,
         select: { ...COMMENT_SELECT, post: { select: { slug: true, title: true } } },
     });
-    return rows.map((row) => ({ ...toNode(row), post: row.post }));
+    return rows.map((row) => ({
+        ...toNode(row),
+        // 관리자에게는 지운 본문·작성자도 그대로
+        body: row.body,
+        author: row.author,
+        post: row.post,
+    }));
 }
 
 /**
