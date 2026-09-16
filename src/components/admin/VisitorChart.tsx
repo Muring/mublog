@@ -15,17 +15,17 @@ import type { DailyPoint } from "@/lib/stats";
  * 바뀌어도 2개·3개다. 한 개짜리 막대 차트는 차트가 아니라 그냥 숫자이고,
  * 그 숫자는 이미 접힌 줄의 "누적" 이 말하고 있다.
  */
-const BUCKETS = [
+export const BUCKETS = [
     // unit 은 조사까지 붙여 둔다. "주" + "이" 는 "주이" 가 된다
     { key: "daily", label: "Daily", unit: "날이" },
     { key: "weekly", label: "Weekly", unit: "주가" },
     { key: "monthly", label: "Monthly", unit: "달이" },
 ] as const;
 
-type BucketKey = (typeof BUCKETS)[number]["key"];
+export type BucketKey = (typeof BUCKETS)[number]["key"];
 
 /** visitors 가 null 이면 "그 달은 기록 밖" 이라는 뜻이다. 0 과 구분한다. */
-type Point = { key: string; label: string; tip: string; visitors: number | null };
+export type Point = { key: string; label: string; tip: string; visitors: number | null };
 
 /**
  * 눈금 천장을 깔끔한 수로 올린다.
@@ -33,7 +33,7 @@ type Point = { key: string; label: string; tip: string; visitors: number | null 
  * 실제 최댓값이 그대로 천장이면 눈금이 7, 13 처럼 읽기 나쁜 수가 된다.
  * 1·2·5 의 배수로 올려 0 / 절반 / 천장 세 눈금이 항상 정수로 떨어지게 한다.
  */
-function niceCeil(value: number): number {
+export function niceCeil(value: number): number {
     if (value <= 4) return 4;
     const mag = 10 ** Math.floor(Math.log10(value));
     for (const step of [1, 2, 4, 5, 10]) {
@@ -49,7 +49,7 @@ function niceCeil(value: number): number {
  * 점이 하나뿐인 덩어리는 선이 그려지지 않아 보이지 않는다. 그 자리에
  * 아주 짧은 가로 선을 그어 "여기 값이 있다" 는 것만 남긴다.
  */
-function linePath(seg: { x: number; y: number }[]): string {
+export function linePath(seg: { x: number; y: number }[]): string {
     if (seg.length === 1) {
         const { x, y } = seg[0];
         return `M${x - 0.6},${y} L${x + 0.6},${y}`;
@@ -74,7 +74,7 @@ function weekStart(iso: string): string {
 }
 
 /** 최근 30일. 기록이 그보다 짧으면 있는 만큼만 */
-function daily(points: DailyPoint[], unit: string): Point[] {
+export function daily(points: DailyPoint[], unit: string): Point[] {
     return points.slice(-30).map((p) => ({
         key: p.date,
         label: md(p.date),
@@ -84,7 +84,7 @@ function daily(points: DailyPoint[], unit: string): Point[] {
 }
 
 /** 최근 12주. 주는 월요일에 시작한다 */
-function weekly(points: DailyPoint[], unit: string): Point[] {
+export function weekly(points: DailyPoint[], unit: string): Point[] {
     const sums = new Map<string, number>();
     for (const p of points) {
         const k = weekStart(p.date);
@@ -109,7 +109,7 @@ function weekly(points: DailyPoint[], unit: string): Point[] {
  * "아무도 안 왔다" 가 아니라 "세지 않았다" 이고, 아직 오지 않은 달도 마찬가지다.
  * 열두 칸을 유지해야 해가 달라져도 같은 자리에서 같은 달을 비교할 수 있다.
  */
-function monthly(points: DailyPoint[], year: string, unit: string): Point[] {
+export function monthly(points: DailyPoint[], year: string, unit: string): Point[] {
     const sums = new Map<string, number>();
     for (const p of points) {
         if (!p.date.startsWith(year)) continue;
@@ -129,7 +129,7 @@ function monthly(points: DailyPoint[], year: string, unit: string): Point[] {
 }
 
 /**
- * 날짜별 추이 차트. 기본은 방문자이고, 태그별 조회(TagViewsChart)가 제목·단위·요약을 바꿔 같이 쓴다.
+ * 날짜별 방문자 추이. 묶음 함수·눈금 계산은 export 해서 태그별 조회(TagViewsChart)가 같이 쓴다.
  *
  * 늘 확인하는 값이 아니라 접어 둔다. 접힌 줄에 오늘과 누적이 남아 있어
  * 굳이 펼치지 않아도 알 것은 알 수 있다. details/summary 를 쓰는 이유는
@@ -141,21 +141,12 @@ function monthly(points: DailyPoint[], year: string, unit: string): Point[] {
 export default function VisitorChart({
     points,
     totalVisitors,
-    title = "방문자 추이",
-    unit = "명",
-    totalLabel = "누적",
-    controls,
 }: {
     points: DailyPoint[];
     /** 집계를 시작한 뒤 지금까지의 누적 */
     totalVisitors: number;
-    title?: string;
-    /** 값 뒤에 붙는 단위. 방문자는 명, 조회는 회 */
-    unit?: string;
-    totalLabel?: string;
-    /** 집계 단위 탭 옆에 더 놓을 조작(태그 선택 등) */
-    controls?: React.ReactNode;
 }) {
+    const unit = "명";
     const [bucket, setBucket] = useState<BucketKey>("daily");
 
     /*
@@ -247,12 +238,11 @@ export default function VisitorChart({
     return (
         <ChartCard onToggle={(e) => !e.currentTarget.open && setAnimate(false)}>
             <summary>
-                <span className="title">{title}</span>
+                <span className="title">방문자 추이</span>
                 {/* 집계 단위와 무관한 두 값이라 탭을 눌러도 바뀌지 않는다 */}
                 <span className="summary-value">
-                    오늘 <strong>{today.toLocaleString("ko-KR")}</strong>
-                    {unit} · {totalLabel} <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>
-                    {unit}
+                    오늘 <strong>{today.toLocaleString("ko-KR")}</strong>명 · 누적{" "}
+                    <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>명
                 </span>
             </summary>
 
@@ -274,8 +264,6 @@ export default function VisitorChart({
                             </button>
                         ))}
                     </RangeTabs>
-
-                    {controls}
 
                     {/* 연도는 Monthly 에서만 뜻이 있다. 자리는 늘 지킨다 */}
                     {years.length > 0 && (
