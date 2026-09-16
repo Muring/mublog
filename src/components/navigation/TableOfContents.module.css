@@ -69,9 +69,7 @@
     margin-top: 3px;
 }
 .navigationList .navigationList a {
-    /* 접힌 둘째 줄부터 8px 더 들여 써서(hanging indent) 새 항목이 아니라 이어지는 줄로 읽히게 한다. */
-    padding: 3px 6px 3px 18px;
-    text-indent: -8px;
+    padding: 3px 6px 3px 10px;
     font-size: 11px;
     font-weight: 400;
     color: var(--portfolio-description);
