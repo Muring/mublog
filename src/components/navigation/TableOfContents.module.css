@@ -38,14 +38,14 @@
     text-decoration: none;
     transition: color 150ms ease;
 }
+/* 마커는 항목 높이를 꽉 채운다. 안쪽 레일이 하위 항목 높이의 합이라, 짧게 하면 선 길이가 어긋난다. */
 .navigationList a::before {
     content: "";
     position: absolute;
     left: -1px;
-    top: 5px;
-    bottom: 5px;
+    top: 0;
+    bottom: 0;
     width: 2px;
-    border-radius: 2px;
     background: transparent;
     transition: background-color 150ms ease;
 }
@@ -68,10 +68,6 @@
     font-size: 11px;
     font-weight: 400;
     color: var(--portfolio-description);
-}
-.navigationList .navigationList a::before {
-    top: 4px;
-    bottom: 4px;
 }
 .navigationTop {
     display: block;
