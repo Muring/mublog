@@ -111,6 +111,8 @@ export const CommentList = styled.ul`
 `;
 
 export const CommentRow = styled.div`
+    scroll-margin-top: 90px;
+    &:target { outline: 2px solid var(--linkhovercolor); outline-offset: 5px; border-radius: 6px; }
     position: relative;
     display: flex;
     gap: 0.75rem;

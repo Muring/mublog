@@ -1,3 +1,4 @@
+import { commentPage } from "@/lib/admin-navigation";
 import { prisma } from "@/lib/prisma";
 import { HttpError } from "@/lib/auth";
 import type { CommentNode } from "@/types/comment";
@@ -62,7 +63,7 @@ export async function getCommentsByPostSlug(slug: string): Promise<CommentNode[]
 }
 
 export type AdminComment = CommentNode & {
-    post: { slug: string; title: string };
+    post: { id: string; slug: string; title: string; status: "DRAFT" | "PUBLISHED" };
 };
 
 /**
@@ -73,20 +74,28 @@ export type AdminComment = CommentNode & {
  * 본인이 지운 거면 그냥 넘기면 된다. 공개 API 로는 여전히 안 나간다(getCommentsByPostSlug 는 그대로).
  * slug 를 주면 그 글의 것만 돌려준다.
  */
-export async function getCommentsForAdmin(slug?: string): Promise<AdminComment[]> {
-    const rows = await prisma.comment.findMany({
-        where: slug ? { post: { slug } } : undefined,
-        orderBy: { createdAt: "desc" },
-        take: 100,
-        select: { ...COMMENT_SELECT, post: { select: { slug: true, title: true } } },
-    });
-    return rows.map((row) => ({
-        ...toNode(row),
-        // 관리자에게는 지운 본문·작성자도 그대로
-        body: row.body,
-        author: row.author,
-        post: row.post,
-    }));
+export async function getCommentsForAdmin({ slug, status = "all", page = 1 }: {
+    slug?: string; status?: "all" | "live" | "deleted"; page?: number;
+} = {}) {
+    return prisma.$transaction(async (tx) => {
+        const base = slug ? { post: { slug } } : {};
+        const post = slug ? await tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } }) : null;
+        const [total, deleted] = await Promise.all([
+            tx.comment.count({ where: base }),
+            tx.comment.count({ where: { ...base, deletedAt: { not: null } } }),
+        ]);
+        const counts = { all: total, live: total - deleted, deleted };
+        const pagination = commentPage(counts[status], page);
+        const rows = await tx.comment.findMany({
+            where: { ...base, ...(status === "live" ? { deletedAt: null } : status === "deleted" ? { deletedAt: { not: null } } : {}) },
+            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            skip: pagination.skip,
+            take: pagination.take,
+            select: { ...COMMENT_SELECT, post: { select: { id: true, slug: true, title: true, status: true } } },
+        });
+        const comments: AdminComment[] = rows.map((row) => ({ ...toNode(row), body: row.body, author: row.author, post: row.post }));
+        return { comments, counts, post, ...pagination };
+    }, { isolationLevel: "RepeatableRead" });
 }
 
 /**

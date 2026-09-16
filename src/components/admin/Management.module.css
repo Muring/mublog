@@ -1,0 +1,21 @@
+.navigation { display:flex; gap:6px; border-bottom:1px solid var(--bordercolor); margin-bottom:20px; }
+.navigation a { padding:10px 16px; color:var(--desccolor); text-decoration:none; border-bottom:2px solid transparent; font-size:14px; font-weight:700; }
+.navigation a[aria-current="page"] { color:var(--linkhovercolor); border-bottom-color:var(--linkhovercolor); }
+.navigation a:hover { color:var(--foreground); }
+.filters { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }
+.filters a, .filters button, .pagination a, .pagination span { padding:8px 12px; border:1px solid var(--bordercolor); border-radius:8px; background:var(--background); color:var(--foreground); text-decoration:none; font:inherit; font-size:13px; }
+.filters button { cursor:pointer; }
+.filters [aria-pressed="true"], .filters [aria-current="true"] { border-color:var(--linkhovercolor); color:var(--linkhovercolor); background:color-mix(in srgb,var(--linkhovercolor) 7%,var(--background)); font-weight:700; }
+.filters button:hover, .filters a:hover, .pagination a:hover { border-color:var(--linkhovercolor); }
+.navigation a:focus-visible, .filters :focus-visible, .pagination a:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:3px; }
+.postFilter { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px; border-radius:8px; background:var(--codefontbgcolor); margin-bottom:16px; font-size:14px; overflow-wrap:anywhere; }
+.postFilter a { color:var(--linkcolor); }
+.pagination { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:12px; margin-top:24px; }
+.pagination [aria-disabled="true"] { color:var(--desccolor); }
+.summary { font-size:13px; color:var(--desccolor); margin:12px 0; line-height:1.8; }
+.chartTabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.chartTabs button { font:inherit; font-size:13px; padding:9px 14px; color:var(--desccolor); border:1px solid var(--bordercolor); border-radius:8px; background:transparent; cursor:pointer; }
+.chartTabs [aria-selected="true"] { background:var(--foreground); color:var(--background); border-color:var(--foreground); }
+.chartTabs button:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:3px; }
+.compact { padding:18px 0; font-size:14px; color:var(--desccolor); }
+@media(max-width:560px) { .navigation a { flex:1; text-align:center; padding:10px 8px; } }

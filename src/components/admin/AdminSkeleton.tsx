@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense } from "react";
+import AdminNavigation from "./AdminNavigation";
 import { AdminWrapper, PostTable, Button, Skeleton } from "./Admin.styled";
 
 /**
@@ -12,27 +14,28 @@ import { AdminWrapper, PostTable, Button, Skeleton } from "./Admin.styled";
  */
 
 /** 데이터가 필요 없는 부분. 기다리는 동안에도 눌러서 글을 쓰러 갈 수 있다. */
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({ children, title = "포스트 관리" }: { children: React.ReactNode; title?: string }) {
     return (
         <AdminWrapper>
             <div className="admin-head">
-                <h2>포스트 관리</h2>
+                <h2>{title}</h2>
                 <Link href="/admin/posts/new">
                     <Button as="span" className="primary">
                         새 글 쓰기
                     </Button>
                 </Link>
             </div>
+            <Suspense fallback={<div style={{ height: 45 }} />}><AdminNavigation /></Suspense>
             {children}
         </AdminWrapper>
     );
 }
 
-/** 통계 4칸 */
+/** 통계 3칸 */
 export function StatRowSkeleton() {
     return (
         <div className="stat-row" aria-hidden>
-            {[0, 1, 2, 3].map((i) => (
+            {[0, 1, 2].map((i) => (
                 <div className="stat" key={i}>
                     <Skeleton style={{ width: "2.5rem", height: "0.75rem" }} />
                     <Skeleton style={{ width: "3rem", height: "1.5rem", marginTop: "0.4rem" }} />
@@ -104,7 +107,11 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
 export default function AdminSkeleton() {
     return (
         <AdminShell>
-            <StatRowSkeleton />
+            <Skeleton style={{ height: "3.2rem", marginBottom: "1.5rem" }} />
+            <div style={{ display: "flex", gap: 8, marginBottom: 16 }} aria-hidden>
+                {[0, 1, 2].map((key) => <Skeleton key={key} style={{ width: "4.5rem", height: "2.4rem" }} />)}
+            </div>
+            <Skeleton style={{ width: "65%", height: "2.5rem", marginBottom: 16 }} />
             <PostTableSkeleton />
         </AdminShell>
     );

@@ -37,7 +37,7 @@ export const AdminWrapper = styled.div`
    */
   .stat-row {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 0.75rem;
     margin-bottom: 1.25rem;
   }
@@ -132,11 +132,11 @@ export const PostTable = styled.table`
   }
 
   th:nth-of-type(2) { width: 5rem; }    /* 상태 */
-  th:nth-of-type(3) { width: 14rem; }   /* 태그 */
+  th:nth-of-type(3) { width: 9rem; }    /* 태그 */
   th:nth-of-type(4) { width: 7.5rem; }  /* 발행일 */
   th:nth-of-type(5) { width: 7.5rem; }  /* 수정일 */
   th:nth-of-type(6) { width: 5rem; }     /* 누적 조회 */
-  th:nth-of-type(7) { width: 4rem; }    /* 댓글 */
+  th:nth-of-type(7) { width: 6rem; }    /* 댓글 */
   th:nth-of-type(8) { width: 9.5rem; }  /* 수정·삭제 */
 
   .views-total {
@@ -217,6 +217,8 @@ export const PostTable = styled.table`
     }
   }
 
+  .compact-tags, .compact-comments { display: none; }
+
   .slug {
     display: block;
     font-size: 0.75rem;
@@ -270,15 +272,12 @@ export const PostTable = styled.table`
    * 좁아진다고 바로 카드로 바꾸지 않는다. 표는 여러 글을 한눈에 훑는 데 유리하므로
    * 먼저 덜 중요한 열부터 접어서 표 모양을 최대한 오래 유지한다.
    *
-   * 접는 순서는 태그 -> 수정일 -> 조회 -> 댓글 이다. 태그와 댓글은 수정 화면에서 다시
-   * 볼 수 있지만 수정일은 거기에도 없어서, 둘 사이에 둔다. 조회는 여기서만 보이지만
-   * 댓글보다 넓어서 먼저 접는다.
-   *
-   * 폭 기준은 고정 열의 합에서 나온다. 여덟 열이 55rem 을 먼저 가져가므로
-   * 컨테이너가 1100px 밑으로 내려가면 제목에 두 줄도 남지 않는다.
-   * 열을 더하거나 폭을 바꾸면 이 숫자들도 같이 바꿔야 한다.
+   * 접는 순서는 태그 -> 수정일 -> 조회 -> 댓글이다.
+   * 태그와 댓글 링크는 열을 접어도 제목 아래에 남긴다.
+   * 열을 더하거나 폭을 바꾸면 컨테이너 기준도 함께 조정한다.
    */
-  @container admin (max-width: 1100px) {
+  @container admin (max-width: 960px) {
+    .compact-tags { display: block; font-size: 0.72rem; color: var(--desccolor); margin-top: 4px; }
     th:nth-of-type(3),
     td:nth-of-type(3) {
       display: none;
@@ -300,6 +299,7 @@ export const PostTable = styled.table`
   }
 
   @container admin (max-width: 720px) {
+    .compact-comments { display: inline-block; font-size: 0.8rem; margin-top: 6px; color: var(--linkcolor); }
     th:nth-of-type(7),
     td:nth-of-type(7) {
       display: none;
@@ -312,6 +312,7 @@ export const PostTable = styled.table`
    * 제 이름표를 달고 나온다.
    */
   @container admin (max-width: 560px) {
+    .compact-tags, .compact-comments { display: none; }
     display: block;
     table-layout: auto;
 
@@ -401,6 +402,9 @@ export const Button = styled.button`
   padding: 0.5rem 0.9rem;
   font-size: 0.85rem;
 
+  &.quiet-danger { background: transparent; border-color: transparent; color: var(--desccolor); }
+  &.quiet-danger:hover { color: var(--dangercolor, #b42318); border-color: var(--bordercolor); }
+
   &.primary {
     ${buttonPrimary}
   }
@@ -478,6 +482,9 @@ export const TableScroll = styled.div`
 /** 검색 줄. 표 바로 위에 두어 무엇을 거르는지 분명히 한다 */
 export const TableToolbar = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  > button { font: inherit; font-size: 0.8rem; padding: 7px 10px; color: var(--foreground); background: var(--background); border: 1px solid var(--bordercolor); border-radius: 6px; cursor: pointer; }
+
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.5rem;
@@ -502,6 +509,8 @@ export const TableToolbar = styled.div`
    * 타자를 칠 때마다 검색창이 조금씩 움찔거린다. 자리를 미리 잡아두면
    * 숫자만 바뀌고 레이아웃은 그대로다.
    */
+  @media (max-width: 560px) { input { flex: 1 1 100%; } }
+
   .count {
     flex-shrink: 0;
     width: 4rem;

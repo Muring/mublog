@@ -54,7 +54,7 @@ export default function CommentItem({
 
     if (comment.deleted) {
         return (
-            <CommentRow className={rowClass}>
+            <CommentRow id={`comment-${comment.id}`} className={rowClass}>
                 <div className="avatar-col">
                     <div className="avatar avatar-fallback">-</div>
                 </div>
@@ -73,7 +73,7 @@ export default function CommentItem({
     const canDelete = isMine || isAdmin;
 
     return (
-        <CommentRow className={rowClass}>
+        <CommentRow id={`comment-${comment.id}`} className={rowClass}>
             <div className="avatar-col">
                 {comment.author?.avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element

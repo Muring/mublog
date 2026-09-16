@@ -60,7 +60,7 @@ function AdminCommentRow({ comment }: { comment: AdminComment }) {
 
     const busy = isDeleting || isPending;
     const postLink = (
-        <Link href={`/${comment.post.slug}#comments`} className="row-action">
+        <Link href={comment.post.status === "PUBLISHED" ? `/${comment.post.slug}#comment-${comment.id}` : `/admin/posts/${comment.post.id}`} className="row-action">
             {comment.post.title}
         </Link>
     );

@@ -9,7 +9,10 @@ import { formatCardDate } from "@/lib/date";
 import { fetchJson } from "@/lib/fetcher";
 import { useConfirm } from "@/providers/Confirm";
 
+import { commentListUrl } from "@/lib/admin-navigation";
+
 type Props = {
+    returnTo: string;
     post: {
         id: string;
         slug: string;
@@ -23,7 +26,7 @@ type Props = {
     };
 };
 
-export default function PostTableRow({ post }: Props) {
+export default function PostTableRow({ post, returnTo }: Props) {
     const router = useRouter();
     const toast = useToast();
     const confirm = useConfirm();
@@ -51,6 +54,7 @@ export default function PostTableRow({ post }: Props) {
         startTransition(() => router.refresh());
     }
 
+    const commentsHref = commentListUrl({ post: post.slug, returnTo });
     const busy = isDeleting || isPending;
 
     return (
@@ -68,6 +72,8 @@ export default function PostTableRow({ post }: Props) {
                     {post.title}
                 </Link>
                 <span className="slug">/{post.slug}</span>
+                <span className="compact-tags">{post.tags.join(" · ")}</span>
+                <Link href={commentsHref} className="compact-comments">댓글 {post.commentCount}개</Link>
             </td>
             <td data-label="상태">
                 <span className={`badge ${post.status === "PUBLISHED" ? "published" : "draft"}`}>
@@ -83,22 +89,15 @@ export default function PostTableRow({ post }: Props) {
             <td data-label="누적 조회" className="views-total">
                 {post.viewCount.toLocaleString("ko-KR")}
             </td>
-            {/* 댓글이 있으면 그 글의 댓글만 걸러 보는 관리 화면으로 */}
             <td data-label="댓글">
-                {post.commentCount > 0 ? (
-                    <Link href={`/admin/comments?post=${post.slug}`} className="title-link">
-                        {post.commentCount}
-                    </Link>
-                ) : (
-                    post.commentCount
-                )}
+                <Link href={commentsHref} className="title-link">댓글 {post.commentCount}개</Link>
             </td>
             <td className="actions">
                 <div className="action-buttons">
                     <Link href={`/admin/posts/${post.id}`}>
                         <Button as="span">수정</Button>
                     </Link>
-                    <Button className="danger" onClick={remove} disabled={busy}>
+                    <Button className="quiet-danger" onClick={remove} disabled={busy}>
                         {busy ? "삭제 중..." : "삭제"}
                     </Button>
                 </div>

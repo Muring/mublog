@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Dropdown from "@/components/ui/Dropdown";
+import { filterAdminPosts, postListState, postListUrl, type PostSort, type PostStatusFilter } from "@/lib/admin-navigation";
+import styles from "./Management.module.css";
 import { PostTable, TableScroll, TableToolbar } from "./Admin.styled";
 import PostTableRow from "./PostTableRow";
 
@@ -12,6 +15,7 @@ type Row = {
     status: "DRAFT" | "PUBLISHED";
     publishedAt: string | null;
     updatedAt: string;
+    createdAt: string;
     /** 발행 후 누적 조회수 */
     viewCount: number;
     commentCount: number;
@@ -28,30 +32,36 @@ type Row = {
  * 가 이미 있으므로 커서 방식으로 바꾸면 된다.
  */
 export default function PostTableView({ posts }: { posts: Row[] }) {
-    const [query, setQuery] = useState("");
+    const params = useSearchParams();
+    const { q: query, status, sort } = postListState(new URLSearchParams(params));
+    const returnTo = postListUrl({ q: query, status, sort });
+    const update = (patch: Partial<{ q: string; status: PostStatusFilter; sort: PostSort }>) => {
+        window.history.replaceState(null, "", postListUrl({ q: query, status, sort, ...patch }));
+    };
 
-    const filtered = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return posts;
-        return posts.filter(
-            (p) =>
-                p.title.toLowerCase().includes(q) ||
-                p.slug.toLowerCase().includes(q) ||
-                p.tags.some((t) => t.toLowerCase().includes(q))
-        );
-    }, [posts, query]);
+    const filtered = filterAdminPosts(posts, { q: query, status, sort });
 
     return (
         <>
+            <div className={styles.filters} role="group" aria-label="포스트 상태">
+                {([['all', '전체'], ['PUBLISHED', '공개'], ['DRAFT', '초안']] as const).map(([value, label]) => (
+                    <button key={value} type="button" aria-pressed={status === value} onClick={() => update({ status: value })}>
+                        {label} {posts.filter((p) => value === 'all' || p.status === value).length}
+                    </button>
+                ))}
+            </div>
             <TableToolbar>
                 <input
                     type="search"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(e) => update({ q: e.target.value })}
                     placeholder="제목 · 주소 · 태그로 거르기"
                     aria-label="포스트 검색"
                 />
-                {/* 전체 개수는 위 통계 카드가 이미 말한다. 여기서는 걸러진 수만 */}
+                <Dropdown label="포스트 정렬" size="sm" value={sort}
+                    options={[{ value: 'newest', label: '최신순' }, { value: 'updated', label: '수정순' }, { value: 'views', label: '조회순' }, { value: 'comments', label: '댓글순' }]}
+                    onChange={(value) => update({ sort: value as PostSort })} />
+                {(query || status !== "all" || sort !== "newest") && <button type="button" onClick={() => update({ q: "", status: "all", sort: "newest" })}>초기화</button>}
                 <span className="count">{filtered.length}개</span>
             </TableToolbar>
 
@@ -72,7 +82,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                     </thead>
                     <tbody>
                         {filtered.map((post) => (
-                            <PostTableRow key={post.id} post={post} />
+                            <PostTableRow key={post.id} post={post} returnTo={returnTo} />
                         ))}
                     </tbody>
                 </PostTable>

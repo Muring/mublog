@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -27,6 +27,18 @@ export default function Comments({ slug }: { slug: string }) {
         isLoading,
         isError,
     } = useQuery({ queryKey, queryFn: () => fetchComments(slug) });
+
+    const anchored = useRef("");
+    useEffect(() => {
+        if (isLoading || isError || !window.location.hash.startsWith("#comment-")) return;
+        const key = slug + window.location.hash;
+        if (anchored.current === key) return;
+        const target = document.getElementById(window.location.hash.slice(1));
+        if (target) {
+            anchored.current = key;
+            target.scrollIntoView({ block: "start", behavior: "instant" });
+        }
+    }, [comments, isLoading, isError, slug]);
 
     const create = useOptimisticList<CommentNode, { body: string; parentId: string | null }, CommentNode>({
         queryKey,
