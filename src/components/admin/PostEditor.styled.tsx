@@ -123,22 +123,34 @@ export const MetaGrid = styled.div`
   }
 
 
+  /* 시리즈 이름(드롭다운 + 새 이름)과 순서를 나란히. 순서는 좁고 라벨을 따로 가진다. */
   .series-row {
     display: flex;
-    gap: 0.35rem;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
-  .series-row > :first-child,
-  .series-row input:not([type="number"]) {
+  .series-name {
     flex: 1;
     min-width: 0;
   }
-  .series-row > :first-child > button {
+  .series-name-row {
+    display: flex;
+    gap: 0.35rem;
+  }
+  .series-name-row > * {
+    flex: 1;
+    min-width: 0;
+  }
+  .series-name-row > :first-child > button {
     width: 100%;
   }
-  .series-row input[type="number"] {
-    width: 4.5rem;
+  .series-order {
+    flex: 0 0 4.5rem;
   }
-  .series-row input:disabled {
+  .series-order input {
+    width: 100%;
+  }
+  .series-order input:disabled {
     cursor: not-allowed;
   }
 

@@ -226,9 +226,10 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                   시리즈도, 그 안의 순서도 선택이다. 순서가 없으면 발행일순이다. datalist 는 브라우저마다 생김새와 여는 조건이 달라
                   select 로 고른다. "새 시리즈" 를 고르면 그때만 이름 입력칸이 나온다.
                 */}
-                <div className="field">
-                    <span className="field-label">시리즈</span>
-                    <div className="series-row">
+                <div className="series-row">
+                    <div className="field series-name">
+                        <span className="field-label">시리즈</span>
+                        <div className="series-name-row">
                         <Dropdown
                             label="시리즈"
                             value={seriesChoice}
@@ -266,6 +267,15 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                                 autoFocus
                             />
                         )}
+                        </div>
+                        {(isNewSeries || post.series.trim()) && (
+                            <span className="field-hint">
+                                시리즈를 고르면 순서가 채워집니다. 비우면 발행일순으로 놓입니다.
+                            </span>
+                        )}
+                    </div>
+                    <label className="series-order">
+                        순서
                         <input
                             type="number"
                             inputMode="numeric"
@@ -274,15 +284,9 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                             value={post.seriesOrder}
                             onChange={(e) => set("seriesOrder", e.target.value)}
                             placeholder="자동"
-                            aria-label="시리즈 안 순서"
                             disabled={!isNewSeries && !post.series.trim()}
                         />
-                    </div>
-                    {(isNewSeries || post.series.trim()) && (
-                        <span className="field-hint">
-                            시리즈를 고르면 다음 순서가 채워집니다. 비우면 발행일순으로 놓입니다.
-                        </span>
-                    )}
+                    </label>
                 </div>
                 </div>
 
