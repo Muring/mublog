@@ -15,8 +15,8 @@ type Row = {
     /** 발행 후 누적 조회수 */
     viewCount: number;
     commentCount: number;
-    /** 최근 14일 일별 조회. 기록이 없으면 빈 배열 */
-    recentViews: number[];
+    /** 기록 시작일부터 오늘까지를 칸으로 나눈 조회 추이. 기록이 없으면 빈 배열 */
+    viewTrend: number[];
 };
 
 /**
@@ -29,7 +29,16 @@ type Row = {
  * 한 번에 받는 양이 눈에 띄게 무거워졌을 때다. 그때는 @@index([status, publishedAt desc])
  * 가 이미 있으므로 커서 방식으로 바꾸면 된다.
  */
-export default function PostTableView({ posts }: { posts: Row[] }) {
+export default function PostTableView({
+    posts,
+    trendSince,
+    trendBucketDays,
+}: {
+    posts: Row[];
+    /** 추이선이 시작하는 날(KST). 열 머리의 툴팁에 쓴다 */
+    trendSince: string;
+    trendBucketDays: number;
+}) {
     const [query, setQuery] = useState("");
 
     const filtered = useMemo(() => {
@@ -67,14 +76,14 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                             <th>태그</th>
                             <th>발행일</th>
                             <th>수정일</th>
-                            <th>조회</th>
+                            <th title={`선은 ${trendSince}부터 오늘까지, 한 칸 ${trendBucketDays}일`}>조회</th>
                             <th>댓글</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {filtered.map((post) => (
-                            <PostTableRow key={post.id} post={post} />
+                            <PostTableRow key={post.id} post={post} trendBucketDays={trendBucketDays} />
                         ))}
                     </tbody>
                 </PostTable>

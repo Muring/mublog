@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth";
 import { getAllPostsForAdmin } from "@/lib/posts";
-import { getDailyVisitors, getRecentPostViews, getSiteStats } from "@/lib/stats";
+import { getDailyVisitors, getPostViewSeries, getSiteStats } from "@/lib/stats";
 import { AdminShell } from "@/components/admin/AdminSkeleton";
 import PostTableView from "@/components/admin/PostTableView";
 import VisitorChart from "@/components/admin/VisitorChart";
@@ -22,13 +22,13 @@ export default async function AdminPage() {
     // 인가는 레이아웃이 아니라 여기서 확정한다 (layout.tsx 의 주석 참고)
     await requireAdmin();
 
-    const [rows, daily, stats, recentViews] = await Promise.all([
+    const [rows, daily, stats, viewSeries] = await Promise.all([
         getAllPostsForAdmin(),
         getDailyVisitors(),
         getSiteStats(),
-        getRecentPostViews(),
+        getPostViewSeries(),
     ]);
-    const posts = rows.map((row) => ({ ...row, recentViews: recentViews.get(row.id) ?? [] }));
+    const posts = rows.map((row) => ({ ...row, viewTrend: viewSeries.series.get(row.id) ?? [] }));
     const published = posts.filter((p) => p.status === "PUBLISHED").length;
     const comments = posts.reduce((sum, p) => sum + p.commentCount, 0);
 
@@ -56,7 +56,7 @@ export default async function AdminPage() {
 
             <VisitorChart points={daily} totalVisitors={stats.total} />
 
-            <PostTableView posts={posts} />
+            <PostTableView posts={posts} trendSince={viewSeries.since} trendBucketDays={viewSeries.bucketDays} />
         </AdminShell>
     );
 }

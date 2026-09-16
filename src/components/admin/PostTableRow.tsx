@@ -21,11 +21,14 @@ type Props = {
         updatedAt: string;
         viewCount: number;
         commentCount: number;
-        recentViews: number[];
+        viewTrend: number[];
     };
+    trendBucketDays: number;
 };
 
-export default function PostTableRow({ post }: Props) {
+const TREND_POINTS = 20;
+
+export default function PostTableRow({ post, trendBucketDays }: Props) {
     const router = useRouter();
     const toast = useToast();
     const confirm = useConfirm();
@@ -83,16 +86,16 @@ export default function PostTableRow({ post }: Props) {
             </td>
             <td data-label="수정일">{formatCardDate(post.updatedAt)}</td>
             {/*
-              숫자는 발행 후 누적 조회수, 선은 최근 14일 추이.
+              숫자는 발행 후 누적 조회수, 선은 기록 시작일부터 오늘까지의 추이(전체 글이 같은 구간·칸).
               데이터가 없어도 같은 자리를 지킨다 — 선은 바닥에 흐리게, 숫자 자리는 폭을 고정한다.
             */}
             <td data-label="조회">
                 <span
                     className="views-cell"
-                    title={`최근 7일 ${post.recentViews.slice(-7).reduce((a, b) => a + b, 0)}회`}
+                    title={`마지막 칸(${trendBucketDays}일) ${post.viewTrend.at(-1) ?? 0}회`}
                 >
                     <span className="views-total">{post.viewCount}</span>
-                    <Sparkline values={post.recentViews.length ? post.recentViews : new Array(14).fill(0)} />
+                    <Sparkline values={post.viewTrend.length ? post.viewTrend : new Array(TREND_POINTS).fill(0)} />
                 </span>
             </td>
             {/* 댓글이 있으면 그 글의 댓글만 걸러 보는 관리 화면으로 */}
