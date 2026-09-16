@@ -23,7 +23,8 @@
 .navigationList a {
     display: block;
     padding: 3px 8px;
-    border-left: 2px solid transparent;
+    border-radius: 5px;
+    font-weight: 600;
     color: var(--portfolio-description);
     overflow-wrap: anywhere;
     text-decoration: none;
@@ -32,7 +33,6 @@
     color: var(--linkhovercolor);
 }
 .navigationList a[aria-current="location"] {
-    border-left-color: var(--linkhovercolor);
     color: var(--linkhovercolor);
     background: color-mix(in srgb, var(--linkhovercolor) 8%, transparent);
     font-weight: 700;
@@ -40,16 +40,28 @@
 .navigationTop {
     display: block;
     margin-top: 12px;
-    padding-top: 10px;
+    padding: 10px 8px 4px;
     text-align: center;
     border-top: 1px solid var(--bordercolor);
     text-decoration: underline;
     text-underline-offset: 4px;
+    border-radius: 0 0 5px 5px;
+    transition: color 150ms ease, background-color 150ms ease;
+}
+.navigationTop:hover,
+.navigationTop:focus-visible {
+    color: var(--linkhovercolor);
+    background: color-mix(in srgb, var(--linkhovercolor) 8%, transparent);
 }
 .navigationList .navigationList {
-    margin-left: 10px;
-    padding-left: 8px;
-    border-left: 1px solid var(--bordercolor);
+    margin: 2px 0 4px 12px;
+}
+.navigationList .navigationList a {
+    font-size: 11px;
+    font-weight: 400;
+}
+.navigationList .navigationList a[aria-current="location"] {
+    font-weight: 700;
 }
 .navigation a:focus-visible {
     outline: 2px solid var(--linkhovercolor);
