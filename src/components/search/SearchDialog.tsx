@@ -25,6 +25,9 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     const [focused, setFocused] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLUListElement>(null);
+    // 목록을 따라 스크롤하는 건 키보드로 옮길 때만이다. 마우스가 위아래 끝에 걸친 항목에
+    // 닿을 때마다 목록이 움직이면 내용이 손 밑에서 미끄러진다.
+    const viaKeyboard = useRef(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -54,6 +57,8 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     }, []);
 
     useEffect(() => {
+        if (!viaKeyboard.current) return;
+        viaKeyboard.current = false;
         const item = listRef.current?.children[focused] as HTMLElement | undefined;
         item?.scrollIntoView({ block: "nearest" });
     }, [focused]);
@@ -70,10 +75,12 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
                 break;
             case "ArrowDown":
                 event.preventDefault();
+                viaKeyboard.current = true;
                 setFocused((i) => Math.min(hits.length - 1, i + 1));
                 break;
             case "ArrowUp":
                 event.preventDefault();
+                viaKeyboard.current = true;
                 setFocused((i) => Math.max(0, i - 1));
                 break;
             case "Enter":

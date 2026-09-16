@@ -24,7 +24,8 @@ export default function SearchButton() {
     return (
         <>
             <SearchTrigger type="button" aria-label="검색" title="검색 (Ctrl+K)" onClick={() => setOpen(true)}>
-                <SearchIcon />
+                <SearchIcon size={18} />
+                <span>검색</span>
             </SearchTrigger>
             {/*
               헤더 트리 안에서 그리면 HeaderWrapper 의 `a { width: 3rem }` 규칙이 결과 링크까지

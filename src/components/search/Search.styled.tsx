@@ -4,18 +4,21 @@ import styled from "@emotion/styled";
 import { surface, hoverSurface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
 
-/** 헤더의 검색 버튼. HeaderWrapper 의 a 규칙과 같은 3rem 정사각형이다. */
+/** 헤더의 검색 버튼. 아이콘 + "검색" 라벨. 오른쪽 로그인 영역과는 한 칸 띄운다. */
 export const SearchTrigger = styled.button`
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    margin-right: 0.25rem;
+    gap: 0.4rem;
+    height: 2.25rem;
+    padding: 0 0.75rem;
+    margin-right: 1rem;
     border: 0;
     border-radius: 0.5rem;
     background: none;
     color: var(--foreground);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
     flex-shrink: 0;
 
@@ -30,9 +33,12 @@ export const SearchTrigger = styled.button`
     }
 
     ${mobile} {
-        width: 2.5rem;
-        height: 2.5rem;
-        margin-right: 0;
+        padding: 0 0.5rem;
+        margin-right: 0.5rem;
+        /* 좁은 화면에서는 아이콘만 */
+        span {
+            display: none;
+        }
     }
 `;
 
@@ -118,9 +124,12 @@ export const SearchPanel = styled.div`
         color: var(--desccolor);
     }
 
+    .search-hit + .search-hit {
+        border-top: 1px solid var(--bordercolor);
+    }
     .search-hit a {
         display: block;
-        padding: 0.7rem 0.8rem;
+        padding: 0.8rem 0.8rem;
         border-radius: 0.5rem;
         color: var(--foreground);
         text-decoration: none;

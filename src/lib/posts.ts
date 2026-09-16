@@ -250,8 +250,9 @@ function makeSnippet(markdown: string, terms: string[]): string | null {
 /**
  * 발행글 검색. 공백으로 나눈 낱말을 전부 포함하는 글을 찾는다.
  *
- * 순위는 제목 > 요약 > 본문 순이고 같으면 최신순. 캐시하지 않는다 — 검색어마다
- * 다르고, 결과가 낡아도 되는 시간이 짧다. 대신 API 쪽에서 CDN 에 잠깐 맡긴다.
+ * 순서는 목록과 같은 최신순이다. 제목이 맞은 글을 앞으로 당기는 점수 정렬을 써 봤는데,
+ * 같은 검색어인데 어떤 글은 앞으로 튀고 어떤 글은 뒤로 가서 무작위처럼 읽혔다.
+ * 캐시하지 않는다 — 검색어마다 다르고, 결과가 낡아도 되는 시간이 짧다. 대신 API 쪽에서 CDN 에 잠깐 맡긴다.
  */
 export async function searchPosts(query: string): Promise<SearchHit[]> {
     const terms = query.trim().split(/\s+/).filter(Boolean).slice(0, 5);
@@ -274,9 +275,7 @@ export async function searchPosts(query: string): Promise<SearchHit[]> {
                 content_md AS "contentMd"
          FROM posts
          WHERE status = 'PUBLISHED' AND ${where}
-         ORDER BY (CASE WHEN title ILIKE $1 THEN 3 ELSE 0 END)
-                + (CASE WHEN coalesce(description, '') ILIKE $1 THEN 2 ELSE 0 END) DESC,
-                  published_at DESC
+         ORDER BY published_at DESC
          LIMIT ${SEARCH_LIMIT}`,
         ...params,
     );
