@@ -58,6 +58,12 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
                 })}
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
         .fast-route-container {
             display: flex;
             justify-content: space-between;

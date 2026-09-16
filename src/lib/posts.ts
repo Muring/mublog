@@ -202,3 +202,87 @@ export async function getPostForEdit(id: string) {
         publishedAt: row.publishedAt?.toISOString() ?? null,
     };
 }
+
+export type SearchHit = PostSummary & {
+    /** 본문에서 처음 맞은 자리 앞뒤를 잘라낸 한 줄. 제목·요약에서만 맞았으면 null. */
+    snippet: string | null;
+};
+
+const SEARCH_LIMIT = 20;
+const SNIPPET_RADIUS = 60;
+
+/** ILIKE 패턴 문자를 이스케이프한다. 사용자가 % 나 _ 를 치면 그 글자 자체를 찾는다. */
+function escapeLike(term: string): string {
+    return term.replace(/[\\%_]/g, (c) => "\\" + c);
+}
+
+/** 마크다운 원문에서 스니펫에 방해되는 기호만 걷어낸다. 렌더가 아니라 미리보기용이다. */
+function plainText(markdown: string): string {
+    return markdown
+        .replace(/```[\s\S]*?```/g, " ")
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/[#>*_`|-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+/**
+ * 검색어 전체가 통째로 나오는 자리를 먼저 찾고, 없으면 가장 긴 낱말이 나오는 자리를 쓴다.
+ * 짧은 낱말("on")을 먼저 찾으면 "Notion" 같은 엉뚱한 자리가 잡힌다.
+ */
+function makeSnippet(markdown: string, terms: string[]): string | null {
+    const text = plainText(markdown);
+    const lower = text.toLowerCase();
+    const candidates = [terms.join(" "), ...[...terms].sort((a, b) => b.length - a.length)];
+    let at = -1;
+    for (const needle of candidates) {
+        at = lower.indexOf(needle.toLowerCase());
+        if (at !== -1) break;
+    }
+    if (at === -1) return null;
+    const start = Math.max(0, at - SNIPPET_RADIUS);
+    const end = Math.min(text.length, at + SNIPPET_RADIUS * 2);
+    return (start > 0 ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
+}
+
+/**
+ * 발행글 검색. 공백으로 나눈 낱말을 전부 포함하는 글을 찾는다.
+ *
+ * 순위는 제목 > 요약 > 본문 순이고 같으면 최신순. 캐시하지 않는다 — 검색어마다
+ * 다르고, 결과가 낡아도 되는 시간이 짧다. 대신 API 쪽에서 CDN 에 잠깐 맡긴다.
+ */
+export async function searchPosts(query: string): Promise<SearchHit[]> {
+    const terms = query.trim().split(/\s+/).filter(Boolean).slice(0, 5);
+    if (terms.length === 0) return [];
+
+    /*
+     * 문장은 손으로 조립하지만 사용자 입력은 전부 $n 자리로만 들어간다.
+     * (Prisma.sql 조각을 겹쳐 넣는 방식은 드라이버 어댑터에서 조각이 JSON 으로 직렬화돼
+     * "invalid input syntax for type boolean" 으로 죽었다.)
+     */
+    const haystack = "(title || ' ' || coalesce(description, '') || ' ' || content_md)";
+    const params = terms.map((term) => "%" + escapeLike(term) + "%");
+    const where = params.map((_, i) => `${haystack} ILIKE $${i + 1}`).join(" AND ");
+
+    const rows = await prisma.$queryRawUnsafe<(SummaryRow & { contentMd: string })[]>(
+        `SELECT id, slug, title, description, tags, thumbnail,
+                published_at AS "publishedAt", created_at AS "createdAt",
+                reading_time AS "readingTime", series, series_order AS "seriesOrder",
+                view_count AS "viewCount", comment_count AS "commentCount",
+                content_md AS "contentMd"
+         FROM posts
+         WHERE status = 'PUBLISHED' AND ${where}
+         ORDER BY (CASE WHEN title ILIKE $1 THEN 3 ELSE 0 END)
+                + (CASE WHEN coalesce(description, '') ILIKE $1 THEN 2 ELSE 0 END) DESC,
+                  published_at DESC
+         LIMIT ${SEARCH_LIMIT}`,
+        ...params,
+    );
+
+    return rows.map(({ contentMd, ...row }) => ({
+        ...toSummary(row),
+        snippet: makeSnippet(contentMd, terms),
+    }));
+}

@@ -1,5 +1,6 @@
 import { fetchJson } from "@/lib/fetcher";
 import type { PostSummary } from "@/types/post";
+import type { SearchHit } from "@/lib/posts";
 import type { CommentNode } from "@/types/comment";
 
 /**
@@ -32,6 +33,7 @@ export const queryKeys = {
     postViews: (slug: string) => ["post-views", slug] as const,
     postViewCounts: ["post-view-counts"] as const,
     comments: (slug: string) => ["comments", slug] as const,
+    search: (q: string) => ["search", q] as const,
 };
 
 /** 현재 로그인 상태. 헤더와 댓글 영역이 함께 본다. */
@@ -75,4 +77,10 @@ export function fetchComments(slug: string): Promise<CommentNode[]> {
 /** 댓글 작성 대상 주소. 생성 mutation 도 같은 주소를 쓴다. */
 export function commentsUrl(slug: string): string {
     return `/api/posts/${encodeURIComponent(slug)}/comments`;
+}
+
+/** 검색. 두 글자 미만은 서버가 빈 결과를 준다. */
+export async function fetchSearch(q: string): Promise<SearchHit[]> {
+    const data = await fetchJson<{ results: SearchHit[] }>(`/api/posts/search?q=${encodeURIComponent(q)}`);
+    return data.results;
 }

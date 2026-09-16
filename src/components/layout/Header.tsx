@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SideMenu from "./SideMenu";
 import HeaderAuth from "./HeaderAuth";
+import SearchButton from "@/components/search/SearchButton";
 
 export default function Header() {
     const [scrollRatio, setScrollRatio] = useState(0);
@@ -68,7 +69,10 @@ export default function Header() {
                     <h5>{title}</h5>
                 </div>
 
-                <HeaderAuth />
+                <div className="header-right">
+                    <SearchButton />
+                    <HeaderAuth />
+                </div>
             </nav>
         </HeaderWrapper>
     );

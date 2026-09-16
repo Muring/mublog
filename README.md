@@ -61,6 +61,10 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 - [x] 🧭 **본문 목차** — 제목 계층을 읽어 만들고, 넓은 화면에서는 옆에 떠서 현재 위치를 따라감
 - [x] 📋 **코드블록 복사** — 언어 라벨과 복사 버튼. 파이프라인이 아니라 브라우저에서 붙임
 - [x] 📚 **시리즈** — `series`·`seriesOrder`로 묶어 본문 아래 목록과 이전/다음 글. 백업 프론트매터에도 남김
+- [x] 🔍 **검색** — 헤더 버튼 또는 Ctrl+K. 제목·요약·본문을 `pg_trgm` ILIKE로 찾고 맞은 자리를 보여줌
+- [x] 📡 **RSS** (`/feed.xml`) — 최근 30편, 요약만. `<head>`에 자동 발견 링크
+- [x] 🖼 **이미지 확대** — 본문 이미지를 누르면 화면에 꽉 차게. 링크 안의 이미지는 제외
+- [x] 🪪 **공유 카드** — 글마다 제목·요약·썸네일을 담은 og:image를 `opengraph-image.tsx`가 굽는다
 - [x] 🗂 **포트폴리오** (`/portfolio`) — 프로젝트별 화면 갤러리(그룹 필터·확대), 같은 목차 컴포넌트를 씀
 
 ### 쓰기 (관리자 전용)
@@ -203,6 +207,9 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 | `/[slug]`                    | `generateStaticParams` + ISR 3600s     | `post:<slug>` (**이름 바꾸면 옛 slug도**) |
 | `/about`                     | 완전 정적                              | —                                   |
 | `/portfolio`                 | 완전 정적 (`noindex`)                  | —                                   |
+| `/feed.xml`                  | ISR 3600s                              | `posts:list`                        |
+| `/[slug]/opengraph-image`    | ISR 3600s                              | `post:<slug>`                       |
+| `/api/posts/search`          | `force-dynamic`, CDN 300s              | IP 상한 60/분 (인스턴스별)           |
 | `/admin/**`                  | `force-dynamic`                        | —                                   |
 | `/api/posts/summary`         | ISR 3600s, `posts:list`                | 포스트 변경 · **댓글 작성/삭제**    |
 | `/api/posts/[slug]/comments` | 캐시 안 함                             | TanStack Query                      |
@@ -570,6 +577,7 @@ src/
 │   │                     # loading.tsx 는 page.tsx 가 있는 세그먼트에만 둔다
 │   ├── api/              # 라우트 핸들러
 │   ├── auth/             # OAuth 콜백 · 로그아웃
+│   ├── feed.xml/         # RSS
 │   ├── login/
 │   ├── portfolio/        # 포트폴리오. 페이지·갤러리·아이콘·CSS 모듈이 한 폴더에
 │   ├── privacy/          # 개인정보 처리방침
@@ -582,6 +590,7 @@ src/
 │   │                     # useSlugCheck / useEditorUploads / usePostSave
 │   ├── comments/         # 댓글 스레드
 │   ├── navigation/       # TableOfContents — 본문·포트폴리오가 같이 쓰는 목차
+│   ├── search/           # 헤더 검색 버튼·대화상자·강조
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
 │   ├── trackers/         # 화면에 아무것도 그리지 않고 부수효과만 내는 null 컴포넌트
 │   ├── ui/               # Skeleton · Toast · ConfirmDialog 같은 범용 조각
@@ -616,6 +625,7 @@ src/
 │   └── prism-notion-theme.css
 ├── types/                # post.ts / comment.ts
 ├── data/                 # about · portfolio 정적 데이터 (portfolio-images.json 은 이미지 치수)
+assets/fonts/             # og 카드용 TTF (public/fonts 의 woff2 는 satori 가 못 읽는다)
 └── proxy.ts              # 세션 갱신 · /admin 가드
 ```
 
@@ -771,7 +781,6 @@ icn1 (현재)         0.15~0.20s   0.14s
 
 ## 📬 개선 예정
 
-- [ ] 🔍 검색 기능 (Full-text search)
 - [ ] 📈 포스트별 통계 대시보드
 - [ ] 📦 블로그 템플릿화
 
