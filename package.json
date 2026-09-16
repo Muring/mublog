@@ -18,7 +18,8 @@
         "draft:post": "tsx scripts/draft-post.mts",
         "migrate:images": "tsx scripts/migrate-images.mts",
         "lint:fix": "eslint . --fix",
-        "make:og": "tsx scripts/make-og-image.mts"
+        "make:og": "tsx scripts/make-og-image.mts",
+        "revalidate": "tsx scripts/revalidate.mts"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",

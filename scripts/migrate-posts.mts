@@ -10,6 +10,7 @@
  * 스크립트로 만든 이유다.
  */
 import { readdirSync, readFileSync } from "node:fs";
+import { revalidateDeployment } from "./lib/revalidate";
 import { loadEnvFile } from "node:process";
 import matter from "gray-matter";
 
@@ -94,15 +95,9 @@ async function main() {
         console.log(`\n완료. DB 포스트 수: ${total}`);
 
         // unstable_cache 는 .next/cache 에 저장되고 재빌드를 넘어 살아남는다.
-        // DB 를 바꿔도 revalidate(1시간) 전에는 옛 결과가 계속 나온다.
-        console.log(
-            [
-                "",
-                "주의: 이 스크립트는 DB 만 바꾼다. 페이지 캐시는 자동 무효화되지 않는다.",
-                "  로컬   : rm -rf .next/cache 후 재빌드",
-                "  배포본 : revalidateTag('posts:list') 호출 또는 최대 1시간 대기",
-            ].join("\n")
-        );
+        // 배포본은 여기서 지우고, 로컬은 손으로 지운다.
+        await revalidateDeployment();
+        console.log("로컬 dev 서버를 보고 있다면 .next/dev/cache/fetch-cache 를 지우고 다시 띄운다.");
     }
 }
 

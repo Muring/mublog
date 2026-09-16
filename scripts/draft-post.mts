@@ -15,6 +15,7 @@ import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 import { loadEnvFile } from "node:process";
 import matter from "gray-matter";
+import { revalidateDeployment } from "./lib/revalidate";
 
 try {
     loadEnvFile(".env");
@@ -88,6 +89,8 @@ async function main(path: string) {
     const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
     console.log(`초안 등록 완료.  ${site}/admin/posts/${post.id}`);
+    // 초안은 공개 페이지에 안 나오지만 관리 목록·시리즈 다음 순서(getAllSeries)가 캐시를 본다.
+    await revalidateDeployment();
     console.log("백업에 반영하려면 mublog 에서 `yarn backup:posts` 후 커밋하세요.");
 }
 

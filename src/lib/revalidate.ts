@@ -15,9 +15,27 @@ export function revalidatePost(slug: string, previousSlug?: string | null) {
     revalidateTag(`post:${slug}`, PURGE);
     revalidatePath("/");
     revalidatePath(`/${slug}`);
+    /*
+     * 다른 글 페이지도 지운다. 글 하나가 바뀌면 같은 시리즈의 글들(시리즈 상자)과
+     * 연관 글 캐러셀이 같이 바뀐다. 글이 수십 편이라 비용은 없다 —
+     * 다음에 열리는 페이지만 그때 다시 그린다.
+     */
+    revalidatePath("/[slug]", "page");
 
     if (previousSlug && previousSlug !== slug) {
         revalidateTag(`post:${previousSlug}`, PURGE);
         revalidatePath(`/${previousSlug}`);
     }
+}
+
+/**
+ * 글과 무관하게 전부 지운다. 스크립트가 DB 를 직접 고쳤을 때(백필·태그 정리·초안 등록)
+ * /api/admin/revalidate 가 부른다. 에디터를 거친 변경은 revalidatePost 로 충분하다.
+ */
+export function revalidateEverything() {
+    revalidateTag("posts:list", PURGE);
+    revalidatePath("/");
+    revalidatePath("/[slug]", "page");
+    revalidatePath("/feed.xml");
+    revalidatePath("/sitemap.xml");
 }

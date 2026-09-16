@@ -219,6 +219,7 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 | `/api/posts/[slug]/comments` | 캐시 안 함                             | TanStack Query                      |
 | `/api/stats`                 | ISR 60s                                | 시간                                |
 | `/api/visit`, `/api/me`      | `force-dynamic`                        | —                                   |
+| `/api/admin/revalidate`      | `force-dynamic`, `CRON_SECRET`         | 전부 지움 (스크립트용)              |
 
 `/api/stats`와 `/api/me`는 홈이 그려진 **뒤에** 클라이언트가 부르는 값이라,
 서버리스에서는 각각이 콜드 스타트와 DB 연결을 따로 겪습니다. 그래서 둘을 다르게 다룹니다.
@@ -727,6 +728,7 @@ $ yarn dev
 | `yarn verify:render`    | 마크다운 파이프라인 회귀 검사 (12가지)          |
 | `yarn audit:render`     | 전체 포스트 렌더링 점검                         |
 | `yarn sweep:images`     | 참조 없는 이미지 정리 (기본 dry-run)            |
+| `yarn revalidate`       | 배포본 캐시 전부 지우기. DB 를 스크립트로 직접 고친 뒤 (`draft:post`·`migrate:posts` 는 스스로 부름) |
 
 > 💾 Supabase 무료 플랜에는 자동 백업이 없습니다.
 > 글을 쓰거나 고친 뒤 `yarn backup:posts`를 돌려 커밋하면 git이 백업이 됩니다.

@@ -1,0 +1,6 @@
+{
+  "generator": "Built-in image_gen",
+  "episode": 8,
+  "file": "blog-development-8.png",
+  "prompt": "Create ONE finished landscape 16:9 thumbnail for episode 8 of a developer's blog-building series, about adding useful features and consolidating reusable components. Use the attached image solely as the series STYLE reference, not as content to copy. New composition: one central tidy browser window with a modular blog interface. Around and partly inside it, six simple feature tiles coherently fit together: magnifying glass search, a small stack of linked article cards for series, RSS broadcast arcs, a share-preview card, overlapping rectangles for copy, and a picture frame with expand corners for image viewer. Show these as an organized unified toolkit, not a cluttered infographic. A small teal connector or interlocking arrangement subtly suggests reusable components becoming one system. Match warm ivory background, deep navy outlines, muted cobalt blue and teal, tiny orange accents, flat geometric editorial illustration with subtle paper grain. Few large readable shapes, generous breathing room, legible at 320px. Central safe area, no important elements at crop edges. No written text, no letters or numbers, no logos, no watermark, no people. This is one standalone thumbnail."
+}
