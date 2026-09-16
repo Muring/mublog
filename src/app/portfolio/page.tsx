@@ -5,11 +5,19 @@ import { portfolioProjects, PORTFOLIO_PATH } from "@/data/portfolio";
 import { baseOpenGraph } from "@/app/shared-metadata";
 import styles from "./portfolio.module.css";
 import ProjectGallery from "./ProjectGallery";
+import PortfolioNavigation from "./PortfolioNavigation";
 import { GitHubIcon, GlobeIcon, VideoIcon } from "./icons";
 
 const title = "엄세현 포트폴리오";
 const description =
     "화면을 만들고, 경험을 연결합니다. 개발자 엄세현의 프로젝트 기록.";
+const navigationItems = [
+    { id: "portfolio-top", label: "소개" },
+    { id: "skills", label: "Skills" },
+    { id: "projects", label: "프로젝트" },
+    ...portfolioProjects.map(({ id, name }) => ({ id, label: name })),
+    { id: "contact", label: "연락" },
+];
 export const metadata: Metadata = {
     title,
     description,
@@ -51,8 +59,11 @@ export default function PortfolioPage() {
                 </div>
             </header>
 
+            <PortfolioNavigation items={navigationItems} />
+
             <section
                 className={styles.expertise}
+                id="skills"
                 aria-labelledby="expertise-title"
             >
                 <div>
@@ -220,7 +231,7 @@ export default function PortfolioPage() {
                     </article>
                 ))}
             </section>
-            <section className={styles.contact} aria-labelledby="contact-title">
+            <section className={styles.contact} id="contact" aria-labelledby="contact-title">
                 <p className={styles.kicker}>KEEP IN TOUCH</p>
                 <h2 id="contact-title">
                     다음 이야기도
