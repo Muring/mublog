@@ -53,7 +53,7 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
                     <th>태그</th>
                     <th>발행일</th>
                     <th>수정일</th>
-                    <th>조회 (14일)</th>
+                    <th>조회</th>
                     <th>댓글</th>
                     <th></th>
                 </tr>

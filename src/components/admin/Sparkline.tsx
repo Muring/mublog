@@ -1,6 +1,7 @@
 /**
  * 표 셀에 들어가는 아주 작은 추이선. 축도 눈금도 없다 — 옆 행과 모양을 견주는 게 목적이다.
- * 색은 방문자 차트와 같은 --chartbar 를 쓴다. 전부 0 이면 부르는 쪽이 "–" 로 대신한다.
+ * 색은 방문자 차트와 같은 --chartbar 를 쓴다. 전부 0 이면 바닥에 테두리색으로 흐리게 긋는다 —
+ * 자리를 비우지 않아야 행마다 열의 모양이 같다.
  */
 export default function Sparkline({
     values,
@@ -11,6 +12,7 @@ export default function Sparkline({
     width?: number;
     height?: number;
 }) {
+    const empty = values.every((v) => v === 0);
     const max = Math.max(1, ...values);
     const step = values.length > 1 ? width / (values.length - 1) : 0;
     const pad = 1.5;
@@ -22,7 +24,7 @@ export default function Sparkline({
             <polyline
                 points={points}
                 fill="none"
-                stroke="var(--chartbar)"
+                stroke={empty ? "var(--bordercolor)" : "var(--chartbar)"}
                 strokeWidth={1.5}
                 strokeLinejoin="round"
                 strokeLinecap="round"

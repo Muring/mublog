@@ -169,6 +169,7 @@ export async function getAllPostsForAdmin() {
             status: true,
             publishedAt: true,
             updatedAt: true,
+            viewCount: true,
             commentCount: true,
         },
     });

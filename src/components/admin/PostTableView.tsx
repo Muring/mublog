@@ -12,6 +12,8 @@ type Row = {
     status: "DRAFT" | "PUBLISHED";
     publishedAt: string | null;
     updatedAt: string;
+    /** 발행 후 누적 조회수 */
+    viewCount: number;
     commentCount: number;
     /** 최근 14일 일별 조회. 기록이 없으면 빈 배열 */
     recentViews: number[];
@@ -65,7 +67,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                             <th>태그</th>
                             <th>발행일</th>
                             <th>수정일</th>
-                            <th>조회 (14일)</th>
+                            <th>조회</th>
                             <th>댓글</th>
                             <th></th>
                         </tr>

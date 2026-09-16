@@ -19,6 +19,7 @@ type Props = {
         status: "DRAFT" | "PUBLISHED";
         publishedAt: string | null;
         updatedAt: string;
+        viewCount: number;
         commentCount: number;
         recentViews: number[];
     };
@@ -81,16 +82,18 @@ export default function PostTableRow({ post }: Props) {
                 {post.publishedAt ? formatCardDate(post.publishedAt) : "-"}
             </td>
             <td data-label="수정일">{formatCardDate(post.updatedAt)}</td>
-            {/* 숫자는 최근 7일 합, 선은 14일. 한 번도 안 읽힌 글은 선 대신 – */}
+            {/*
+              숫자는 발행 후 누적 조회수, 선은 최근 14일 추이.
+              데이터가 없어도 같은 자리를 지킨다 — 선은 바닥에 흐리게, 숫자 자리는 폭을 고정한다.
+            */}
             <td data-label="조회">
-                {post.recentViews.some((v) => v > 0) ? (
-                    <span className="views-cell">
-                        <span className="views-week">{post.recentViews.slice(-7).reduce((a, b) => a + b, 0)}</span>
-                        <Sparkline values={post.recentViews} />
-                    </span>
-                ) : (
-                    "-"
-                )}
+                <span
+                    className="views-cell"
+                    title={`최근 7일 ${post.recentViews.slice(-7).reduce((a, b) => a + b, 0)}회`}
+                >
+                    <span className="views-total">{post.viewCount}</span>
+                    <Sparkline values={post.recentViews.length ? post.recentViews : new Array(14).fill(0)} />
+                </span>
             </td>
             {/* 댓글이 있으면 그 글의 댓글만 걸러 보는 관리 화면으로 */}
             <td data-label="댓글">

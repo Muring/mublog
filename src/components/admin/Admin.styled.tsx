@@ -139,15 +139,15 @@ export const PostTable = styled.table`
   th:nth-of-type(7) { width: 4rem; }    /* 댓글 */
   th:nth-of-type(8) { width: 9.5rem; }  /* 수정·삭제 */
 
-  /* 7일 합계 숫자와 14일 스파크라인을 한 줄에 */
+  /* 누적 숫자와 14일 스파크라인을 한 줄에. 숫자 자리 폭을 고정해 행마다 선의 시작점이 같다 */
   .views-cell {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     white-space: nowrap;
   }
-  .views-week {
-    min-width: 1.5rem;
+  .views-total {
+    width: 2.6rem;
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
