@@ -222,7 +222,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                 </div>
 
                 {/*
-                  시리즈는 선택이다. datalist 는 브라우저마다 생김새와 여는 조건이 달라
+                  시리즈도, 그 안의 순서도 선택이다. 순서가 없으면 발행일순이다. datalist 는 브라우저마다 생김새와 여는 조건이 달라
                   select 로 고른다. "새 시리즈" 를 고르면 그때만 이름 입력칸이 나온다.
                 */}
                 <div className="field">
@@ -263,11 +263,16 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                             max={999}
                             value={post.seriesOrder}
                             onChange={(e) => set("seriesOrder", e.target.value)}
-                            placeholder="순서"
+                            placeholder="자동"
                             aria-label="시리즈 안 순서"
                             disabled={!isNewSeries && !post.series.trim()}
                         />
                     </div>
+                    {(isNewSeries || post.series.trim()) && (
+                        <span className="field-hint">
+                            순서를 비우면 발행일순으로 놓입니다. 읽는 순서가 다를 때만 번호를 적으세요.
+                        </span>
+                    )}
                 </div>
                 </div>
 
