@@ -20,7 +20,6 @@ export const AdminWrapper = styled.div`
   margin: 0 auto;
   /* 헤더가 position: fixed / height 64px 이므로 그만큼 비워준다 */
   padding: 6rem 1rem 3rem;
-  animation: fadeIn 1s ease forwards;
 
   .admin-head {
     display: flex;
@@ -98,7 +97,8 @@ export const AdminWrapper = styled.div`
 
 export const PostTable = styled.table`
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 0.875rem;
 
   /*
@@ -128,7 +128,7 @@ export const PostTable = styled.table`
      * 스크롤하면 원래 자리에 남아 헤더에서 떨어져 나간다.
      * 그림자는 칸에 붙어 따라오므로 스크롤 중에도 경계가 유지된다.
      */
-    box-shadow: inset 0 -2px 0 var(--bordercolor);
+    box-shadow: inset 0 1px 0 var(--bordercolor), inset 0 -2px 0 var(--bordercolor);
   }
 
   th:nth-of-type(2) { width: 5rem; }    /* 상태 */
@@ -262,6 +262,29 @@ export const PostTable = styled.table`
     border-color: var(--warnborder);
   }
 
+  .row-edit, .row-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 32px;
+    padding: 0 9px;
+    box-sizing: border-box;
+    border: 1px solid var(--bordercolor);
+    border-radius: 7px;
+    background: var(--background);
+    color: var(--foreground);
+    text-decoration: none;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color .15s, border-color .15s;
+  }
+  .row-edit:hover { border-color: var(--linkhovercolor); color: var(--linkhovercolor); }
+  .row-delete { color: var(--dangercolor); border-color: color-mix(in srgb, var(--dangercolor) 25%, var(--bordercolor)); }
+  .row-delete:hover:not(:disabled) { background: color-mix(in srgb, var(--dangercolor) 10%, var(--background)); border-color: var(--dangercolor); }
+  .row-delete:disabled { opacity: .5; cursor: wait; }
+  .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
   .action-buttons {
     display: flex;
     gap: 0.4rem;
@@ -463,7 +486,6 @@ export const TableScroll = styled.div`
    */
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
-  border-top: 1px solid var(--bordercolor);
 
   .empty {
     padding: 2.5rem 0;
@@ -483,40 +505,68 @@ export const TableScroll = styled.div`
 export const TableToolbar = styled.div`
   display: flex;
   flex-wrap: wrap;
-  > button { font: inherit; font-size: 0.8rem; padding: 7px 10px; color: var(--foreground); background: var(--background); border: 1px solid var(--bordercolor); border-radius: 6px; cursor: pointer; }
-
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  gap: 8px;
+  margin-bottom: 12px;
 
-  input {
-    flex: 1;
-    min-width: 0;
-    padding: 0.45rem 0.65rem;
-    ${surface("0.5rem")}
-    color: var(--foreground);
+  input, > button, .sort-control > button {
+    box-sizing: border-box;
+    height: 38px;
     font-family: inherit;
-    font-size: 0.85rem;
-
-    &:focus {
-      outline: 2px solid var(--bordercolor);
-      outline-offset: 1px;
-    }
+    font-size: 13px;
+    border: 1px solid var(--bordercolor);
+    border-radius: 8px;
+    background: var(--background);
+    color: var(--foreground);
+    padding: 0 12px;
   }
-
-  /*
-   * 폭을 고정한다. 개수 글자가 길어지면 flex:1 인 입력창이 그만큼 줄어들어,
-   * 타자를 칠 때마다 검색창이 조금씩 움찔거린다. 자리를 미리 잡아두면
-   * 숫자만 바뀌고 레이아웃은 그대로다.
-   */
-  @media (max-width: 560px) { input { flex: 1 1 100%; } }
-
+  > button { cursor: pointer; }
+  input { flex: 1; min-width: 160px; width: 0; }
+  input:focus-visible, button:focus-visible {
+    outline: 2px solid var(--linkhovercolor);
+    outline-offset: 2px;
+  }
+  .status-filters {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    height: 38px;
+    box-sizing: border-box;
+    background: var(--codefontbgcolor);
+    border-radius: 8px;
+  }
+  .status-filters button {
+    height: 32px;
+    border: 0;
+    border-radius: 6px;
+    padding: 0 10px;
+    font: inherit;
+    font-size: 12px;
+    white-space: nowrap;
+    background: transparent;
+    color: var(--desccolor);
+    cursor: pointer;
+  }
+  .status-filters button[aria-pressed="true"] {
+    background: var(--background);
+    color: var(--foreground);
+    font-weight: 700;
+    box-shadow: 0 1px 3px #0002;
+  }
+  .status-filters button:hover { color: var(--foreground); }
   .count {
     flex-shrink: 0;
-    width: 4rem;
+    min-width: 3rem;
     text-align: right;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--desccolor);
     font-variant-numeric: tabular-nums;
+  }
+  @container admin (max-width: 650px) {
+    .status-filters { flex: 1 1 auto; }
+    .status-filters button { flex: 1; }
+    input { order: 1; flex: 1 1 calc(100% - 4rem); }
+    .count { order: 2; }
   }
 `;

@@ -1,9 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Dropdown from "@/components/ui/Dropdown";
 import { filterAdminPosts, postListState, postListUrl, type PostSort, type PostStatusFilter } from "@/lib/admin-navigation";
-import styles from "./Management.module.css";
 import { PostTable, TableScroll, TableToolbar } from "./Admin.styled";
 import PostTableRow from "./PostTableRow";
 
@@ -34,6 +34,11 @@ type Row = {
 export default function PostTableView({ posts }: { posts: Row[] }) {
     const params = useSearchParams();
     const { q: query, status, sort } = postListState(new URLSearchParams(params));
+    const input = useRef<HTMLInputElement>(null);
+    const composing = useRef(false);
+    useEffect(() => {
+        if (input.current && !composing.current) input.current.value = query;
+    }, [query]);
     const returnTo = postListUrl({ q: query, status, sort });
     const update = (patch: Partial<{ q: string; status: PostStatusFilter; sort: PostSort }>) => {
         window.history.replaceState(null, "", postListUrl({ q: query, status, sort, ...patch }));
@@ -43,22 +48,25 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
 
     return (
         <>
-            <div className={styles.filters} role="group" aria-label="포스트 상태">
-                {([['all', '전체'], ['PUBLISHED', '공개'], ['DRAFT', '초안']] as const).map(([value, label]) => (
-                    <button key={value} type="button" aria-pressed={status === value} onClick={() => update({ status: value })}>
-                        {label} {posts.filter((p) => value === 'all' || p.status === value).length}
-                    </button>
-                ))}
-            </div>
             <TableToolbar>
+                <div className="status-filters" role="group" aria-label="포스트 상태">
+                    {([['all', '전체'], ['PUBLISHED', '공개'], ['DRAFT', '초안']] as const).map(([value, label]) => (
+                        <button key={value} type="button" aria-pressed={status === value} onClick={() => update({ status: value })}>
+                            {label} {posts.filter((p) => value === 'all' || p.status === value).length}
+                        </button>
+                    ))}
+                </div>
                 <input
                     type="search"
-                    value={query}
-                    onChange={(e) => update({ q: e.target.value })}
+                    ref={input}
+                    defaultValue={query}
+                    onCompositionStart={() => { composing.current = true; }}
+                    onCompositionEnd={(event) => { composing.current = false; update({ q: event.currentTarget.value }); }}
+                    onChange={(event) => { if (!composing.current) update({ q: event.currentTarget.value }); }}
                     placeholder="제목 · 주소 · 태그로 거르기"
                     aria-label="포스트 검색"
                 />
-                <Dropdown label="포스트 정렬" size="sm" value={sort}
+                <Dropdown className="sort-control" label="포스트 정렬" size="sm" value={sort}
                     options={[{ value: 'newest', label: '최신순' }, { value: 'updated', label: '수정순' }, { value: 'views', label: '조회순' }, { value: 'comments', label: '댓글순' }]}
                     onChange={(value) => update({ sort: value as PostSort })} />
                 {(query || status !== "all" || sort !== "newest") && <button type="button" onClick={() => update({ q: "", status: "all", sort: "newest" })}>초기화</button>}

@@ -3,7 +3,6 @@ import { seoulDateKey } from "@/lib/date";
 import { requireAdmin } from "@/lib/auth";
 import { getAllPostsForAdmin } from "@/lib/posts";
 import { getDailyVisitors, getSiteStats, getTagDailyViews } from "@/lib/stats";
-import { AdminShell } from "@/components/admin/AdminSkeleton";
 import PostTableView from "@/components/admin/PostTableView";
 import AdminAnalytics from "@/components/admin/AdminAnalytics";
 
@@ -21,10 +20,10 @@ export default async function AdminPage() {
         getTagDailyViews(),
     ]);
     return (
-        <AdminShell>
+        <>
             <AdminAnalytics points={daily} tags={tagViews} today={seoulDateKey()} totalVisitors={stats.total} />
 
             <Suspense><PostTableView posts={posts} /></Suspense>
-        </AdminShell>
+        </>
     );
 }

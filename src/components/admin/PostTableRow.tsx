@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "./Admin.styled";
 import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
 import { fetchJson } from "@/lib/fetcher";
@@ -94,12 +93,14 @@ export default function PostTableRow({ post, returnTo }: Props) {
             </td>
             <td className="actions">
                 <div className="action-buttons">
-                    <Link href={`/admin/posts/${post.id}`}>
-                        <Button as="span">수정</Button>
+                    <Link href={`/admin/posts/${post.id}`} className="row-edit">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="m16 3 5 5-12 12-6 1 1-6Z M14 5l5 5" /></svg>
+                        수정
                     </Link>
-                    <Button className="quiet-danger" onClick={remove} disabled={busy}>
+                    <button type="button" className="row-delete" onClick={remove} disabled={busy}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M3 6h18 M9 6V3h6v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7" /></svg>
                         {busy ? "삭제 중..." : "삭제"}
-                    </Button>
+                    </button>
                 </div>
             </td>
         </tr>

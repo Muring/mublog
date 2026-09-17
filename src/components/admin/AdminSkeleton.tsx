@@ -1,20 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import AdminNavigation from "./AdminNavigation";
 import { AdminWrapper, PostTable, Button, Skeleton } from "./Admin.styled";
 
-/**
- * 관리 화면의 뼈대.
- *
- * loading.tsx 와 page.tsx 가 **같은 컴포넌트**를 쓴다.
- * 둘이 조금이라도 다르면 loading -> page 로 넘어갈 때 화면이 한 번 더 튄다.
- * 실제로 헤더를 한쪽은 스켈레톤, 한쪽은 진짜 버튼으로 그렸다가 깜빡임을 만들었다.
- */
-
-/** 데이터가 필요 없는 부분. 기다리는 동안에도 눌러서 글을 쓰러 갈 수 있다. */
-export function AdminShell({ children, title = "포스트 관리" }: { children: React.ReactNode; title?: string }) {
+/** 관리 탭 사이에서 유지되는 공통 프레임. 페이지 로딩은 children 내부만 교체한다. */
+export function AdminShell({ children }: { children: React.ReactNode }) {
+    const title = usePathname() === "/admin/comments" ? "댓글 관리" : "포스트 관리";
     return (
         <AdminWrapper>
             <div className="admin-head">
@@ -28,20 +22,6 @@ export function AdminShell({ children, title = "포스트 관리" }: { children:
             <Suspense fallback={<div style={{ height: 45 }} />}><AdminNavigation /></Suspense>
             {children}
         </AdminWrapper>
-    );
-}
-
-/** 통계 3칸 */
-export function StatRowSkeleton() {
-    return (
-        <div className="stat-row" aria-hidden>
-            {[0, 1, 2].map((i) => (
-                <div className="stat" key={i}>
-                    <Skeleton style={{ width: "2.5rem", height: "0.75rem" }} />
-                    <Skeleton style={{ width: "3rem", height: "1.5rem", marginTop: "0.4rem" }} />
-                </div>
-            ))}
-        </div>
     );
 }
 
@@ -106,13 +86,13 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
 /** 목록이 오기 전 상태 그대로. loading.tsx 가 이것을 쓴다. */
 export default function AdminSkeleton() {
     return (
-        <AdminShell>
+        <>
             <Skeleton style={{ height: "3.2rem", marginBottom: "1.5rem" }} />
             <div style={{ display: "flex", gap: 8, marginBottom: 16 }} aria-hidden>
                 {[0, 1, 2].map((key) => <Skeleton key={key} style={{ width: "4.5rem", height: "2.4rem" }} />)}
             </div>
             <Skeleton style={{ width: "65%", height: "2.5rem", marginBottom: 16 }} />
             <PostTableSkeleton />
-        </AdminShell>
+        </>
     );
 }

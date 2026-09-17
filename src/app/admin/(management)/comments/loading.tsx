@@ -1,13 +1,9 @@
-import { AdminWrapper, Skeleton } from "@/components/admin/Admin.styled";
+import { Skeleton } from "@/components/admin/Admin.styled";
 
 /** 댓글 관리 로딩 표시. 머리와 항목 여섯 줄 자리를 먼저 그린다. */
 export default function Loading() {
     return (
-        <AdminWrapper aria-hidden>
-            <div className="admin-head">
-                <Skeleton style={{ width: "6rem", height: "1.6rem" }} />
-                <Skeleton style={{ width: "7rem", height: "2.2rem" }} />
-            </div>
+        <div aria-hidden>
             <Skeleton style={{ width: "9rem", height: "0.9rem", marginBottom: "1.25rem" }} />
             <div style={{ display: "grid", gap: "1.25rem" }}>
                 {Array.from({ length: 6 }, (_, i) => (
@@ -20,6 +16,6 @@ export default function Loading() {
                     </div>
                 ))}
             </div>
-        </AdminWrapper>
+        </div>
     );
 }
