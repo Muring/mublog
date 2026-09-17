@@ -5,8 +5,8 @@
 .filters { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }
 .filters a, .filters button, .pagination a, .pagination span { padding:8px 12px; border: var(--border-width) solid var(--bordercolor); border-radius:8px; background:var(--background); color:var(--foreground); text-decoration:none; font:inherit; font-size:13px; }
 .filters button { cursor:pointer; }
-.filters [aria-pressed="true"], .filters [aria-current="true"] { border-color:var(--linkhovercolor); color:var(--linkhovercolor); background:color-mix(in srgb,var(--linkhovercolor) 7%,var(--background)); font-weight:700; }
-.filters button:hover, .filters a:hover, .pagination a:hover { border-color:var(--linkhovercolor); }
+.filters [aria-pressed="true"], .filters [aria-current="true"] { border-color:var(--foreground); color:var(--background); background:var(--foreground); font-weight:700; }
+.filters button:hover, .filters a:hover, .pagination a:hover { border-color:var(--foreground); background:var(--hovercolor); color:var(--hoverfontcolor); }
 .navigation a:focus-visible, .filters :focus-visible, .pagination a:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:3px; }
 .postFilter { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px; border-radius:8px; background:var(--codefontbgcolor); margin-bottom:16px; font-size:14px; overflow-wrap:anywhere; }
 .postFilter a { color:var(--linkcolor); }
@@ -24,7 +24,7 @@
 .analyticsSummary strong { font-weight:800; }
 .analyticsSummary small { display:block; color:var(--desccolor); font-size:12px; }
 .chartTabs button { background-clip:padding-box; box-shadow:none; transition: background-color .15s, color .15s, border-color 150ms ease; }
-.chartTabs button:not([aria-selected="true"]):hover { border-color:var(--linkhovercolor); color:var(--linkhovercolor); background:color-mix(in srgb,var(--linkhovercolor) 10%,var(--background)); }
+.chartTabs button:not([aria-selected="true"]):hover { border-color:var(--foreground); color:var(--hoverfontcolor); background:var(--hovercolor); }
 
 .chartTabs button[aria-selected="true"]:hover { background:color-mix(in srgb,var(--foreground) 88%,var(--background)); color:var(--background); border-color:var(--foreground); }
 .analyticsToolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 16px; }

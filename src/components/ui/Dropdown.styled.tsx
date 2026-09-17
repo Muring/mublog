@@ -42,8 +42,9 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
 
     &:hover,
     &[aria-expanded="true"] {
-        border-color: var(--linkhovercolor);
-        color: var(--linkhovercolor);
+        border-color: var(--foreground);
+        background-color: var(--hovercolor);
+        color: var(--hoverfontcolor);
     }
     &:focus-visible {
         outline: 2px solid var(--linkhovercolor);

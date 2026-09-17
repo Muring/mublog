@@ -281,7 +281,7 @@ export const PostTable = styled.table`
     cursor: pointer;
     transition: background-color .15s, border-color 150ms ease;
   }
-  .row-edit:hover { background: var(--linkhovercolor); color: var(--background); }
+  .row-edit:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
   .row-delete { color: var(--desccolor); }
   .row-delete:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
   .row-delete:disabled { opacity: .5; cursor: wait; }
@@ -529,9 +529,9 @@ export const TableToolbar = styled.div`
   }
   > button { cursor: pointer; background-clip: padding-box; transition: background-color .15s, color .15s, border-color 150ms ease; }
   > button:hover:not(:disabled) {
-    border-color: var(--linkhovercolor);
-    color: var(--linkhovercolor);
-    background-color: color-mix(in srgb, var(--linkhovercolor) 8%, var(--background));
+    border-color: var(--foreground);
+    color: var(--hoverfontcolor);
+    background-color: var(--hovercolor);
   }
   > button:disabled { opacity: .45; cursor: default; }
   input { flex: 1; min-width: 160px; width: 0; }
