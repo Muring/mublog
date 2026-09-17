@@ -65,7 +65,7 @@ export const AdminWrapper = styled.div`
     display: block;
     color: inherit;
     text-decoration: none;
-    transition: border-color 0.15s ease-in-out;
+    transition: border-color 150ms ease;
     &:hover {
       border-color: var(--foreground);
     }
@@ -192,7 +192,7 @@ export const PostTable = styled.table`
   .title-link {
     color: inherit;
     text-decoration: none;
-    transition: color 0.15s ease;
+    transition: color 0.15s ease, border-color 150ms ease;
 
     /*
      * 밑줄 대신 색이 바뀐다. 밑줄은 그어지는 순간 글자 아래 여백을 먹어
@@ -236,7 +236,7 @@ export const PostTable = styled.table`
     font-weight: 700;
     /* 글자가 두 자뿐이라 쪼개지면 배지로 보이지 않는다 */
     white-space: nowrap;
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
   }
 
   /*
@@ -278,7 +278,7 @@ export const PostTable = styled.table`
     font: inherit;
     font-size: 12px;
     cursor: pointer;
-    transition: background-color .15s, border-color .15s;
+    transition: background-color .15s, border-color 150ms ease;
   }
   .row-edit:hover { background: var(--codefontbgcolor); color: var(--linkhovercolor); }
   .row-delete { color: var(--desccolor); }
@@ -520,13 +520,13 @@ export const TableToolbar = styled.div`
     height: 38px;
     font-family: inherit;
     font-size: 13px;
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 8px;
     background: var(--background);
     color: var(--foreground);
     padding: 0 12px;
   }
-  > button { cursor: pointer; background-clip: padding-box; transition: background-color .15s, color .15s; }
+  > button { cursor: pointer; background-clip: padding-box; transition: background-color .15s, color .15s, border-color 150ms ease; }
   > button:hover:not(:disabled) {
     border-color: var(--linkhovercolor);
     color: var(--linkhovercolor);

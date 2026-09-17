@@ -54,7 +54,7 @@ export const Article = styled.article`
   }
   table td,
   table th {
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
   }
   table th {
     background-color: var(--codefontbgcolor);
@@ -68,7 +68,7 @@ export const Article = styled.article`
     display: block;
     /* max-width: 656px; */
     max-width: 100%;
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     margin: 2rem auto 0 auto;
     border-radius: 6px;
   }
@@ -245,7 +245,7 @@ export const Article = styled.article`
     text-transform: lowercase;
   }
   .code-copy {
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 4px;
     padding: 4px 8px;
     background: var(--background);
@@ -253,7 +253,7 @@ export const Article = styled.article`
     font: inherit;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.15s, color 0.15s, border-color 0.15s;
+    transition: opacity 0.15s, color 0.15s, border-color 150ms ease;
   }
   .code-copy:hover,
   .code-copy.copied {

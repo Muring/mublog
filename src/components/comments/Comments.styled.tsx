@@ -134,7 +134,7 @@ export const CommentRow = styled.div`
         width: ${ROOT_AVATAR}px;
         height: ${ROOT_AVATAR}px;
         border-radius: 50%;
-        border: 1px solid var(--bordercolor);
+        border: var(--border-width) solid var(--bordercolor);
         object-fit: cover;
     }
 
@@ -315,7 +315,7 @@ export const CommentFormWrapper = styled.form`
         font-family: inherit;
         font-size: 0.9rem;
         line-height: 1.75;
-        transition: border-color 0.15s ease-in-out;
+        transition: border-color 150ms ease;
 
         &::placeholder {
             color: var(--desccolor);
@@ -388,7 +388,7 @@ export const SignInPrompt = styled.div`
 
     a {
         padding: 0.45rem 1rem;
-        border: 1px solid var(--foreground);
+        border: var(--border-width) solid var(--foreground);
         border-radius: 0.5rem;
         background-color: var(--foreground);
         color: var(--background);

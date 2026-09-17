@@ -25,7 +25,7 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
     cursor: pointer;
     background-clip: padding-box;
     box-shadow: none;
-    transition: color 0.15s ease, background-color 0.15s ease;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 150ms ease;
 
     ${({ $size }) =>
         $size === "control"

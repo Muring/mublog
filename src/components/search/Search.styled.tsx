@@ -103,7 +103,7 @@ export const SearchPanel = styled.div`
     }
     kbd {
         padding: 0.15rem 0.4rem;
-        border: 1px solid var(--bordercolor);
+        border: var(--border-width) solid var(--bordercolor);
         border-radius: 0.3rem;
         font-family: inherit;
         font-size: 0.7rem;

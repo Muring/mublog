@@ -12,7 +12,7 @@ export const ToggleContainer = styled.div<{ themeMode: string | undefined }>`
   padding: 3px;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 150ms ease;
 `;
 
 export const ToggleBall = styled.div<{ themeMode: string | undefined }>`

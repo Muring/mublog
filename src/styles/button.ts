@@ -11,14 +11,14 @@ import { css } from "@emotion/react";
  * 쓰는 쪽에서 이 조각을 깔고 그 뒤에 덧붙인다.
  */
 export const buttonBase = css`
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 0.5rem;
     background-color: var(--cardbackground);
     color: var(--foreground);
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
-    transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    transition: border-color 150ms ease, background-color 0.15s ease-in-out,
         color 0.15s ease-in-out;
 
     &:hover:not(:disabled) {
@@ -40,14 +40,14 @@ export const buttonBase = css`
  * 배경을 채우면 내용이 묻힌다.
  */
 export const buttonQuiet = css`
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 0.5rem;
     background-color: var(--cardbackground);
     color: var(--foreground);
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
-    transition: border-color 0.15s ease-in-out;
+    transition: border-color 150ms ease;
 
     &:hover:not(:disabled) {
         border-color: var(--foreground);

@@ -58,7 +58,7 @@ export const ViewerDialog = styled.dialog`
         font-size: 13px;
         background: var(--background);
         color: var(--foreground);
-        border: 1px solid var(--bordercolor);
+        border: var(--border-width) solid var(--bordercolor);
         border-radius: 5px;
         cursor: pointer;
         text-decoration: none;
@@ -121,7 +121,7 @@ export const ViewerDialog = styled.dialog`
     .viewer-nav button {
         width: 40px;
         height: 40px;
-        border: 1px solid var(--bordercolor);
+        border: var(--border-width) solid var(--bordercolor);
         border-radius: 50%;
         background: var(--background);
         color: var(--foreground);

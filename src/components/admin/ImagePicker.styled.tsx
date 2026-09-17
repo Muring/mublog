@@ -121,7 +121,7 @@ export const ImageCard = styled.button`
   flex-direction: column;
   gap: 0.4rem;
   padding: 0.4rem;
-  border: 1px solid var(--bordercolor);
+  border: var(--border-width) solid var(--bordercolor);
   border-radius: 10px;
   background: none;
   color: var(--foreground);
@@ -172,7 +172,7 @@ export const ImageCard = styled.button`
     border-radius: 999px;
     font-size: 0.6rem;
     font-weight: 700;
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     background-color: var(--codefontbgcolor);
     color: var(--foreground);
   }

@@ -18,7 +18,7 @@ const Wrapper = styled.article`
   width: 100%;
   /* 부모(li / Slide)가 늘어난 만큼 카드도 늘어나야 메타 줄이 바닥에 정렬된다 */
   height: 100%;
-  border: 1px solid var(--bordercolor);
+  border: var(--border-width) solid var(--bordercolor);
   border-radius: 12px;
   overflow: hidden;
   background-color: var(--cardbackground);

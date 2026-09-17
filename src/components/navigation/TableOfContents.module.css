@@ -5,7 +5,7 @@
     line-height: 1.7;
     color: var(--foreground);
     padding: 14px;
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 12px;
     background: var(--background);
     font-size: 12px;
@@ -38,7 +38,7 @@
     color: var(--foreground);
     overflow-wrap: anywhere;
     text-decoration: none;
-    transition: color 150ms ease;
+    transition: color 150ms ease, border-color 150ms ease;
 }
 /* 마커는 항목 높이를 꽉 채운다. 안쪽 레일이 하위 항목 높이의 합이라, 짧게 하면 선 길이가 어긋난다. */
 .navigationList a::before {
@@ -49,7 +49,7 @@
     bottom: 0;
     width: 2px;
     background: transparent;
-    transition: background-color 150ms ease;
+    transition: background-color 150ms ease, border-color 150ms ease;
 }
 .navigationList a:hover {
     color: var(--linkhovercolor);
@@ -87,7 +87,7 @@
     border-top: 1px solid var(--bordercolor);
     text-decoration: underline;
     text-underline-offset: 4px;
-    transition: color 150ms ease;
+    transition: color 150ms ease, border-color 150ms ease;
 }
 .navigationTop:hover,
 .navigationTop:focus-visible {

@@ -83,7 +83,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                         <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
                             {post.tags.slice(0, 3).map((tag) => (
                                 <div key={tag} style={{ padding: "6px 16px", border: `2px solid ${COLORS.border}`, borderRadius: 999, fontSize: 22, color: COLORS.desc, fontWeight: 700 }}>
-                                    {`#${tag}`}
+                                    {tag}
                                 </div>
                             ))}
                         </div>

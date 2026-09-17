@@ -6,6 +6,6 @@ export const RelatedWrapper = styled.div`
   padding: 0 2rem;
 
   hr {
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
   }
 `;

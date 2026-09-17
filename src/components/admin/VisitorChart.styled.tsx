@@ -152,7 +152,7 @@ export const RangeTabs = styled.div`
 
     button {
         padding: 0.25rem 0.6rem;
-        border: 1px solid transparent;
+        border: var(--border-width) solid transparent;
         border-radius: 999px;
         background: none;
         color: var(--desccolor);

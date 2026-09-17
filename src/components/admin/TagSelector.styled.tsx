@@ -36,7 +36,7 @@ export const TagSelectorWrapper = styled.div`
         font-size: 0.78rem;
         font-weight: 700;
         cursor: pointer;
-        transition: border-color 0.12s ease-in-out, background-color 0.12s ease-in-out;
+        transition: border-color 150ms ease, background-color 0.12s ease-in-out;
 
         /* hover 는 배경을 건드리지 않고 테두리만 또렷하게 */
         &:hover {

@@ -23,7 +23,7 @@ export const AuthWrapper = styled.div`
         width: 26px;
         height: 26px;
         border-radius: 50%;
-        border: 1px solid var(--bordercolor);
+        border: var(--border-width) solid var(--bordercolor);
         flex-shrink: 0;
     }
 

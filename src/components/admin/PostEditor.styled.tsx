@@ -214,7 +214,7 @@ export const MetaGrid = styled.div`
     aspect-ratio: 16 / 9;
     object-fit: cover;
     object-position: center;
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 12px;
     background-color: var(--codefontbgcolor);
   }
@@ -305,7 +305,7 @@ export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
   .pane-preview {
     overflow-y: auto;
     overscroll-behavior: contain;
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 0.75rem;
   }
 
@@ -355,7 +355,7 @@ export const PaneTab = styled.button`
   font-size: 0.85rem;
   font-weight: 700;
   cursor: pointer;
-  transition: color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  transition: color 0.15s ease-in-out, border-color 150ms ease;
 
   &:hover:not(.active) {
     color: var(--foreground);
@@ -370,7 +370,7 @@ export const PaneTab = styled.button`
 export const EditorColumn = styled.div`
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--bordercolor);
+  border: var(--border-width) solid var(--bordercolor);
   border-radius: 0.75rem;
   overflow: hidden;
   background-color: var(--cardbackground);
@@ -444,7 +444,7 @@ export const ToolbarButton = styled.button`
   justify-content: center;
   min-width: 2rem;
   padding: 0.3rem 0.55rem;
-  border: 1px solid transparent;
+  border: var(--border-width) solid transparent;
   border-radius: 0.35rem;
   background: none;
   color: var(--foreground);

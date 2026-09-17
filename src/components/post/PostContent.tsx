@@ -58,7 +58,7 @@ export default function PostContent({ title, date, slug, viewCount, description,
                             {tags?.map((tag) => (
                                 <li key={tag}>
                                     <Link href={`/?tag=${encodeURIComponent(tag)}`}>
-                                        <h4 className=" tag">{"#" + tag}</h4>
+                                        <h4 className=" tag">{tag}</h4>
                                     </Link>
                                 </li>
                             ))}

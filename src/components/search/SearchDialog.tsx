@@ -148,7 +148,7 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
                                     <span className="hit-meta">
                                         <span>{formatPostDate(hit.publishedAt)}</span>
                                         {hit.tags.map((tag) => (
-                                            <span key={tag}>#{tag}</span>
+                                            <span key={tag}>{tag}</span>
                                         ))}
                                     </span>
                                 </a>

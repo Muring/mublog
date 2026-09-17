@@ -77,7 +77,7 @@ const Tags = styled.div<{ $alignEnd: boolean }>`
 export default function TagChips({ tags, visibleCount = 2, alignEnd = false }: { tags: string[]; visibleCount?: number; alignEnd?: boolean }) {
     const hidden = tags.slice(visibleCount);
     return <Tags $alignEnd={alignEnd}>
-        {tags.slice(0, visibleCount).map(tag => <span key={tag} className="chip" title={`#${tag}`}>#{tag}</span>)}
-        {hidden.length > 0 && <span className="chip more" tabIndex={0} aria-label={`추가 태그: ${hidden.join(', ')}`} title={hidden.map(tag => `#${tag}`).join(' ')}>+{hidden.length}<span className="popover" aria-hidden>{hidden.map(tag => `#${tag}`).join(' ')}</span></span>}
+        {tags.slice(0, visibleCount).map(tag => <span key={tag} className="chip" title={tag}>{tag}</span>)}
+        {hidden.length > 0 && <span className="chip more" tabIndex={0} aria-label={`추가 태그: ${hidden.join(', ')}`} title={hidden.join(' · ')}>+{hidden.length}<span className="popover" aria-hidden>{hidden.join(' · ')}</span></span>}
     </Tags>;
 }

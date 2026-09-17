@@ -10,7 +10,7 @@ import { css } from "@emotion/react";
  * 어긋나는 일을 막을 수 있다. 모서리는 자리마다 달라야 해서 인자로 받는다.
  */
 export const surface = (radius: string) => css`
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: ${radius};
     background-color: var(--cardbackground);
 `;

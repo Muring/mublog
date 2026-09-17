@@ -10,7 +10,7 @@ export const SeriesBox = styled.nav`
   padding: 0 1rem;
 
   .series-inner {
-    border: 1px solid var(--bordercolor);
+    border: var(--border-width) solid var(--bordercolor);
     border-radius: 0.5rem;
     padding: 1rem 1.25rem;
   }
@@ -51,7 +51,7 @@ export const SeriesBox = styled.nav`
   ol a {
     color: var(--desccolor);
     text-decoration: none;
-    transition: color 0.15s;
+    transition: color 0.15s, border-color 150ms ease;
   }
   ol a:hover {
     color: var(--linkhovercolor);
