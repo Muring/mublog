@@ -1,8 +1,11 @@
 // 25개 포스트 전체를 파이프라인에 통과시켜 무증상 회귀를 찾는다.
-import { readdirSync, readFileSync, existsSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import matter from "gray-matter";
 import { renderMarkdown } from "../src/lib/markdown/render";
 
+import { checkLocalImage } from "./local-image-check.mjs";
+
+let remoteUnverified = 0;
 const DIR = "backup/posts";
 const files = readdirSync(DIR).filter((f) => f.endsWith(".mdx"));
 let problems = 0;
@@ -42,10 +45,12 @@ for (const file of files) {
     if (!data.date) issues.push("date 없음");
 
     // 로컬 이미지 실재 여부
-    const imgs = [...html.matchAll(/<img src="(\/[^"]+)"/g)].map((m) => m[1]);
+    const imgs = [...html.matchAll(/<img src="([^"]+)"/g)].map((m) => m[1]);
     const thumb = data.thumbnail as string | undefined;
     for (const p of [...imgs, ...(thumb ? [thumb] : [])]) {
-        if (!existsSync(`public${decodeURIComponent(p)}`)) issues.push(`이미지 없음: ${p}`);
+        const result = checkLocalImage(p);
+        if (result.state === "remote-unverified") remoteUnverified++;
+        else if (result.state !== "present") issues.push(`${result.state === "missing" ? "이미지 없음" : "잘못된 이미지 경로"}: ${p}`);
     }
 
     if (issues.length) {
@@ -56,4 +61,5 @@ for (const file of files) {
 }
 
 console.log(problems === 0 ? "\n모든 포스트 통과" : `\n문제 있는 포스트 ${problems}개`);
+console.log(`원격 이미지 참조 ${remoteUnverified}개는 네트워크 요청 없이 미검증으로 남겼습니다.`);
 process.exit(problems ? 1 : 0);

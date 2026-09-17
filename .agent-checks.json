@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "lint",
+      "command": [
+        "yarn",
+        "lint"
+      ],
+      "paths": [
+        "src/*",
+        "scripts/*",
+        "eslint*",
+        "package.json",
+        "yarn.lock"
+      ],
+      "timeout": 120
+    },
+    {
+      "name": "types",
+      "command": [
+        "yarn",
+        "exec",
+        "tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "paths": [
+        "src/*",
+        "scripts/*",
+        "tsconfig.json",
+        "next-env.d.ts",
+        "package.json",
+        "yarn.lock"
+      ],
+      "timeout": 120
+    },
+    {
+      "name": "render",
+      "command": [
+        "yarn",
+        "verify:render"
+      ],
+      "paths": [
+        "src/lib/markdown/*",
+        "backup/posts/*",
+        "scripts/smoke-render.mts",
+        "package.json",
+        "yarn.lock"
+      ],
+      "timeout": 120
+    },
+    {
+      "name": "audit-fixes",
+      "command": [
+        "yarn",
+        "verify:audit-fixes"
+      ],
+      "paths": [
+        "src/components/admin/*",
+        "src/lib/*",
+        "scripts/verify-audit-fixes.mts",
+        "package.json",
+        "yarn.lock"
+      ],
+      "timeout": 120
+    },
+    {
+      "name": "render-audit",
+      "command": [
+        "yarn",
+        "audit:render"
+      ],
+      "paths": [
+        "src/lib/markdown/*",
+        "backup/posts/*",
+        "public/images/*",
+        "scripts/audit-render.mts",
+        "package.json",
+        "yarn.lock",
+        "scripts/local-image-check.mts",
+        "scripts/test-local-image-check.mts"
+      ],
+      "timeout": 120
+    },
+    {
+      "name": "image-audit-regression",
+      "command": [
+        "yarn",
+        "exec",
+        "tsx",
+        "scripts/test-local-image-check.mts"
+      ],
+      "paths": [
+        "scripts/local-image-check.mts",
+        "scripts/test-local-image-check.mts",
+        "scripts/audit-render.mts",
+        "package.json",
+        "yarn.lock"
+      ],
+      "timeout": 120
+    }
+  ]
+}

@@ -810,3 +810,9 @@ icn1 (현재)         0.15~0.20s   0.14s
 - **Muring (무링무링)**
 - GitHub: [@Muring](https://github.com/Muring)
 - Email: esh5218@gmail.com
+
+### 변경 후 회귀 검사와 배포 대기
+
+공용 명령 `/verify-changes`(Claude), `$verify-changes`(Codex)는 `.agent-checks.json`의 경로 규칙에 따라 기존 lint·타입·렌더·감사 수정 검사를 선택합니다. 기준 커밋부터 현재 staged·unstaged·untracked 변경을 포함하며 결과 요약과 전체 로그 경로를 반환합니다. 검사 성공을 캐시하지 않습니다. 프로젝트 전체 코드 점검은 기존 `code-audit`의 역할입니다.
+
+`wait-deploy`는 이미 시작된 GitHub 상태를 기다리는 조회 전용 명령입니다. Vercel 배포는 실제 상태 이름 `Vercel`과 대상 커밋을 지정해 기다리고, 완료 후 해당 배포 URL에서 화면을 확인합니다. `session-brief`로 독립 작업의 결정·검증·남은 일을 정리해 다음 세션에 넘길 수 있습니다. 이 공용 명령은 dev-bootstrap의 커맨드·스킬 업데이트로 설치합니다.
