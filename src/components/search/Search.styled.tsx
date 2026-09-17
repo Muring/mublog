@@ -27,11 +27,6 @@ export const SearchTrigger = styled.button`
         color: var(--hoverfontcolor);
         transition: 0.1s ease-in-out;
     }
-    &:focus-visible {
-        outline: 2px solid var(--bordercolor);
-        outline-offset: 1px;
-    }
-
     ${mobile} {
         padding: 0 0.5rem;
         margin-right: 0.5rem;

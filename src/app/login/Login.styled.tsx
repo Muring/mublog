@@ -50,4 +50,9 @@ export const GithubButton = styled.button`
   ${buttonBase}
   padding: 0.75rem 1.4rem;
   font-size: 0.95rem;
+
+  /* 호버 면(--hovercolor)은 다크에서도 밝아서, 반전돼 흰색이 된 아이콘을 도로 어둡게 돌린다 */
+  html.dark &:hover:not(:disabled) .auto-dark {
+    filter: invert(0) brightness(1) !important;
+  }
 `;

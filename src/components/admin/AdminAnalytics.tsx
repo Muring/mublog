@@ -3,7 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import type { DailyPoint, TagDailyViews } from "@/lib/stats";
 import { bucketPoints, BUCKETS, lineSegments, niceCeil, type BucketKey } from "@/lib/admin-chart";
-import { ChartCard, Plot, Axis, RangeTabs } from "./VisitorChart.styled";
+import { ChartCard, Plot, Axis, Pills } from "./VisitorChart.styled";
 import { Legend, Column } from "./TagViewsChart.styled";
 import Dropdown from "@/components/ui/Dropdown";
 import styles from "./Management.module.css";
@@ -40,7 +40,7 @@ export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
             <summary><span className="title">방문·조회 통계</span><span className="summary-value">오늘 방문 <strong>{todayVisits.toLocaleString("ko-KR")}</strong>명</span></summary>
             <div className="body">
                 <div className={styles.analyticsToolbar}>
-                <div className={styles.chartTabs} role="tablist" aria-label="통계 종류">
+                <Pills role="tablist" aria-label="통계 종류">
                     {([['visits', '방문'], ['tags', '태그별 조회']] as const).map(([key, title]) => (
                         <button type="button" role="tab" id={`analytics-tab-${key}`} aria-controls="analytics-panel" aria-selected={metric === key} tabIndex={metric === key ? 0 : -1} key={key}
                             onClick={() => setMetric(key)} onKeyDown={(event) => {
@@ -50,11 +50,11 @@ export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
                                 setMetric(next); document.getElementById(`analytics-tab-${next}`)?.focus();
                             }}>{title}</button>
                     ))}
-                </div>
+                </Pills>
                 <div className="controls">
-                    <RangeTabs role="group" aria-label="집계 기간">
-                        {BUCKETS.map((b) => <button type="button" key={b.key} aria-pressed={bucket === b.key} className={bucket === b.key ? "active" : undefined} onClick={() => setBucket(b.key)}>{b.label}</button>)}
-                    </RangeTabs>
+                    <Pills role="group" aria-label="집계 기간">
+                        {BUCKETS.map((b) => <button type="button" key={b.key} aria-pressed={bucket === b.key} onClick={() => setBucket(b.key)}>{b.label}</button>)}
+                    </Pills>
                 </div>
                 </div>
                 <div id="analytics-panel" role="tabpanel" aria-labelledby={`analytics-tab-${metric}`}>

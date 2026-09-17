@@ -92,12 +92,6 @@ export const MetaGrid = styled.div`
     font-size: 0.875rem;
   }
 
-  input:focus,
-  select:focus {
-    outline: 2px solid var(--bordercolor);
-    outline-offset: 1px;
-  }
-
   /* 라벨과 판정 문구를 한 줄에서 양 끝으로 벌린다 */
   .label-row {
     display: flex;

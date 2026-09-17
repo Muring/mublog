@@ -253,12 +253,19 @@ export const Article = styled.article`
     font: inherit;
     cursor: pointer;
     opacity: 0;
-    transition: opacity 0.15s, color 0.15s, border-color 150ms ease;
+    outline: 1px solid transparent;
+    outline-offset: calc(-1 * var(--border-width));
+    transition: opacity 0.15s, color 0.15s, outline-color 150ms ease, border-color 150ms ease;
   }
   .code-copy:hover,
   .code-copy.copied {
     color: var(--linkhovercolor);
-    border-color: var(--linkhovercolor);
+    border-color: transparent;
+    outline-color: var(--linkhovercolor);
+  }
+  .code-copy:focus-visible {
+    outline: 2px solid var(--linkhovercolor);
+    outline-offset: 2px;
   }
   pre:hover .code-copy,
   pre:focus-within .code-copy {

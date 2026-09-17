@@ -34,33 +34,34 @@ export default function Header() {
             <nav>
                 <div className="menu">
                     <ButtonWrapper>
-                        <button onClick={() => setMenuOpen(!menuOpen)} className="menu-button auto-dark">
-                            <Image src="/icons/hamburger-menu.svg" alt="hamburger icon" width={22} height={22} />
+                        {/* auto-dark 는 아이콘에만 건다. 버튼에 걸면 filter 가 초점 링까지 뒤집어 파랑이 주황으로 보인다 */}
+                        <button onClick={() => setMenuOpen(!menuOpen)} className="menu-button">
+                            <Image src="/icons/hamburger-menu.svg" alt="hamburger icon" width={22} height={22} className="auto-dark" />
                         </button>
                     </ButtonWrapper>
 
                     {menuOpen && <SideMenu onClose={() => setMenuOpen(false)} />}
 
                     <div className="fast-route-container">
-                        <Link href={`/`} className="auto-dark">
+                        <Link href={`/`}>
                             {" "}
                             <Image
                                 src="/icons/mublog.svg"
                                 alt="mublog icon"
                                 width={24}
                                 height={24}
-                                className="article-detail-icon"
+                                className="article-detail-icon auto-dark"
                             />
                         </Link>
                         <DiagonalLine />
-                        <Link href={`https://github.com/Muring`} className="auto-dark">
+                        <Link href={`https://github.com/Muring`}>
                             {" "}
                             <Image
                                 src="/icons/github.svg"
                                 alt="github icon"
                                 width={24}
                                 height={24}
-                                className="article-detail-icon"
+                                className="article-detail-icon auto-dark"
                             />
                         </Link>
                     </div>

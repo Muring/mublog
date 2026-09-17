@@ -25,7 +25,10 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
     cursor: pointer;
     background-clip: padding-box;
     box-shadow: none;
-    transition: color 0.15s ease, background-color 0.15s ease, border-color 150ms ease;
+    /* outline 은 none ↔ solid 사이를 못 넘어간다(style 은 이산값). 늘 투명한 링을 깔아두고 색만 바꾼다 */
+    outline: 1px solid transparent;
+    outline-offset: calc(-1 * var(--border-width));
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 150ms ease, outline-color 0.15s ease;
 
     ${({ $size }) =>
         $size === "control"
@@ -40,11 +43,17 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
         white-space: nowrap;
     }
 
+    /*
+     * 호버는 포커스 링과 같은 outline 으로 알린다. 테두리 색을 바꾸면 1px 선이 무거워져 옆의
+     * 세그먼트(테두리 없음)와 무게가 갈리고, --hovercolor 는 다크에서 면이 확 밝아져 컨트롤 하나에는 과하다.
+     * 면은 펼친 목록의 항목 호버와 같은 8% 섞기만 얹는다.
+     */
     &:hover,
     &[aria-expanded="true"] {
-        border-color: var(--foreground);
-        background-color: var(--hovercolor);
-        color: var(--hoverfontcolor);
+        border-color: transparent;
+        outline-color: var(--foreground);
+        background-color: color-mix(in srgb, var(--foreground) 8%, var(--background));
+        color: var(--foreground);
     }
     &:focus-visible {
         outline: 2px solid var(--linkhovercolor);

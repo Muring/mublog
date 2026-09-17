@@ -47,10 +47,23 @@ export const buttonQuiet = css`
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
-    transition: border-color 150ms ease;
+    /*
+     * 호버는 테두리 자리에 outline 을 그린다. 링을 테두리 바깥에 두면 두 선이 겹쳐 2px 두 색이 되므로
+     * offset 을 테두리 폭만큼 안으로 넣고 테두리는 투명하게 물린다. outline-style 은 none ↔ solid 를
+     * 못 넘어가므로 늘 투명한 링을 깔아두고 색만 바꾼다 — 그래야 전환이 흐른다.
+     */
+    outline: 1px solid transparent;
+    outline-offset: calc(-1 * var(--border-width));
+    transition: outline-color 150ms ease, border-color 150ms ease;
 
     &:hover:not(:disabled) {
-        border-color: var(--foreground);
+        border-color: transparent;
+        outline-color: var(--foreground);
+    }
+    /* 기본 링을 투명으로 덮었으니 키보드 초점은 여기서 따로 살린다 */
+    &:focus-visible {
+        outline: 2px solid var(--linkhovercolor);
+        outline-offset: 2px;
     }
 
     &:disabled {

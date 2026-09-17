@@ -315,14 +315,9 @@ export const CommentFormWrapper = styled.form`
         font-family: inherit;
         font-size: 0.9rem;
         line-height: 1.75;
-        transition: border-color 150ms ease;
 
         &::placeholder {
             color: var(--desccolor);
-        }
-        &:focus {
-            outline: none;
-            border-color: var(--foreground);
         }
     }
 

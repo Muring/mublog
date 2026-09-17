@@ -36,11 +36,18 @@ export const TagSelectorWrapper = styled.div`
         font-size: 0.78rem;
         font-weight: 700;
         cursor: pointer;
-        transition: border-color 150ms ease, background-color 0.12s ease-in-out;
+        outline: 1px solid transparent;
+        outline-offset: calc(-1 * var(--border-width));
+        transition: outline-color 150ms ease, border-color 150ms ease, background-color 0.12s ease-in-out;
 
-        /* hover 는 배경을 건드리지 않고 테두리만 또렷하게 */
+        /* hover 는 배경을 건드리지 않고 바깥에 링만 두른다 */
         &:hover {
-            border-color: var(--foreground);
+            border-color: transparent;
+            outline-color: var(--foreground);
+        }
+        &:focus-visible {
+            outline: 2px solid var(--linkhovercolor);
+            outline-offset: 2px;
         }
 
         &.active {

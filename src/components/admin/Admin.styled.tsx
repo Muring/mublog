@@ -2,6 +2,7 @@
 
 import styled from "@emotion/styled";
 import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
+import { segmented } from "@/styles/segmented";
 import { surface } from "@/styles/surface";
 import { truncate } from "@/styles/text";
 
@@ -65,10 +66,15 @@ export const AdminWrapper = styled.div`
     display: block;
     color: inherit;
     text-decoration: none;
-    transition: border-color 150ms ease;
+    outline: 1px solid transparent;
+    outline-offset: calc(-1 * var(--border-width));
+    transition: outline-color 150ms ease, border-color 150ms ease;
     &:hover {
-      border-color: var(--foreground);
+      border-color: transparent;
+      outline-color: var(--foreground);
     }
+    /* 기본 링을 투명으로 덮었으니 키보드 초점은 따로 살린다 */
+    &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   }
 
   /* 댓글 관리 머리의 보조 줄과 요약 */
@@ -213,7 +219,7 @@ export const PostTable = styled.table`
       color: var(--linkhovercolor);
       outline: 2px solid var(--linkhovercolor);
       outline-offset: 2px;
-      border-radius: 2px;
+      border-radius: 3px;
     }
   }
 
@@ -285,7 +291,7 @@ export const PostTable = styled.table`
   .row-delete { color: var(--desccolor); }
   .row-delete:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
   .row-delete:disabled { opacity: .5; cursor: wait; }
-  .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+  .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   .action-buttons {
     display: flex;
     gap: 0.4rem;
@@ -426,8 +432,9 @@ export const Button = styled.button`
   padding: 0.5rem 0.9rem;
   font-size: 0.85rem;
 
-  &.quiet-danger { background: transparent; border-color: transparent; color: var(--desccolor); }
-  &.quiet-danger:hover { color: var(--dangercolor, #b42318); border-color: var(--bordercolor); }
+  &.quiet-danger { background: transparent; border-color: transparent; color: var(--desccolor); outline: 1px solid transparent; outline-offset: calc(-1 * var(--border-width)); transition: outline-color 150ms ease, color 0.15s ease-in-out; }
+  &.quiet-danger:hover { color: var(--dangercolor, #b42318); outline-color: var(--bordercolor); }
+  &.quiet-danger:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
 
   &.primary {
     ${buttonPrimary}
@@ -436,7 +443,7 @@ export const Button = styled.button`
       color: var(--activefontcolor);
       border-color: var(--activecolor);
     }
-    &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 3px; }
+    &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   }
   &.danger {
     ${buttonDanger}
@@ -527,47 +534,25 @@ export const TableToolbar = styled.div`
     color: var(--foreground);
     padding: 0 12px;
   }
-  > button { cursor: pointer; background-clip: padding-box; transition: background-color .15s, color .15s, border-color 150ms ease; }
+  /* outline 은 none ↔ solid 를 못 넘어가므로 늘 투명한 링을 깔고 색만 바꾼다 */
+  > button { cursor: pointer; background-clip: padding-box; outline: 1px solid transparent; outline-offset: calc(-1 * var(--border-width)); transition: background-color .15s, color .15s, border-color 150ms ease, outline-color .15s; }
+  /* 드롭다운과 같은 호버: 포커스 링과 같은 outline + 8% 섞기. 한 줄에 놓인 컨트롤끼리 호버 표현이 갈리면 안 된다 */
   > button:hover:not(:disabled) {
-    border-color: var(--foreground);
-    color: var(--hoverfontcolor);
-    background-color: var(--hovercolor);
+    border-color: transparent;
+    outline-color: var(--foreground);
+    color: var(--foreground);
+    background-color: color-mix(in srgb, var(--foreground) 8%, var(--background));
   }
   > button:disabled { opacity: .45; cursor: default; }
   input { flex: 1; min-width: 160px; width: 0; }
+  /* 댓글 툴바의 글 드롭다운. 검색창처럼 남는 폭을 가져가고 긴 제목은 버튼 안에서 말줄임된다 */
+  .post-filter { flex: 1; min-width: 160px; width: 0; }
+  .post-filter > button { width: 100%; }
   input:focus-visible, button:focus-visible {
     outline: 2px solid var(--linkhovercolor);
     outline-offset: 2px;
   }
-  .status-filters {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding: 3px;
-    height: 38px;
-    box-sizing: border-box;
-    background: var(--codefontbgcolor);
-    border-radius: 8px;
-  }
-  .status-filters button {
-    height: 32px;
-    border: 0;
-    border-radius: 6px;
-    padding: 0 10px;
-    font: inherit;
-    font-size: 12px;
-    white-space: nowrap;
-    background: transparent;
-    color: var(--desccolor);
-    cursor: pointer;
-  }
-  .status-filters button[aria-pressed="true"] {
-    background: var(--background);
-    color: var(--foreground);
-    font-weight: 700;
-    box-shadow: 0 1px 3px #0002;
-  }
-  .status-filters button:hover { color: var(--foreground); background: color-mix(in srgb, var(--foreground) 8%, var(--background)); }
+  .status-filters { ${segmented} }
   .count {
     flex-shrink: 0;
     min-width: 3rem;
@@ -579,7 +564,7 @@ export const TableToolbar = styled.div`
   @container admin (max-width: 650px) {
     .status-filters { flex: 1 1 auto; }
     .status-filters button { flex: 1; }
-    input { order: 1; flex: 1 1 100%; }
+    input, .post-filter { order: 1; flex: 1 1 100%; }
     .count { order: 2; }
   }
 `;

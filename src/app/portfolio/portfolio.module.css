@@ -617,6 +617,9 @@
     color: var(--foreground);
     font-size: 17px;
     cursor: pointer;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    transition: outline-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 .viewerNavigation button:disabled {
     opacity: 0.3;
@@ -624,7 +627,8 @@
 }
 .viewerNavigation button:hover:not(:disabled) {
     color: var(--accent);
-    border-color: var(--accent);
+    border-color: transparent;
+    outline-color: var(--accent);
 }
 .viewerNavigation > span {
     font-size: 12px;

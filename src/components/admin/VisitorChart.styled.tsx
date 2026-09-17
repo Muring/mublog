@@ -2,6 +2,7 @@
 
 import styled from "@emotion/styled";
 import { surface } from "@/styles/surface";
+import { pills } from "@/styles/segmented";
 
 /**
  * 방문자 추이 차트.
@@ -45,8 +46,8 @@ export const ChartCard = styled.details`
             display: none;
         }
         &:focus-visible {
-            outline: 2px solid var(--bordercolor);
-            outline-offset: 3px;
+            outline: 2px solid var(--linkhovercolor);
+            outline-offset: 2px;
             border-radius: 4px;
         }
     }
@@ -146,32 +147,9 @@ export const ChartCard = styled.details`
 `;
 
 /** 기간 선택. 차트 위 한 줄에 둔다 */
-export const RangeTabs = styled.div`
-    display: flex;
-    gap: 0.25rem;
-
-    button {
-        padding: 0.25rem 0.6rem;
-        border: var(--border-width) solid transparent;
-        border-radius: 999px;
-        background: none;
-        color: var(--desccolor);
-        font-family: inherit;
-        font-size: 0.75rem;
-        font-weight: 700;
-        cursor: pointer;
-
-        &:hover {
-            color: var(--foreground);
-        }
-
-        &.active {
-            background-color: var(--activecolor);
-            color: var(--activefontcolor);
-            &:hover { background-color: color-mix(in srgb, var(--activecolor) 85%, var(--activefontcolor)); }
-        }
-        &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
-    }
+/** 통계 종류·집계 단위 선택. 알약 묶음 — 표 툴바의 세그먼트와는 일부러 다르다 */
+export const Pills = styled.div`
+    ${pills}
 `;
 
 /**

@@ -62,11 +62,14 @@ export const ViewerDialog = styled.dialog`
         border-radius: 5px;
         cursor: pointer;
         text-decoration: none;
-        transition: border-color 150ms ease, color 150ms ease;
+        outline: 1px solid transparent;
+        outline-offset: calc(-1 * var(--border-width));
+        transition: outline-color 150ms ease, border-color 150ms ease, color 150ms ease;
     }
     .viewer-actions button:hover,
     .viewer-actions a:hover {
-        border-color: var(--linkhovercolor);
+        border-color: transparent;
+        outline-color: var(--linkhovercolor);
         color: var(--linkhovercolor);
     }
 
@@ -127,6 +130,9 @@ export const ViewerDialog = styled.dialog`
         color: var(--foreground);
         font-size: 17px;
         cursor: pointer;
+        outline: 1px solid transparent;
+        outline-offset: calc(-1 * var(--border-width));
+        transition: outline-color 150ms ease, border-color 150ms ease, color 150ms ease;
     }
     .viewer-nav button:disabled {
         opacity: 0.3;
@@ -134,7 +140,8 @@ export const ViewerDialog = styled.dialog`
     }
     .viewer-nav button:hover:not(:disabled) {
         color: var(--linkhovercolor);
-        border-color: var(--linkhovercolor);
+        border-color: transparent;
+        outline-color: var(--linkhovercolor);
     }
     .viewer-nav > span {
         font-size: 12px;
@@ -148,7 +155,7 @@ export const ViewerDialog = styled.dialog`
     a:focus-visible,
     [tabindex]:focus-visible {
         outline: 2px solid var(--linkhovercolor);
-        outline-offset: 3px;
+        outline-offset: 2px;
     }
 
     ${mobile} {

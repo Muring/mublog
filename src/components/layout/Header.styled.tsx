@@ -121,6 +121,10 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
             background-color: var(--hovercolor);
             transition: 0.1s ease-in-out;
         }
+        /* 호버 면은 다크에서도 밝은 회색이라, 반전돼 흰색이 된 아이콘을 도로 어둡게 돌린다 */
+        html.dark &:hover .auto-dark {
+            filter: invert(0) brightness(1) !important;
+        }
     }
 `;
 
@@ -161,6 +165,9 @@ export const ButtonWrapper = styled.div`
             /* --hovercolor 는 양 테마 모두 밝은 회색이라 글자색도 같이 뒤집어야 한다 */
             color: var(--hoverfontcolor);
             transition: 0.1s ease-in-out;
+        }
+        html.dark &:hover .auto-dark {
+            filter: invert(0) brightness(1) !important;
         }
     }
 `;

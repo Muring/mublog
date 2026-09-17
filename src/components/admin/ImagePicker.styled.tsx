@@ -52,11 +52,6 @@ export const PickerBox = styled.div`
     color: var(--foreground);
     font-family: inherit;
     font-size: 0.85rem;
-
-    &:focus {
-      outline: 2px solid var(--bordercolor);
-      outline-offset: 1px;
-    }
   }
 
   .sources {
@@ -130,6 +125,9 @@ export const ImageCard = styled.button`
   cursor: pointer;
   /* grid 아이템의 기본값이 auto 라, 안 끊기는 파일명이 칸 폭을 밀어낸다 */
   min-width: 0;
+  outline: 1px solid transparent;
+  outline-offset: calc(-1 * var(--border-width));
+  transition: outline-color 150ms ease, border-color 150ms ease;
 
   img {
     display: block;
@@ -184,10 +182,9 @@ export const ImageCard = styled.button`
     color: var(--warncolor);
   }
 
-  &:hover,
-  &:focus-visible {
-    border-color: var(--linkhovercolor);
-    outline: none;
+  &:hover {
+    border-color: transparent;
+    outline-color: var(--linkhovercolor);
   }
 
   /* 키보드에는 색만으로 알리지 않는다 */
