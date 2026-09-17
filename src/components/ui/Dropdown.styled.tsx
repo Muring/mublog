@@ -13,7 +13,7 @@ export const DropdownRoot = styled.div`
     }
 `;
 
-export const DropdownButton = styled.button<{ $size: "sm" | "md" }>`
+export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -26,7 +26,9 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" }>`
     transition: border-color 0.15s ease, color 0.15s ease;
 
     ${({ $size }) =>
-        $size === "sm"
+        $size === "control"
+            ? `box-sizing: border-box; height: 38px; padding: 0 30px 0 12px; border-radius: 8px; background: var(--background); font-size: 13px;`
+            : $size === "sm"
             ? `padding: 0.25rem 1.6rem 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 700;`
             : `padding: 0.55rem 2rem 0.55rem 0.75rem; font-size: 0.875rem;`}
 

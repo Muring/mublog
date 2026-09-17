@@ -11,7 +11,7 @@ type Props = {
     onChange: (value: string) => void;
     /** 스크린리더용 이름. 화면에 라벨이 따로 없을 때 반드시 준다. */
     label: string;
-    size?: "sm" | "md";
+    size?: "sm" | "md" | "control";
     /** 목록을 버튼의 어느 쪽에 맞출지. 오른쪽 끝에 놓인 버튼은 right. */
     align?: "left" | "right";
     /** 자리는 지키고 보이지만 않게 한다. */

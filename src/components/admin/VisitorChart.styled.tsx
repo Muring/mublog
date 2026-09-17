@@ -70,7 +70,7 @@ export const ChartCard = styled.details`
 
     .summary-value {
         font-size: 0.8rem;
-        color: var(--desccolor);
+        color: var(--foreground);
         font-variant-numeric: tabular-nums;
 
         strong {
@@ -97,6 +97,7 @@ export const ChartCard = styled.details`
             content-visibility 0.25s allow-discrete;
     }
     &[open]::details-content {
+        overflow: visible;
         block-size: auto;
     }
 
@@ -113,6 +114,7 @@ export const ChartCard = styled.details`
     /* 집계 단위와 연도를 한 줄에 둔다 */
     .controls {
         display: flex;
+        min-height: 38px;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
@@ -122,6 +124,9 @@ export const ChartCard = styled.details`
 
     /* 그림 자리를 그대로 차지해, 단위를 오갈 때 카드 높이가 튀지 않는다 */
     .empty {
+        margin: 0;
+        padding: 16px;
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -380,4 +385,3 @@ export const Axis = styled.div`
         transform: translateX(-100%);
     }
 `;
-

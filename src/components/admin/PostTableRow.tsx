@@ -89,7 +89,7 @@ export default function PostTableRow({ post, returnTo }: Props) {
                 {post.viewCount.toLocaleString("ko-KR")}
             </td>
             <td data-label="댓글">
-                <Link href={commentsHref} className="title-link">댓글 {post.commentCount}개</Link>
+                <Link href={commentsHref} className="title-link" aria-label={`댓글 ${post.commentCount}개 관리`}>{post.commentCount}</Link>
             </td>
             <td className="actions">
                 <div className="action-buttons">

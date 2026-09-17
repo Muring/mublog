@@ -509,7 +509,7 @@ export const TableToolbar = styled.div`
   gap: 8px;
   margin-bottom: 12px;
 
-  input, > button, .sort-control > button {
+  input, > button {
     box-sizing: border-box;
     height: 38px;
     font-family: inherit;

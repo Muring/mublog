@@ -32,7 +32,9 @@ export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
     const shown = new Set<number>();
     for (let i = columns.length - 1; i >= 0; i -= step) shown.add(i);
     if (Math.min(...shown) >= step * 0.6) shown.add(0);
-    const periodLabel = `${columns[0].key} ~ ${columns.at(-1)?.period.split(" ~ ").at(-1)}`;
+    const periodStart = columns[0].key + (bucket === "monthly" ? "-01" : "");
+    const calendarEnd = bucket === "monthly" ? `${year}-12-31` : columns.at(-1)!.period.split(" ~ ").at(-1)!;
+    const periodLabel = `${periodStart} ~ ${calendarEnd > today ? today : calendarEnd}`;
     return (
         <ChartCard>
             <summary><span className="title">방문·조회 통계</span><span className="summary-value">오늘 방문 <strong>{todayVisits.toLocaleString("ko-KR")}</strong>명</span></summary>
@@ -52,15 +54,16 @@ export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
                     <RangeTabs role="group" aria-label="집계 기간">
                         {BUCKETS.map((b) => <button type="button" key={b.key} aria-pressed={bucket === b.key} className={bucket === b.key ? "active" : undefined} onClick={() => setBucket(b.key)}>{b.label}</button>)}
                     </RangeTabs>
-                    {bucket === "monthly" && <Dropdown label="연도 선택" size="sm" value={year} options={years.map((value) => ({ value, label: `${value}년` }))} onChange={setYear} />}
+                    {bucket === "monthly" && <Dropdown label="연도 선택" size="control" align="right" value={year} options={years.map((value) => ({ value, label: `${value}년` }))} onChange={setYear} />}
                 </div>
                 <div id="analytics-panel" role="tabpanel" aria-labelledby={`analytics-tab-${metric}`}>
-                    <p className={styles.summary}>
-                        {metric === "tags" && "선택 태그 합산 · 중복 포함 | "}오늘 <strong>{todayValue.toLocaleString("ko-KR")}</strong>{unit} · 선택 기간 <strong>{periodTotal.toLocaleString("ko-KR")}</strong>{unit}
-                        {metric === "visits" && <> · 누적 <strong>{totalVisitors.toLocaleString("ko-KR")}</strong>명 (일별 집계의 합)</>}
-                        <br />KST 기준 · {periodLabel} · 집계 시작 전과 미래는 기록 없음
-                    </p>
-                    {known.length < 2 ? <p className={styles.compact}>{known.length ? `${known[0].period} 한 구간만 기록되어 있습니다. 값은 위 요약과 아래 범례에서 확인할 수 있습니다.` : "선택 기간에 집계된 기록이 없습니다."}</p> : <>
+                    <div className={styles.analyticsSummary}>
+                        <div>오늘 ({today}) <strong>{todayValue.toLocaleString("ko-KR")}{unit}</strong> · 선택 기간 <strong>{periodTotal.toLocaleString("ko-KR")}{unit}</strong>
+                        {metric === "visits" && <> · 누적 <strong>{totalVisitors.toLocaleString("ko-KR")}명</strong></>}</div>
+                        <div>집계 기간 <strong>{periodLabel}</strong> · 한국 시간(KST)</div>
+                        <small>{metric === "tags" ? "선택 태그 합산 · 여러 태그가 붙은 글의 조회는 중복 포함" : "방문 수는 일별 순 방문자의 합계"} · 오늘은 현재까지 집계 · 집계 시작 전과 미래는 기록 없음</small>
+                    </div>
+                    {known.length < 2 ? <div className="empty" role="status"><strong>{known.length ? "추이를 표시하려면 두 구간 이상의 기록이 필요합니다." : "선택 기간에 집계된 기록이 없습니다."}</strong><span>{known.length ? `${known[0].period}의 집계 값은 위 요약에서 확인할 수 있습니다.` : "다른 기간을 선택하거나 기록이 쌓인 뒤 확인해 주세요."}</span></div> : <>
                         <Plot>
                             {[ceiling, ceiling / 2, 0].map((tick) => <div key={tick} className="gridline" data-base={tick === 0} style={{ bottom: `${tick / ceiling * 100}%` }} aria-hidden><span>{tick}</span></div>)}
                             <div className="series">
@@ -79,7 +82,7 @@ export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
                         </Plot>
                         <Axis>{columns.map((c, i) => <span key={c.key} style={{ "--x": `${xAt(i)}%` } as CSSProperties} data-show={shown.has(i)} data-edge={i === 0 ? "first" : i === columns.length - 1 ? "last" : undefined}>{c.label}</span>)}</Axis>
                     </>}
-                    {metric === "tags" && <Legend aria-label="표시할 태그 · 수치는 선택 기간 합계">{series.map((s) => <button type="button" key={s.tag} aria-pressed={!hidden.includes(s.tag)} style={{ "--series": s.color } as CSSProperties}
+                    {metric === "tags" && series.length > 0 && <Legend aria-label="표시할 태그 · 수치는 선택 기간 합계">{series.map((s) => <button type="button" key={s.tag} aria-pressed={!hidden.includes(s.tag)} style={{ "--series": s.color } as CSSProperties}
                         onClick={() => setHidden((previous) => previous.includes(s.tag) ? previous.filter((tag) => tag !== s.tag) : previous.length < series.length - 1 ? [...previous, s.tag] : previous)}>
                         <span className="swatch" />#{s.tag}<span className="total">{s.bars.reduce((sum, b) => sum + (b.value ?? 0), 0)}회</span>
                     </button>)}</Legend>}

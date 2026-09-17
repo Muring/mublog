@@ -19,3 +19,9 @@
 .chartTabs button:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:3px; }
 .compact { padding:18px 0; font-size:14px; color:var(--desccolor); }
 @media(max-width:560px) { .navigation a { flex:1; text-align:center; padding:10px 8px; } }
+
+.analyticsSummary { color:var(--foreground); font-size:14px; line-height:1.8; margin:16px 0; }
+.analyticsSummary strong { font-weight:800; }
+.analyticsSummary small { display:block; color:var(--desccolor); font-size:12px; }
+.chartTabs button { transition:background-color .15s, border-color .15s, color .15s; }
+.chartTabs button:hover { border-color:var(--linkhovercolor); color:var(--linkhovercolor); background:color-mix(in srgb,var(--linkhovercolor) 10%,var(--background)); }

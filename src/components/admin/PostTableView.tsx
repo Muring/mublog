@@ -66,7 +66,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                     placeholder="제목 · 주소 · 태그로 거르기"
                     aria-label="포스트 검색"
                 />
-                <Dropdown className="sort-control" label="포스트 정렬" size="sm" value={sort}
+                <Dropdown className="sort-control" label="포스트 정렬" size="control" value={sort}
                     options={[{ value: 'newest', label: '최신순' }, { value: 'updated', label: '수정순' }, { value: 'views', label: '조회순' }, { value: 'comments', label: '댓글순' }]}
                     onChange={(value) => update({ sort: value as PostSort })} />
                 {(query || status !== "all" || sort !== "newest") && <button type="button" onClick={() => update({ q: "", status: "all", sort: "newest" })}>초기화</button>}
