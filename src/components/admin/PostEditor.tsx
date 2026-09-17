@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
@@ -16,6 +16,7 @@ import {
     QuoteIcon,
 } from "./ToolbarIcons";
 import { useDebouncedEffect } from "@/hooks/useDebouncedEffect";
+import { useScrollStop } from "@/hooks/useScrollStop";
 import { useSlugCheck } from "./useSlugCheck";
 import { useEditorUploads } from "./useEditorUploads";
 import { usePostSave } from "./usePostSave";
@@ -73,6 +74,28 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
     const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
+    const headRef = useRef<HTMLDivElement>(null);
+    const splitRef = useRef<HTMLDivElement>(null);
+
+    /**
+     * 붙어 있는 저장 줄의 실제 높이를 CSS 변수로 넘긴다. 두 칸의 높이가
+     * 이 값에서 나온다(SplitPane 의 --pane-top). 상태로 들지 않는다 —
+     * 폭이 아니라 여백이라 처음 그릴 때 기본값이 잠깐 쓰여도 화면이
+     * 납작해지지 않고, 재면 바로 덮어쓴다.
+     */
+    useEffect(() => {
+        const head = headRef.current;
+        const wrapper = head?.parentElement;
+        if (!head || !wrapper) return;
+        const apply = () => wrapper.style.setProperty("--editor-head-height", `${head.offsetHeight}px`);
+        apply();
+        const observer = new ResizeObserver(apply);
+        observer.observe(head);
+        return () => observer.disconnect();
+    }, []);
+
+    // 두 칸 상단이 헤더(64px)와 저장 줄(+ 아래 여백 0.5rem) 바로 밑에 오는 자리에서 내려가는 스크롤을 한 번 세운다
+    useScrollStop(splitRef, () => 64 + (headRef.current?.offsetHeight ?? 0) + 8);
     const previewContentRef = useRef<HTMLDivElement>(null);
     const thumbInputRef = useRef<HTMLInputElement>(null);
 
@@ -143,7 +166,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => event.preventDefault()}
         >
-            <div className="editor-head">
+            <div className="editor-head" ref={headRef}>
                 <h2>{postId ? "포스트 수정" : "새 글 쓰기"}</h2>
                 <div className="actions">
                     {isUploading && <span role="status">이미지 업로드 중…</span>}
@@ -372,7 +395,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                 </div>
             </MetaGrid>
 
-            <SplitPane activeTab={activeTab}>
+            <SplitPane activeTab={activeTab} ref={splitRef}>
                 {/* 넓은 화면에서는 숨는다. 둘이 나란히 보이므로 고를 것이 없다 */}
                 <div className="pane-tabs" role="tablist">
                     <PaneTab

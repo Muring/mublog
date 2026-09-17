@@ -270,15 +270,22 @@ export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
    * 본문 입력란은 60vh 에 멈춰 있었다. 그래서 아래를 보려면 페이지를 한참 내리고
    * 쓰려면 다시 올라와야 했다. 높이는 바깥 상자가 잡고 글은 제 높이대로 둔다.
    *
-   * 빼는 값은 위아래로 고정된 것들의 합이다 — 헤더 64px, 붙어 있는 저장 줄,
-   * 아래 여백. 저 줄의 높이를 바꾸면 이 값도 함께 봐야 한다.
+   * 빼는 값은 위아래로 고정된 것들의 합이다 — 헤더 64px, 붙어 있는 저장 줄
+   * (--editor-head-height, PostEditor 가 실제 높이를 재서 넣는다. 줄바꿈되면
+   * 커진다)과 그 아래 여백 0.5rem, 그리고 바닥 여백 3rem.
+   *
+   * 내려가는 페이지 스크롤은 이 칸 상단이 저장 줄 바로 아래에 오는 자리에서
+   * 한 번 멈춘다(PostEditor 의 useScrollStop). CSS scroll-snap 이 아니다 —
+   * 그쪽은 끌어당기는 거리를 정할 수 없어서 맨 위에서 한 번만 내려도
+   * 여기까지 튀어 왔다. 제목·설명·태그를 지나칠 수가 없었다.
    *
    * vh 가 아니라 dvh 다. 모바일에서 주소창이 접혔다 펴지면 vh 는 그대로라
    * 칸의 아래쪽이 잘린다. 사용자 정의 속성에는 "모르면 앞 줄로 되돌아가기" 가
    * 없으므로(파싱 단계에서는 무엇이든 유효하다) vh 를 앞에 덧대지 않는다 —
    * 이 저장소는 이미 컨테이너 쿼리를 쓰고 있고 그쪽 지원선이 dvh 보다 높다.
    */
-  --pane-height: calc(100dvh - 13rem);
+  --pane-top: calc(64px + var(--editor-head-height, 5.5rem) + 0.5rem);
+  --pane-height: calc(100dvh - var(--pane-top) - 3rem);
 
   display: grid;
   grid-template-columns: 1fr 1fr;
