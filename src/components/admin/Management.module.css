@@ -1,7 +1,7 @@
 .navigation { display:flex; gap:6px; border-bottom:1px solid var(--bordercolor); margin-bottom:20px; }
 .navigation a { padding:10px 16px; color:var(--desccolor); text-decoration:none; border-bottom:2px solid transparent; font-size:14px; font-weight:700; }
 .navigation a[aria-current="page"] { color:var(--linkhovercolor); border-bottom-color:var(--linkhovercolor); }
-.navigation a:hover { color:var(--foreground); }
+.navigation a:not([aria-current="page"]):hover { color:var(--foreground); }
 .filters { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:16px; }
 .filters a, .filters button, .pagination a, .pagination span { padding:8px 12px; border: var(--border-width) solid var(--bordercolor); border-radius:8px; background:var(--background); color:var(--foreground); text-decoration:none; font:inherit; font-size:13px; }
 .filters button { cursor:pointer; }
