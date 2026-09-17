@@ -63,7 +63,11 @@ export async function getCommentsByPostSlug(slug: string): Promise<CommentNode[]
 }
 
 export type AdminComment = CommentNode & {
+    /** 언제 지워졌는지. 공개 화면에는 안 내려가고 관리 목록만 쓴다 */
+    deletedAt: string | null;
     post: { id: string; slug: string; title: string; status: "DRAFT" | "PUBLISHED" };
+    /** 답글이면 무엇에 단 답글인지. 목록이 트리가 아니라서 부모를 한 줄로 같이 보여준다 */
+    parent: { id: string; body: string; deleted: boolean; author: string } | null;
 };
 
 /**
@@ -72,14 +76,21 @@ export type AdminComment = CommentNode & {
  * 공개 화면(toNode)과 달리 지운 댓글의 본문과 작성자를 **가리지 않는다.**
  * 관리자는 무엇이 왜 지워졌는지 봐야 한다 — 도배·욕설이면 작성자를 알아야 하고,
  * 본인이 지운 거면 그냥 넘기면 된다. 공개 API 로는 여전히 안 나간다(getCommentsByPostSlug 는 그대로).
- * slug 를 주면 그 글의 것만 돌려준다.
+ * slug 를 주면 그 글의 것만, authorId 를 주면 그 사람 것만 돌려준다(둘 다 주면 교집합).
+ * 작성자 필터는 도배 대응용이다 — @@index([authorId, createdAt]) 가 받쳐준다.
  */
-export async function getCommentsForAdmin({ slug, status = "all", page = 1 }: {
-    slug?: string; status?: "all" | "live" | "deleted"; page?: number;
+export async function getCommentsForAdmin({ slug, authorId, status = "all", page = 1 }: {
+    slug?: string; authorId?: string; status?: "all" | "live" | "deleted"; page?: number;
 } = {}) {
     return prisma.$transaction(async (tx) => {
-        const base = slug ? { post: { slug } } : {};
-        const post = slug ? await tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } }) : null;
+        const base = { ...(slug ? { post: { slug } } : {}), ...(authorId ? { authorId } : {}) };
+        const [post, author, posts, authors] = await Promise.all([
+            slug ? tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } }) : null,
+            authorId ? tx.profile.findUnique({ where: { id: authorId }, select: { id: true, username: true, avatarUrl: true } }) : null,
+            // 필터 드롭다운 항목. 댓글이 하나라도 달린 글·사람만 — 빈 선택지는 고를 이유가 없다
+            tx.post.findMany({ where: { comments: { some: {} } }, select: { slug: true, title: true }, orderBy: { title: "asc" } }),
+            tx.profile.findMany({ where: { comments: { some: {} } }, select: { id: true, username: true }, orderBy: { username: "asc" } }),
+        ]);
         const [total, deleted] = await Promise.all([
             tx.comment.count({ where: base }),
             tx.comment.count({ where: { ...base, deletedAt: { not: null } } }),
@@ -91,10 +102,21 @@ export async function getCommentsForAdmin({ slug, status = "all", page = 1 }: {
             orderBy: [{ createdAt: "desc" }, { id: "desc" }],
             skip: pagination.skip,
             take: pagination.take,
-            select: { ...COMMENT_SELECT, post: { select: { id: true, slug: true, title: true, status: true } } },
+            select: {
+                ...COMMENT_SELECT,
+                post: { select: { id: true, slug: true, title: true, status: true } },
+                parent: { select: { id: true, body: true, deletedAt: true, author: { select: { username: true } } } },
+            },
         });
-        const comments: AdminComment[] = rows.map((row) => ({ ...toNode(row), body: row.body, author: row.author, post: row.post }));
-        return { comments, counts, post, ...pagination };
+        const comments: AdminComment[] = rows.map((row) => ({
+            ...toNode(row),
+            body: row.body,
+            author: row.author,
+            deletedAt: row.deletedAt?.toISOString() ?? null,
+            post: row.post,
+            parent: row.parent ? { id: row.parent.id, body: row.parent.body, deleted: row.parent.deletedAt !== null, author: row.parent.author.username } : null,
+        }));
+        return { comments, counts, post, author, options: { posts, authors }, ...pagination };
     }, { isolationLevel: "RepeatableRead" });
 }
 

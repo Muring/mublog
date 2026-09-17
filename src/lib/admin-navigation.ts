@@ -21,11 +21,12 @@ export function safeAdminReturn(value?: string | null) {
     const url = new URL(value, "https://admin.local");
     return url.pathname === "/admin" ? postListUrl(postListState(url.searchParams)) : "/admin";
 }
-export function commentListUrl({ post, status = "all", page = 1, returnTo = "/admin" }: {
-    post?: string; status?: string; page?: number; returnTo?: string;
+export function commentListUrl({ post, author, status = "all", page = 1, returnTo = "/admin" }: {
+    post?: string; author?: string; status?: string; page?: number; returnTo?: string;
 }) {
     const params = new URLSearchParams();
     if (post) params.set("post", post);
+    if (author) params.set("author", author);
     if (status === "live" || status === "deleted") params.set("status", status);
     if (page > 1) params.set("page", String(page));
     if (safeAdminReturn(returnTo) !== "/admin") params.set("returnTo", safeAdminReturn(returnTo));
