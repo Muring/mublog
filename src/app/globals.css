@@ -1,5 +1,5 @@
 :root {
-  --border-width: 2px;
+  --border-width: 1px;
   /* 본문 폰트. 서식 버튼(B/I)처럼 일부러 다른 폰트를 쓰는 자리에서
      기본으로 되돌아올 때 이 값을 쓴다 */
   --font-body: "NanumSquareNeo", "Noto Sans KR", "Pretendard", sans-serif;

@@ -276,13 +276,14 @@ export const PostTable = styled.table`
     color: var(--foreground);
     text-decoration: none;
     font: inherit;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
     transition: background-color .15s, border-color 150ms ease;
   }
-  .row-edit:hover { background: var(--codefontbgcolor); color: var(--linkhovercolor); }
+  .row-edit:hover { background: var(--linkhovercolor); color: var(--background); }
   .row-delete { color: var(--desccolor); }
-  .row-delete:hover:not(:disabled) { background: color-mix(in srgb, var(--dangercolor) 10%, var(--background)); color: var(--dangercolor); }
+  .row-delete:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
   .row-delete:disabled { opacity: .5; cursor: wait; }
   .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
   .action-buttons {
