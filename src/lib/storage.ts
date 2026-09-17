@@ -2,6 +2,7 @@ import { readdirSync, statSync } from "node:fs";
 import { join, sep } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
+import { referencedImagePaths } from "@/lib/image-references";
 
 const POST_IMAGE_BUCKET = "post-images";
 
@@ -86,17 +87,10 @@ async function listAllObjects(): Promise<StoredObject[]> {
  */
 async function collectReferencedPaths(): Promise<Set<string>> {
     const posts = await prisma.post.findMany({ select: { contentMd: true, thumbnail: true } });
-    const pattern = new RegExp(
-        `/storage/v1/object/public/${POST_IMAGE_BUCKET}/([^)\\s"'<>]+)`,
-        "g"
-    );
-
     const referenced = new Set<string>();
     for (const post of posts) {
         for (const text of [post.contentMd, post.thumbnail ?? ""]) {
-            for (const match of text.matchAll(pattern)) {
-                referenced.add(decodeURIComponent(match[1]));
-            }
+            for (const path of referencedImagePaths(text, POST_IMAGE_BUCKET)) referenced.add(path);
         }
     }
     return referenced;

@@ -1,4 +1,4 @@
-import { useCallback, useState, type RefObject } from "react";
+import { useCallback, useRef, useState, type RefObject } from "react";
 import { useToast } from "@/providers/Toast";
 import { fetchJson } from "@/lib/fetcher";
 
@@ -21,7 +21,13 @@ export function useEditorUploads(
     slug: string
 ) {
     const toast = useToast();
+    const active = useRef(0);
+    const thumbActive = useRef(false);
+    const [pendingUploads, setPendingUploads] = useState(0);
     const [isUploadingThumb, setIsUploadingThumb] = useState(false);
+    const uploadsPending = useCallback(() => active.current > 0, []);
+    const begin = useCallback(() => { active.current++; setPendingUploads(active.current); }, []);
+    const end = useCallback(() => { active.current--; setPendingUploads(active.current); }, []);
 
     /** 실패하면 문구를 띄우고 null 을 돌려준다. */
     const upload = useCallback(
@@ -51,21 +57,23 @@ export function useEditorUploads(
             const el = textareaRef.current;
             if (!el) return;
 
-            for (const file of files) {
-                if (!file.type.startsWith("image/")) continue;
-
-                const token = "![업로드 중 " + crypto.randomUUID().slice(0, 8) + "]()";
-                const { selectionStart: pos, value } = el;
-                setContentMd(() => value.slice(0, pos) + token + value.slice(pos));
-
-                const url = await upload(file, "body");
-                setContentMd((previous) =>
-                    previous.replace(token, url ? "![](" + url + ")" : "")
-                );
-                if (url) toast.success("이미지를 올렸습니다.");
+            const images = files.filter((file) => file.type.startsWith("image/"));
+            if (!images.length) return;
+            begin();
+            const tokens = images.map(() => "![업로드 중 " + crypto.randomUUID() + "]()");
+            const pos = el.selectionStart;
+            setContentMd((previous) => previous.slice(0, pos) + tokens.join("\n") + previous.slice(pos));
+            try {
+                for (const [index, file] of images.entries()) {
+                    const url = await upload(file, "body");
+                    setContentMd((previous) => previous.replace(tokens[index], url ? "![](" + url + ")" : ""));
+                    if (url) toast.success("이미지를 올렸습니다.");
+                }
+            } finally {
+                end();
             }
         },
-        [textareaRef, setContentMd, upload, toast]
+        [textareaRef, setContentMd, upload, toast, begin, end]
     );
 
     const uploadThumbnail = useCallback(
@@ -76,13 +84,21 @@ export function useEditorUploads(
                 return;
             }
 
+            if (thumbActive.current) return;
+            thumbActive.current = true;
+            begin();
             setIsUploadingThumb(true);
-            const url = await upload(file, "thumbnail");
-            setIsUploadingThumb(false);
-            if (url) setThumbnail(url);
+            try {
+                const url = await upload(file, "thumbnail");
+                if (url) setThumbnail(url);
+            } finally {
+                thumbActive.current = false;
+                setIsUploadingThumb(false);
+                end();
+            }
         },
-        [upload, setThumbnail, toast]
+        [upload, setThumbnail, toast, begin, end]
     );
 
-    return { isUploadingThumb, uploadIntoBody, uploadThumbnail };
+    return { isUploadingThumb, isUploading: pendingUploads > 0, uploadsPending, uploadIntoBody, uploadThumbnail };
 }

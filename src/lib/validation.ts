@@ -14,6 +14,7 @@ const RESERVED_SLUGS = new Set([
     "api",
     "about",
     "portfolio",
+    "privacy",
     "feed.xml",
     "_next",
     "favicon.ico",

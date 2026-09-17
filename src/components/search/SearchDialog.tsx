@@ -23,6 +23,8 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     const [input, setInput] = useState("");
     const [query, setQuery] = useState("");
     const [focused, setFocused] = useState(0);
+    const dialogRef = useRef<HTMLDialogElement>(null);
+    const composing = useRef(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const listRef = useRef<HTMLUListElement>(null);
     // 목록을 따라 스크롤하는 건 키보드로 옮길 때만이다. 마우스가 위아래 끝에 걸친 항목에
@@ -44,15 +46,21 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
         enabled,
         staleTime: 5 * 60 * 1000,
     });
-    const hits = enabled ? (data ?? []) : [];
+    const currentResults = input.trim() === query;
+    const hits = enabled && currentResults ? (data ?? []) : [];
     const terms = query.split(/\s+/).filter(Boolean);
 
     useEffect(() => {
+        const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const dialog = dialogRef.current;
+        dialog?.showModal();
         inputRef.current?.focus();
         const previous = document.body.style.overflow;
         document.body.style.overflow = "hidden";
         return () => {
+            dialog?.close();
             document.body.style.overflow = previous;
+            if (opener?.isConnected) opener.focus();
         };
     }, []);
 
@@ -69,14 +77,26 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     }
 
     function onKeyDown(event: KeyboardEvent) {
+        if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+        if (event.key === "Tab") {
+            const items = dialogRef.current?.querySelectorAll<HTMLElement>('input, a[href], button:not(:disabled)');
+            const first = items?.[0];
+            const last = items?.[items.length - 1];
+            if (first && last && event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (first && last && !event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+            return;
+        }
+        if (event.target !== inputRef.current) return;
         switch (event.key) {
-            case "Escape":
-                onClose();
-                break;
             case "ArrowDown":
                 event.preventDefault();
                 viaKeyboard.current = true;
-                setFocused((i) => Math.min(hits.length - 1, i + 1));
+                setFocused((i) => Math.max(0, Math.min(hits.length - 1, i + 1)));
                 break;
             case "ArrowUp":
                 event.preventDefault();
@@ -84,6 +104,7 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
                 setFocused((i) => Math.max(0, i - 1));
                 break;
             case "Enter":
+                event.preventDefault();
                 if (hits[focused]) go(hits[focused].slug);
                 break;
         }
@@ -92,15 +113,20 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     let status: string | null = null;
     if (!enabled) status = input.trim().length > 0 ? "두 글자 이상 입력하세요." : "제목·요약·본문에서 찾습니다.";
     else if (error) status = error instanceof Error ? error.message : "검색에 실패했습니다.";
-    else if (isFetching && !data) status = "찾는 중…";
+    else if (!currentResults || (isFetching && !data)) status = "찾는 중…";
     else if (hits.length === 0) status = `"${query}" 에 맞는 글이 없습니다.`;
 
     return (
-        <SearchOverlay onClick={onClose}>
+        <SearchOverlay
+            ref={dialogRef}
+            aria-label="글 검색"
+            onCancel={(event) => {
+                event.preventDefault();
+                if (!composing.current) onClose();
+            }}
+            onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
+        >
             <SearchPanel
-                role="dialog"
-                aria-modal="true"
-                aria-label="글 검색"
                 onClick={(event) => event.stopPropagation()}
                 onKeyDown={onKeyDown}
             >
@@ -109,6 +135,8 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
                     <input
                         ref={inputRef}
                         value={input}
+                        onCompositionStart={() => { composing.current = true; }}
+                        onCompositionEnd={() => { composing.current = false; }}
                         onChange={(event) => setInput(event.target.value)}
                         placeholder="검색어를 입력하세요"
                         aria-label="검색어"
@@ -120,13 +148,11 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
                 {status ? (
                     <p className="search-status">{status}</p>
                 ) : (
-                    <ul className="search-results" ref={listRef} role="listbox" aria-label="검색 결과">
+                    <ul className="search-results" ref={listRef} aria-label="검색 결과">
                         {hits.map((hit, index) => (
                             <li
                                 key={hit.slug}
                                 className="search-hit"
-                                role="option"
-                                aria-selected={index === focused}
                                 data-focused={index === focused}
                                 onPointerEnter={() => setFocused(index)}
                             >

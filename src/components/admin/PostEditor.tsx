@@ -58,7 +58,7 @@ const NEW_SERIES = "__new__";
 
 export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
     const [post, setPost] = useState(initial);
-    const [postId, setPostId] = useState(initial.id);
+    const postId = initial.id;
     const [html, setHtml] = useState("");
     const [isDragging, setIsDragging] = useState(false);
     const [isThumbDragging, setIsThumbDragging] = useState(false);
@@ -108,14 +108,14 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
         (url: string) => setPost((prev) => ({ ...prev, thumbnail: url })),
         []
     );
-    const { isUploadingThumb, uploadIntoBody, uploadThumbnail } = useEditorUploads(
+    const { isUploadingThumb, isUploading, uploadsPending, uploadIntoBody, uploadThumbnail } = useEditorUploads(
         textareaRef,
         setContentMd,
         setThumbnail,
         post.slug
     );
 
-    const { save, pending, isSaving } = usePostSave(post, setPost, postId, setPostId, setTagError);
+    const { save, pending, isSaving } = usePostSave(post, postId, setTagError, uploadsPending);
 
     /** 커서 위치에 텍스트를 끼워 넣는다 */
     const insertAtCursor = useCallback((before: string, after = "", placeholder = "") => {
@@ -131,7 +131,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
         });
     }, []);
 
-    const canSave = Boolean(post.title.trim()) && slugState.available !== false && !isSaving;
+    const canSave = Boolean(post.title.trim()) && slugState.available !== false && !isSaving && !isUploading;
 
     return (
         <EditorWrapper
@@ -146,6 +146,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
             <div className="editor-head">
                 <h2>{postId ? "포스트 수정" : "새 글 쓰기"}</h2>
                 <div className="actions">
+                    {isUploading && <span role="status">이미지 업로드 중…</span>}
                     <Link href="/admin">
                         <Button as="span">목록</Button>
                     </Link>

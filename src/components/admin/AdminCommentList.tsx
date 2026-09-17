@@ -148,7 +148,7 @@ function absolute(iso: string) {
     return `${part.year}년 ${Number(part.month)}월 ${Number(part.day)}일 ${part.hour}:${part.minute}`;
 }
 
-const CompactList = styled(CommentList)`
+export const CompactList = styled(CommentList)`
     && {
     margin-top: 8px;
     > li { padding: 0; }

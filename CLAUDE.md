@@ -89,7 +89,8 @@ styled 는 태그가 안 보여서 밟기 쉽다 — 공용 조각은 `span` + `
 Prisma 7은 접속 URL을 스키마가 아니라 `prisma.config.ts`에 둔다.
 Supabase 대시보드가 보여주는 `schema.prisma` 예시를 그대로 쓰지 않는다.
 
-`DATABASE_URL`은 6543 + `?pgbouncer=true&connection_limit=1`, `DIRECT_URL`은 5432다.
+`DATABASE_URL`은 6543 + `?pgbouncer=true`, `DIRECT_URL`은 5432다.
+런타임 연결 상한은 `lib/prisma.ts`의 `PrismaPg({ max: 1 })`로 설정한다. URL의 `connection_limit`은 pg 풀 상한을 바꾸지 않는다.
 `?pgbouncer=true`를 빠뜨리면 **로컬에서는 재현되지 않고 프로덕션에서만** 간헐적으로 터진다.
 
 `vercel.json` 의 `"regions": ["icn1"]` 을 지우지 않는다. Supabase 가 서울이라
@@ -172,6 +173,10 @@ DB는 맞는데 페이지가 낡았으면 `.next/cache`를 지운다. `unstable_
 ---
 
 ## 5. 검증할 때 속지 말 것
+
+**웹 화면 확인은 `orca-cli` 스킬로 Orca 내장 브라우저를 우선 사용한다.**
+현재 프로젝트의 기존 탭과 로그인 세션을 먼저 확인한다. Orca에서 확인할 수 없는 경우에만
+다른 브라우저나 임시 미리보기를 사용하고, 실제 화면 검증과 미리보기 검증을 구분해 보고한다.
 
 **브라우저 자동화 탭은 백그라운드로 뜬다**(`document.hidden === true`).
 숨겨진 문서에는 렌더링 스텝이 돌지 않으므로:

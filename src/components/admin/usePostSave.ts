@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/Toast";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
@@ -11,26 +11,33 @@ type Saved = { id?: string; slug?: string; publishedAt?: string | null };
  * 초안 저장 / 발행.
  *
  * 새 글이면 POST, 이미 있으면 PATCH 로 간다. 저장 뒤 처리가 둘로 갈린다 —
- * 발행은 게시된 글로 넘어가고, 초안 저장은 이어서 쓰는 중이라 화면을 유지한다.
+ * 발행은 게시된 글로 넘어가고, 초안 저장은 관리 목록으로 돌아간다.
  */
 export function usePostSave(
     post: EditablePost,
-    setPost: Dispatch<SetStateAction<EditablePost>>,
     postId: string | null,
-    setPostId: (id: string) => void,
-    onTagError: (message: string) => void
+    onTagError: (message: string) => void,
+    uploadsPending: () => boolean
 ) {
     const router = useRouter();
     const toast = useToast();
     const [pending, setPending] = useState<Status | null>(null);
 
+    const saving = useRef(false);
+
     async function save(status: Status) {
+        if (saving.current) return;
+        if (uploadsPending()) {
+            toast.error("이미지 업로드가 끝난 뒤 저장해 주세요.");
+            return;
+        }
         // 태그는 목록 필터의 기준이라 하나도 없으면 글이 어디에도 걸리지 않는다.
         if (post.tags.length === 0) {
             onTagError("태그를 하나 이상 선택하세요.");
             return;
         }
 
+        saving.current = true;
         setPending(status);
 
         const payload = {
@@ -55,6 +62,7 @@ export function usePostSave(
                 jsonRequest(postId ? "PATCH" : "POST", payload)
             );
         } catch (error) {
+            saving.current = false;
             setPending(null);
             toast.error(error instanceof Error ? error.message : "저장에 실패했습니다.");
             return;

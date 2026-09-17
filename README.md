@@ -154,7 +154,7 @@ Prisma 7은 접속 URL을 스키마가 아니라 `prisma.config.ts`에 둡니다
 
 | 용도                 | 포트                     | 비고                                    |
 | -------------------- | ------------------------ | --------------------------------------- |
-| 앱 런타임            | **6543** Transaction 풀러 | `?pgbouncer=true&connection_limit=1` 필수 |
+| 앱 런타임            | **6543** Transaction 풀러 | `?pgbouncer=true`, 풀 상한은 `max: 1` |
 | 마이그레이션         | **5432** Session 풀러     | `db.<ref>...:5432`는 IPv6 전용이라 CI 실패 |
 
 <br>
@@ -713,8 +713,8 @@ $ yarn dev
 
 > ⚠️ `?pgbouncer=true`를 빠뜨리면 **동시 요청 시에만** `prepared statement "s0" already exists`가
 > 간헐적으로 납니다. 로컬에서는 재현되지 않고 프로덕션에서만 터집니다.
-> `connection_limit=1`도 필수입니다 — 서버리스 인스턴스마다 풀이 생기므로
-> 그 이상이면 무료 티어 커넥션이 고갈됩니다.
+> 런타임 연결 상한은 `src/lib/prisma.ts`의 `PrismaPg({ max: 1 })`로 지정합니다.
+> pg 어댑터는 URL의 `connection_limit=1`을 풀 상한으로 해석하지 않습니다.
 
 > Vercel에서는 **Production·Preview·Development 전부**에 등록해야 합니다.
 > `generateStaticParams`가 빌드 시점에 DB를 조회하므로 빌드에도 `DATABASE_URL`이 필요합니다.
@@ -730,6 +730,7 @@ $ yarn dev
 | `yarn migrate:posts`    | mdx를 DB로 가져오기 (복구·최초 이전)            |
 | `yarn verify:migration` | 백업과 DB 대조                                  |
 | `yarn verify:render`    | 마크다운 파이프라인 회귀 검사 (12가지)          |
+| `yarn verify:audit-fixes` | 감사에서 고친 지점 회귀 검사 (DB·Storage 접속 없음) |
 | `yarn audit:render`     | 전체 포스트 렌더링 점검                         |
 | `yarn sweep:images`     | 참조 없는 이미지 정리 (기본 dry-run)            |
 | `yarn revalidate`       | 배포본 캐시 전부 지우기. DB 를 스크립트로 직접 고친 뒤 (`draft:post`·`migrate:posts` 는 스스로 부름) |

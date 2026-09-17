@@ -5,7 +5,7 @@ import { PrismaClient } from "@/generated/prisma";
 // 접속 문자열은 스키마가 아니라 여기서 주입된다.
 //
 // DATABASE_URL 은 Supabase Supavisor 의 transaction 모드(6543)를 가리켜야 한다.
-// 서버리스 함수마다 풀이 따로 생기므로 connection_limit=1 로 묶어두지 않으면
+// 서버리스 함수마다 풀이 따로 생기므로 pg 풀의 max: 1 로 묶어두지 않으면
 // 무료 티어의 커넥션 한도가 금방 고갈된다.
 function createPrismaClient() {
     const connectionString = process.env.DATABASE_URL;
@@ -16,6 +16,8 @@ function createPrismaClient() {
     return new PrismaClient({
         adapter: new PrismaPg({
             connectionString,
+            // pg 어댑터는 URL의 connection_limit을 풀 상한으로 해석하지 않는다.
+            max: 1,
             // DB 가 불통이면 빌드가 무한정 매달리는 대신 명확히 실패하게 한다.
             // (Supabase 무료 프로젝트는 7일 무활동 시 정지된다)
             connectionTimeoutMillis: 10_000,

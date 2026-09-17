@@ -12,6 +12,7 @@
         "postinstall": "prisma generate",
         "check:db": "tsx scripts/check-db.mts",
         "verify:render": "tsx scripts/smoke-render.mts",
+        "verify:audit-fixes": "tsx scripts/verify-audit-fixes.mts",
         "audit:render": "tsx scripts/audit-render.mts",
         "sweep:images": "tsx scripts/sweep-images.mts",
         "backup:posts": "tsx scripts/backup-posts.mts",

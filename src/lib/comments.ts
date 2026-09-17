@@ -84,17 +84,18 @@ export async function getCommentsForAdmin({ slug, authorId, status = "all", page
 } = {}) {
     return prisma.$transaction(async (tx) => {
         const base = { ...(slug ? { post: { slug } } : {}), ...(authorId ? { authorId } : {}) };
-        const [post, author, posts, authors] = await Promise.all([
-            slug ? tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } }) : null,
-            authorId ? tx.profile.findUnique({ where: { id: authorId }, select: { id: true, username: true, avatarUrl: true } }) : null,
-            // 필터 드롭다운 항목. 댓글이 하나라도 달린 글·사람만 — 빈 선택지는 고를 이유가 없다
-            tx.post.findMany({ where: { comments: { some: {} } }, select: { slug: true, title: true }, orderBy: { title: "asc" } }),
-            tx.profile.findMany({ where: { comments: { some: {} } }, select: { id: true, username: true }, orderBy: { username: "asc" } }),
-        ]);
-        const [total, deleted] = await Promise.all([
-            tx.comment.count({ where: base }),
-            tx.comment.count({ where: { ...base, deletedAt: { not: null } } }),
-        ]);
+        // 트랜잭션은 커넥션 하나를 독점하므로 Promise.all 로 묶어도 직렬로 실행된다.
+        // pg 는 한 클라이언트에 쿼리가 겹쳐 쌓이면 deprecation 경고를 내므로(pg@9 에서는 오류) 순서대로 기다린다.
+        const post = slug ? await tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } }) : null;
+        const author = authorId ? await tx.profile.findUnique({ where: { id: authorId }, select: { id: true, username: true, avatarUrl: true } }) : null;
+        // 필터 드롭다운 항목. 댓글이 하나라도 달린 글·사람만 — 빈 선택지는 고를 이유가 없다.
+        // 목록 행의 글 정보도 여기서 찾는다 — 행마다 relation 을 셋 이상 걸면 Prisma 가
+        // 트랜잭션 커넥션 하나에 relation 조회를 동시에 던져 위와 같은 경고가 난다(prisma/prisma#29407).
+        const posts = await tx.post.findMany({ where: { comments: { some: {} } }, select: { id: true, slug: true, title: true, status: true }, orderBy: { title: "asc" } });
+        const postById = new Map(posts.map((row) => [row.id, row]));
+        const authors = await tx.profile.findMany({ where: { comments: { some: {} } }, select: { id: true, username: true }, orderBy: { username: "asc" } });
+        const total = await tx.comment.count({ where: base });
+        const deleted = await tx.comment.count({ where: { ...base, deletedAt: { not: null } } });
         const counts = { all: total, live: total - deleted, deleted };
         const pagination = commentPage(counts[status], page);
         const rows = await tx.comment.findMany({
@@ -104,7 +105,7 @@ export async function getCommentsForAdmin({ slug, authorId, status = "all", page
             take: pagination.take,
             select: {
                 ...COMMENT_SELECT,
-                post: { select: { id: true, slug: true, title: true, status: true } },
+                postId: true,
                 parent: { select: { id: true, body: true, deletedAt: true, author: { select: { username: true } } } },
             },
         });
@@ -113,7 +114,7 @@ export async function getCommentsForAdmin({ slug, authorId, status = "all", page
             body: row.body,
             author: row.author,
             deletedAt: row.deletedAt?.toISOString() ?? null,
-            post: row.post,
+            post: postById.get(row.postId)!,
             parent: row.parent ? { id: row.parent.id, body: row.parent.body, deleted: row.parent.deletedAt !== null, author: row.parent.author.username } : null,
         }));
         return { comments, counts, post, author, options: { posts, authors }, ...pagination };
@@ -235,13 +236,15 @@ export async function deleteComment(params: {
 
     // hard delete 하면 달려 있던 답글이 함께 사라진다.
     // 행은 남기고 본문만 가려서 대화 흐름을 유지한다.
-    await prisma.$transaction([
-        prisma.comment.update({
-            where: { id },
+    await prisma.$transaction(async (tx) => {
+        // 동시에 삭제해도 상태를 실제로 바꾼 요청만 카운트를 차감한다.
+        const deleted = await tx.comment.updateMany({
+            where: { id, deletedAt: null },
             data: { deletedAt: new Date(), deletedBy: actorId },
-        }),
-        prisma.$executeRaw`UPDATE posts SET comment_count = comment_count - 1 WHERE id = ${existing.postId}`,
-    ]);
+        });
+        if (deleted.count === 0) throw new HttpError(404, "댓글을 찾을 수 없습니다.");
+        await tx.$executeRaw`UPDATE posts SET comment_count = comment_count - 1 WHERE id = ${existing.postId}`;
+    });
 
     return { slug: existing.post.slug };
 }

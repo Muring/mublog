@@ -390,6 +390,14 @@ export const PostTable = styled.table`
       text-align: left;
     }
 
+    &[data-loading] td[data-label]::before {
+      content: "";
+      width: 3em;
+      height: .8em;
+      border-radius: .4rem;
+      background: var(--codefontbgcolor);
+    }
+
     /* 이 둘은 이름표가 필요 없다. attr() 이 빈 값이면 빈 상자가 남는다 */
     .title-cell::before,
     .actions::before {
@@ -553,6 +561,32 @@ export const TableToolbar = styled.div`
     outline-offset: 2px;
   }
   .status-filters { ${segmented} }
+  /* 로딩에서도 컨트롤의 폭은 그대로 두고 문구·아이콘을 막대로 대체한다. */
+  &[data-loading] {
+    input { color: transparent; background: var(--codefontbgcolor); }
+    input::placeholder { color: transparent; }
+    button, .status-filters button {
+      position: relative;
+      color: transparent;
+      opacity: 1;
+      box-shadow: none;
+    }
+    button * { visibility: hidden; }
+    button::after {
+      content: "";
+      position: absolute;
+      inset: 50% 10px auto;
+      width: auto;
+      height: .75rem;
+      border: 0;
+      border-radius: .4rem;
+      background: var(--bordercolor);
+      transform: translateY(-50%);
+    }
+  }
+  .filter-count { display: inline-block; position: relative; min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+  .filter-count-placeholder { position: absolute; inset: 50% 0 auto; height: .7em; transform: translateY(-50%); }
+
   .count {
     flex-shrink: 0;
     min-width: 3rem;

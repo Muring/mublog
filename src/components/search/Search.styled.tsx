@@ -38,11 +38,20 @@ export const SearchTrigger = styled.button`
 `;
 
 /* 뒤를 가리는 막. ConfirmOverlay 와 같은 이유로 토큰을 쓰지 않는다 */
-export const SearchOverlay = styled.div`
+export const SearchOverlay = styled.dialog`
+    box-sizing: border-box;
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    color: var(--foreground);
     position: fixed;
     inset: 0;
     z-index: 200;
-    display: flex;
+    display: none;
+    &[open] { display: flex; }
     align-items: flex-start;
     justify-content: center;
     padding: 12vh 1rem 1rem;
