@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Card from "./PostCard.styled";
+import TagChips from "@/components/ui/TagChips";
 import type { PostSummary } from "@/types/post";
 import { formatCardDate } from "@/lib/date";
 import { fetchPostViewCounts, queryKeys } from "@/lib/queries";
@@ -47,15 +48,6 @@ const CommentIcon = () => (
     </svg>
 );
 
-/**
- * 한 줄에 들어가는 태그 수.
- *
- * 폭을 재서 몇 개가 들어가는지 계산할 수도 있지만, 그러면 하이드레이션 전후로
- * 개수가 달라져 화면이 한 번 흔들린다. 실제 데이터가 대부분 태그 1~2개이므로
- * 개수로 자르고 나머지는 +N 으로 접는다.
- */
-const VISIBLE_TAGS = 2;
-
 export default function PostCard({
     post,
     style,
@@ -79,8 +71,6 @@ export default function PostCard({
     const viewCount = liveViews?.[post.slug] ?? post.viewCount;
 
     const formattedDate = formatCardDate(post.publishedAt);
-    const shownTags = post.tags.slice(0, VISIBLE_TAGS);
-    const hiddenTags = post.tags.slice(VISIBLE_TAGS);
 
     return (
         <Card.Wrapper style={style}>
@@ -96,24 +86,7 @@ export default function PostCard({
 
             <Card.Body>
                 {/* 태그가 없어도 자리는 지킨다. 비면 그 카드만 짧아진다 */}
-                <Card.Tags>
-                    {shownTags.map((tag) => (
-                        <span key={tag} className="chip">
-                            #{tag}
-                        </span>
-                    ))}
-                    {hiddenTags.length > 0 && (
-                        <span
-                            className="chip more"
-                            title={hiddenTags.map((t) => `#${t}`).join(" ")}
-                        >
-                            +{hiddenTags.length}
-                            <span className="popover" aria-hidden>
-                                {hiddenTags.map((t) => `#${t}`).join(" ")}
-                            </span>
-                        </span>
-                    )}
-                </Card.Tags>
+                <TagChips tags={post.tags} />
 
                 {/* 잘렸을 때 전체를 확인할 수 있도록 title 속성을 함께 둔다 */}
                 <Card.Title title={post.title}>{post.title}</Card.Title>

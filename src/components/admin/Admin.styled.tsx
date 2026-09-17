@@ -137,7 +137,7 @@ export const PostTable = styled.table`
   th:nth-of-type(5) { width: 7.5rem; }  /* 수정일 */
   th:nth-of-type(6) { width: 5rem; }     /* 누적 조회 */
   th:nth-of-type(7) { width: 6rem; }    /* 댓글 */
-  th:nth-of-type(8) { width: 9.5rem; }  /* 수정·삭제 */
+  th:nth-of-type(8) { width: 7rem; }  /* 수정·삭제 */
 
   .views-total {
     text-align: center;
@@ -270,9 +270,9 @@ export const PostTable = styled.table`
     height: 32px;
     padding: 0 9px;
     box-sizing: border-box;
-    border: 1px solid var(--bordercolor);
-    border-radius: 7px;
-    background: var(--background);
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
     color: var(--foreground);
     text-decoration: none;
     font: inherit;
@@ -280,9 +280,9 @@ export const PostTable = styled.table`
     cursor: pointer;
     transition: background-color .15s, border-color .15s;
   }
-  .row-edit:hover { border-color: var(--linkhovercolor); color: var(--linkhovercolor); }
-  .row-delete { color: var(--dangercolor); border-color: color-mix(in srgb, var(--dangercolor) 25%, var(--bordercolor)); }
-  .row-delete:hover:not(:disabled) { background: color-mix(in srgb, var(--dangercolor) 10%, var(--background)); border-color: var(--dangercolor); }
+  .row-edit:hover { background: var(--codefontbgcolor); color: var(--linkhovercolor); }
+  .row-delete { color: var(--desccolor); }
+  .row-delete:hover:not(:disabled) { background: color-mix(in srgb, var(--dangercolor) 10%, var(--background)); color: var(--dangercolor); }
   .row-delete:disabled { opacity: .5; cursor: wait; }
   .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
   .action-buttons {

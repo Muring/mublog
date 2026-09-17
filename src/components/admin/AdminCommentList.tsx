@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import styled from "@emotion/styled";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CommentList, CommentRow } from "@/components/comments/Comments.styled";
@@ -21,13 +22,13 @@ import type { AdminComment } from "@/lib/comments";
 export default function AdminCommentList({ comments }: { comments: AdminComment[] }) {
     if (comments.length === 0) return null;
     return (
-        <CommentList>
+        <CompactList>
             {comments.map((comment) => (
                 <li key={comment.id}>
                     <AdminCommentRow comment={comment} />
                 </li>
             ))}
-        </CommentList>
+        </CompactList>
     );
 }
 
@@ -66,7 +67,7 @@ function AdminCommentRow({ comment }: { comment: AdminComment }) {
     );
 
     // 지운 댓글도 본문과 작성자를 그대로 보여준다(공개 화면과 다른 점). 행만 흐리게, 배지로 누가 지웠는지.
-    const rowClass = ["root", busy || comment.deleted ? "pending" : ""].filter(Boolean).join(" ");
+    const rowClass = ["root", busy ? "pending" : ""].filter(Boolean).join(" ");
 
     return (
         <CommentRow className={rowClass}>
@@ -107,3 +108,23 @@ function AdminCommentRow({ comment }: { comment: AdminComment }) {
         </CommentRow>
     );
 }
+
+const CompactList = styled(CommentList)`
+    && {
+    margin-top: 8px;
+    > li { padding: 0; }
+    .root { padding: 10px 0; gap: 10px; }
+    .avatar-col { width: 28px; }
+    .avatar { width: 28px; height: 28px; }
+    .meta { gap: 6px; margin-bottom: 2px; }
+    .meta .username { font-size: 13px; }
+    .body { font-size: 13px; line-height: 1.6; margin: 0; }
+    .row-actions { opacity: 1; margin-top: 3px; align-items: center; gap: 10px; }
+    .row-action { font-size: 12px; text-decoration: none; }
+    a.row-action { overflow-wrap: anywhere; }
+    .row-action:hover { color: var(--linkhovercolor); text-decoration: underline; }
+    button.row-action { padding: 3px 7px; border-radius: 4px; flex-shrink: 0; }
+    button.row-action:hover:not(:disabled) { background: color-mix(in srgb, var(--dangercolor) 8%, var(--background)); text-decoration: none; }
+    .row-action:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+    }
+`;
