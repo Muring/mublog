@@ -39,7 +39,7 @@ export const ChartCard = styled.details`
         gap: 0.5rem 0.75rem;
         cursor: pointer;
         list-style: none;
-        &:hover .title, &:hover .summary-value { color: var(--linkhovercolor); }
+        &:hover .title { color: var(--linkhovercolor); }
 
         &::-webkit-details-marker {
             display: none;
