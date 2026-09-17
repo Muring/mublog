@@ -23,7 +23,7 @@ export const ChartCard = styled.details`
     --axis-h: calc(0.4rem + 0.9rem);
 
     ${surface("12px")}
-    padding: 0.85rem 1.25rem;
+    padding: 0.7rem 1.25rem;
     margin-bottom: 1.5rem;
     container-type: inline-size;
 
@@ -39,6 +39,7 @@ export const ChartCard = styled.details`
         gap: 0.5rem 0.75rem;
         cursor: pointer;
         list-style: none;
+        &:hover .title, &:hover .summary-value { color: var(--linkhovercolor); }
 
         &::-webkit-details-marker {
             display: none;
@@ -108,7 +109,7 @@ export const ChartCard = styled.details`
     }
 
     .body {
-        margin-top: 1rem;
+        margin-top: 0.65rem;
     }
 
     /* 집계 단위와 연도를 한 줄에 둔다 */
@@ -119,7 +120,7 @@ export const ChartCard = styled.details`
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 0.5rem;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0;
     }
 
     /* 그림 자리를 그대로 차지해, 단위를 오갈 때 카드 높이가 튀지 않는다 */
@@ -167,7 +168,9 @@ export const RangeTabs = styled.div`
         &.active {
             background-color: var(--activecolor);
             color: var(--activefontcolor);
+            &:hover { background-color: color-mix(in srgb, var(--activecolor) 85%, var(--activefontcolor)); }
         }
+        &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
     }
 `;
 

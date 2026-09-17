@@ -21,6 +21,9 @@ export const Legend = styled.div`
         font-size: 0.72rem;
         font-weight: 700;
         cursor: pointer;
+        border-radius: 4px;
+        &:hover { background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground)); }
+        &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
     }
     button .swatch {
         width: 10px;

@@ -39,6 +39,7 @@ export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
         <ChartCard>
             <summary><span className="title">방문·조회 통계</span><span className="summary-value">오늘 방문 <strong>{todayVisits.toLocaleString("ko-KR")}</strong>명</span></summary>
             <div className="body">
+                <div className={styles.analyticsToolbar}>
                 <div className={styles.chartTabs} role="tablist" aria-label="통계 종류">
                     {([['visits', '방문'], ['tags', '태그별 조회']] as const).map(([key, title]) => (
                         <button type="button" role="tab" id={`analytics-tab-${key}`} aria-controls="analytics-panel" aria-selected={metric === key} tabIndex={metric === key ? 0 : -1} key={key}
@@ -55,6 +56,7 @@ export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
                         {BUCKETS.map((b) => <button type="button" key={b.key} aria-pressed={bucket === b.key} className={bucket === b.key ? "active" : undefined} onClick={() => setBucket(b.key)}>{b.label}</button>)}
                     </RangeTabs>
                     {bucket === "monthly" && <Dropdown label="연도 선택" size="control" align="right" value={year} options={years.map((value) => ({ value, label: `${value}년` }))} onChange={setYear} />}
+                </div>
                 </div>
                 <div id="analytics-panel" role="tabpanel" aria-labelledby={`analytics-tab-${metric}`}>
                     <div className={styles.analyticsSummary}>

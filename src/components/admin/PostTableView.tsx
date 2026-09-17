@@ -44,7 +44,8 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
         window.history.replaceState(null, "", postListUrl({ q: query, status, sort, ...patch }));
     };
 
-    const filtered = filterAdminPosts(posts, { q: query, status, sort });
+    const matching = filterAdminPosts(posts, { q: query, status: "all", sort });
+    const filtered = matching.filter((post) => status === "all" || post.status === status);
 
     return (
         <>
@@ -52,7 +53,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                 <div className="status-filters" role="group" aria-label="포스트 상태">
                     {([['all', '전체'], ['PUBLISHED', '공개'], ['DRAFT', '초안']] as const).map(([value, label]) => (
                         <button key={value} type="button" aria-pressed={status === value} onClick={() => update({ status: value })}>
-                            {label} {posts.filter((p) => value === 'all' || p.status === value).length}
+                            {label} {matching.filter((p) => value === 'all' || p.status === value).length}
                         </button>
                     ))}
                 </div>
@@ -69,8 +70,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                 <Dropdown className="sort-control" label="포스트 정렬" size="control" value={sort}
                     options={[{ value: 'newest', label: '최신순' }, { value: 'updated', label: '수정순' }, { value: 'views', label: '조회순' }, { value: 'comments', label: '댓글순' }]}
                     onChange={(value) => update({ sort: value as PostSort })} />
-                {(query || status !== "all" || sort !== "newest") && <button type="button" onClick={() => update({ q: "", status: "all", sort: "newest" })}>초기화</button>}
-                <span className="count">{filtered.length}개</span>
+                <button type="button" disabled={!query && status === "all" && sort === "newest"} onClick={() => update({ q: "", status: "all", sort: "newest" })}>초기화</button>
             </TableToolbar>
 
             {/* 표만 스크롤한다. 머리글은 sticky 라 스크롤해도 열 이름이 남는다 */}

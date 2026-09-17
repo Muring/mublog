@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { surface, hoverSurface } from "@/styles/surface";
+import { surface } from "@/styles/surface";
 
 export const DropdownRoot = styled.div`
     position: relative;
@@ -23,7 +23,9 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
     font-family: inherit;
     text-align: left;
     cursor: pointer;
-    transition: border-color 0.15s ease, color 0.15s ease;
+    background-clip: padding-box;
+    box-shadow: none;
+    transition: color 0.15s ease, background-color 0.15s ease;
 
     ${({ $size }) =>
         $size === "control"
@@ -90,12 +92,17 @@ export const DropdownList = styled.ul<{ $align: "left" | "right" }>`
         color: var(--foreground);
         cursor: pointer;
     }
-    /* 호버 면은 두 테마 모두 밝은 회색이라 글자도 어두운 값을 같이 준다. */
-    li[data-focused="true"] {
-        ${hoverSurface}
+    li[data-focused="true"], li:hover {
+        background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
+        color: var(--foreground);
     }
     li[aria-selected="true"] {
-        color: var(--linkhovercolor);
+        background-color: transparent;
+        color: var(--foreground);
+        font-weight: 700;
+    }
+    li[aria-selected="true"]:hover {
+        background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
     }
     li[aria-selected="true"]::after {
         content: "";

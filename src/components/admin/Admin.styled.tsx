@@ -430,6 +430,12 @@ export const Button = styled.button`
 
   &.primary {
     ${buttonPrimary}
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--activecolor) 85%, var(--activefontcolor));
+      color: var(--activefontcolor);
+      border-color: var(--activecolor);
+    }
+    &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 3px; }
   }
   &.danger {
     ${buttonDanger}
@@ -520,7 +526,13 @@ export const TableToolbar = styled.div`
     color: var(--foreground);
     padding: 0 12px;
   }
-  > button { cursor: pointer; }
+  > button { cursor: pointer; background-clip: padding-box; transition: background-color .15s, color .15s; }
+  > button:hover:not(:disabled) {
+    border-color: var(--linkhovercolor);
+    color: var(--linkhovercolor);
+    background-color: color-mix(in srgb, var(--linkhovercolor) 8%, var(--background));
+  }
+  > button:disabled { opacity: .45; cursor: default; }
   input { flex: 1; min-width: 160px; width: 0; }
   input:focus-visible, button:focus-visible {
     outline: 2px solid var(--linkhovercolor);
@@ -554,7 +566,7 @@ export const TableToolbar = styled.div`
     font-weight: 700;
     box-shadow: 0 1px 3px #0002;
   }
-  .status-filters button:hover { color: var(--foreground); }
+  .status-filters button:hover { color: var(--foreground); background: color-mix(in srgb, var(--foreground) 8%, var(--background)); }
   .count {
     flex-shrink: 0;
     min-width: 3rem;
@@ -566,7 +578,7 @@ export const TableToolbar = styled.div`
   @container admin (max-width: 650px) {
     .status-filters { flex: 1 1 auto; }
     .status-filters button { flex: 1; }
-    input { order: 1; flex: 1 1 calc(100% - 4rem); }
+    input { order: 1; flex: 1 1 100%; }
     .count { order: 2; }
   }
 `;
