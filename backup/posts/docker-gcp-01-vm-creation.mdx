@@ -4,7 +4,7 @@ date: "2025-04-30"
 description: "GCP VM을 활용한 Docker 응용 1편"
 tags:
     - devOps
-thumbnail: "/thumbnails/docker-gcp.png"
+thumbnail: "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/shared/docker-gcp-f7aef7a4.png"
 series: "Docker + GCP 배포"
 seriesOrder: 1
 ---
@@ -60,7 +60,7 @@ seriesOrder: 1
 
 [Free cloud features and trial offer  |  Google Cloud Free Program](https://cloud.google.com/free/docs/free-cloud-features#free-tier-usage-limits)
 
-![*“Cloud Storage 무료 버전 조건”*](/images/docker-gcp/01/image.png)
+![*“Cloud Storage 무료 버전 조건”*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-1-ec08707b.png)
 
 *“Cloud Storage 무료 버전 조건”*
 
@@ -70,11 +70,11 @@ seriesOrder: 1
 
 이후, Compute Engine API로 들어가거 인스턴스 만들기를 누르거나 Welcome 페이지에서 VM만들기 버튼을 클릭해서 바로 생성 창으로 들어가자.
 
-![*“Welcome page”*](/images/docker-gcp/01/image1.png)
+![*“Welcome page”*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-2-d7d2deb9.png)
 
 *“Welcome page”*
 
-![*“Compute Engine API”*](/images/docker-gcp/01/image2.png)
+![*“Compute Engine API”*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-3-fc477c8f.png)
 
 *“Compute Engine API”*
 
@@ -105,7 +105,7 @@ seriesOrder: 1
 
 가격은 청구된다고 나와있지만 공식 문서를 읽어보면 **무료 등급 한도** **내**에서는 요금이 청구되지 않는다고 작성되어 있으니 안심하자.
 
-![*“공식 문서”*](/images/docker-gcp/01/image3.png)
+![*“공식 문서”*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-4-ab5971a6.png)
 
 *“공식 문서”*
 
@@ -115,7 +115,7 @@ seriesOrder: 1
 
 성공적으로 VM 인스턴스가 만들어졌다면 사진과 같은 화면이 나올 것이다.
 
-![image.png](/images/docker-gcp/01/image4.png)
+![image.png](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-5-7e8b804a.png)
 
 이제, 우리는 여기에 Docker를 심기 위해서 서버에 접속해야 한다.
 
@@ -135,7 +135,7 @@ VS Code의 터미널을 통해서 접근을 하기 위해서는 SSH 키, 즉 공
 3. 스크롤을 내려 **SSH 키** 란에서 **‘항목 추가’ 클릭**
 4. 생성된 본인의 **SSH 키 입력 후 저장**
 
-![*“성공적으로 저장된 SSH 키”*](/images/docker-gcp/01/image5.png)
+![*“성공적으로 저장된 SSH 키”*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-6-c504eb22.png)
 
 *“성공적으로 저장된 SSH 키”*
 
@@ -151,13 +151,13 @@ ssh -i ~/.ssh/my-gcp-key [USERNAME]@[EXTERNAL_IP]
 
 성공적으로 연결이 진행되고 있다면 이와 같은 문구가 나올 것이다.
 
-![image.png](/images/docker-gcp/01/image6.png)
+![image.png](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-7-5d3ea42c.png)
 
 이는 서버가 현재 접속하려는 공개키를 처음 보는 것이라고 설명하는 것이며 해당 키를 가진 사용자를 서버에 접속시킬 것인지 물어보는 절차이다.
 
 `yes`를 입력해주게 되면 이제 정상적으로 서버에 접속된 모습을 확인할 수 있다.
 
-![*“SSH 키 등록 시 사용자 이름@ VM 인스턴스 이름”*](/images/docker-gcp/01/image7.png)
+![*“SSH 키 등록 시 사용자 이름@ VM 인스턴스 이름”*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/docker-gcp-01-vm-creation/image-8-22e8775e.png)
 
 *“SSH 키 등록 시 사용자 이름@ VM 인스턴스 이름”*
 

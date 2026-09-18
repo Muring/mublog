@@ -10,18 +10,13 @@ import { PickerOverlay, PickerBox, SourceTab, ImageCard } from "./ImagePicker.st
 type LibraryImage = {
     url: string;
     name: string;
-    source: "storage" | "static";
     size: number;
     createdAt: string;
     usedAsThumbnail: string[];
     usedInBody: string[];
 };
 
-/**
- * 무엇으로 쓰이는지로 거른다. 어디에 저장돼 있는지(올린 것 / 저장소 파일)로
- * 거르지 않는 이유는, 썸네일을 고르러 온 사람에게 그 구분이 아무 의미가 없기
- * 때문이다. 저장 위치는 이름 옆 툴팁에 남겨 둔다.
- */
+/** 무엇으로 쓰이는지로 거른다. 고르러 온 사람에게 중요한 건 파일 위치가 아니라 쓰임이다. */
 type Filter = "all" | "thumbnail" | "body" | "unused";
 
 const FILTERS: { key: Filter; label: string }[] = [
@@ -30,8 +25,6 @@ const FILTERS: { key: Filter; label: string }[] = [
     { key: "body", label: "본문" },
     { key: "unused", label: "미사용" },
 ];
-
-const SOURCE_LABEL = { storage: "올린 이미지", static: "저장소 파일" } as const;
 
 const kb = (bytes: number) => (bytes / 1024).toFixed(0) + "KB";
 
@@ -54,8 +47,7 @@ type Props = {
  * `.../post-images/2026-09/<uuid>.png` 라 손으로 칠 수 없고, 훑어볼 화면도 없어서
  * Supabase 대시보드에서 주소를 복사해 오는 수밖에 없었다.
  *
- * 저장소에 커밋된 public/thumbnails 와 올린 이미지를 한 목록에 섞는다.
- * 고르는 사람에게 그 구분은 중요하지 않다 — 어디에 있든 쓸 수 있는 이미지 하나다.
+ * 목록은 Storage 에 올린 이미지뿐이다. 글 이미지를 public/ 에 두지 않는다 (lib/storage.ts 참고).
  */
 export default function ImagePicker({ current, onSelect, onClose }: Props) {
     const toast = useToast();
@@ -200,10 +192,7 @@ export default function ImagePicker({ current, onSelect, onClose }: Props) {
                                     {/* 목록 미리보기라 next/image 최적화를 태우지 않는다 */}
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img src={image.url} alt="" loading="lazy" />
-                                    <span
-                                        className="name"
-                                        title={image.name + " · " + SOURCE_LABEL[image.source]}
-                                    >
+                                    <span className="name" title={image.name}>
                                         {image.name}
                                     </span>
                                     <span className="meta">

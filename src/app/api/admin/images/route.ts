@@ -4,8 +4,6 @@ import { handleApiError } from "@/lib/api";
 import { listImageLibrary } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
-// 정적 썸네일을 읽으려면 파일 시스템이 필요하다
-export const runtime = "nodejs";
 
 /**
  * 고를 수 있는 이미지 목록 (관리자 전용).

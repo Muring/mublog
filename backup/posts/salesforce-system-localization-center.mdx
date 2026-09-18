@@ -5,7 +5,7 @@ description: "개발자를 위한 코드 기반 다국어 메시지·라벨 운�
 tags:
     - salesforce
     - project
-thumbnail: "/thumbnails/salesforce-system-localization-center.png"
+thumbnail: "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/salesforce-system-localization-center/thumbnail-b52b9d9a.png"
 ---
 
 ## 다국어 메시지를 “관리”하고 “개발에서 쉽게 쓰기”까지
@@ -93,7 +93,7 @@ UI를 만들기 전에 먼저 데이터 구조를 확립했다. 이유는 간단
     - Missing Only 토글(번역 누락만 보기)
     - Save 버튼(Dirty 상태 기반)
 
-![*"화면 구성 예시"*](/images/salesforce-system-localization-center/image.png)
+![*"화면 구성 예시"*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/salesforce-system-localization-center/image-1-5d2cd69f.png)
 
 _"화면 구성 예시"_
 
@@ -195,7 +195,7 @@ _“어, 그러면 ResourceCode가 Unique하지 않게 되는거 아닌가?”_
 
 아니다. 여전히 레코드 상에서의 Unique는 보장된다. 실제로도 같은 ResourceCode로 Definition을 생성하려고 할 때는 생성되지 않는 모습을 확인할 수 있다.
 
-![image.png](/images/salesforce-system-localization-center/image1.png)
+![image.png](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/salesforce-system-localization-center/image-2-e7d1dd55.png)
 
 ### 장점 정리
 
@@ -215,7 +215,7 @@ Overwriting 구조를 도입하면, 사용자 입장에서는 “내가 만든 �
 - CMDT 기반이면: System Resource Registry 탭에서 별도 확인 가능
 - Record 기반인데 ResourceCode가 시스템 코드와 중복이면: **OVERWRITE 태그 표시**
 
-    ![*"Overwrite 태그 예시"*](/images/salesforce-system-localization-center/image2.png)
+    ![*"Overwrite 태그 예시"*](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/salesforce-system-localization-center/image-3-2035ff30.png)
     _"Overwrite 태그 예시"_
 
 표시는 “입력 중 실시간 감지”가 아니라,
@@ -250,7 +250,7 @@ UX 문제도 해결했고, 사용자 자유도도 제공해줬고 App 배포도 
 
 - 템플릿은 `{VariableName}` 형태의 플레이스홀더를 포함
 
-    ![image.png](/images/salesforce-system-localization-center/image3.png)
+    ![image.png](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/salesforce-system-localization-center/image-4-52d94b9a.png)
     _"템플릿 예시"_
 
 - 호출 시 `vars` 객체를 넘기면 해당 키로 치환
@@ -265,7 +265,7 @@ UX 문제도 해결했고, 사용자 자유도도 제공해줬고 App 배포도 
     ```
 - 에러 메시지는 `{Error}`를 템플릿에 넣으면, 시스템이 자동 주입
 
-    ![image.png](/images/salesforce-system-localization-center/image4.png)
+    ![image.png](https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/posts/salesforce-system-localization-center/image-5-fdd85691.png)
     _"Error 예시"_
 
     ```jsx

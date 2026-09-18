@@ -1,26 +1,8 @@
-import { readdirSync, statSync } from "node:fs";
-import { join, sep } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { referencedImagePaths } from "@/lib/image-references";
 
 const POST_IMAGE_BUCKET = "post-images";
-
-/**
- * 저장소에 함께 커밋된 이미지. public/ 아래라 주소가 곧 경로다.
- *
- * 마이그레이션으로 넘어온 옛 본문 이미지가 public/images 에 있어서, 여기를
- * 빠뜨리면 "본문" 태그가 Storage 에 올린 것만 세게 된다 (45개 중 5개였다).
- *
- * 깊이를 고정하지 않는다. images 아래는 글마다 폴더가 한 겹인 줄 알았는데
- * docker-gcp 만 그 안에 01/02/04 로 한 겹이 더 있어서 10장이 조용히 빠졌다.
- */
-const STATIC_DIRS = [
-    { dir: "public/thumbnails", url: "/thumbnails" },
-    { dir: "public/images", url: "/images" },
-] as const;
-
-const IMAGE_FILE = /[.](png|jpe?g|webp|gif|svg)$/i;
 
 function createStorageClient() {
     const secretKey = process.env.SUPABASE_SECRET_KEY;
@@ -165,8 +147,6 @@ export type LibraryImage = {
     url: string;
     /** 화면에 보일 이름 */
     name: string;
-    /** storage: 에디터로 올린 것, static: 저장소에 커밋된 것 */
-    source: "storage" | "static";
     size: number;
     createdAt: string;
     /** 이 이미지를 대표 이미지로 쓰는 글 */
@@ -178,13 +158,13 @@ export type LibraryImage = {
 /**
  * 에디터에서 고를 수 있는 이미지 전부.
  *
- * 출처가 둘이다 — 저장소에 커밋된 public/thumbnails 와 에디터로 올린 Storage.
- * 둘을 한 목록으로 합치는 이유는 고르는 사람에게 그 구분이 중요하지 않기 때문이다.
- * 어디에 있든 "쓸 수 있는 이미지" 하나일 뿐이다.
+ * 출처는 Storage 하나다. 저장소에 커밋된 public/thumbnails·public/images 를
+ * 같이 훑던 시절이 있었는데, 서버 코드가 public/ 을 fs 로 읽으면 Next 가 그 폴더를
+ * 통째로 함수 번들에 싣는다 — 그게 배포마다 쌓여 Vercel Function Storage 를 먹었다.
+ * 글 이미지를 다시 public/ 에 두지 않는다 (next.config 의 outputFileTracingExcludes 가 안전망).
  *
- * 쓰임은 본문과 썸네일을 한 덩어리로 붙여 놓고 문자열 포함으로 찾는다.
- * 정규식으로 주소를 파싱하지 않는 이유는 두 출처의 주소 모양이 다르고
- * (절대 URL / 루트 경로), 마크다운·HTML·프론트매터 어디에 있든 걸려야 하기 때문이다.
+ * 쓰임은 본문과 썸네일을 문자열 포함으로 찾는다. 정규식으로 주소를 파싱하지 않는 이유는
+ * 마크다운·HTML·프론트매터 어디에 있든 걸려야 하기 때문이다.
  */
 export async function listImageLibrary(): Promise<LibraryImage[]> {
     const posts = await prisma.post.findMany({
@@ -210,29 +190,11 @@ export async function listImageLibrary(): Promise<LibraryImage[]> {
             // 마지막 조각만 보여준다. 지금은 uuid 라 읽히지 않지만
             // 아래 "사용 중" 표시가 어느 글의 것인지 알려준다.
             name: object.path.split("/").pop() ?? object.path,
-            source: "storage",
             size: object.size,
             createdAt: object.createdAt.toISOString(),
             // 주소 전체가 아니라 버킷 안 경로로 찾는다. 프로젝트 주소가 바뀌어도 걸린다.
             ...usersOf(object.path),
         });
-    }
-
-    // 저장소 파일은 배포본에도 그대로 있으므로 목록에서 빠지면 안 된다
-    for (const { dir, url: urlBase } of STATIC_DIRS) {
-        for (const relative of listStaticFiles(dir)) {
-            const url = urlBase + "/" + relative;
-            const stats = statSync(join(dir, relative));
-            images.push({
-                url,
-                // 글 폴더가 있으면 그것까지 보여준다 (blog-development-4/editor.jpg)
-                name: relative,
-                source: "static",
-                size: stats.size,
-                createdAt: stats.mtime.toISOString(),
-                ...usersOf(url),
-            });
-        }
     }
 
     // 최근에 올린 것을 먼저 본다
@@ -243,21 +205,4 @@ export async function listImageLibrary(): Promise<LibraryImage[]> {
 function publicUrlOf(path: string): string {
     const supabase = createStorageClient();
     return supabase.storage.from(POST_IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
-}
-
-/**
- * public/ 아래의 이미지 파일을 폴더 기준 상대 경로로 돌려준다.
- *
- * 폴더가 없는 환경(예: 일부 CI)에서는 조용히 건너뛴다.
- * 이미지 목록이 비는 것과 화면이 죽는 것 중에는 전자가 낫다.
- */
-function listStaticFiles(dir: string): string[] {
-    try {
-        return readdirSync(dir, { recursive: true, encoding: "utf8" })
-            .filter((entry) => IMAGE_FILE.test(entry))
-            // Windows 는 구분자가 역슬래시라 그대로 주소에 쓰면 깨진다
-            .map((entry) => entry.split(sep).join("/"));
-    } catch {
-        return [];
-    }
 }

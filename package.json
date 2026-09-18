@@ -18,6 +18,7 @@
         "backup:posts": "tsx scripts/backup-posts.mts",
         "draft:post": "tsx scripts/draft-post.mts",
         "migrate:images": "tsx scripts/migrate-images.mts",
+        "migrate:public-images": "tsx scripts/migrate-public-images.mts",
         "lint:fix": "eslint . --fix",
         "make:og": "tsx scripts/make-og-image.mts",
         "revalidate": "tsx scripts/revalidate.mts"

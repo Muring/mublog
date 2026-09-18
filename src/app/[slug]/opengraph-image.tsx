@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { getPostBySlug } from "@/lib/posts";
 import { SITE_NAME } from "@/app/shared-metadata";
+import { SITE_URL } from "@/lib/site";
 
 export const alt = "글 미리보기 카드";
 export const size = { width: 1200, height: 630 };
@@ -11,26 +12,26 @@ export const revalidate = 3600;
 
 /*
  * 글꼴은 assets/fonts 의 TTF 다. public/fonts 의 woff2 는 satori 가 못 읽는다.
- * process.cwd() 기준으로 읽어야 Next 가 서버리스 번들에 파일을 같이 싣는다.
+ * process.cwd() 기준의 고정 경로로 읽어야 Next 가 서버리스 번들에 그 두 파일만 싣는다.
+ *
+ * 여기 말고는 서버에서 fs 로 파일을 읽지 않는다. 경로에 변수가 섞이면 Next 는 그 폴더를
+ * 통째로 번들에 넣는다 — public/ 을 그렇게 읽다가 19MB 가 배포마다 쌓여
+ * Vercel Function Storage 상한을 건드렸다.
  */
 const fontsDir = join(process.cwd(), "assets", "fonts");
 const bold = readFile(join(fontsDir, "NanumSquareNeo-Bold.ttf"));
 const regular = readFile(join(fontsDir, "NanumSquareNeo-Regular.ttf"));
 
 /**
- * 썸네일을 data URI 로 만든다. satori 는 상대경로를 못 읽고, 절대 URL 은
- * 생성 시점에 사이트 자신을 다시 호출하게 되므로 파일을 직접 읽는다.
- * 원격(Supabase)이면 받아온다. 실패하면 없는 것으로 친다 — 카드가 깨지는 것보다 낫다.
+ * 썸네일을 data URI 로 만든다. satori 는 상대경로를 못 읽으므로 받아와서 넣는다.
+ * 글 썸네일은 전부 Storage 에 있다. 루트 경로가 오면 사이트 주소를 붙여 CDN 에서 받는다 —
+ * 정적 파일이라 함수를 다시 부르지 않고, public/ 을 fs 로 읽지 않는다(위 주석).
+ * 실패하면 없는 것으로 친다 — 카드가 깨지는 것보다 낫다.
  */
 async function thumbnailDataUri(thumbnail: string | null): Promise<string | null> {
     if (!thumbnail || thumbnail.endsWith(".svg")) return null;
     try {
-        if (thumbnail.startsWith("/")) {
-            const buffer = await readFile(join(process.cwd(), "public", thumbnail));
-            const type = thumbnail.endsWith(".png") ? "image/png" : "image/jpeg";
-            return `data:${type};base64,${buffer.toString("base64")}`;
-        }
-        const response = await fetch(thumbnail);
+        const response = await fetch(thumbnail.startsWith("/") ? SITE_URL + thumbnail : thumbnail);
         if (!response.ok) return null;
         const type = response.headers.get("content-type") ?? "image/jpeg";
         const buffer = Buffer.from(await response.arrayBuffer());

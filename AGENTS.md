@@ -97,6 +97,14 @@ styled 는 태그가 안 보여서 밟기 쉽다 — 공용 조각은 `span` + `
 해당하는 곳은 `stats.ts` 의 `recordPostView` 와 `comments.ts` 의 카운트 증감 두 곳이고,
 관리 목록의 수정일 열이 이 사실에 기대고 있다. 되돌려도 오류는 나지 않는다 — 값만 조용히 틀린다.
 
+### 서버에서 `public/` 을 읽지 않는다
+
+`public/` 은 CDN 이 주는 정적 파일이다. 서버 코드가 `fs` 로 읽으면 — 경로에 변수가 섞이면 —
+Next 트레이서가 그 폴더를 **통째로 함수 번들에 싣는다.** 그게 배포마다 쌓여 Vercel Function
+Storage(Hobby 10GB, 월별이 아니라 누적) 의 75% 를 채웠다. 글 이미지는 전부 Supabase Storage 에
+두고, 서버가 파일을 읽는 곳은 `opengraph-image` 의 고정 경로 글꼴 둘뿐이다.
+`next.config.js` 의 `outputFileTracingExcludes` 가 안전망이지만 그 줄을 지우면 조용히 되돌아간다.
+
 ### DB 접속
 
 Prisma 7은 접속 URL을 스키마가 아니라 `prisma.config.ts`에 둔다.
@@ -182,6 +190,11 @@ OS 설정을 보면 사용자가 고른 테마와 어긋난다 — 라이트를 
 
 배포는 `main` 에 병합해 push 하면 Vercel 이 한다. 기다릴 때는 `/wait-deploy`(`$wait-deploy`) 로
 `Vercel` 상태와 대상 커밋을 지정하고, 끝나면 그 배포 URL 에서 화면을 확인한다.
+
+**`backup/`·`output/`·`*.md` 만 바뀐 push 는 배포되지 않는다** — `vercel.json` 의 `ignoreCommand` 가
+직전 배포 커밋과 비교해 빌드를 취소한다(배포 목록에 `Canceled` 로 남는다. 고장이 아니다).
+배포마다 함수 번들이 저장되므로 문서 커밋까지 배포하면 Function Storage 만 축낸다.
+런타임이 읽는 폴더를 그 제외 목록에 넣으면 안 된다.
 
 `yarn build`는 `prisma generate && eslint . && next build`다.
 Vercel이 이 스크립트를 그대로 돌리므로 **lint 오류는 배포를 막는다**(경고는 막지 않는다).

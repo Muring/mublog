@@ -316,6 +316,13 @@ URL만 정규식으로 분리해 `<a rel="nofollow ugc noopener noreferrer">` **
 `/api/admin/upload` 하나만 두어 `requireAdminApi`가 유일한 관문이 되게 했습니다.
 secret key는 서버에서만 쓰이며 버킷에는 insert 정책이 없습니다.
 
+**글 이미지는 전부 Storage 에 있습니다.** 처음 이전한 글의 이미지가 `public/images`·`public/thumbnails` 에
+남아 있었는데, `opengraph-image` 가 그 폴더를 `fs` 로 읽는 바람에 Next 가 `public/` 19MB 를 통째로
+서버리스 함수 번들에 실었고, 그것이 배포마다 쌓여 Vercel Function Storage 상한(Hobby 10GB, 누적)을
+건드렸습니다. `scripts/migrate-public-images.mts` 로 Storage 에 올려 본문·썸네일 주소를 바꿨고,
+`public/` 에는 포트폴리오 스크린샷과 기본 SVG 만 남았습니다. `next.config.js` 의
+`outputFileTracingExcludes` 가 `public/` 을 함수 번들에서 제외합니다.
+
 ### 집계 방식
 
 | 지표          | 기준                                                             |
@@ -741,6 +748,11 @@ $ yarn dev
 <br>
 
 ## ⏰ 자동화
+
+`vercel.json` 의 `ignoreCommand` 는 `backup/`·`output/`·`*.md` 만 바뀐 push 의 빌드를 취소합니다.
+배포마다 함수 번들이 저장되므로(Function Storage), 문서·백업 커밋까지 배포하면 저장소만 축납니다.
+그런 push 는 배포 목록에 `Canceled` 로 남습니다 — 고장이 아닙니다.
+
 
 `vercel.json`의 cron이 하루 한 번(`0 3 * * *`) 도는 동안 두 가지를 처리합니다.
 

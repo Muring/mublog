@@ -1,6 +1,9 @@
 {
     "$schema": "https://openapi.vercel.sh/vercel.json",
-    "regions": ["icn1"],
+    "regions": [
+        "icn1"
+    ],
+    "ignoreCommand": "git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- . ':!backup' ':!output' ':!*.md'",
     "crons": [
         {
             "path": "/api/cron/daily",
