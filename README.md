@@ -585,6 +585,8 @@ prisma/
 
 scripts/                  # 일회성·운영 스크립트 (tsx 로 실행)
 backup/posts/             # DB 내보내기 백업 (앱은 읽지 않음)
+assets/fonts/             # og 카드용 TTF (public/fonts 의 woff2 는 satori 가 못 읽는다)
+public/                   # CDN 이 주는 정적 파일. 포트폴리오 스크린샷·글꼴·아이콘·기본 SVG (글 이미지는 Storage)
 
 src/
 ├── app/
@@ -641,7 +643,6 @@ src/
 │   └── prism-notion-theme.css
 ├── types/                # post.ts / comment.ts
 ├── data/                 # about · portfolio 정적 데이터 (portfolio-images.json 은 이미지 치수)
-assets/fonts/             # og 카드용 TTF (public/fonts 의 woff2 는 satori 가 못 읽는다)
 └── proxy.ts              # 세션 갱신 · /admin 가드
 ```
 
