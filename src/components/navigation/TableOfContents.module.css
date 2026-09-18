@@ -11,9 +11,11 @@
     background: var(--background);
     font-size: 12px;
 }
-.navigationTitle {
+/* 포스트에서는 본문 Article 안에 놓여 그쪽의 p·li·a 태그 규칙(여백·불릿·링크색·밑줄)을 물려받는다.
+   아래 제목·항목·링크 규칙은 그보다 높은 우선순위로 그 값들을 되돌린다. */
+.navigation .navigationTitle {
     display: none;
-    margin-bottom: 10px;
+    margin: 0 0 10px;
     font-weight: 800;
     text-align: center;
 }
@@ -64,6 +66,11 @@
     padding: 0;
     margin: 0;
 }
+.navigation .navigationList li {
+    margin-left: 0;
+    font-size: inherit;
+    list-style: none;
+}
 /* 상위는 본문색·굵게, 하위는 보조색·가늘게로 나누고, 하위 묶음은 안쪽 레일로 한 번 더 감싼다.
    현재 위치 마커는 그 항목에서 가장 가까운 레일 위에 붙는다. */
 .navigation > .navigationList {
@@ -72,7 +79,7 @@
 .navigation > .navigationList > li + li {
     margin-top: 6px;
 }
-.navigationList a {
+.navigation .navigationList a {
     position: relative;
     display: block;
     padding: 4px 6px 4px 12px;
@@ -95,11 +102,12 @@
     background: transparent;
     transition: background-color 150ms ease, border-color 150ms ease;
 }
-.navigationList a:hover {
+.navigation .navigationList a:hover {
     color: var(--linkhovercolor);
+    text-decoration: none;
 }
 /* 강조는 색과 마커로만 한다. 굵기를 바꾸면 글자 폭이 늘어 줄이 다시 접힌다. */
-.navigationList a[aria-current="location"] {
+.navigation .navigationList a[aria-current="location"] {
     color: var(--linkhovercolor);
 }
 .navigationList a[aria-current="location"]::before {
@@ -112,19 +120,20 @@
 .navigationList .navigationList li + li {
     margin-top: 3px;
 }
-.navigationList .navigationList a {
+.navigation .navigationList .navigationList a {
     padding: 3px 6px 3px 10px;
     font-size: 11px;
     font-weight: 400;
     color: var(--portfolio-description);
 }
 /* 위 규칙이 같은 우선순위로 뒤에 오므로, 하위의 현재·호버 색을 다시 명시해야 한다. */
-.navigationList .navigationList a:hover,
-.navigationList .navigationList a[aria-current="location"] {
+.navigation .navigationList .navigationList a:hover,
+.navigation .navigationList .navigationList a[aria-current="location"] {
     color: var(--linkhovercolor);
 }
-.navigationTop {
+.navigation .navigationTop {
     display: none;
+    color: var(--foreground);
     margin-top: 12px;
     padding: 10px 8px 4px;
     text-align: center;
@@ -133,9 +142,10 @@
     text-underline-offset: 4px;
     transition: color 150ms ease, border-color 150ms ease;
 }
-.navigationTop:hover,
-.navigationTop:focus-visible {
+.navigation .navigationTop:hover,
+.navigation .navigationTop:focus-visible {
     color: var(--linkhovercolor);
+    text-decoration: underline;
 }
 .navigation a:focus-visible {
     outline: 2px solid var(--linkhovercolor);

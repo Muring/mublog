@@ -1,7 +1,6 @@
+/* Article 안, 구분선과 본문 사이에 놓인다. 폭·여백은 Article 이 잡는다. */
 .postNavigation {
-    max-width: 900px;
-    margin: 80px auto 0;
-    padding: 0 16px;
+    margin: 0 0 2rem;
 }
 @media (min-width: 1400px) {
     .postNavigation {
@@ -10,7 +9,6 @@
         left: calc(50% + 470px);
         width: 210px;
         margin: 0;
-        padding: 0;
         z-index: 10;
     }
     /* 고정 패널: 접기 대신 제목·맨 위로를 보이고, 목차 자체가 스크롤한다. */

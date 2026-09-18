@@ -25,7 +25,6 @@ export default function PostContent({ title, date, slug, viewCount, description,
 
     return (
         <>
-            <PostNavigation key={slug} html={html} />
             <CodeBlockTools html={html} />
             <ImageLightbox title={title} html={html} />
             <Article id="post-top">
@@ -66,6 +65,7 @@ export default function PostContent({ title, date, slug, viewCount, description,
                     </div>
                 </div>
                 <hr />
+                <PostNavigation key={slug} html={html} />
                 <div id="post-body" dangerouslySetInnerHTML={{ __html: html }} />
             </Article>
         </>
