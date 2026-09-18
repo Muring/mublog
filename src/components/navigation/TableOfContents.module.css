@@ -1,7 +1,8 @@
+/* 기본은 좁은 화면의 인라인 배치다 — 접힌 한 줄 바(토글)만 보이고, 펼치면 페이지 흐름 안에
+   그대로 늘어난다. 내부 스크롤·최대 높이를 여기 두면 본문 위에서 휠이 페이지 대신 목차에 먹히므로
+   그 값들과 고정 패널 전용 요소(제목·맨 위로)는 감싸는 쪽(PostNavigation·portfolio)의
+   `position: fixed` 미디어 쿼리가 `[data-toc-*]` 속성으로 켠다. */
 .navigation {
-    max-height: calc(100dvh - 144px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
     line-height: 1.7;
     color: var(--foreground);
     padding: 14px;
@@ -11,9 +12,52 @@
     font-size: 12px;
 }
 .navigationTitle {
+    display: none;
     margin-bottom: 10px;
     font-weight: 800;
     text-align: center;
+}
+.navigationToggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-weight: 800;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: color 150ms ease;
+}
+.navigationToggle::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    margin-right: 4px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform 150ms ease;
+}
+.navigationToggle[aria-expanded="true"]::after {
+    transform: translateY(2px) rotate(225deg);
+}
+.navigationToggle:hover,
+.navigationToggle:focus-visible {
+    color: var(--linkhovercolor);
+}
+.navigationToggle:focus-visible {
+    outline: 2px solid var(--linkhovercolor);
+    outline-offset: 4px;
+    border-radius: 3px;
+}
+.navigationBody {
+    margin-top: 10px;
+}
+.navigationBody[data-collapsed] {
+    display: none;
 }
 .navigationList {
     list-style: none;
@@ -80,7 +124,7 @@
     color: var(--linkhovercolor);
 }
 .navigationTop {
-    display: block;
+    display: none;
     margin-top: 12px;
     padding: 10px 8px 4px;
     text-align: center;

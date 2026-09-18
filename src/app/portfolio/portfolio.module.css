@@ -51,11 +51,25 @@
         top: 112px;
         left: calc(50% + 570px);
         width: 180px;
+        margin-top: 0;
+        z-index: 10;
+    }
+    /* 고정 패널: 접기 대신 제목·맨 위로를 보이고, 목차 자체가 스크롤한다. */
+    .portfolioNavigation [data-toc] {
         max-height: calc(100dvh - 144px);
         overflow-y: auto;
         overscroll-behavior: contain;
+    }
+    .portfolioNavigation [data-toc-title],
+    .portfolioNavigation [data-toc] [data-toc-body],
+    .portfolioNavigation [data-toc] [data-toc-top] {
+        display: block;
+    }
+    .portfolioNavigation [data-toc-toggle] {
+        display: none;
+    }
+    .portfolioNavigation [data-toc-body] {
         margin-top: 0;
-        z-index: 10;
     }
 }
 .eyebrow {

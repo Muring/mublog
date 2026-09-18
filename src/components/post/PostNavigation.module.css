@@ -1,5 +1,5 @@
 .postNavigation {
-    max-width: 868px;
+    max-width: 900px;
     margin: 80px auto 0;
     padding: 0 16px;
 }
@@ -12,5 +12,22 @@
         margin: 0;
         padding: 0;
         z-index: 10;
+    }
+    /* 고정 패널: 접기 대신 제목·맨 위로를 보이고, 목차 자체가 스크롤한다. */
+    .postNavigation [data-toc] {
+        max-height: calc(100dvh - 144px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .postNavigation [data-toc-title],
+    .postNavigation [data-toc] [data-toc-body],
+    .postNavigation [data-toc] [data-toc-top] {
+        display: block;
+    }
+    .postNavigation [data-toc-toggle] {
+        display: none;
+    }
+    .postNavigation [data-toc-body] {
+        margin-top: 0;
     }
 }

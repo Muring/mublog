@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
 import styles from "./TableOfContents.module.css";
 
 export type NavigationItem = {
@@ -19,6 +19,9 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
     label?: string;
 }) {
     const [activeId, setActiveId] = useState(items[0]?.id ?? "");
+    // 좁은 화면(인라인 배치)에서만 의미 있는 접힘 상태. 고정 패널 모드에서는 CSS 가 무시한다.
+    const [open, setOpen] = useState(false);
+    const bodyId = useId();
     const navigationRef = useRef<HTMLElement>(null);
     const clickedTarget = useRef<string | null>(null);
 
@@ -83,7 +86,7 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
     useEffect(() => {
         const nav = navigationRef.current;
         const active = nav?.querySelector<HTMLElement>('[aria-current="location"]');
-        if (!nav || !active) return;
+        if (!nav || !active || nav.scrollHeight <= nav.clientHeight) return;
         const container = nav.getBoundingClientRect();
         const link = active.getBoundingClientRect();
         if (link.top < container.top || link.bottom > container.bottom) {
@@ -95,6 +98,7 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
         if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
         clickedTarget.current = id;
         setActiveId(id);
+        setOpen(false);
     };
 
     const renderItems = (entries: NavigationItem[]) => (
@@ -115,10 +119,22 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
     );
 
     return (
-        <nav ref={navigationRef} className={styles.navigation} aria-label={label}>
-            <p className={styles.navigationTitle}>목차</p>
-            {renderItems(items)}
-            <a className={styles.navigationTop} href={`#${topId}`} onClick={(event) => handleNavigation(event, topId)}>맨 위로</a>
+        <nav ref={navigationRef} className={styles.navigation} aria-label={label} data-toc>
+            <p className={styles.navigationTitle} data-toc-title>목차</p>
+            <button
+                type="button"
+                className={styles.navigationToggle}
+                data-toc-toggle
+                aria-expanded={open}
+                aria-controls={bodyId}
+                onClick={() => setOpen((value) => !value)}
+            >
+                목차
+            </button>
+            <div id={bodyId} className={styles.navigationBody} data-toc-body data-collapsed={open ? undefined : ""}>
+                {renderItems(items)}
+                <a className={styles.navigationTop} data-toc-top href={`#${topId}`} onClick={(event) => handleNavigation(event, topId)}>맨 위로</a>
+            </div>
         </nav>
     );
 }
