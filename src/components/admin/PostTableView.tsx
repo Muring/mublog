@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { filterAdminPosts, postListState, postListUrl, type PostSort, type PostStatusFilter } from "@/lib/admin-navigation";
-import { PostTable, TableScroll } from "./Admin.styled";
+import { PostTable, AdminListScroll } from "./Admin.styled";
 import PostTableRow from "./PostTableRow";
 import PostTableHead from "./PostTableHead";
 import PostTableToolbar from "./PostTableToolbar";
@@ -48,7 +48,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                 counts={{ all: matching.length, PUBLISHED: matching.filter(p => p.status === "PUBLISHED").length, DRAFT: matching.filter(p => p.status === "DRAFT").length }} />
 
             {/* 표만 스크롤한다. 머리글은 sticky 라 스크롤해도 열 이름이 남는다 */}
-            <TableScroll>
+            <AdminListScroll>
                 <PostTable>
                     <PostTableHead />
                     <tbody>
@@ -59,7 +59,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                 </PostTable>
 
                 {filtered.length === 0 && <p className="empty">찾는 글이 없습니다.</p>}
-            </TableScroll>
+            </AdminListScroll>
         </>
     );
 }

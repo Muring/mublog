@@ -150,7 +150,8 @@ function absolute(iso: string) {
 
 export const CompactList = styled(CommentList)`
     && {
-    margin-top: 8px;
+    /* 삭제 표시와 키보드 포커스 테두리가 스크롤 경계에서 잘리지 않게 여백을 둔다. */
+    margin: 8px 10px 0;
     > li { padding: 0; }
     .root { padding: 10px 0; gap: 10px; }
     .avatar-col { width: 28px; }

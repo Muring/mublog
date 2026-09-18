@@ -459,15 +459,16 @@ export const Button = styled.button`
 `;
 
 /**
- * 표만 스크롤한다.
+ * 포스트·댓글의 실제 목록과 로딩 목록이 함께 쓰는 스크롤 경계.
  *
  * 페이지 전체를 스크롤하면 통계와 차트가 위로 밀려 나가고, 목록 끝에서 다시
- * 올라와야 한다. 표에 높이를 주고 그 안에서만 굴리면 화면 구성이 그대로 남는다.
+ * 올라와야 한다. 목록에 높이를 주고 그 안에서만 굴리면 화면 구성이 그대로 남는다.
+ * 필터·개수 요약·페이지 이동은 밖에 두며, 카드 모드에서도 높이 제한을 유지한다.
  *
  * 높이는 뷰포트 기준이다. 픽셀로 고정하면 큰 화면에서 남는 자리를 못 쓰고
  * 작은 화면에서는 넘친다.
  */
-export const TableScroll = styled.div`
+export const AdminListScroll = styled.div`
   max-height: min(60vh, 40rem);
   overflow-y: auto;
 

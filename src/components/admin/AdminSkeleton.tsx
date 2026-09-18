@@ -12,7 +12,7 @@ import { ChartCard } from "./VisitorChart.styled";
 import { CompactList } from "./AdminCommentList";
 import { CommentRow } from "@/components/comments/Comments.styled";
 import styles from "./Management.module.css";
-import { AdminWrapper, PostTable, TableScroll, TableToolbar, Button, Skeleton } from "./Admin.styled";
+import { AdminWrapper, PostTable, AdminListScroll, TableToolbar, Button, Skeleton } from "./Admin.styled";
 
 /** 관리 탭 사이에서 유지되는 공통 프레임. 페이지 로딩은 children 내부만 교체한다. */
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -103,7 +103,7 @@ export default function AdminSkeleton() {
                     </summary>
                 </ChartCard>
                 <PostTableToolbar loading state={{ q: "", status: "all", sort: "newest" }} counts={{ all: 0, PUBLISHED: 0, DRAFT: 0 }} onChange={() => {}} />
-                <TableScroll><PostTableSkeleton /></TableScroll>
+                <AdminListScroll><PostTableSkeleton /></AdminListScroll>
             </div>
         </div>
     );
@@ -116,23 +116,25 @@ export function AdminCommentsSkeleton() {
             <div aria-hidden inert>
                 <CommentToolbarSkeleton />
                 <p className={styles.summary}><Skeleton style={{ width: "13rem", height: "1.45rem" }} /></p>
-                <CompactList>
-                    {Array.from({ length: 6 }, (_, i) => (
-                        <li key={i}>
-                            <CommentRow className="root">
-                                <div className="avatar-col"><Skeleton className="avatar" style={{ borderRadius: "50%" }} /></div>
-                                <div className="content">
-                                    <div className="meta">
-                                        <Skeleton style={{ width: "4rem", height: "1rem" }} />
-                                        <Skeleton style={{ width: "3rem", height: "0.8rem" }} />
-                                        <Skeleton style={{ width: "min(12rem, 40%)", height: "1rem" }} />
+                <AdminListScroll>
+                    <CompactList>
+                        {Array.from({ length: 6 }, (_, i) => (
+                            <li key={i}>
+                                <CommentRow className="root">
+                                    <div className="avatar-col"><Skeleton className="avatar" style={{ borderRadius: "50%" }} /></div>
+                                    <div className="content">
+                                        <div className="meta">
+                                            <Skeleton style={{ width: "4rem", height: "1rem" }} />
+                                            <Skeleton style={{ width: "3rem", height: "0.8rem" }} />
+                                            <Skeleton style={{ width: "min(12rem, 40%)", height: "1rem" }} />
+                                        </div>
+                                        <p className="body"><Skeleton style={{ width: i % 2 ? "65%" : "85%", height: "1.4rem" }} /></p>
                                     </div>
-                                    <p className="body"><Skeleton style={{ width: i % 2 ? "65%" : "85%", height: "1.4rem" }} /></p>
-                                </div>
-                            </CommentRow>
-                        </li>
-                    ))}
-                </CompactList>
+                                </CommentRow>
+                            </li>
+                        ))}
+                    </CompactList>
+                </AdminListScroll>
                 <div className={styles.pagination}>
                     <span><TextSkeleton width="2em" /></span><span><TextSkeleton width="3em" /></span><span><TextSkeleton width="2em" /></span>
                 </div>

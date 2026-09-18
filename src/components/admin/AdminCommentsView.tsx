@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { getCommentsForAdmin } from "@/lib/comments";
 import { commentListUrl } from "@/lib/admin-navigation";
+import { AdminListScroll } from "./Admin.styled";
 import AdminCommentList from "./AdminCommentList";
 import CommentFilters from "./CommentFilters";
 import styles from "./Management.module.css";
@@ -19,7 +20,9 @@ export default function AdminCommentsView({ result, status, postSlug, authorId, 
         <>
             <CommentFilters post={postSlug} author={authorId} status={status} counts={result.counts} returnTo={returnTo} options={result.options}>
                 <p className={styles.summary}>{total === 0 ? "0개" : `${total.toLocaleString('ko-KR')}개 중 ${result.skip + 1}–${result.skip + result.comments.length}개 표시`} · 최신순</p>
-                {result.comments.length ? <AdminCommentList comments={result.comments} /> : <p className={styles.compact}>해당 조건의 댓글이 없습니다.</p>}
+                <AdminListScroll key={`${postSlug ?? ""}:${authorId ?? ""}:${status}:${result.page}`}>
+                    {result.comments.length ? <AdminCommentList comments={result.comments} /> : <p className={styles.compact}>해당 조건의 댓글이 없습니다.</p>}
+                </AdminListScroll>
             </CommentFilters>
             <nav className={styles.pagination} aria-label="댓글 페이지">
                 {result.page > 1 ? <Link href={href({ page: result.page - 1 })}>이전</Link> : <span aria-disabled="true">이전</span>}
