@@ -515,12 +515,6 @@ export const TableScroll = styled.div`
     font-size: 0.85rem;
     color: var(--desccolor);
   }
-
-  /* 좁은 화면에서는 행이 카드로 바뀌어 세로로 길어지므로 높이를 풀어준다 */
-  @container admin (max-width: 560px) {
-    max-height: none;
-    overflow-y: visible;
-  }
 `;
 
 /** 검색 줄. 표 바로 위에 두어 무엇을 거르는지 분명히 한다 */
