@@ -2,11 +2,15 @@
  * 임의 위치의 mdx 파일 하나를 DB 에 초안(DRAFT)으로 등록한다.
  *
  *   yarn draft:post <파일경로>            등록
- *   yarn draft:post <파일경로> --dry-run  검사만
+ *   yarn draft:post <파일경로> --update   같은 slug 의 기존 초안을 이 파일로 갱신
+ *   yarn draft:post <파일경로> --dry-run  검사만 (--update 와 같이 쓸 수 있다)
  *
  * migrate:posts 와 달리 upsert 가 아니라 create 다. slug 가 이미 있으면 실패한다.
  * 다른 프로젝트에서 /blog-draft 로 만든 초안을 넣는 통로라, 남의 글을 조용히
  * 덮어쓰는 일이 절대 없어야 하기 때문이다.
+ *
+ * --update 는 그 예외가 아니라 같은 원칙의 연장이다. 대상이 없거나 DRAFT 가 아니면
+ * 실패한다 — 발행된 글은 에디터에서만 고친다. status 와 publishedAt 은 건드리지 않는다.
  *
  * backup/posts 에는 쓰지 않는다. 등록 후 `yarn backup:posts` 가 DB 를 보고
  * 정규 형식으로 내보내므로, 두 곳에서 형식을 만들면 매번 diff 가 난다.
@@ -30,10 +34,11 @@ const { slugSchema } = await import("../src/lib/validation");
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
+const update = args.includes("--update");
 const file = args.find((a) => !a.startsWith("--"));
 
 if (!file) {
-    console.error("사용법: yarn draft:post <파일경로> [--dry-run]");
+    console.error("사용법: yarn draft:post <파일경로> [--update] [--dry-run]");
     process.exit(1);
 }
 
@@ -65,11 +70,18 @@ async function main(path: string) {
 
     const existing = await prisma.post.findUnique({
         where: { slug },
-        select: { status: true },
+        select: { id: true, status: true, contentMd: true },
     });
-    if (existing) {
+    if (update) {
+        if (!existing) {
+            throw new Error(`slug '${slug}' 가 없습니다. --update 를 빼고 새로 등록하세요.`);
+        }
+        if (existing.status !== "DRAFT") {
+            throw new Error(`slug '${slug}' 는 ${existing.status} 상태라 갱신하지 않습니다. 에디터에서 고치세요.`);
+        }
+    } else if (existing) {
         throw new Error(
-            `slug '${slug}' 는 이미 있습니다(${existing.status}). 다른 slug 를 쓰거나 에디터에서 고치세요.`
+            `slug '${slug}' 는 이미 있습니다(${existing.status}). 다른 slug 를 쓰거나 --update 로 초안을 갱신하세요.`
         );
     }
 
@@ -77,7 +89,9 @@ async function main(path: string) {
         `  slug   ${slug}\n` +
             `  title  ${fields.title}\n` +
             `  tags   ${tags.join(", ") || "-"}\n` +
-            `  본문   ${body.length.toLocaleString()}자, ${fields.readingTime}분\n`
+            `  본문   ${body.length.toLocaleString()}자, ${fields.readingTime}분` +
+            (update && existing ? ` (기존 ${existing.contentMd.length.toLocaleString()}자)` : "") +
+            "\n"
     );
 
     if (dryRun) {
@@ -85,10 +99,15 @@ async function main(path: string) {
         return;
     }
 
-    const post = await prisma.post.create({ data: fields, select: { id: true } });
+    // 갱신은 status 와 publishedAt 을 빼고 나머지 필드만 다시 쓴다.
+    const { status: _status, ...updatable } = fields;
+    const post =
+        update && existing
+            ? await prisma.post.update({ where: { id: existing.id }, data: updatable, select: { id: true } })
+            : await prisma.post.create({ data: fields, select: { id: true } });
     const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-    console.log(`초안 등록 완료.  ${site}/admin/posts/${post.id}`);
+    console.log(`초안 ${update ? "갱신" : "등록"} 완료.  ${site}/admin/posts/${post.id}`);
     // 초안은 공개 페이지에 안 나오지만 관리 목록·시리즈 다음 순서(getAllSeries)가 캐시를 본다.
     await revalidateDeployment();
     console.log("백업에 반영하려면 mublog 에서 `yarn backup:posts` 후 커밋하세요.");
