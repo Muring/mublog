@@ -55,12 +55,11 @@ export const Article = styled.article`
   table td,
   table th {
     border: var(--border-width) solid var(--bordercolor);
+    padding: 0 0.5rem;
   }
   table th {
     background-color: var(--codefontbgcolor);
-  }
-  table td {
-    padding: 0 0.5rem;
+    text-align: center;
   }
 
   /* 이미지 스타일 */
