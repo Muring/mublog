@@ -20,6 +20,7 @@ import { useScrollStop } from "@/hooks/useScrollStop";
 import { useSlugCheck } from "./useSlugCheck";
 import { useEditorUploads } from "./useEditorUploads";
 import { usePostSave } from "./usePostSave";
+import { usePostDelete } from "./usePostDelete";
 import { useScrollSync } from "./useScrollSync";
 import {
     EditorWrapper,
@@ -139,6 +140,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
     );
 
     const { save, pending, isSaving } = usePostSave(post, postId, setTagError, uploadsPending);
+    const { remove, isDeleting } = usePostDelete(postId, initial.title);
 
     /** 커서 위치에 텍스트를 끼워 넣는다 */
     const insertAtCursor = useCallback((before: string, after = "", placeholder = "") => {
@@ -154,7 +156,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
         });
     }, []);
 
-    const canSave = Boolean(post.title.trim()) && slugState.available !== false && !isSaving && !isUploading;
+    const canSave = Boolean(post.title.trim()) && slugState.available !== false && !isSaving && !isUploading && !isDeleting;
 
     return (
         <EditorWrapper
@@ -170,6 +172,12 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
                 <h2>{postId ? "포스트 수정" : "새 글 쓰기"}</h2>
                 <div className="actions">
                     {isUploading && <span role="status">이미지 업로드 중…</span>}
+                    {/* 저장된 적 있는 글만 지울 수 있다. 새 글은 목록으로 나가면 그만이다. */}
+                    {postId && (
+                        <Button className="quiet-danger" onClick={remove} disabled={isDeleting || isSaving}>
+                            {isDeleting ? "삭제 중..." : "삭제"}
+                        </Button>
+                    )}
                     <Link href="/admin">
                         <Button as="span">목록</Button>
                     </Link>
