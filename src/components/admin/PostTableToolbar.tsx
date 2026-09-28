@@ -37,7 +37,7 @@ export default function PostTableToolbar({ state, counts, onChange, loading = fa
                 onCompositionStart={() => { composing.current = true; }}
                 onCompositionEnd={(event) => { composing.current = false; onChange({ q: event.currentTarget.value }); }}
                 onChange={(event) => { if (!composing.current) onChange({ q: event.currentTarget.value }); }}
-                placeholder="제목 · 주소 · 태그로 거르기" aria-label="포스트 검색" />
+                placeholder="제목 · 주소 · 태그 검색" aria-label="포스트 검색" />
             <Dropdown className="sort-control" label="포스트 정렬" size="control" value={state.sort}
                 options={[{ value: 'newest', label: '최신순' }, { value: 'updated', label: '수정순' }, { value: 'views', label: '조회순' }, { value: 'comments', label: '댓글순' }]}
                 onChange={(value) => onChange({ sort: value as PostSort })} />

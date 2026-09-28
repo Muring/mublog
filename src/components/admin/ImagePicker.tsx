@@ -154,7 +154,7 @@ export default function ImagePicker({ current, onSelect, onClose }: Props) {
                         type="search"
                         value={query}
                         onChange={(event) => setQuery(event.target.value)}
-                        placeholder="파일 이름 · 쓰는 글로 거르기"
+                        placeholder="파일 이름 · 글 제목 검색"
                         aria-label="이미지 검색"
                     />
                     <div className="sources">
