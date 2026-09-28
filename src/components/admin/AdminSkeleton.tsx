@@ -51,6 +51,7 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
                             <span className="slug"><TextSkeleton width="45%" /></span>
                             <div className="compact-tags"><TagChips tags={["\u00a0\u00a0\u00a0\u00a0\u00a0\u00a0"]} /></div>
                             <span className="compact-comments"><TextSkeleton width="6ch" /></span>
+                            <span className="compact-likes"><TextSkeleton width="6ch" /></span>
                         </td>
                         <td data-label="상태">
                             <span className="badge"><TextSkeleton width="2ch" /></span>
@@ -60,6 +61,7 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
                         <td data-label="수정일"><TextSkeleton width="10ch" /></td>
                         <td data-label="누적 조회" className="views-total"><TextSkeleton width="3ch" /></td>
                         <td data-label="댓글"><span className="title-link"><TextSkeleton width="2ch" /></span></td>
+                        <td data-label="좋아요"><TextSkeleton width="2ch" /></td>
                         <td className="actions">
                             <div className="action-buttons">
                                 <span className="row-edit"><TextSkeleton width="2em" /></span>
@@ -136,6 +138,7 @@ export function AdminCommentsSkeleton() {
                                         <div className="meta">
                                             <Skeleton style={{ width: "4rem", height: "1rem" }} />
                                             <Skeleton style={{ width: "3rem", height: "0.8rem" }} />
+                                            <Skeleton style={{ width: "3.5rem", height: "0.8rem" }} />
                                             <Skeleton style={{ width: "min(12rem, 40%)", height: "1rem" }} />
                                         </div>
                                         <p className="body"><Skeleton style={{ width: i % 2 ? "65%" : "85%", height: "1.4rem" }} /></p>

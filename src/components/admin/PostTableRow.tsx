@@ -23,6 +23,7 @@ type Props = {
         updatedAt: string;
         viewCount: number;
         commentCount: number;
+        likeCount: number;
     };
 };
 
@@ -74,6 +75,7 @@ export default function PostTableRow({ post, returnTo }: Props) {
                 <span className="slug">/{post.slug}</span>
                 <div className="compact-tags"><TagChips tags={post.tags} /></div>
                 <Link href={commentsHref} className="compact-comments">댓글 {post.commentCount}개</Link>
+                <span className="compact-likes">좋아요 {post.likeCount.toLocaleString("ko-KR")}개</span>
             </td>
             <td data-label="상태">
                 <span className={`badge ${post.status === "PUBLISHED" ? "published" : "draft"}`}>
@@ -92,6 +94,7 @@ export default function PostTableRow({ post, returnTo }: Props) {
             <td data-label="댓글">
                 <Link href={commentsHref} className="title-link" aria-label={`댓글 ${post.commentCount}개 관리`}>{post.commentCount}</Link>
             </td>
+            <td data-label="좋아요">{post.likeCount.toLocaleString("ko-KR")}</td>
             <td className="actions">
                 <div className="action-buttons">
                     <Link href={`/admin/posts/${post.id}`} className="row-edit">

@@ -144,7 +144,7 @@ export const PostTable = styled.table`
   th:nth-of-type(5) { width: 7.5rem; }  /* 수정일 */
   th:nth-of-type(6) { width: 5rem; }     /* 누적 조회 */
   th:nth-of-type(7) { width: 6rem; }    /* 댓글 */
-  th:nth-of-type(8) { width: 7rem; }  /* 수정·삭제 */
+  th:nth-of-type(9) { width: 7rem; }  /* 수정·삭제 */
 
   .views-total {
     text-align: center;
@@ -155,7 +155,8 @@ export const PostTable = styled.table`
   td:nth-of-type(4),
   td:nth-of-type(5),
   td:nth-of-type(6),
-  td:nth-of-type(7) {
+  td:nth-of-type(7),
+  td:nth-of-type(8) {
     white-space: nowrap;
   }
 
@@ -164,7 +165,8 @@ export const PostTable = styled.table`
    * 카드 모드에서는 td 가 flex 라 justify-content 가 자리를 정하므로 영향이 없다.
    */
   td:nth-of-type(2),
-  td:nth-of-type(7) {
+  td:nth-of-type(7),
+  td:nth-of-type(8) {
     text-align: center;
   }
 
@@ -224,7 +226,7 @@ export const PostTable = styled.table`
     }
   }
 
-  .compact-tags, .compact-comments { display: none; }
+  .compact-tags, .compact-comments, .compact-likes { display: none; }
 
   .slug {
     display: block;
@@ -303,10 +305,15 @@ export const PostTable = styled.table`
    * 좁아진다고 바로 카드로 바꾸지 않는다. 표는 여러 글을 한눈에 훑는 데 유리하므로
    * 먼저 덜 중요한 열부터 접어서 표 모양을 최대한 오래 유지한다.
    *
-   * 접는 순서는 태그 -> 수정일 -> 조회 -> 댓글이다.
+   * 접는 순서는 좋아요 -> 태그 -> 수정일 -> 조회 -> 댓글이다.
    * 태그와 댓글 링크는 열을 접어도 제목 아래에 남긴다.
    * 열을 더하거나 폭을 바꾸면 컨테이너 기준도 함께 조정한다.
    */
+  th:nth-of-type(8) { width: 4.5rem; } /* 좋아요 */
+  @container admin (max-width: 1050px) {
+    th:nth-of-type(8), td:nth-of-type(8) { display: none; }
+    .compact-likes { display: inline-block; margin: 6px 0 0 8px; font-size: 0.8rem; color: var(--desccolor); }
+  }
   @container admin (max-width: 960px) {
     .compact-tags { display: block; font-size: 0.72rem; color: var(--desccolor); margin-top: 4px; }
     th:nth-of-type(3),
@@ -343,7 +350,7 @@ export const PostTable = styled.table`
    * 제 이름표를 달고 나온다.
    */
   @container admin (max-width: 560px) {
-    .compact-tags, .compact-comments { display: none; }
+    .compact-tags, .compact-comments, .compact-likes { display: none; }
     display: block;
     table-layout: auto;
 
@@ -361,7 +368,8 @@ export const PostTable = styled.table`
     td:nth-of-type(3),
     td:nth-of-type(5),
     td:nth-of-type(6),
-    td:nth-of-type(7) {
+    td:nth-of-type(7),
+    td:nth-of-type(8) {
       display: flex;
     }
 

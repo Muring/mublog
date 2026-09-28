@@ -100,6 +100,26 @@
         "yarn.lock"
       ],
       "timeout": 120
+    },
+    {
+      "name": "likes",
+      "command": [
+        "yarn",
+        "exec",
+        "tsx",
+        "scripts/verify-likes.mts"
+      ],
+      "paths": [
+        "src/lib/likes.ts",
+        "src/lib/like-api.ts",
+        "src/hooks/useLike.ts",
+        "src/components/likes/*",
+        "src/providers/AuthQuerySync.tsx",
+        "src/app/api/*/likes/*",
+        "prisma/*",
+        "scripts/verify-likes.mts"
+      ],
+      "timeout": 120
     }
   ]
 }

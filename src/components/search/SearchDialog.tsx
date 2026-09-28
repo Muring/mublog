@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchSearch, queryKeys } from "@/lib/queries";
 import { formatPostDate } from "@/lib/date";
 import { SearchOverlay, SearchPanel } from "./Search.styled";
+import PostLikeCount from "@/components/likes/PostLikeCount";
 import SearchIcon from "./SearchIcon";
 import Highlight from "./Highlight";
 
@@ -173,6 +174,7 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
                                     )}
                                     <span className="hit-meta">
                                         <span>{formatPostDate(hit.publishedAt)}</span>
+                                        <PostLikeCount slug={hit.slug} />
                                         {hit.tags.map((tag) => (
                                             <span key={tag}>{tag}</span>
                                         ))}

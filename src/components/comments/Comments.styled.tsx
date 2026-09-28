@@ -266,14 +266,8 @@ export const CommentRow = styled.div`
         display: flex;
         gap: 0.75rem;
         margin-top: 0.35rem;
-        /* 평소에는 물러나 있다가 해당 댓글에 다가가면 또렷해진다 */
-        opacity: 0.55;
-        transition: opacity 0.15s ease-in-out;
-    }
-
-    &:hover .row-actions,
-    &:focus-within .row-actions {
-        opacity: 1;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
     .row-action {

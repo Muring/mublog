@@ -20,6 +20,7 @@ type Row = {
     /** 발행 후 누적 조회수 */
     viewCount: number;
     commentCount: number;
+    likeCount: number;
 };
 
 /**

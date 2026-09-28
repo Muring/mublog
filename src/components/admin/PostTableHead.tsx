@@ -5,7 +5,7 @@ export default function PostTableHead({ loading = false }: { loading?: boolean }
     return (
         <thead>
             <tr>
-                {["제목", "상태", "태그", "발행일", "수정일", "누적 조회", "댓글", ""].map((label, index) => (
+                {["제목", "상태", "태그", "발행일", "수정일", "누적 조회", "댓글", "좋아요", ""].map((label, index) => (
                     <th key={index}>{loading && label ? <Skeleton style={{ display: "inline-block", width: `${label.length}em`, maxWidth: "100%", height: ".8em", verticalAlign: "middle", backgroundColor: "var(--bordercolor)" }} /> : label}</th>
                 ))}
             </tr>

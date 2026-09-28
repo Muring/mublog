@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import PostLikeCount from "@/components/likes/PostLikeCount";
 import Card from "./PostCard.styled";
 import TagChips from "@/components/ui/TagChips";
 import type { PostSummary } from "@/types/post";
@@ -109,6 +110,7 @@ export default function PostCard({
                             <CommentIcon />
                             {post.commentCount.toLocaleString("ko-KR")}
                         </span>
+                        <PostLikeCount slug={post.slug} />
                     </div>
                 </Card.Meta>
             </Card.Body>

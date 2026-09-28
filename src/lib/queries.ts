@@ -28,6 +28,8 @@ export type SiteStats = { today: number; total: number };
 
 export const queryKeys = {
     me: ["me"] as const,
+    likes: (slug: string, userId: string | null) => ["likes", slug, userId] as const,
+    postLikeCounts: ["post-like-counts"] as const,
     siteStats: ["site-stats"] as const,
     postsSummary: ["posts", "summary"] as const,
     postViews: (slug: string) => ["post-views", slug] as const,
@@ -83,4 +85,12 @@ export function commentsUrl(slug: string): string {
 export async function fetchSearch(q: string): Promise<SearchHit[]> {
     const data = await fetchJson<{ results: SearchHit[] }>(`/api/posts/search?q=${encodeURIComponent(q)}`);
     return data.results;
+}
+
+export function fetchPostLikeCounts(): Promise<Record<string, number>> {
+    return fetchJson<Record<string, number>>("/api/posts/likes");
+}
+
+export function postLikesUrl(slug: string) {
+    return `/api/posts/${encodeURIComponent(slug)}/likes`;
 }

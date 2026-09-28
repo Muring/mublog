@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CommentsWrapper, CommentList, SignInPrompt } from "./Comments.styled";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
@@ -15,6 +15,7 @@ import type { CommentNode } from "@/types/comment";
 
 export default function Comments({ slug }: { slug: string }) {
     const pathname = usePathname();
+    const queryClient = useQueryClient();
     const toast = useToast();
     const queryKey = queryKeys.comments(slug);
 
@@ -63,7 +64,7 @@ export default function Comments({ slug }: { slug: string }) {
                   ]
                 : list,
         onError: (message) => setFormError(message),
-        onSuccess: () => setReplyTo(null),
+        onSuccess: () => { setReplyTo(null); void queryClient.invalidateQueries({ queryKey: ["likes", slug] }); },
     });
 
     const update = useOptimisticList<CommentNode, { id: string; body: string }, CommentNode>({
@@ -142,6 +143,7 @@ export default function Comments({ slug }: { slug: string }) {
                         return (
                             <li key={comment.id}>
                                 <CommentItem
+                                    slug={slug}
                                     comment={comment}
                                     currentUserId={me?.user?.id ?? null}
                                     isAdmin={me?.isAdmin ?? false}
@@ -158,6 +160,7 @@ export default function Comments({ slug }: { slug: string }) {
                                     <div className="replies">
                                         {replies.map((reply, index) => (
                                             <CommentItem
+                                                slug={slug}
                                                 key={reply.id}
                                                 comment={reply}
                                                 currentUserId={me?.user?.id ?? null}

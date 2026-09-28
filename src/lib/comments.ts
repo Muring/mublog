@@ -63,6 +63,7 @@ export async function getCommentsByPostSlug(slug: string): Promise<CommentNode[]
 }
 
 export type AdminComment = CommentNode & {
+    likeCount: number;
     /** 언제 지워졌는지. 공개 화면에는 안 내려가고 관리 목록만 쓴다 */
     deletedAt: string | null;
     post: { id: string; slug: string; title: string; status: "DRAFT" | "PUBLISHED" };
@@ -130,12 +131,14 @@ export async function getCommentsForAdmin({ slug, authorId, q, from = "", to = "
             take: pagination.take,
             select: {
                 ...COMMENT_SELECT,
+                _count: { select: { likes: true } },
                 postId: true,
                 parent: { select: { id: true, body: true, deletedAt: true, author: { select: { username: true } } } },
             },
         });
         const comments: AdminComment[] = rows.map((row) => ({
             ...toNode(row),
+            likeCount: row._count.likes,
             body: row.body,
             author: row.author,
             deletedAt: row.deletedAt?.toISOString() ?? null,

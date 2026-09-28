@@ -4,6 +4,7 @@ import { Article } from "./PostContent.styled";
 import Image from "next/image";
 import Link from "next/link";
 import { formatPostDate } from "@/lib/date";
+import LikeButton from "@/components/likes/LikeButton";
 import PostViews from "./PostViews";
 import PostNavigation from "./PostNavigation";
 import CodeBlockTools from "./CodeBlockTools";
@@ -67,6 +68,7 @@ export default function PostContent({ title, date, slug, viewCount, description,
                 <hr />
                 <PostNavigation key={slug} html={html} />
                 <div id="post-body" dangerouslySetInnerHTML={{ __html: html }} />
+                <div id="post-likes" style={{ marginTop: "2rem" }}><LikeButton slug={slug} /></div>
             </Article>
         </>
     );

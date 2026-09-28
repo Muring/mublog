@@ -32,6 +32,8 @@ model Profile {
 
   posts    Post[]
   comments Comment[]
+  postLikes PostLike[]
+  commentLikes CommentLike[]
 
   @@map("profiles")
 }
@@ -66,6 +68,7 @@ model Post {
   author   Profile? @relation(fields: [authorId], references: [id], onDelete: SetNull)
 
   comments   Comment[]
+  likes      PostLike[]
   dailyViews PostDailyView[]
 
   @@index([status, publishedAt(sort: Desc)])
@@ -97,6 +100,7 @@ model Comment {
   parentId String?   @map("parent_id")
   parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies  Comment[] @relation("CommentReplies")
+  likes    CommentLike[]
 
   @@index([postId, createdAt])
   @@index([authorId, createdAt])
@@ -125,4 +129,27 @@ model DailyStat {
   visitors Int      @default(0)
 
   @@map("daily_stats")
+}
+
+/// 현재 좋아요만 저장한다. 취소는 행 삭제이며 이벤트 이력을 쌓지 않는다.
+model PostLike {
+  postId String @map("post_id")
+  userId String @map("user_id") @db.Uuid
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId])
+  @@map("post_likes")
+}
+
+model CommentLike {
+  commentId String @map("comment_id")
+  userId String @map("user_id") @db.Uuid
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([commentId, userId])
+  @@index([userId])
+  @@map("comment_likes")
 }

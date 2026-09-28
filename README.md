@@ -84,6 +84,7 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 ### 참여
 
 - [x] 🔐 **GitHub 로그인**
+- [x] ❤️ **좋아요** — 공개 글·댓글·답글에 GitHub 로그인 후 등록/취소. 본인 콘텐츠는 집계만 표시하며 카드·관리 목록에서도 개수를 확인. 요청당 이력 없이 사용자·대상별 한 행을 저장하고 수정일은 유지
 - [x] 💬 **댓글 · 답글** (2단, 낙관적 갱신)
 - [x] 📊 **방문자 수 · 조회수 집계**
 - [x] 🔒 **개인정보 처리방침** (`/privacy`) — 저장하는 것과 쿠키 세 개를 그대로 적음
@@ -105,6 +106,7 @@ Supabase의 PostgreSQL 하나를 씁니다. `public` 스키마만 Prisma가 관�
 | ----------- | --------------------------------------------------------------- |
 | `Profile`   | `auth.users`의 미러. 사용자명·아바타·권한(`role`)                |
 | `Post`      | 포스트. 마크다운 원문과 렌더된 HTML을 함께 보관. `series`/`seriesOrder`로 묶음 |
+| `PostLike` / `CommentLike` | 사용자·대상별 좋아요. 복합 기본 키, 취소 시 행 삭제, RLS 정책 없이 서버에서만 접근 |
 | `Comment`   | 댓글. 자기참조 `parentId`로 답글, soft delete(`deletedBy`로 관리자 삭제 구분) |
 | `DailyStat` | 사이트 전체 방문 집계. KST 기준 **하루 1행**                     |
 | `PostDailyView` | 글별 일일 조회. 글마다 KST **하루 1행** (30편 × 365일 ≈ 1만 행/년) |
@@ -195,6 +197,9 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 | `/api/posts/summary`              | GET               | 공개        |
 | `/api/posts/[slug]/comments`      | GET, POST         | 조회 공개 / 작성 로그인 |
 | `/api/posts/[slug]/views`         | POST              | 공개        |
+| `/api/posts/likes` | GET | 공개 글 좋아요 집계 |
+| `/api/posts/[slug]/likes` | GET, PUT, DELETE | 조회 공개(개인 상태는 비공유), 변경 로그인 필요·본인 제외 |
+| `/api/comments/[id]/likes` | PUT, DELETE | 로그인 필요·본인 제외 |
 | `/api/comments/[id]`              | PATCH, DELETE     | 본인 (삭제는 관리자도) |
 | `/api/stats`, `/api/visit`        | GET / POST        | 공개        |
 | `/api/me`                         | GET               | 공개        |
@@ -830,3 +835,7 @@ icn1 (현재)         0.15~0.20s   0.14s
 공용 명령 `/verify-changes`(Claude), `$verify-changes`(Codex)는 `.agent-checks.json`의 경로 규칙에 따라 기존 lint·타입·렌더·감사 수정 검사를 선택합니다. 기준 커밋부터 현재 staged·unstaged·untracked 변경을 포함하며 결과 요약과 전체 로그 경로를 반환합니다. 검사 성공을 캐시하지 않습니다. 프로젝트 전체 코드 점검은 기존 `code-audit`의 역할입니다.
 
 `wait-deploy`는 이미 시작된 GitHub 상태를 기다리는 조회 전용 명령입니다. Vercel 배포는 실제 상태 이름 `Vercel`과 대상 커밋을 지정해 기다리고, 완료 후 해당 배포 URL에서 화면을 확인합니다. `session-brief`로 독립 작업의 결정·검증·남은 일을 정리해 다음 세션에 넘길 수 있습니다. 이 공용 명령은 dev-bootstrap의 커맨드·스킬 업데이트로 설치합니다.
+
+### 좋아요 스키마 반영
+
+좋아요 기능 배포 전에 `yarn prisma migrate deploy`로 `20260928000000_likes` 마이그레이션을 적용합니다. 기존 콘텐츠는 0개에서 시작하며 백필은 필요 없습니다. 두 테이블은 RLS를 켜고 공개 정책을 만들지 않습니다. 로컬의 순수 회귀 검사는 `yarn exec tsx scripts/verify-likes.mts`이며 실제 PostgreSQL 동시성 검증과는 구분합니다.

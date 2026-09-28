@@ -105,6 +105,7 @@ function AdminCommentRow({ comment, postFiltered }: { comment: AdminComment; pos
                         {formatRelative(comment.createdAt)}
                         {comment.editedAt && " (수정됨)"}
                     </time>
+                    {!comment.deleted && <span className="time">좋아요 {comment.likeCount.toLocaleString("ko-KR")}</span>}
                     {/* "이름 · 시각 · 제목" 으로 이으면 그 사람이 쓴 글처럼 읽힌다. 겹낫표로 감싸 글 제목임을 드러낸다.
                         글로 걸렀으면 모든 행이 같은 제목이라 소음이다 — 제목은 툴바에 있으니 여기엔 이동 링크만 남긴다 */}
                     <span className="sep" aria-hidden="true">·</span>

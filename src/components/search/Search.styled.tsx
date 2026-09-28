@@ -162,6 +162,7 @@ export const SearchPanel = styled.div`
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
+    .hit-meta .item { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
     .hit-meta {
         margin-top: 0.3rem;
         display: flex;

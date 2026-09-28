@@ -173,10 +173,12 @@ export async function getAllPostsForAdmin() {
             createdAt: true,
             viewCount: true,
             commentCount: true,
+            _count: { select: { likes: true } },
         },
     });
     return rows.map((row) => ({
         ...row,
+        likeCount: row._count.likes,
         publishedAt: row.publishedAt?.toISOString() ?? null,
         createdAt: row.createdAt.toISOString(),
         /*

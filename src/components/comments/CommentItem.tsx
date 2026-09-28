@@ -1,5 +1,6 @@
 "use client";
 
+import LikeButton from "@/components/likes/LikeButton";
 import { useState } from "react";
 import { CommentRow } from "./Comments.styled";
 import CommentBody from "./CommentBody";
@@ -9,6 +10,7 @@ import type { CommentNode } from "@/types/comment";
 import { formatRelative } from "@/lib/date";
 
 type Props = {
+    slug: string;
     comment: CommentNode;
     currentUserId: string | null;
     isAdmin: boolean;
@@ -28,6 +30,7 @@ type Props = {
 
 export default function CommentItem({
     comment,
+    slug,
     currentUserId,
     isAdmin,
     isReplying,
@@ -115,6 +118,7 @@ export default function CommentItem({
 
                         {!comment.pending && (
                             <div className="row-actions">
+                                <LikeButton slug={slug} commentId={comment.id} />
                                 {canReply && currentUserId && (
                                     <button
                                         type="button"
