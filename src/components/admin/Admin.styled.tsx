@@ -3,6 +3,7 @@
 import styled from "@emotion/styled";
 import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
 import { segmented } from "@/styles/segmented";
+import { thinScrollbar } from "@/styles/scrollbar";
 import { surface } from "@/styles/surface";
 import { truncate } from "@/styles/text";
 
@@ -472,37 +473,8 @@ export const AdminListScroll = styled.div`
   max-height: min(60vh, 40rem);
   overflow-y: auto;
 
-  /*
-   * 스크롤 막대를 직접 그린다. body 는 아예 감춰 두었는데(globals.css) 여기는
-   * 표가 제 안에서 스크롤한다는 사실 자체가 보여야 해서 남긴다.
-   *
-   * 두께는 트랙과 같게 두고 배경색 테두리로 깎는다 — 막대에 padding 을 줄
-   * 방법이 없어서, 배경색 띠를 둘러 가늘고 둥근 막대로 보이게 하는 방식이다.
-   */
-  &::-webkit-scrollbar {
-    width: 10px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--bordercolor);
-    border-radius: 999px;
-    border: 3px solid var(--background);
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: var(--desccolor);
-  }
-
-  /*
-   * 표준 속성은 ::-webkit-scrollbar 를 모르는 브라우저에만 준다.
-   * 크롬은 scrollbar-width 가 지정되면 위 가상 요소를 무시하므로,
-   * 둘을 같이 적으면 애써 그린 막대가 사라진다.
-   */
-  @supports not selector(::-webkit-scrollbar) {
-    scrollbar-width: thin;
-    scrollbar-color: var(--bordercolor) transparent;
-  }
+  /* 스크롤 막대는 공용(styles/scrollbar). 표가 제 안에서 스크롤한다는 사실이 보여야 한다 */
+  ${thinScrollbar()}
   /*
    * 스크롤바 자리를 늘 비워 둔다. 걸러진 행이 줄어 스크롤이 사라지면 표가
    * 스크롤바 폭만큼 넓어지는데, 그때 헤더와 열 경계가 한 번 튄다.

@@ -1,17 +1,23 @@
 export type PostStatusFilter = "all" | "PUBLISHED" | "DRAFT";
 export type PostSort = "newest" | "updated" | "views" | "comments";
-export function postListState(params: URLSearchParams) {
+/** tag·series 는 값 그대로 비교한다(정확히 같은 것만). 비어 있으면 거르지 않는다 */
+export type PostListState = { q: string; status: PostStatusFilter; sort: PostSort; tag: string; series: string };
+export function postListState(params: URLSearchParams): PostListState {
     const rawStatus = params.get("status");
     const rawSort = params.get("sort");
     return {
         q: params.get("q") ?? "",
         status: (rawStatus === "PUBLISHED" || rawStatus === "DRAFT" ? rawStatus : "all") as PostStatusFilter,
         sort: (["updated", "views", "comments"].includes(rawSort ?? "") ? rawSort : "newest") as PostSort,
+        tag: params.get("tag") ?? "",
+        series: params.get("series") ?? "",
     };
 }
-export function postListUrl(state: ReturnType<typeof postListState>) {
+export function postListUrl(state: PostListState) {
     const params = new URLSearchParams();
     if (state.q) params.set("q", state.q);
+    if (state.tag) params.set("tag", state.tag);
+    if (state.series) params.set("series", state.series);
     if (state.status !== "all") params.set("status", state.status);
     if (state.sort !== "newest") params.set("sort", state.sort);
     return `/admin${params.size ? `?${params}` : ""}`;
@@ -90,11 +96,13 @@ export function pageWindow(page: number, pages: number, radius = 2): (number | n
 type SortablePost = {
     id: string; title: string; slug: string; tags: string[]; status: string;
     publishedAt: string | null; createdAt: string; updatedAt: string;
-    viewCount: number; commentCount: number;
+    viewCount: number; commentCount: number; series?: string | null;
 };
-export function filterAdminPosts<T extends SortablePost>(posts: T[], state: ReturnType<typeof postListState>): T[] {
+export function filterAdminPosts<T extends SortablePost>(posts: T[], state: Omit<PostListState, "tag" | "series"> & Partial<Pick<PostListState, "tag" | "series">>): T[] {
     const query = state.q.trim().toLowerCase();
     return posts.filter((post) => (state.status === "all" || post.status === state.status) &&
+        (!state.tag || post.tags.includes(state.tag)) &&
+        (!state.series || post.series === state.series) &&
         (!query || [post.title, post.slug, ...post.tags].some((text) => text.toLowerCase().includes(query)))
     ).sort((a, b) => {
         const difference = state.sort === "views" ? b.viewCount - a.viewCount

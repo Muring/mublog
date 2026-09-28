@@ -2,6 +2,7 @@
 
 import styled from "@emotion/styled";
 import { surface } from "@/styles/surface";
+import { thinScrollbar } from "@/styles/scrollbar";
 
 export const DropdownRoot = styled.div`
     position: relative;
@@ -116,6 +117,8 @@ export const DropdownList = styled.ul<{ $align: "left" | "right"; $inPanel?: boo
     ${({ $align, $inPanel }) => ($inPanel ? "" : popup($align))}
     max-height: ${({ $inPanel }) => ($inPanel ? "280px" : "320px")};
     overflow-y: auto;
+    /* 항목이 많으면(태그·글 목록) 스크롤이 생긴다. 관리 목록과 같은 막대를 쓰고, 막대 둘레는 목록 바탕(카드색)으로 깎는다 */
+    ${thinScrollbar("var(--cardbackground)")}
     margin: 0;
     padding: ${({ $inPanel }) => ($inPanel ? "0" : "6px")};
     list-style: none;
@@ -128,16 +131,31 @@ export const DropdownList = styled.ul<{ $align: "left" | "right"; $inPanel?: boo
     li {
         position: relative;
         display: flex;
-        align-items: baseline;
-        gap: 12px;
+        align-items: center;
+        gap: 6px;
         padding: 0.5rem 1.75rem 0.5rem 0.75rem;
         border-radius: 4px;
         color: var(--foreground);
         cursor: pointer;
     }
-    .option-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-    /* 개수 같은 보조 정보. 항목 글자와 같이 호버 면 위에 놓이므로 --desccolor 로 양 테마 대비를 지킨다 */
-    .option-hint { flex-shrink: 0; color: var(--desccolor); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
+    .option-label { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    /*
+     * 개수 같은 보조 정보. 이름 바로 뒤에 알약 배지로 붙인다(사용자 결정, 2026-09-28) —
+     * 오른쪽 끝에 맨 숫자로 두면 넓은 목록에서 이름과 떨어져 허공에 뜬다.
+     * 바탕은 고정 토큰이 아니라 전경색을 얇게 깐다. --codefontbgcolor 는 다크 호버 면(카드 + 8%)과
+     * 거의 같은 색이라 호버하면 배지가 사라진다. 글자는 --foreground 라 어느 면 위에서도 대비가 충분하다.
+     */
+    .option-hint {
+        flex-shrink: 0;
+        padding: 0 6px;
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--foreground) 12%, transparent);
+        color: var(--foreground);
+        font-size: 11px;
+        font-weight: 600;
+        line-height: 1.6;
+        font-variant-numeric: tabular-nums;
+    }
     li.empty { color: var(--desccolor); cursor: default; }
     li[data-focused="true"], li:not(.empty):hover {
         background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));

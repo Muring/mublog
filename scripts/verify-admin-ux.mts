@@ -48,4 +48,12 @@ assert.deepEqual(filterAdminPosts(posts, { q: '', status: 'all', sort: 'newest' 
 assert.deepEqual(filterAdminPosts(posts, { q: '', status: 'all', sort: 'views' }).map((post) => post.id), ['a', 'b']);
 assert.equal(filterAdminPosts(posts, { q: 'FRONTEND', status: 'DRAFT', sort: 'newest' })[0].id, 'b');
 assert.equal(posts[0].id, 'a');
+// 태그·시리즈는 정확히 같은 값만. 검색어처럼 부분 일치로 걸리지 않는다
+const tagged = [{ ...base, id: 't1', tags: ['react', 'nextjs'], series: '블로그 개발기' }, { ...base, id: 't2', tags: ['react-native'], series: null }];
+assert.deepEqual(filterAdminPosts(tagged, { q: '', status: 'all', sort: 'newest', tag: 'react' }).map((post) => post.id), ['t1']);
+assert.deepEqual(filterAdminPosts(tagged, { q: '', status: 'all', sort: 'newest', series: '블로그 개발기' }).map((post) => post.id), ['t1']);
+assert.deepEqual(filterAdminPosts(tagged, { q: '', status: 'all', sort: 'newest', tag: 'react-native', series: '블로그 개발기' }), []);
+const listState = postListState(new URLSearchParams('tag=react&series=%EB%B8%94%EB%A1%9C%EA%B7%B8+%EA%B0%9C%EB%B0%9C%EA%B8%B0'));
+assert.deepEqual([listState.tag, listState.series], ['react', '블로그 개발기']);
+assert.equal(safeAdminReturn(postListUrl(listState)), postListUrl(listState));
 console.log('Admin UX: date ranges, missing/zero observations, year boundaries, safe return links, pagination and post filters passed.');

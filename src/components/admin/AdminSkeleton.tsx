@@ -112,7 +112,7 @@ export default function AdminSkeleton() {
                         <span className="summary-value"><TextSkeleton width="7em" /></span>
                     </summary>
                 </ChartCard>
-                <PostTableToolbar loading state={{ q: "", status: "all", sort: "newest" }} counts={{ all: 0, PUBLISHED: 0, DRAFT: 0 }} onChange={() => {}} />
+                <PostTableToolbar loading state={{ q: "", status: "all", sort: "newest", tag: "", series: "" }} counts={{ all: 0, PUBLISHED: 0, DRAFT: 0 }} onChange={() => {}} />
                 <AdminListScroll><PostTableSkeleton /></AdminListScroll>
             </div>
         </div>

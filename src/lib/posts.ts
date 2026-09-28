@@ -166,6 +166,7 @@ export async function getAllPostsForAdmin() {
             slug: true,
             title: true,
             tags: true,
+            series: true,
             status: true,
             publishedAt: true,
             updatedAt: true,

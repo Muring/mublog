@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { filterAdminPosts, postListState, postListUrl, type PostSort, type PostStatusFilter } from "@/lib/admin-navigation";
+import { filterAdminPosts, postListState, postListUrl, type PostListState } from "@/lib/admin-navigation";
 import { PostTable, AdminListScroll } from "./Admin.styled";
 import PostTableRow from "./PostTableRow";
 import PostTableHead from "./PostTableHead";
@@ -12,6 +12,7 @@ type Row = {
     slug: string;
     title: string;
     tags: string[];
+    series: string | null;
     status: "DRAFT" | "PUBLISHED";
     publishedAt: string | null;
     updatedAt: string;
@@ -33,18 +34,18 @@ type Row = {
  */
 export default function PostTableView({ posts }: { posts: Row[] }) {
     const params = useSearchParams();
-    const { q: query, status, sort } = postListState(new URLSearchParams(params));
-    const returnTo = postListUrl({ q: query, status, sort });
-    const update = (patch: Partial<{ q: string; status: PostStatusFilter; sort: PostSort }>) => {
-        window.history.replaceState(null, "", postListUrl({ q: query, status, sort, ...patch }));
+    const state = postListState(new URLSearchParams(params));
+    const returnTo = postListUrl(state);
+    const update = (patch: Partial<PostListState>) => {
+        window.history.replaceState(null, "", postListUrl({ ...state, ...patch }));
     };
 
-    const matching = filterAdminPosts(posts, { q: query, status: "all", sort });
-    const filtered = matching.filter((post) => status === "all" || post.status === status);
+    const matching = filterAdminPosts(posts, { ...state, status: "all" });
+    const filtered = matching.filter((post) => state.status === "all" || post.status === state.status);
 
     return (
         <>
-            <PostTableToolbar state={{ q: query, status, sort }} onChange={update}
+            <PostTableToolbar state={state} onChange={update} options={{ tags: tally(posts.flatMap((p) => p.tags)), series: tally(posts.flatMap((p) => p.series ? [p.series] : [])) }}
                 counts={{ all: matching.length, PUBLISHED: matching.filter(p => p.status === "PUBLISHED").length, DRAFT: matching.filter(p => p.status === "DRAFT").length }} />
 
             {/* 표만 스크롤한다. 머리글은 sticky 라 스크롤해도 열 이름이 남는다 */}
@@ -62,4 +63,11 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
             </AdminListScroll>
         </>
     );
+}
+
+/** 드롭다운 항목. 많이 쓴 것부터, 같으면 가나다순. 개수는 초안 포함 전체 글 기준이다 */
+function tally(values: string[]) {
+    const counts = new Map<string, number>();
+    for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
+    return [...counts].map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ko"));
 }
