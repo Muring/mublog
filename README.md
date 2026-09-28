@@ -593,7 +593,7 @@ src/
 ├── app/
 │   ├── [slug]/           # 포스트 상세 (SSG + ISR)
 │   ├── admin/            # 관리자 화면 (목록·에디터), force-dynamic
-│   │                     # loading.tsx 는 page.tsx 가 있는 세그먼트에만 둔다
+│   │                     # loading.tsx 는 page.tsx 옆에만 둔다 — 하위 경로까지 감싼다
 │   ├── api/              # 라우트 핸들러
 │   ├── auth/             # OAuth 콜백 · 로그아웃
 │   ├── feed.xml/         # RSS
