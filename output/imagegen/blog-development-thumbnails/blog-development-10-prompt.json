@@ -1,0 +1,8 @@
+{
+  "generator": "Built-in image_gen",
+  "episode": 10,
+  "file": "blog-development-10.png",
+  "prompt": "Create ONE finished landscape 16:9 thumbnail for episode 10 of a developer's blog-building series, about adding likes to posts and comments with reliable state. Use the attached image solely as the series STYLE reference, not as content to copy. New composition: one central tidy browser window with a large article card and two smaller comment bubbles below it. The article and a comment each have a clear heart-shaped reaction control. One heart is filled muted orange, another is an empty navy outline. A compact teal database cylinder on the right is connected to the reaction controls by two clean restrained lines, subtly conveying stored reactions and consistency. Keep the scene simple and cohesive, emphasize the hearts, not an infographic or technical schema. Match warm ivory background, deep navy outlines, muted cobalt blue and teal, tiny orange accents, flat geometric editorial illustration with subtle paper grain. Few large readable shapes, generous breathing room, legible at 320px. Central safe area, no important elements at crop edges. No written text, no letters or numbers, no logos, no watermark, no people. This is one standalone thumbnail.",
+  "reference": "blog-development-8.png",
+  "referenceNote": "Episode 9 uses a JPG thumbnail and has no local series illustration. Episode 8 is the latest available illustration reference."
+}
