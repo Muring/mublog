@@ -78,31 +78,68 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
     }
 `;
 
-export const DropdownList = styled.ul<{ $align: "left" | "right" }>`
+/* 펼친 목록의 바탕. 검색형은 이 판 위에 검색창과 목록을 함께 얹고, 목록 자체는 판 안에 흐르게 둔다 */
+const popup = (align: "left" | "right") => `
     position: absolute;
     top: calc(100% + 6px);
-    ${({ $align }) => ($align === "right" ? "right: 0;" : "left: 0;")}
+    ${align === "right" ? "right: 0;" : "left: 0;"}
     z-index: 20;
     min-width: 100%;
-    max-height: 320px;
-    overflow-y: auto;
-    margin: 0;
-    padding: 6px;
-    list-style: none;
+`;
+
+export const DropdownPanel = styled.div<{ $align: "left" | "right" }>`
+    ${({ $align }) => popup($align)}
     ${surface("0.4rem")}
     box-shadow: 0 8px 24px var(--shadowcolor);
+    /* 글 제목처럼 긴 항목이 화면 밖으로 밀어내지 않게 폭을 묶고, 항목은 말줄임한다 */
+    width: max-content;
+    max-width: min(32rem, calc(100vw - 32px));
+    padding: 6px;
+
+    .dropdown-search {
+        box-sizing: border-box;
+        width: 100%;
+        height: 34px;
+        margin-bottom: 4px;
+        padding: 0 10px;
+        border: var(--border-width) solid var(--bordercolor);
+        border-radius: 6px;
+        background: var(--background);
+        color: var(--foreground);
+        font: inherit;
+        font-size: 13px;
+    }
+    .dropdown-search:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: -1px; }
+`;
+
+export const DropdownList = styled.ul<{ $align: "left" | "right"; $inPanel?: boolean }>`
+    ${({ $align, $inPanel }) => ($inPanel ? "" : popup($align))}
+    max-height: ${({ $inPanel }) => ($inPanel ? "280px" : "320px")};
+    overflow-y: auto;
+    margin: 0;
+    padding: ${({ $inPanel }) => ($inPanel ? "0" : "6px")};
+    list-style: none;
+    ${({ $inPanel }) => ($inPanel ? "" : surface("0.4rem"))}
+    ${({ $inPanel }) => ($inPanel ? "" : "box-shadow: 0 8px 24px var(--shadowcolor);")}
     font-size: 0.875rem;
     font-weight: 400;
     white-space: nowrap;
 
     li {
         position: relative;
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
         padding: 0.5rem 1.75rem 0.5rem 0.75rem;
         border-radius: 4px;
         color: var(--foreground);
         cursor: pointer;
     }
-    li[data-focused="true"], li:hover {
+    .option-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    /* 개수 같은 보조 정보. 항목 글자와 같이 호버 면 위에 놓이므로 --desccolor 로 양 테마 대비를 지킨다 */
+    .option-hint { flex-shrink: 0; color: var(--desccolor); font-size: 12px; font-weight: 400; font-variant-numeric: tabular-nums; }
+    li.empty { color: var(--desccolor); cursor: default; }
+    li[data-focused="true"], li:not(.empty):hover {
         background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
         color: var(--foreground);
     }

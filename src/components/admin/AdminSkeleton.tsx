@@ -76,6 +76,7 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
 /** 실제 툴바와 같은 높이·줄바꿈 규칙을 사용한다. 로딩 중에는 조작하지 않는다. */
 function CommentToolbarSkeleton() {
     return (
+        <>
         <TableToolbar data-loading>
             <div className="status-filters">
                 {["전체", "게시 중", "삭제됨"].map((label, i) => (
@@ -84,10 +85,19 @@ function CommentToolbarSkeleton() {
                     </button>
                 ))}
             </div>
-            <Dropdown className="post-filter" label="글로 거르기" size="control" value="all" options={[{ value: "all", label: "모든 글" }]} onChange={() => {}} />
-            <Dropdown label="작성자로 거르기" size="control" value="all" options={[{ value: "all", label: "모든 작성자" }]} onChange={() => {}} />
+            <Dropdown className="post-filter" label="글 필터" size="control" value="all" options={[{ value: "all", label: "모든 글" }]} onChange={() => {}} />
+            <Dropdown label="작성자 필터" size="control" value="all" options={[{ value: "all", label: "모든 작성자" }]} onChange={() => {}} />
+            <Dropdown label="댓글 정렬" size="control" value="newest" options={[{ value: "newest", label: "최신순" }]} onChange={() => {}} />
             <button type="button" tabIndex={-1} disabled>초기화</button>
         </TableToolbar>
+        <TableToolbar data-loading className="comment-search">
+            <input type="search" tabIndex={-1} readOnly aria-label="댓글 본문 검색" />
+            <span className="date-label">작성일 <small>(한국 시간)</small></span>
+            <input type="date" tabIndex={-1} readOnly aria-label="작성일 시작" />
+            <span className="date-sep">~</span>
+            <input type="date" tabIndex={-1} readOnly aria-label="작성일 끝" />
+        </TableToolbar>
+        </>
     );
 }
 

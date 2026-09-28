@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { bucketPoints, lineSegments } from "../src/lib/admin-chart";
-import { commentPage, commentListUrl, filterAdminPosts, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
+import { commentDateRange, commentDates, commentPage, commentListUrl, commentQuery, filterAdminPosts, pageWindow, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
 
 const today = "2026-09-17";
 const points = [{ date: "2026-09-16", value: 2 }, { date: today, value: 0 }];
@@ -25,6 +25,23 @@ assert.equal(new URL(commentListUrl({ post: "한글 글", returnTo }), "https://
 for (const [total, pages] of [[0, 1], [25, 1], [26, 2], [101, 5]]) assert.equal(commentPage(total, 99).pages, pages);
 assert.equal(commentPage(25, 2).page, 1);
 assert.equal(commentPage(26, NaN).page, 1);
+assert.equal(commentListUrl({ q: "  ", sort: "newest" }), "/admin/comments");
+assert.equal(commentListUrl({ q: " 스팸 ", sort: "oldest", page: 2 }), `/admin/comments?q=${encodeURIComponent("스팸")}&sort=oldest&page=2`);
+assert.equal(commentListUrl({ sort: "bad" }), "/admin/comments");
+assert.equal(commentQuery("가".repeat(150)).length, 100);
+assert.deepEqual(commentDates("2026-09-30", "2026-09-01"), { from: "2026-09-01", to: "2026-09-30" });
+assert.deepEqual(commentDates("2026-02-30", "bad"), { from: "", to: "" });
+assert.equal(commentListUrl({ from: "2026-09-30", to: "2026-09-01" }), "/admin/comments?from=2026-09-01&to=2026-09-30");
+// KST 하루: 9/28 00:00 KST = 9/27 15:00Z, 끝은 9/28 24:00 KST 미만
+assert.equal(commentDateRange("2026-09-28", "2026-09-28").gte?.toISOString(), "2026-09-27T15:00:00.000Z");
+assert.equal(commentDateRange("2026-09-28", "2026-09-28").lt?.toISOString(), "2026-09-28T15:00:00.000Z");
+assert.deepEqual(commentDateRange("", ""), {});
+assert.deepEqual(pageWindow(1, 1), [1]);
+assert.deepEqual(pageWindow(1, 4), [1, 2, 3, 4]);
+assert.deepEqual(pageWindow(1, 10), [1, 2, 3, null, 10]);
+assert.deepEqual(pageWindow(5, 10), [1, 2, 3, 4, 5, 6, 7, null, 10]);
+assert.deepEqual(pageWindow(6, 12), [1, null, 4, 5, 6, 7, 8, null, 12]);
+assert.deepEqual(pageWindow(10, 10), [1, null, 8, 9, 10]);
 const base = { title: 'React', slug: 'react', tags: ['frontend'], status: 'PUBLISHED', publishedAt: '2026-09-01', createdAt: '2026-09-01', updatedAt: '2026-09-17', commentCount: 0, viewCount: 0 };
 const posts = [{ ...base, id: 'a', viewCount: 20 }, { ...base, id: 'b', status: 'DRAFT', publishedAt: null, createdAt: '2026-09-02', updatedAt: '2026-09-03', viewCount: 4 }];
 assert.deepEqual(filterAdminPosts(posts, { q: '', status: 'all', sort: 'newest' }).map((post) => post.id), ['b', 'a']);

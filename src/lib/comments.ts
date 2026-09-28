@@ -1,4 +1,4 @@
-import { commentPage } from "@/lib/admin-navigation";
+import { commentDateRange, commentPage, type CommentSort } from "@/lib/admin-navigation";
 import { prisma } from "@/lib/prisma";
 import { HttpError } from "@/lib/auth";
 import type { CommentNode } from "@/types/comment";
@@ -71,36 +71,61 @@ export type AdminComment = CommentNode & {
 };
 
 /**
- * 관리 화면의 댓글 목록. 최신순, 삭제된 것도 포함한다.
+ * 관리 화면의 댓글 목록. 기본은 최신순(sort 로 오래된순), 삭제된 것도 포함한다.
  *
  * 공개 화면(toNode)과 달리 지운 댓글의 본문과 작성자를 **가리지 않는다.**
  * 관리자는 무엇이 왜 지워졌는지 봐야 한다 — 도배·욕설이면 작성자를 알아야 하고,
  * 본인이 지운 거면 그냥 넘기면 된다. 공개 API 로는 여전히 안 나간다(getCommentsByPostSlug 는 그대로).
- * slug 를 주면 그 글의 것만, authorId 를 주면 그 사람 것만 돌려준다(둘 다 주면 교집합).
+ * slug 를 주면 그 글의 것만, authorId 를 주면 그 사람 것만, q 를 주면 본문에 그 말이 든 것만,
+ * from·to 를 주면 그 기간(KST)에 쓴 것만 돌려준다(모두 교집합).
  * 작성자 필터는 도배 대응용이다 — @@index([authorId, createdAt]) 가 받쳐준다.
+ * 본문 검색은 인덱스 없는 ILIKE 다. 댓글이 수만 개가 되기 전까지는 이걸로 충분하다.
  */
-export async function getCommentsForAdmin({ slug, authorId, status = "all", page = 1 }: {
-    slug?: string; authorId?: string; status?: "all" | "live" | "deleted"; page?: number;
+export async function getCommentsForAdmin({ slug, authorId, q, from = "", to = "", status = "all", sort = "newest", page = 1 }: {
+    slug?: string; authorId?: string; q?: string; from?: string; to?: string; status?: "all" | "live" | "deleted"; sort?: CommentSort; page?: number;
 } = {}) {
     return prisma.$transaction(async (tx) => {
-        const base = { ...(slug ? { post: { slug } } : {}), ...(authorId ? { authorId } : {}) };
+        const base = {
+            ...(slug ? { post: { slug } } : {}),
+            ...(authorId ? { authorId } : {}),
+            ...(q ? { body: { contains: q, mode: "insensitive" as const } } : {}),
+            ...(from || to ? { createdAt: commentDateRange(from, to) } : {}),
+        };
         // 트랜잭션은 커넥션 하나를 독점하므로 Promise.all 로 묶어도 직렬로 실행된다.
         // pg 는 한 클라이언트에 쿼리가 겹쳐 쌓이면 deprecation 경고를 내므로(pg@9 에서는 오류) 순서대로 기다린다.
-        const post = slug ? await tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } }) : null;
-        const author = authorId ? await tx.profile.findUnique({ where: { id: authorId }, select: { id: true, username: true, avatarUrl: true } }) : null;
+        // 직렬이라 쿼리 수가 곧 응답 시간이다(검색마다 왕복한다). 그래서 한 번에 모을 수 있는 건 모은다.
+        //
         // 필터 드롭다운 항목. 댓글이 하나라도 달린 글·사람만 — 빈 선택지는 고를 이유가 없다.
+        // 제목·이름순이 아니라 **최근 댓글순**이다. 관리하러 들어와 찾는 건 대개 방금 댓글이 달린 글이라,
+        // 가나다순이면 목록이 길어질수록 그게 중간에 묻힌다. 개수는 삭제 포함(상태 필터의 "전체" 와 같은 기준).
+        // groupBy + findMany 두 번이면 왕복도 두 번이라 조인·집계를 SQL 한 번으로 한다.
         // 목록 행의 글 정보도 여기서 찾는다 — 행마다 relation 을 셋 이상 걸면 Prisma 가
         // 트랜잭션 커넥션 하나에 relation 조회를 동시에 던져 위와 같은 경고가 난다(prisma/prisma#29407).
-        const posts = await tx.post.findMany({ where: { comments: { some: {} } }, select: { id: true, slug: true, title: true, status: true }, orderBy: { title: "asc" } });
-        const postById = new Map(posts.map((row) => [row.id, row]));
-        const authors = await tx.profile.findMany({ where: { comments: { some: {} } }, select: { id: true, username: true }, orderBy: { username: "asc" } });
-        const total = await tx.comment.count({ where: base });
-        const deleted = await tx.comment.count({ where: { ...base, deletedAt: { not: null } } });
-        const counts = { all: total, live: total - deleted, deleted };
+        const postRows = await tx.$queryRaw<{ id: string; slug: string; title: string; status: "DRAFT" | "PUBLISHED"; count: number }[]>`
+            SELECT p.id, p.slug, p.title, p.status::text AS status, count(*)::int AS count
+            FROM comments c JOIN posts p ON p.id = c.post_id
+            GROUP BY p.id ORDER BY max(c.created_at) DESC`;
+        const postById = new Map(postRows.map((row) => [row.id, { id: row.id, slug: row.slug, title: row.title, status: row.status }]));
+        const posts = postRows.map((row) => ({ slug: row.slug, title: row.title, count: row.count }));
+        const authors = await tx.$queryRaw<{ id: string; username: string; count: number }[]>`
+            SELECT a.id::text AS id, a.username, count(*)::int AS count
+            FROM comments c JOIN profiles a ON a.id = c.author_id
+            GROUP BY a.id ORDER BY max(c.created_at) DESC`;
+        // 거른 글·사람이 실재하는지. 댓글이 달린 것이면 위 목록에 이미 있으니 따로 묻지 않는다
+        const listed = slug ? postRows.find((row) => row.slug === slug) : undefined;
+        const post = !slug ? null
+            : listed ? postById.get(listed.id)!
+            : await tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } });
+        const author = !authorId ? null
+            : authors.find((row) => row.id === authorId) ?? await tx.profile.findUnique({ where: { id: authorId }, select: { id: true, username: true } });
+        // 전체·삭제 수를 한 번에. count 의 select 에 컬럼을 넣으면 그 컬럼이 null 이 아닌 행을 센다
+        const tally = await tx.comment.count({ where: base, select: { _all: true, deletedAt: true } });
+        const counts = { all: tally._all, live: tally._all - tally.deletedAt, deleted: tally.deletedAt };
         const pagination = commentPage(counts[status], page);
+        const direction = sort === "oldest" ? "asc" : "desc";
         const rows = await tx.comment.findMany({
             where: { ...base, ...(status === "live" ? { deletedAt: null } : status === "deleted" ? { deletedAt: { not: null } } : {}) },
-            orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+            orderBy: [{ createdAt: direction }, { id: direction }],
             skip: pagination.skip,
             take: pagination.take,
             select: {

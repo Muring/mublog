@@ -526,6 +526,14 @@ export const TableToolbar = styled.div`
   gap: 8px;
   margin-bottom: 12px;
 
+  /*
+   * 툴바에 홀로 선 버튼(포스트·댓글의 초기화). 틀은 공용 buttonBase, 호버는 buttonPrimary 로 전경/배경을 뒤집는다
+   * — 라이트는 검은 바탕 + 흰 글씨, 다크는 밝은 바탕 + 검은 글씨(사용자 결정, 2026-09-28).
+   * 선택 상태가 없는 버튼이라 --activecolor 를 호버에 써도 "호버 ≠ 선택" 규칙과 부딪치지 않는다.
+   * 크기·바탕·굵기는 옆 입력창·드롭다운에 맞춰야 하므로 아래 공통 규칙이 덮는다(그래서 이 조각이 먼저 온다).
+   */
+  > button { ${buttonBase} font-weight: 400; background-clip: padding-box; }
+  > button:hover:not(:disabled) { ${buttonPrimary} }
   input, > button {
     box-sizing: border-box;
     height: 38px;
@@ -536,15 +544,6 @@ export const TableToolbar = styled.div`
     background: var(--background);
     color: var(--foreground);
     padding: 0 12px;
-  }
-  /* outline 은 none ↔ solid 를 못 넘어가므로 늘 투명한 링을 깔고 색만 바꾼다 */
-  > button { cursor: pointer; background-clip: padding-box; outline: 1px solid transparent; outline-offset: calc(-1 * var(--border-width)); transition: background-color .15s, color .15s, border-color 150ms ease, outline-color .15s; }
-  /* 드롭다운과 같은 호버: 포커스 링과 같은 outline + 8% 섞기. 한 줄에 놓인 컨트롤끼리 호버 표현이 갈리면 안 된다 */
-  > button:hover:not(:disabled) {
-    border-color: transparent;
-    outline-color: var(--foreground);
-    color: var(--foreground);
-    background-color: color-mix(in srgb, var(--foreground) 8%, var(--background));
   }
   > button:disabled { opacity: .45; cursor: default; }
   input { flex: 1; min-width: 160px; width: 0; }
@@ -595,5 +594,42 @@ export const TableToolbar = styled.div`
     .status-filters button { flex: 1; }
     input, .post-filter { order: 1; flex: 1 1 100%; }
     .count { order: 2; }
+  }
+
+  /*
+   * 댓글 관리의 둘째 줄: 본문 검색 + 작성일 범위.
+   * 날짜 칸은 위의 input 규칙(남는 폭을 다 가져감)을 받으면 달력 칸이 검색창만큼 늘어나서 폭을 고정한다.
+   * 달력 아이콘은 브라우저가 그리므로 color-scheme 으로 테마를 알려줘야 다크에서 검은 아이콘이 묻히지 않는다.
+   * OS 설정(prefers-color-scheme)이 아니라 html.dark 를 따른다(AGENTS §3).
+   */
+  &.comment-search {
+    input[type="date"] { flex: 0 0 auto; width: 150px; min-width: 0; padding: 0 10px; color-scheme: light; }
+    /*
+     * 날짜 칸은 눌러서 달력을 여는 컨트롤이라 드롭다운 버튼과 같은 호버를 준다 — 포커스 링과 같은 outline + 8% 섞기.
+     * outline 은 none ↔ solid 를 못 넘어가므로 늘 투명한 링을 깔고 색만 바꾼다(DropdownButton 과 같은 방식).
+     */
+    input[type="date"] {
+      cursor: pointer;
+      background-clip: padding-box;
+      outline: 1px solid transparent;
+      outline-offset: calc(-1 * var(--border-width));
+      transition: background-color .15s, border-color 150ms ease, outline-color .15s;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; }
+    /* 시작·끝 순서가 거꾸로면 적용하지 않는다. 브라우저 안내 말풍선은 몇 초 뒤 사라지므로 칸 테두리로도 남겨 둔다 */
+    input[type="date"]:invalid { border-color: var(--dangercolor); }
+    input[type="date"]:hover:not(:read-only):not(:focus-visible) {
+      border-color: transparent;
+      outline-color: var(--foreground);
+      background-color: color-mix(in srgb, var(--foreground) 8%, var(--background));
+    }
+    .date-label { flex-shrink: 0; font-size: 13px; color: var(--foreground); }
+    .date-label small { font-size: 12px; color: var(--desccolor); }
+    .date-sep { color: var(--desccolor); }
+  }
+  html.dark &.comment-search input[type="date"] { color-scheme: dark; }
+  @container admin (max-width: 650px) {
+    &.comment-search input[type="date"] { order: 1; flex: 1 1 0; width: 0; min-width: 120px; }
+    &.comment-search .date-label, &.comment-search .date-sep { order: 1; }
   }
 `;

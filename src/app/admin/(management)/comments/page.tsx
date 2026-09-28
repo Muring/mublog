@@ -1,11 +1,11 @@
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { getCommentsForAdmin } from "@/lib/comments";
-import { commentListUrl, safeAdminReturn } from "@/lib/admin-navigation";
+import { commentDates, commentListUrl, commentQuery, safeAdminReturn } from "@/lib/admin-navigation";
 import AdminCommentsView from "@/components/admin/AdminCommentsView";
 
 export const dynamic = "force-dynamic";
-type Props = { searchParams: Promise<{ post?: string; author?: string; status?: string; page?: string; returnTo?: string }> };
+type Props = { searchParams: Promise<{ post?: string; author?: string; q?: string; from?: string; to?: string; status?: string; sort?: string; page?: string; returnTo?: string }> };
 // profiles.id 는 uuid 컬럼이라 아무 문자열이나 넣으면 Postgres 가 500 으로 죽는다. 모양이 아니면 404 로 보낸다.
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -13,12 +13,15 @@ export default async function AdminCommentsPage({ searchParams }: Props) {
     await requireAdmin();
     const params = await searchParams;
     const status = params.status === "live" || params.status === "deleted" ? params.status : "all";
+    const sort = params.sort === "oldest" ? "oldest" : "newest";
+    const q = commentQuery(params.q) || undefined;
+    const { from, to } = commentDates(params.from, params.to);
     const requestedPage = Number(params.page ?? 1);
     const returnTo = safeAdminReturn(params.returnTo);
     if (params.author && !UUID.test(params.author)) notFound();
-    const result = await getCommentsForAdmin({ slug: params.post, authorId: params.author, status, page: requestedPage });
+    const result = await getCommentsForAdmin({ slug: params.post, authorId: params.author, q, from, to, status, sort, page: requestedPage });
     if ((params.post && !result.post) || (params.author && !result.author)) notFound();
-    const href = (patch: { post?: string; status?: string; page?: number } = {}) => commentListUrl({ post: params.post, author: params.author, status, page: result.page, returnTo, ...patch });
+    const href = (patch: { post?: string; status?: string; page?: number } = {}) => commentListUrl({ post: params.post, author: params.author, q, from, to, status, sort, page: result.page, returnTo, ...patch });
     if (requestedPage !== result.page) redirect(href());
-    return <AdminCommentsView result={result} status={status} postSlug={params.post} authorId={params.author} returnTo={returnTo} />;
+    return <AdminCommentsView result={result} status={status} sort={sort} q={q} from={from} to={to} postSlug={params.post} authorId={params.author} returnTo={returnTo} />;
 }

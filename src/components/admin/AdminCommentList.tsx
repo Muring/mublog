@@ -19,13 +19,13 @@ import type { AdminComment } from "@/lib/comments";
  * 두 화면에서 갈리면 안 된다. 여기서 더 붙는 건 "어느 글에 달렸나" 링크와 삭제뿐이다.
  * 답글 트리는 그리지 않는다. 최신순 한 줄 목록이라 부모 댓글을 인용 한 줄로 같이 보여준다.
  */
-export default function AdminCommentList({ comments }: { comments: AdminComment[] }) {
+export default function AdminCommentList({ comments, postFiltered = false }: { comments: AdminComment[]; postFiltered?: boolean }) {
     if (comments.length === 0) return null;
     return (
         <CompactList>
             {comments.map((comment) => (
                 <li key={comment.id}>
-                    <AdminCommentRow comment={comment} />
+                    <AdminCommentRow comment={comment} postFiltered={postFiltered} />
                 </li>
             ))}
         </CompactList>
@@ -35,7 +35,7 @@ export default function AdminCommentList({ comments }: { comments: AdminComment[
 /** 본문이 이 줄 수를 넘으면 접는다. 한 댓글(최대 2000자)이 화면을 다 먹지 않게 */
 const CLAMP_LINES = 5;
 
-function AdminCommentRow({ comment }: { comment: AdminComment }) {
+function AdminCommentRow({ comment, postFiltered }: { comment: AdminComment; postFiltered: boolean }) {
     const router = useRouter();
     const toast = useToast();
     const confirm = useConfirm();
@@ -105,10 +105,13 @@ function AdminCommentRow({ comment }: { comment: AdminComment }) {
                         {formatRelative(comment.createdAt)}
                         {comment.editedAt && " (수정됨)"}
                     </time>
-                    {/* "이름 · 시각 · 제목" 으로 이으면 그 사람이 쓴 글처럼 읽힌다. 겹낫표로 감싸 글 제목임을 드러낸다 */}
+                    {/* "이름 · 시각 · 제목" 으로 이으면 그 사람이 쓴 글처럼 읽힌다. 겹낫표로 감싸 글 제목임을 드러낸다.
+                        글로 걸렀으면 모든 행이 같은 제목이라 소음이다 — 제목은 툴바에 있으니 여기엔 이동 링크만 남긴다 */}
                     <span className="sep" aria-hidden="true">·</span>
-                    <Link href={postHref} className="post-link" title={published ? "글에서 이 댓글 보기" : "초안 편집 화면으로"}>『{comment.post.title}』</Link>
-                    {!published && <span className="badge draft">초안</span>}
+                    <Link href={postHref} className="post-link" title={published ? "글에서 이 댓글 보기" : "초안 편집 화면으로"}>
+                        {postFiltered ? (published ? "글에서 보기" : "초안 편집") : `『${comment.post.title}』`}
+                    </Link>
+                    {!published && !postFiltered && <span className="badge draft">초안</span>}
                     {!comment.deleted && (
                         <button type="button" className="row-action danger" onClick={remove} disabled={busy}>
                             {busy ? "삭제 중..." : "삭제"}
