@@ -6,7 +6,7 @@ import ProjectTimeline from "@/components/about/ProjectTimeline";
 
 export const metadata: Metadata = {
   title: "소개",
-  description: "방랑하는 개발자 엄세현이 걸어온 길과 만들어 온 것들",
+  description: "React·Next.js와 Salesforce 개발자 엄세현의 경험과 프로젝트",
   alternates: { canonical: "/about" },
 };
 

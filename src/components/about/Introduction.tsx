@@ -58,10 +58,14 @@ export default function Introduction() {
       </div>
       <blockquote>
         <p>
-          프론트엔드 개발자로 개발을 시작했으나 현재는 세일즈포스 개발자로 활동하고 있습니다. <br />
-          더 나은 사용자 경험에 대한 고민을하고 개발하는 것에서 행복을 느낍니다.
+          <strong>
+            React·Next.js와 Salesforce로, 사용자 경험과 업무 흐름을 함께 설계하는 개발자
+          </strong>
+        </p>
+        <p>
+          화면 설계부터 API 연동과 업무 자동화까지, 사용자가 일을 마치는 흐름을 고민합니다.
           <br />
-          새로운 도구를 학습하고 연습하는 것도 좋아합니다.
+          직접 만든 서비스를 운영하며 작은 불편을 꾸준히 개선하고 있습니다.
         </p>
       </blockquote>
     </IntroductionWrapper>
