@@ -8,9 +8,15 @@ export default function Footer() {
   return (
     <FooterWrapper>
       <p>© {new Date().getFullYear()} Mublog. All rights reserved. Developed by MuRing.</p>
-      <Link href="/privacy" className="privacy">
-        개인정보 처리방침
-      </Link>
+      {/*
+        크롤러가 따라갈 수 있는 유일한 /about 링크다. SideMenu 의 "About me" 는
+        메뉴를 열어야 마운트되는 클라이언트 컴포넌트라 서버 HTML 에 나오지 않는다.
+      */}
+      <nav className="links" aria-label="사이트 정보">
+        <Link href="/about">소개</Link>
+        <span aria-hidden="true">·</span>
+        <Link href="/privacy">개인정보 처리방침</Link>
+      </nav>
       <div className="stack">
         <Image
           src="/icons/next.svg"

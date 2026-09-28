@@ -23,14 +23,21 @@ export const FooterWrapper = styled.footer`
     min-width: 25rem;
   }
 
-  .privacy {
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     font-size: 0.75rem;
     color: var(--desccolor);
-    text-decoration: none;
 
-    &:hover {
-      color: var(--foreground);
-      text-decoration: underline;
+    a {
+      color: var(--desccolor);
+      text-decoration: none;
+
+      &:hover {
+        color: var(--foreground);
+        text-decoration: underline;
+      }
     }
   }
 `;
