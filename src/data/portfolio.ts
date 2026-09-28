@@ -33,7 +33,7 @@ export const portfolioProjects: PortfolioProject[] = [
         id: "mublog",
         name: "Mublog",
         category: "BLOG · FULL-STACK",
-        period: "2025.04 — 진행 중",
+        period: "2025.04 – 진행 중",
         team: "1명",
         role: "설계 · 개발 · 운영",
         summary:
@@ -75,7 +75,7 @@ export const portfolioProjects: PortfolioProject[] = [
         id: "ohana",
         name: "Ohana Liquor",
         category: "SALESFORCE · CRM",
-        period: "2024.09.05 — 10.21",
+        period: "2024.09 – 2024.10",
         team: "4명",
         role: "프로그래밍 리더 · Salesforce Developer",
         summary:
@@ -109,7 +109,7 @@ export const portfolioProjects: PortfolioProject[] = [
         id: "vita",
         name: "Vita",
         category: "HEALTHCARE · GAMIFICATION",
-        period: "2024.04.08 — 05.24",
+        period: "2024.04 – 2024.05",
         team: "4명",
         role: "프론트엔드 리더",
         summary:
@@ -140,7 +140,7 @@ export const portfolioProjects: PortfolioProject[] = [
         id: "momo",
         name: "MOMO Bank",
         category: "FINTECH · COMMUNITY",
-        period: "2024.02.26 — 04.05",
+        period: "2024.02 – 2024.04",
         team: "6명",
         role: "프론트엔드 리더",
         summary:
@@ -170,7 +170,7 @@ export const portfolioProjects: PortfolioProject[] = [
         id: "seas",
         name: "SEAS",
         category: "EDUCATION · WEB",
-        period: "2024.01 — 02",
+        period: "2024.01 – 2024.02",
         team: "6명",
         role: "프론트엔드 리더",
         summary:
@@ -200,7 +200,7 @@ export const portfolioProjects: PortfolioProject[] = [
         id: "ghiburi",
         name: "집우리",
         category: "REAL ESTATE · MAP",
-        period: "2023",
+        period: "2023.10 – 2023.11",
         team: "2명",
         role: "프론트엔드 개발 · 디자인",
         summary:
