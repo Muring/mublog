@@ -110,7 +110,7 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
                         onClick={(event) => handleNavigation(event, item.id)}
                         aria-current={activeId === item.id ? "location" : undefined}
                     >
-                        {item.label}
+                        <span className={styles.navigationLabel}>{item.label}</span>
                     </a>
                     {item.children?.length ? renderItems(item.children) : null}
                 </li>

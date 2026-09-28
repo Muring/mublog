@@ -5,7 +5,7 @@
 .navigation {
     line-height: 1.7;
     color: var(--foreground);
-    padding: 14px;
+    padding: 14px 10px;
     border: var(--border-width) solid var(--bordercolor);
     border-radius: 12px;
     background: var(--background);
@@ -71,18 +71,15 @@
     font-size: inherit;
     list-style: none;
 }
-/* 상위는 본문색·굵게, 하위는 보조색·가늘게로 나누고, 하위 묶음은 안쪽 레일로 한 번 더 감싼다.
-   현재 위치 마커는 그 항목에서 가장 가까운 레일 위에 붙는다. */
-.navigation > .navigationList {
-    border-left: 1px solid var(--bordercolor);
-}
-.navigation > .navigationList > li + li {
+/* 상위는 본문색·굵게, 하위는 보조색·가늘게로 나눈다. 레일은 하위 묶음에만 두고 상위에는 긋지 않는다 —
+   상자 테두리와 겹쳐 선이 많아 보인다. 현재 위치 마커는 상위에서는 항목 왼쪽 끝, 하위에서는 레일 위에 붙는다. */
+.navigationBody > .navigationList > li + li {
     margin-top: 6px;
 }
 .navigation .navigationList a {
     position: relative;
     display: block;
-    padding: 4px 6px 4px 12px;
+    padding: 4px 4px 4px 8px;
     /* 항목 안의 줄은 촘촘히, 항목 사이는 넓게 — 접힌 둘째 줄과 다음 항목이 갈리도록. */
     line-height: 1.4;
     font-weight: 700;
@@ -106,6 +103,24 @@
     color: var(--linkhovercolor);
     text-decoration: none;
 }
+/* 상위 항목은 포트폴리오 링크(.animatedLink)처럼 호버하면 밑줄이 왼쪽에서 그어진다.
+   ::after 로 항목 상자 전체에 그으면 여백까지 덮고 접힌 둘째 줄을 못 따라가므로,
+   글자를 감싼 span 의 배경 선을 늘린다 — 줄마다 따로 그어진다. 하위 항목은 색만 바꾼다. */
+.navigationBody > .navigationList > li > a > .navigationLabel {
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    padding-bottom: 2px;
+    transition: background-size 280ms ease;
+}
+.navigationBody > .navigationList > li > a:is(:hover, :focus-visible) > .navigationLabel {
+    background-size: 100% 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .navigationBody > .navigationList > li > a > .navigationLabel {
+        transition: none;
+    }
+}
 /* 강조는 색과 마커로만 한다. 굵기를 바꾸면 글자 폭이 늘어 줄이 다시 접힌다. */
 .navigation .navigationList a[aria-current="location"] {
     color: var(--linkhovercolor);
@@ -114,14 +129,14 @@
     background: var(--linkhovercolor);
 }
 .navigationList .navigationList {
-    margin: 2px 0 4px 12px;
+    margin: 2px 0 4px 8px;
     border-left: 1px solid var(--bordercolor);
 }
 .navigationList .navigationList li + li {
     margin-top: 3px;
 }
 .navigation .navigationList .navigationList a {
-    padding: 3px 6px 3px 10px;
+    padding: 3px 4px 3px 8px;
     font-size: 11px;
     font-weight: 400;
     color: var(--portfolio-description);
