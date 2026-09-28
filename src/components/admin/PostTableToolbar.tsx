@@ -21,7 +21,8 @@ const STATUS_LABEL: Record<PostStatusFilter, string> = { all: "전체", PUBLISHE
 /**
  * 태그·시리즈 필터는 검색형 드롭다운이다. 검색창도 태그를 찾지만 제목·주소까지 같이 걸려서
  * "이 태그가 붙은 글만" 을 정확히 고를 수 없고, 어떤 태그가 몇 개 있는지도 안 보인다.
- * 시리즈가 하나도 없으면 시리즈 드롭다운은 그리지 않는다.
+ * 시리즈가 하나도 없으면 시리즈 드롭다운은 그리지 않는다. 로딩 중에는 목록을 몰라도 그려 둔다 —
+ * 빠지면 그 폭만큼 상태 버튼이 늘어났다가 로드되며 줄어든다.
  */
 export default function PostTableToolbar({ state, counts, onChange, options = { tags: [], series: [] }, loading = false }: Props) {
     const input = useRef<HTMLInputElement>(null);
@@ -51,7 +52,7 @@ export default function PostTableToolbar({ state, counts, onChange, options = { 
             <Dropdown label="태그 필터" size="control" value={state.tag} searchable="태그 검색"
                 options={[{ value: "", label: "모든 태그" }, ...options.tags.map((t) => ({ value: t.name, label: t.name, hint: String(t.count) }))]}
                 onChange={(value) => onChange({ tag: value })} />
-            {options.series.length > 0 && (
+            {(loading || options.series.length > 0) && (
                 <Dropdown label="시리즈 필터" size="control" value={state.series} searchable="시리즈 검색"
                     options={[{ value: "", label: "모든 시리즈" }, ...options.series.map((s) => ({ value: s.name, label: s.name, hint: String(s.count) }))]}
                     onChange={(value) => onChange({ series: value })} />

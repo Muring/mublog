@@ -91,7 +91,7 @@ function CommentToolbarSkeleton() {
             <button type="button" tabIndex={-1} disabled>초기화</button>
         </TableToolbar>
         <TableToolbar data-loading className="comment-search">
-            <input type="search" tabIndex={-1} readOnly aria-label="댓글 본문 검색" />
+            <input type="search" tabIndex={-1} readOnly placeholder="댓글 본문 검색" aria-label="댓글 본문 검색" />
             <span className="date-label">작성일 <small>(한국 시간)</small></span>
             <input type="date" tabIndex={-1} readOnly aria-label="작성일 시작" />
             <span className="date-sep">~</span>
