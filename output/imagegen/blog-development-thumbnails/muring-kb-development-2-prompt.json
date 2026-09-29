@@ -1,0 +1,8 @@
+{
+  "generator": "Built-in image_gen",
+  "file": "muring-kb-development-2.png",
+  "reference": "/tmp/muring-kb-blog-draft/muring-kb-development-1.png",
+  "prompt": "Create ONE finished landscape 16:9 thumbnail for episode 2 of a personal knowledge-base development series, about sorting accumulated notes, testing retrieval, and reusing a lesson to solve another project's problem. Use the attached image solely as a STYLE reference, not content to copy. New composition: on the left a compact organized set of three upright index-card trays in muted cobalt and teal; in the center a large magnifying glass selects one single useful card; on the right that same card fits into a small browser panel like a missing puzzle piece, with one restrained orange accent and a teal success tick. A subtle curved connector makes the reuse clear. Avoid a cluttered infographic. Match warm ivory background, deep navy outlines, muted cobalt blue and teal, tiny orange accents, flat geometric editorial illustration with subtle paper grain. Few large readable shapes, generous breathing room, legible at 320px. Central safe area, no important elements at crop edges. No written text, no letters or numbers, no logos, no watermark, no people. This is one standalone thumbnail. The reference's lettering and photorealistic rendering must NOT be copied; follow the flat editorial style and no-text constraints above.",
+  "approved": true,
+  "thumbnail_url": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/muring-kb-development-2/illustration-2b5126e0361f.png"
+}
