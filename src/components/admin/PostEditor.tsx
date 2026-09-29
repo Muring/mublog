@@ -542,6 +542,7 @@ export default function PostEditor({ initial, knownTags, knownSeries }: Props) {
             {isPickerOpen && (
                 <ImagePicker
                     current={post.thumbnail}
+                    slug={post.slug.trim() || undefined}
                     onSelect={(url) => set("thumbnail", url)}
                     onClose={() => setIsPickerOpen(false)}
                 />

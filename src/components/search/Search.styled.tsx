@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { overlayBackdrop, overlayPanel } from "@/styles/motion";
 import { surface, hoverSurface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
 
@@ -57,15 +58,10 @@ export const SearchOverlay = styled.dialog`
     padding: 12vh 1rem 1rem;
     background-color: rgba(0, 0, 0, 0.5);
 
-    animation: search-fade 0.12s ease-out;
-    @keyframes search-fade {
-        from {
-            opacity: 0;
-        }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        animation: none;
-    }
+    /* 막을 끌어도 뒤 페이지가 움직이지 않는다. 결과 목록은 제 안에서 굴린다 */
+    touch-action: none;
+    /* 막은 흐려졌다 짙어지고, 패널은 살짝 떠오른다. 닫을 때는 반대로(공용 움직임) */
+    ${overlayBackdrop}
 
     ${mobile} {
         padding-top: 6vh;
@@ -80,6 +76,7 @@ export const SearchPanel = styled.div`
     ${surface("0.75rem")}
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     overflow: hidden;
+    ${overlayPanel("pop")}
 
     .search-input-row {
         display: flex;

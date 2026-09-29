@@ -1,53 +1,23 @@
 // SideMenu.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import { ButtonWrapper, Overlay } from "./Header.styled";
 import { MenuWrapper } from "./SideMenu.styled";
 import Image from "next/image";
 import Link from "next/link";
 import SideList from "./SideList";
 import ThemeSwitcher from "./ThemeSwitcher";
+import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 
 export default function SideMenu({ onClose }: { onClose: () => void }) {
-  const [isClosing, setIsClosing] = useState(false);
-
-  // 사이드 메뉴 열렸을 때 body 스크롤 방지
-  useEffect(() => {
-    const originalBodyStyle = {
-      overflow: document.body.style.overflow,
-      height: document.body.style.height,
-    };
-    const originalHtmlStyle = {
-      overflow: document.documentElement.style.overflow,
-      height: document.documentElement.style.height,
-    };
-
-    // 스크롤 완전 차단
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-
-    return () => {
-      // 복원
-      document.body.style.overflow = originalBodyStyle.overflow;
-      document.documentElement.style.overflow = originalHtmlStyle.overflow;
-    };
-  }, []);
-
-  const handleClose = () => {
-    setIsClosing(true); // 애니메이션 시작
-  };
-
-  const handleAnimationEnd = () => {
-    if (isClosing) {
-      onClose(); // 애니메이션 끝난 뒤 실제 제거
-    }
-  };
+  // 밀려 들어오고 나가는 움직임·움직임 줄이기·닫힘 안전망·뒤 스크롤 잠금은 다른 창들과 같은 공용 동작이다
+  const { closing, requestClose: handleClose, onAnimationEnd } = useExitTransition(onClose);
+  useScrollLock();
 
   return (
     <>
-      <Overlay onClick={handleClose} />
-      <MenuWrapper isClosing={isClosing} onAnimationEnd={handleAnimationEnd}>
+      <Overlay onClick={handleClose} data-closing={closing || undefined} />
+      <MenuWrapper data-closing={closing || undefined} onAnimationEnd={onAnimationEnd}>
         <div className="side-header">
           <Image
             src="/icons/mublog.svg"

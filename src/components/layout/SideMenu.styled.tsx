@@ -1,14 +1,17 @@
 import styled from "@emotion/styled";
 import { hoverSurface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
+import { overlayPanel } from "@/styles/motion";
 
-export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
+export const MenuWrapper = styled.div`
   background-color: var(--background);
   color: var(--foreground);
 
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  /* 메뉴 끝까지 굴려도 뒤 페이지로 스크롤이 넘어가지 않는다 */
+  overscroll-behavior: contain;
   position: fixed;
   top: 0;
   left: 0;
@@ -22,36 +25,12 @@ export const MenuWrapper = styled.div<{ isClosing?: boolean }>`
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   transition: 0.1s ease-in-out;
-  animation: ${({ isClosing }) =>
-    isClosing
-      ? "slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"
-      : "slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards"};
+  /* 왼쪽에서 밀려 들어오고 왼쪽으로 나간다(공용 움직임). 닫히는 중에는 data-closing 이 붙는다 */
+  ${overlayPanel("drawer")}
 
   ${mobile} {
     width: 100% !important;
     border-radius: 0;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-100%);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes slideOut {
-    from {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateX(-100%);
-    }
   }
 
   a:hover {

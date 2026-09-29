@@ -25,7 +25,7 @@ export async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> 
 }
 
 /** JSON 본문을 보내는 요청. Content-Type 지정을 매번 적지 않기 위한 것. */
-export function jsonRequest(method: "POST" | "PATCH", body: unknown): RequestInit {
+export function jsonRequest(method: "POST" | "PATCH" | "DELETE", body: unknown): RequestInit {
     return {
         method,
         headers: { "Content-Type": "application/json" },

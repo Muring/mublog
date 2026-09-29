@@ -36,9 +36,9 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // 24시간 유예를 둔다. 방금 올렸지만 아직 저장하지 않은 초안의 이미지를
+        // GRACE_HOURS(24시간) 유예를 둔다. 방금 올렸지만 아직 저장하지 않은 초안의 이미지를
         // 지우면 작성 중인 글이 깨진다.
-        const sweep = await sweepOrphanImages({ dryRun: false, graceHours: 24 });
+        const sweep = await sweepOrphanImages({ dryRun: false });
         result.sweep = {
             scanned: sweep.total,
             deleted: sweep.deleted.length,

@@ -3,6 +3,7 @@
 import styled from "@emotion/styled";
 import { buttonBase } from "@/styles/button";
 import { surface } from "@/styles/surface";
+import { overlayBackdrop, overlayPanel } from "@/styles/motion";
 
 export const PickerOverlay = styled.div`
   position: fixed;
@@ -18,10 +19,15 @@ export const PickerOverlay = styled.div`
    * (헤더의 Overlay 와 같은 값)
    */
   background-color: rgba(0, 0, 0, 0.4);
+  /* 막을 끌어도 뒤 에디터가 움직이지 않는다. 목록은 .picker-body 가 제 안에서 굴린다 */
+  touch-action: none;
+  ${overlayBackdrop}
 `;
 
 export const PickerBox = styled.div`
   ${surface("14px")}
+  /* 살짝 떠오르며 나타나고 가라앉으며 사라진다(공용 움직임). 막의 data-closing 을 따른다 */
+  ${overlayPanel("pop")}
   display: flex;
   flex-direction: column;
   width: min(920px, 100%);
@@ -44,10 +50,33 @@ export const PickerBox = styled.div`
     margin-right: auto;
   }
 
+  /*
+   * 둘째 줄: 검색 · 글 필터 · 정렬. 셋의 높이를 36px 로 맞춘다(Dropdown md 와 같은 높이).
+   * 좁아지면 검색이 한 줄을 다 쓰고 글 필터가 남는 폭을, 정렬이 제 폭을 가진다.
+   */
+  .picker-filters {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+  .picker-filters .post-filter {
+    flex: 0 1 15rem;
+    min-width: 0;
+  }
+  .picker-filters .post-filter > button { width: 100%; }
+  @media (max-width: 560px) {
+    .picker-filters input[type="search"] { flex-basis: 100%; }
+    .picker-filters .post-filter { flex: 1 1 0; }
+  }
+
   input[type="search"] {
     flex: 1;
     min-width: 8rem;
-    padding: 0.45rem 0.65rem;
+    box-sizing: border-box;
+    height: 36px;
+    padding: 0 0.65rem;
     ${surface("0.5rem")}
     color: var(--foreground);
     font-family: inherit;
@@ -180,6 +209,12 @@ export const ImageCard = styled.button`
     border-color: var(--warnborder);
     background-color: var(--warnbg);
     color: var(--warncolor);
+  }
+
+  /* 미사용이지만 아직 유예 중(이미지 관리). 분류처럼 중립이되 점선으로 "곧 바뀔 상태" 를 드러낸다 */
+  .badge.grace {
+    border-style: dashed;
+    background-color: transparent;
   }
 
   &:hover {
