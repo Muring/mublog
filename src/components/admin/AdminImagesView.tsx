@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Dropdown from "@/components/ui/Dropdown";
 import FilterChips from "./FilterChips";
@@ -11,9 +11,10 @@ import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import { useConfirm } from "@/providers/Confirm";
 import { useToast } from "@/providers/Toast";
 import type { ImageUser, ManagedImage } from "@/lib/storage";
-import { AdminListScroll, Button, TableToolbar } from "./Admin.styled";
+import { AdminListScroll, Button } from "./Admin.styled";
 import { ImageCard } from "./ImagePicker.styled";
-import { DetailPanel, ImagesLayout } from "./AdminImages.styled";
+import { DetailPanel, ImageToolbar, ImagesLayout, SHEET_MEDIA } from "./AdminImages.styled";
+import DetailSheet from "./ImageDetailSheet";
 
 type Filter = "all" | "thumbnail" | "body" | "unused" | "scheduled";
 type Sort = "newest" | "oldest" | "size";
@@ -101,6 +102,29 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [deleting, setDeleting] = useState(false);
     const [viewing, setViewing] = useState(false);
+    // 좁은 화면에서 상세를 시트로 띄웠는가. 넓은 화면은 옆 패널이 늘 보이므로 쓰지 않는다
+    const [sheetOpen, setSheetOpen] = useState(false);
+    // 시트는 이 함수가 바뀔 때마다 포커스·스크롤 잠금을 다시 잡으므로 고정해 둔다
+    const closeSheet = useCallback(() => setSheetOpen(false), []);
+
+    /*
+     * 좁은 화면에서는 패널이 그리드 맨 아래로 밀려 눌러도 반응이 없는 것처럼 보인다.
+     * 그래서 고르는 순간 시트로 띄운다. 폭은 누르는 시점에 한 번만 본다 — 렌더 중에 재면
+     * 하이드레이션 전에는 알 수 없어서 화면이 갈린다(AGENTS §3 레이아웃).
+     */
+    const select = (path: string) => {
+        setSelectedPath(path);
+        if (window.matchMedia(SHEET_MEDIA).matches) setSheetOpen(true);
+    };
+
+    // 시트를 연 채로 화면이 넓어지면 옆 패널이 같은 내용을 보여주므로 닫는다
+    useEffect(() => {
+        if (!sheetOpen) return;
+        const media = window.matchMedia(SHEET_MEDIA);
+        const onChange = () => { if (!media.matches) setSheetOpen(false); };
+        media.addEventListener("change", onChange);
+        return () => media.removeEventListener("change", onChange);
+    }, [sheetOpen]);
 
     /** 이미지가 하나라도 딸린 글. 제목순 — 글을 이름으로 찾아 들어오는 목록이다 */
     const posts = useMemo(() => {
@@ -168,7 +192,10 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                 freed += result.freedBytes;
             }
             toast.success(`${targets.length}개를 삭제했습니다. ${bytes(freed)} 확보.`);
-            if (selected && targets.includes(selected)) setSelectedPath(null);
+            if (selected && targets.includes(selected)) {
+                setSelectedPath(null);
+                setSheetOpen(false);
+            }
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "이미지를 삭제하지 못했습니다.");
         } finally {
@@ -196,9 +223,62 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
         }
     };
 
+    const details = selected && (
+        <>
+            {/* 누르면 본문·포트폴리오와 같은 전체 화면 뷰어로 크게 본다 */}
+            <button type="button" className="preview-button" onClick={() => setViewing(true)} aria-label="이미지 크게 보기">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="preview" src={selected.url} alt="" />
+            </button>
+            <dl>
+                <dt>경로</dt>
+                <dd className="path">{selected.path}</dd>
+                <dt>크기</dt>
+                <dd>{bytes(selected.size)}</dd>
+                <dt>올린 시각</dt>
+                <dd>{kst(selected.createdAt)} (KST)</dd>
+            </dl>
+
+            <div className={`state ${selected.state}`} role="note">
+                <span className="icon" aria-hidden>{selected.state === "scheduled" ? "⚠" : "ⓘ"}</span>
+                <span>
+                    {selected.state === "used" && "글에서 쓰고 있습니다. 지우려면 먼저 아래 글에서 제거해야 합니다."}
+                    {selected.state === "grace" && `아무 글도 쓰지 않지만 올린 지 하루가 안 됐습니다. 저장 전인 글이 쓰고 있을 수 있습니다. 그대로 두면 ${sweepTime(selected.deletesAt!)} 자동 정리에서 지워집니다.`}
+                    {selected.state === "scheduled" && `아무 글도 쓰지 않습니다. ${sweepTime(selected.deletesAt!)} 자동 정리에서 지워집니다.`}
+                </span>
+            </div>
+
+            {selected.state === "used" && (
+                <div>
+                    <h3>쓰는 글</h3>
+                    <ul className="users">
+                        {usersOf(selected).map(({ user, kinds }) => (
+                            <li key={user.id}>
+                                <Link href={`/admin/posts/${user.id}`}>
+                                    <span className={`badge ${user.status === "DRAFT" ? "draft" : ""}`}>{user.status === "DRAFT" ? "초안" : "공개"}</span>
+                                    <span className="title" title={user.title}>{user.title}</span>
+                                    <span className="kind">{kinds.join(" · ")}</span>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            <div className="actions">
+                <Button type="button" onClick={() => copyUrl(selected.url)}>주소 복사</Button>
+                <Button type="button" onClick={() => setViewing(true)}>크게 보기</Button>
+                <Button type="button" className="danger" disabled={selected.state === "used" || deleting} onClick={() => removeOne(selected)}>
+                    삭제
+                </Button>
+            </div>
+        </>
+    );
+
     return (
         <>
-            <TableToolbar>
+            {/* 윗줄은 걸러 보기·정렬·일괄 동작, 아랫줄은 찾기. 줄마다 할 일을 정해 두어 폭이 바뀌어도 섞이지 않는다 */}
+            <ImageToolbar className="filters-row">
                 <div className="status-filters" role="group" aria-label="이미지 쓰임">
                     {FILTERS.map(({ key, label }) => (
                         <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>
@@ -206,6 +286,18 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                         </button>
                     ))}
                 </div>
+                <Dropdown className="sort-control" label="이미지 정렬" size="control" value={sort}
+                    options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }, { value: "size", label: "용량순" }]}
+                    onChange={(value) => setSort(value as Sort)} />
+                <button type="button" className="reset" disabled={filter === "all" && !postId && !query && sort === "newest"}
+                    onClick={() => { setFilter("all"); setPostId(""); setSort("newest"); clearQuery(); }}>초기화</button>
+                <button type="button" className="bulk-delete" disabled={deleting || scheduled.length === 0}
+                    onClick={() => remove(scheduled, `${scopedLabel}삭제 예정 ${scheduled.length}개를 지금 삭제할까요?`,
+                        `어떤 글도 쓰지 않고 올린 지 하루가 지난 이미지입니다(${bytes(total(scheduled))}). 두면 ${sweepTime(nextSweepAt)} 자동 정리에서 지워집니다. 되돌릴 수 없습니다.`)}>
+                    삭제 예정 지금 삭제
+                </button>
+            </ImageToolbar>
+            <ImageToolbar className="search-row">
                 <input type="search" ref={search} defaultValue="" placeholder="경로 · 글 제목 검색" aria-label="이미지 검색"
                     onCompositionStart={() => { composing.current = true; }}
                     onCompositionEnd={(event) => { composing.current = false; setQuery(event.currentTarget.value); }}
@@ -213,17 +305,7 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                 <Dropdown className="post-filter" label="글 필터" size="control" value={postId} searchable="글 제목 검색"
                     options={[{ value: "", label: "모든 글" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))]}
                     onChange={setPostId} />
-                <Dropdown label="이미지 정렬" size="control" value={sort}
-                    options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }, { value: "size", label: "용량순" }]}
-                    onChange={(value) => setSort(value as Sort)} />
-                <button type="button" disabled={filter === "all" && !postId && !query && sort === "newest"}
-                    onClick={() => { setFilter("all"); setPostId(""); setSort("newest"); clearQuery(); }}>초기화</button>
-                <button type="button" disabled={deleting || scheduled.length === 0}
-                    onClick={() => remove(scheduled, `${scopedLabel}삭제 예정 ${scheduled.length}개를 지금 삭제할까요?`,
-                        `어떤 글도 쓰지 않고 올린 지 하루가 지난 이미지입니다(${bytes(total(scheduled))}). 두면 ${sweepTime(nextSweepAt)} 자동 정리에서 지워집니다. 되돌릴 수 없습니다.`)}>
-                    삭제 예정 지금 삭제
-                </button>
-            </TableToolbar>
+            </ImageToolbar>
 
             <FilterChips items={[
                 ...(filter !== "all" ? [{ key: "status", name: "쓰임", value: FILTERS.find((f) => f.key === filter)!.label }] : []),
@@ -248,7 +330,7 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                                 const users = usersOf(image);
                                 return (
                                     <ImageCard key={image.path} type="button" className={image.path === selectedPath ? "current" : ""}
-                                        aria-pressed={image.path === selectedPath} onClick={() => setSelectedPath(image.path)}>
+                                        aria-pressed={image.path === selectedPath} onClick={() => select(image.path)}>
                                         {/* 목록 미리보기라 next/image 최적화를 태우지 않는다 */}
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={image.url} alt="" loading="lazy" />
@@ -267,62 +349,15 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                     )}
                 </AdminListScroll>
 
-                <DetailPanel aria-label="이미지 정보">
-                    {!selected ? (
-                        <p className="placeholder">이미지를 고르면 쓰임과 정보가 여기 나옵니다.</p>
-                    ) : (
-                        <>
-                            {/* 누르면 본문·포트폴리오와 같은 전체 화면 뷰어로 크게 본다 */}
-                            <button type="button" className="preview-button" onClick={() => setViewing(true)} aria-label="이미지 크게 보기">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img className="preview" src={selected.url} alt="" />
-                            </button>
-                            <dl>
-                                <dt>경로</dt>
-                                <dd className="path">{selected.path}</dd>
-                                <dt>크기</dt>
-                                <dd>{bytes(selected.size)}</dd>
-                                <dt>올린 시각</dt>
-                                <dd>{kst(selected.createdAt)} (KST)</dd>
-                            </dl>
-
-                            <div className={`state ${selected.state}`} role="note">
-                                <span className="icon" aria-hidden>{selected.state === "scheduled" ? "⚠" : "ⓘ"}</span>
-                                <span>
-                                    {selected.state === "used" && "글에서 쓰고 있습니다. 지우려면 먼저 아래 글에서 제거해야 합니다."}
-                                    {selected.state === "grace" && `아무 글도 쓰지 않지만 올린 지 하루가 안 됐습니다. 저장 전인 글이 쓰고 있을 수 있습니다. 그대로 두면 ${sweepTime(selected.deletesAt!)} 자동 정리에서 지워집니다.`}
-                                    {selected.state === "scheduled" && `아무 글도 쓰지 않습니다. ${sweepTime(selected.deletesAt!)} 자동 정리에서 지워집니다.`}
-                                </span>
-                            </div>
-
-                            {selected.state === "used" && (
-                                <div>
-                                    <h3>쓰는 글</h3>
-                                    <ul className="users">
-                                        {usersOf(selected).map(({ user, kinds }) => (
-                                            <li key={user.id}>
-                                                <Link href={`/admin/posts/${user.id}`}>
-                                                    <span className={`badge ${user.status === "DRAFT" ? "draft" : ""}`}>{user.status === "DRAFT" ? "초안" : "공개"}</span>
-                                                    <span className="title" title={user.title}>{user.title}</span>
-                                                    <span className="kind">{kinds.join(" · ")}</span>
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-
-                            <div className="actions">
-                                <Button type="button" onClick={() => copyUrl(selected.url)}>주소 복사</Button>
-                                <Button type="button" onClick={() => setViewing(true)}>크게 보기</Button>
-                                <Button type="button" className="danger" disabled={selected.state === "used" || deleting} onClick={() => removeOne(selected)}>
-                                    삭제
-                                </Button>
-                            </div>
-                        </>
-                    )}
+                {/* 넓은 화면에서는 그리드 옆에 붙어 있고, 좁은 화면에서는 CSS 가 숨기고 아래 시트가 대신한다 */}
+                <DetailPanel className="inline-panel" aria-label="이미지 정보">
+                    {details ?? <p className="placeholder">이미지를 고르면 쓰임과 정보가 여기 나옵니다.</p>}
                 </DetailPanel>
             </ImagesLayout>
+
+            {sheetOpen && details && (
+                <DetailSheet onClose={closeSheet}>{details}</DetailSheet>
+            )}
 
             {/*
               지금 걸러진 목록을 그대로 넘겨 뷰어 안에서 이전·다음으로 넘긴다.

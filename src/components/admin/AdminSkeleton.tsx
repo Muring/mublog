@@ -12,7 +12,7 @@ import { ChartCard } from "./VisitorChart.styled";
 import { CompactList } from "./AdminCommentList";
 import { CommentRow } from "@/components/comments/Comments.styled";
 import { ImageCard } from "./ImagePicker.styled";
-import { DetailPanel, ImagesLayout } from "./AdminImages.styled";
+import { DetailPanel, ImageToolbar, ImagesLayout } from "./AdminImages.styled";
 import styles from "./Management.module.css";
 import { AdminWrapper, PostTable, AdminListScroll, TableToolbar, Button, Skeleton } from "./Admin.styled";
 
@@ -164,18 +164,20 @@ export function AdminImagesSkeleton() {
     return (
         <div role="status" aria-label="이미지 목록을 불러오는 중">
             <div aria-hidden inert>
-                <TableToolbar data-loading>
+                <ImageToolbar data-loading className="filters-row">
                     <div className="status-filters">
                         {["전체", "썸네일", "본문", "미사용", "삭제 예정"].map((label, i) => (
                             <button key={label} type="button" tabIndex={-1} aria-pressed={i === 0}>{label}</button>
                         ))}
                     </div>
+                    <Dropdown className="sort-control" label="이미지 정렬" size="control" value="newest" options={[{ value: "newest", label: "최신순" }]} onChange={() => {}} />
+                    <button type="button" className="reset" tabIndex={-1} disabled>초기화</button>
+                    <button type="button" className="bulk-delete" tabIndex={-1} disabled>삭제 예정 지금 삭제</button>
+                </ImageToolbar>
+                <ImageToolbar data-loading className="search-row">
                     <input type="search" tabIndex={-1} readOnly placeholder="경로 · 글 제목 검색" aria-label="이미지 검색" />
                     <Dropdown className="post-filter" label="글 필터" size="control" value="" options={[{ value: "", label: "모든 글" }]} onChange={() => {}} />
-                    <Dropdown label="이미지 정렬" size="control" value="newest" options={[{ value: "newest", label: "최신순" }]} onChange={() => {}} />
-                    <button type="button" tabIndex={-1} disabled>초기화</button>
-                    <button type="button" tabIndex={-1} disabled>삭제 예정 지금 삭제</button>
-                </TableToolbar>
+                </ImageToolbar>
                 <p className={styles.summary}><Skeleton style={{ width: "26rem", maxWidth: "100%", height: "1.45rem" }} /></p>
                 <ImagesLayout>
                     <AdminListScroll>
@@ -189,7 +191,7 @@ export function AdminImagesSkeleton() {
                             ))}
                         </div>
                     </AdminListScroll>
-                    <DetailPanel><p className="placeholder">이미지를 고르면 쓰임과 정보가 여기 나옵니다.</p></DetailPanel>
+                    <DetailPanel className="inline-panel"><p className="placeholder">이미지를 고르면 쓰임과 정보가 여기 나옵니다.</p></DetailPanel>
                 </ImagesLayout>
             </div>
         </div>
