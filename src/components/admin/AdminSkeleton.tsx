@@ -11,12 +11,15 @@ import PostTableToolbar from "./PostTableToolbar";
 import { ChartCard } from "./VisitorChart.styled";
 import { CompactList } from "./AdminCommentList";
 import { CommentRow } from "@/components/comments/Comments.styled";
+import { ImageCard } from "./ImagePicker.styled";
+import { DetailPanel, ImagesLayout } from "./AdminImages.styled";
 import styles from "./Management.module.css";
 import { AdminWrapper, PostTable, AdminListScroll, TableToolbar, Button, Skeleton } from "./Admin.styled";
 
 /** 관리 탭 사이에서 유지되는 공통 프레임. 페이지 로딩은 children 내부만 교체한다. */
 export function AdminShell({ children }: { children: React.ReactNode }) {
-    const title = usePathname() === "/admin/comments" ? "댓글 관리" : "포스트 관리";
+    const pathname = usePathname();
+    const title = pathname === "/admin/comments" ? "댓글 관리" : pathname === "/admin/images" ? "이미지 관리" : "포스트 관리";
     return (
         <AdminWrapper>
             <div className="admin-head">
@@ -151,6 +154,41 @@ export function AdminCommentsSkeleton() {
                 <div className={styles.pagination}>
                     <span><TextSkeleton width="2em" /></span><span><TextSkeleton width="3em" /></span><span><TextSkeleton width="2em" /></span>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+/** 상태 필터·요약 줄·카드 그리드·상세 패널 자리를 실제 이미지 관리와 맞춘다. */
+export function AdminImagesSkeleton() {
+    return (
+        <div role="status" aria-label="이미지 목록을 불러오는 중">
+            <div aria-hidden inert>
+                <TableToolbar data-loading>
+                    <div className="status-filters">
+                        {["전체", "썸네일", "본문", "미사용", "삭제 예정"].map((label, i) => (
+                            <button key={label} type="button" tabIndex={-1} aria-pressed={i === 0}>{label}</button>
+                        ))}
+                    </div>
+                    <input type="search" tabIndex={-1} readOnly placeholder="파일 경로 · 글 제목 · 주소 검색" aria-label="이미지 검색" />
+                    <Dropdown label="이미지 정렬" size="control" value="newest" options={[{ value: "newest", label: "최신순" }]} onChange={() => {}} />
+                    <button type="button" tabIndex={-1} disabled>삭제 예정 지금 삭제</button>
+                </TableToolbar>
+                <p className={styles.summary}><Skeleton style={{ width: "22rem", maxWidth: "100%", height: "1.45rem" }} /></p>
+                <ImagesLayout>
+                    <AdminListScroll>
+                        <div className="grid">
+                            {Array.from({ length: 12 }, (_, i) => (
+                                <ImageCard key={i} as="span">
+                                    <Skeleton style={{ width: "100%", aspectRatio: "16 / 9", height: "auto" }} />
+                                    <span className="name"><TextSkeleton width="80%" /></span>
+                                    <span className="meta"><TextSkeleton width="50%" /></span>
+                                </ImageCard>
+                            ))}
+                        </div>
+                    </AdminListScroll>
+                    <DetailPanel><p className="placeholder">이미지를 고르면 쓰임과 정보가 여기 나옵니다.</p></DetailPanel>
+                </ImagesLayout>
             </div>
         </div>
     );

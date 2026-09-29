@@ -100,6 +100,17 @@ async function collectImageUsage(): Promise<Map<string, ImageUsage>> {
  * 그것까지 지우면 작성 중인 글이 깨진다.
  */
 export const GRACE_HOURS = 24;
+/** vercel.json crons 의 "0 3 * * *" 와 맞춘다. UTC 03시 = KST 12시 */
+const SWEEP_HOUR_UTC = 3;
+
+/** after 이후 처음 도는 정리 시각 */
+function nextSweepAt(after: Date): Date {
+    const next = new Date(after);
+    next.setUTCHours(SWEEP_HOUR_UTC, 0, 0, 0);
+    if (next <= after) next.setUTCDate(next.getUTCDate() + 1);
+    return next;
+}
+
 type SweepResult = {
     total: number;
     referenced: number;
@@ -161,6 +172,63 @@ export async function sweepOrphanImages(
     };
 }
 
+/**
+ * used: 어떤 글이 쓰는 중
+ * grace: 아무도 안 쓰지만 올린 지 GRACE_HOURS 가 안 됐다. 저장 전 초안일 수 있다
+ * scheduled: 다음 정리에서 지워진다
+ */
+export type ImageState = "used" | "grace" | "scheduled";
+
+/** 이미지 관리 화면의 한 장 */
+export type ManagedImage = {
+    /** 버킷 안 경로. 삭제 요청은 이걸로 한다 */
+    path: string;
+    url: string;
+    name: string;
+    size: number;
+    createdAt: string;
+    usedAsThumbnail: ImageUser[];
+    usedInBody: ImageUser[];
+    state: ImageState;
+    /** 자동 정리로 지워질 시각. 쓰는 중이면 null */
+    deletesAt: string | null;
+};
+
+/**
+ * 버킷의 모든 이미지를 쓰임·상태와 함께.
+ *
+ * sweep 과 같은 참조 판정·같은 유예 시간을 쓴다. 여기서 "삭제 예정" 인 것이
+ * 실제로 다음 정리에서 지워지는 것과 어긋나면 이 화면은 거짓말을 한다.
+ */
+export async function classifyImages(now = new Date()): Promise<{ images: ManagedImage[]; nextSweepAt: string }> {
+    const usage = await collectImageUsage();
+    const objects = await listAllObjects();
+    const supabase = createStorageClient();
+    const graceMs = GRACE_HOURS * 60 * 60 * 1000;
+
+    const images = objects.map((object): ManagedImage => {
+        const used = usage.get(object.path);
+        const expires = new Date(object.createdAt.getTime() + graceMs);
+        // sweep 은 "cutoff 보다 늦게 올린 것" 만 남긴다 — 경계는 sweep 과 같게 둔다
+        const state: ImageState = used ? "used" : expires.getTime() > now.getTime() ? "grace" : "scheduled";
+        return {
+            path: object.path,
+            url: supabase.storage.from(POST_IMAGE_BUCKET).getPublicUrl(object.path).data.publicUrl,
+            name: object.path.split("/").pop() ?? object.path,
+            size: object.size,
+            createdAt: object.createdAt.toISOString(),
+            usedAsThumbnail: used?.thumbnail ?? [],
+            usedInBody: used?.body ?? [],
+            state,
+            deletesAt: used ? null : nextSweepAt(expires > now ? expires : now).toISOString(),
+        };
+    });
+
+    // 최근에 올린 것을 먼저 본다
+    images.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { images, nextSweepAt: nextSweepAt(now).toISOString() };
+}
+
 /** 이미지 고르기 화면에 뿌릴 한 장 */
 export type LibraryImage = {
     /** 그대로 썸네일 칸에 넣을 수 있는 주소 */
@@ -186,18 +254,44 @@ export type LibraryImage = {
  * 쓰임은 본문과 썸네일로 나눠 본다. 고르는 사람에게는 그게 파일 위치보다 중요하다.
  */
 export async function listImageLibrary(): Promise<LibraryImage[]> {
-    const usage = await collectImageUsage();
-    const supabase = createStorageClient();
-    const images = (await listAllObjects()).map((object): LibraryImage => ({
-        url: supabase.storage.from(POST_IMAGE_BUCKET).getPublicUrl(object.path).data.publicUrl,
-        // 마지막 조각만 보여준다. 아래 "사용 중" 표시가 어느 글의 것인지 알려준다.
-        name: object.path.split("/").pop() ?? object.path,
-        size: object.size,
-        createdAt: object.createdAt.toISOString(),
-        usedAsThumbnail: usage.get(object.path)?.thumbnail.map((post) => post.slug) ?? [],
-        usedInBody: usage.get(object.path)?.body.map((post) => post.slug) ?? [],
+    const { images } = await classifyImages();
+    return images.map(({ url, name, size, createdAt, usedAsThumbnail, usedInBody }) => ({
+        url,
+        name,
+        size,
+        createdAt,
+        usedAsThumbnail: usedAsThumbnail.map((post) => post.slug),
+        usedInBody: usedInBody.map((post) => post.slug),
     }));
+}
 
-    // 최근에 올린 것을 먼저 본다
-    return images.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+/** 삭제를 거절한 이유. 라우트가 상태 코드로 바꾼다 */
+export class ImageDeleteRefused extends Error {
+    constructor(readonly status: 404 | 409, message: string) {
+        super(message);
+    }
+}
+
+/**
+ * 아무 글도 쓰지 않는 이미지를 지금 지운다 (관리 화면의 삭제 버튼).
+ *
+ * 화면이 "미사용" 이라고 보낸 것을 믿지 않고 참조를 다시 모은다. 화면을 연 뒤
+ * 다른 탭에서 그 이미지를 글에 넣었을 수 있다. 하나라도 쓰는 중이면 전부 거절한다 —
+ * 일부만 지우고 성공이라 하면 무엇이 남았는지 알 수 없다.
+ * 버킷에 실제로 있는 경로만 받는다. 목록에 없는 경로를 remove 에 넘기지 않는다.
+ */
+export async function deleteUnusedImages(paths: string[]): Promise<{ deleted: string[]; freedBytes: number }> {
+    const usage = await collectImageUsage();
+    const objects = new Map((await listAllObjects()).map((object) => [object.path, object]));
+
+    const missing = paths.filter((path) => !objects.has(path));
+    if (missing.length > 0) throw new ImageDeleteRefused(404, `이미 없는 이미지가 있습니다: ${missing.join(", ")}`);
+
+    const inUse = paths.filter((path) => usage.has(path));
+    if (inUse.length > 0) throw new ImageDeleteRefused(409, `글에서 쓰고 있어 지울 수 없습니다: ${inUse.join(", ")}`);
+
+    const { error } = await createStorageClient().storage.from(POST_IMAGE_BUCKET).remove(paths);
+    if (error) throw new Error(`삭제 실패: ${error.message}`);
+
+    return { deleted: paths, freedBytes: paths.reduce((sum, path) => sum + (objects.get(path)?.size ?? 0), 0) };
 }

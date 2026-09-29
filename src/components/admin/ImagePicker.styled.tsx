@@ -182,6 +182,12 @@ export const ImageCard = styled.button`
     color: var(--warncolor);
   }
 
+  /* 미사용이지만 아직 유예 중(이미지 관리). 분류처럼 중립이되 점선으로 "곧 바뀔 상태" 를 드러낸다 */
+  .badge.grace {
+    border-style: dashed;
+    background-color: transparent;
+  }
+
   &:hover {
     border-color: transparent;
     outline-color: var(--linkhovercolor);
