@@ -77,10 +77,19 @@ check("표 셀 안 <br /> 생존", /<br\s*\/?>/.test(sshHtml));
 // 5. rehype-slug 로 heading id 부여
 check("heading 에 id 부여됨", /<h2 id="/.test(spreadHtml) || /<h3 id="/.test(spreadHtml));
 
-// 6. 본문 이미지가 순수 <img> (기존 DOM 과 동일해야 함)
+// 6. 본문의 HTTPS 이미지가 원래 URL을 보존한 <img>로 렌더되어야 한다.
+// 이미지 저장소를 옮겨도 /images/ 같은 과거 경로를 정답으로 고정하지 않는다.
 const ciCd = read("salesforce-ci-cd-basic");
 const ciCdHtml = await renderMarkdown(ciCd);
-check("본문 이미지가 <img> 로 렌더됨", /<img src="\/images\//.test(ciCdHtml));
+const sourceImages = Array.from(ciCd.matchAll(/!\[[^\]]*\]\((https:\/\/[^\s)]+)\)/g), (m) => m[1]);
+const renderedImages = Array.from(ciCdHtml.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/g), (m) => m[1]);
+check(
+    "본문 이미지가 원본 URL을 보존한 <img> 로 렌더됨",
+    sourceImages.length > 0 &&
+        sourceImages.length === renderedImages.length &&
+        sourceImages.every((src, index) => renderedImages[index] === src),
+    `source=${sourceImages.length} rendered=${renderedImages.length}`
+);
 
 let failed = 0;
 for (const c of checks) {
