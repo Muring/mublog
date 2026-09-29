@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import { buttonBase, buttonDanger } from "@/styles/button";
 import { surface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
+import { overlayBackdrop, overlayPanel } from "@/styles/motion";
 
 /**
  * 확인 대화상자.
@@ -24,16 +25,10 @@ export const ConfirmOverlay = styled.div`
        뒤를 가리는 막이라 두 테마 모두 검정이어야 한다 */
     background-color: rgba(0, 0, 0, 0.5);
 
-    animation: confirm-fade 0.12s ease-out;
-    @keyframes confirm-fade {
-        from {
-            opacity: 0;
-        }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        animation: none;
-    }
+    /* 막을 끌어도 뒤 페이지가 움직이지 않는다 */
+    touch-action: none;
+    /* 막은 흐려졌다 짙어지고, 상자는 살짝 떠오른다. 닫을 때는 반대로(공용 움직임) */
+    ${overlayBackdrop}
 `;
 
 export const ConfirmBox = styled.div`
@@ -41,6 +36,7 @@ export const ConfirmBox = styled.div`
     padding: 1.25rem;
     ${surface("0.75rem")}
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    ${overlayPanel("pop")}
 
     h3 {
         font-size: 1rem;

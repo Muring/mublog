@@ -2,6 +2,7 @@
 
 import styled from "@emotion/styled";
 import { mobile } from "@/styles/breakpoints";
+import { overlayDialog } from "@/styles/motion";
 
 /**
  * 전체 화면 이미지 뷰어. 포트폴리오 갤러리와 본문 이미지가 같이 쓴다.
@@ -27,6 +28,8 @@ export const ViewerDialog = styled.dialog`
     &::backdrop {
         background: rgb(0 0 0 / 80%);
     }
+    /* 흐려졌다 짙어지며 나타나고, 닫을 때 다시 흐려진다(공용 움직임) */
+    ${overlayDialog("fade")}
 
     .viewer-toolbar {
         display: flex;

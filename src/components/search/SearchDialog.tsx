@@ -8,6 +8,7 @@ import { formatPostDate } from "@/lib/date";
 import { SearchOverlay, SearchPanel } from "./Search.styled";
 import PostLikeCount from "@/components/likes/PostLikeCount";
 import SearchIcon from "./SearchIcon";
+import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 import Highlight from "./Highlight";
 
 const DEBOUNCE_MS = 250;
@@ -31,6 +32,9 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     // 목록을 따라 스크롤하는 건 키보드로 옮길 때만이다. 마우스가 위아래 끝에 걸친 항목에
     // 닿을 때마다 목록이 움직이면 내용이 손 밑에서 미끄러진다.
     const viaKeyboard = useRef(false);
+    // 뜨고 닫히는 움직임·뒤 스크롤 잠금은 다른 창들과 같은 공용 동작이다
+    const { closing, requestClose, onAnimationEnd } = useExitTransition(onClose);
+    useScrollLock();
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -56,11 +60,8 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
         const dialog = dialogRef.current;
         dialog?.showModal();
         inputRef.current?.focus();
-        const previous = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
         return () => {
             dialog?.close();
-            document.body.style.overflow = previous;
             if (opener?.isConnected) opener.focus();
         };
     }, []);
@@ -73,7 +74,7 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     }, [focused]);
 
     function go(slug: string) {
-        onClose();
+        requestClose();
         router.push(`/${slug}`);
     }
 
@@ -121,11 +122,13 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
         <SearchOverlay
             ref={dialogRef}
             aria-label="글 검색"
+            data-closing={closing || undefined}
+            onAnimationEnd={onAnimationEnd}
             onCancel={(event) => {
                 event.preventDefault();
-                if (!composing.current) onClose();
+                if (!composing.current) requestClose();
             }}
-            onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}
+            onClick={(event) => { if (event.target === event.currentTarget) requestClose(); }}
         >
             <SearchPanel
                 onClick={(event) => event.stopPropagation()}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ViewerDialog } from "./ImageViewer.styled";
+import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 
 export type ViewerImage = {
     src: string;
@@ -28,6 +29,9 @@ type Props = {
 /**
  * 전체 화면 이미지 뷰어. 네이티브 dialog 를 showModal 로 띄운다 —
  * Escape 와 포커스 가두기를 브라우저가 해준다. 포트폴리오 갤러리와 본문 이미지가 같이 쓴다.
+ *
+ * 닫을 때는 흐려지는 애니메이션이 끝난 뒤 dialog 를 닫는다. 그래서 Escape(cancel)와 닫기 버튼은
+ * 바로 close() 하지 않고 requestClose 를 거친다. 움직임·뒤 스크롤 잠금은 공용 동작(hooks/useOverlay)이다.
  */
 export default function ImageViewer({ open, title, images, index, onIndexChange, onClose }: Props) {
     const dialog = useRef<HTMLDialogElement>(null);
@@ -35,6 +39,17 @@ export default function ImageViewer({ open, title, images, index, onIndexChange,
     const [zoomed, setZoomed] = useState(false);
     const image = images[index];
     const many = images.length > 1;
+    /*
+     * 닫힘 애니메이션이 끝나면 dialog 를 닫고 부모에게도 곧바로 알린다. dialog 의 close 이벤트는
+     * 브라우저가 나중에 보내는 것이라, 프레임이 멈춘 탭에서는 오지 않아 부모가 열린 줄로 알고
+     * 스크롤 잠금이 남고 다시 열리지도 않았다. onClose 는 두 번 불려도 상태만 끄므로 괜찮다.
+     */
+    const closeDialog = useCallback(() => {
+        dialog.current?.close();
+        onClose();
+    }, [onClose]);
+    const { closing, requestClose, onAnimationEnd } = useExitTransition(closeDialog);
+    useScrollLock(open);
 
     useEffect(() => {
         const element = dialog.current;
@@ -45,15 +60,6 @@ export default function ImageViewer({ open, title, images, index, onIndexChange,
         } else if (!open && element.open) {
             element.close();
         }
-    }, [open]);
-
-    useEffect(() => {
-        if (!open) return;
-        const previous = document.body.style.overflow;
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = previous;
-        };
     }, [open]);
 
     function select(next: number) {
@@ -67,6 +73,12 @@ export default function ImageViewer({ open, title, images, index, onIndexChange,
         <ViewerDialog
             ref={dialog}
             aria-label={`${title} 이미지 확대 보기`}
+            data-closing={closing || undefined}
+            onAnimationEnd={onAnimationEnd}
+            onCancel={(event) => {
+                event.preventDefault();
+                requestClose();
+            }}
             onClose={onClose}
             onKeyDown={(event) => {
                 if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
@@ -97,7 +109,7 @@ export default function ImageViewer({ open, title, images, index, onIndexChange,
                             <a href={image.fileUrl ?? image.src} target="_blank" rel="noopener noreferrer">
                                 이미지 파일
                             </a>
-                            <button type="button" onClick={() => dialog.current?.close()} autoFocus aria-label="확대 보기 닫기">
+                            <button type="button" onClick={requestClose} autoFocus aria-label="확대 보기 닫기">
                                 닫기 ×
                             </button>
                         </div>

@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { fadeSlide } from "@/styles/motion";
+import { fadeSlide, overlayBackdrop } from "@/styles/motion";
 import { truncate } from "@/styles/text";
 
 export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
@@ -144,6 +144,9 @@ export const Overlay = styled.div`
        --shadowcolor 는 다크에서 흰색 계열이라 여기 쓰면 화면이 뿌옇게 밝아진다 */
     background-color: rgba(0, 0, 0, 0.4);
     z-index: 99;
+    /* 막을 끌어도 뒤 페이지가 움직이지 않는다. 흐려졌다 짙어지고 닫힐 때 다시 흐려진다(공용 움직임) */
+    touch-action: none;
+    ${overlayBackdrop}
 `;
 
 export const ButtonWrapper = styled.div`

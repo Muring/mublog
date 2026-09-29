@@ -229,18 +229,23 @@ export async function classifyImages(now = new Date()): Promise<{ images: Manage
     return { images, nextSweepAt: nextSweepAt(now).toISOString() };
 }
 
+/** 이미지 고르기 화면의 "이 이미지를 쓰는 글". 글 필터가 제목으로 고르게 한다 */
+export type LibraryUser = { slug: string; title: string };
+
 /** 이미지 고르기 화면에 뿌릴 한 장 */
 export type LibraryImage = {
     /** 그대로 썸네일 칸에 넣을 수 있는 주소 */
     url: string;
+    /** 버킷 안 경로. 글 폴더(posts/<slug>/…)로 "이 글" 을 가린다 */
+    path: string;
     /** 화면에 보일 이름 */
     name: string;
     size: number;
     createdAt: string;
     /** 이 이미지를 대표 이미지로 쓰는 글 */
-    usedAsThumbnail: string[];
+    usedAsThumbnail: LibraryUser[];
     /** 이 이미지를 본문에 끼워 넣은 글 */
-    usedInBody: string[];
+    usedInBody: LibraryUser[];
 };
 
 /**
@@ -255,13 +260,15 @@ export type LibraryImage = {
  */
 export async function listImageLibrary(): Promise<LibraryImage[]> {
     const { images } = await classifyImages();
-    return images.map(({ url, name, size, createdAt, usedAsThumbnail, usedInBody }) => ({
+    const user = ({ slug, title }: ImageUser): LibraryUser => ({ slug, title });
+    return images.map(({ url, path, name, size, createdAt, usedAsThumbnail, usedInBody }) => ({
         url,
+        path,
         name,
         size,
         createdAt,
-        usedAsThumbnail: usedAsThumbnail.map((post) => post.slug),
-        usedInBody: usedInBody.map((post) => post.slug),
+        usedAsThumbnail: usedAsThumbnail.map(user),
+        usedInBody: usedInBody.map(user),
     }));
 }
 

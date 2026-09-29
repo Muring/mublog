@@ -137,6 +137,8 @@ export default function Dropdown({
                 choose(focused);
                 break;
             case "Escape":
+                // 펼친 목록만 닫는다. 모달 안의 드롭다운에서 모달까지 같이 닫히지 않게 처리했음을 알린다
+                event.preventDefault();
                 close();
                 break;
             case "Tab":

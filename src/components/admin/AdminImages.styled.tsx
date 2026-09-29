@@ -2,6 +2,7 @@
 
 import styled from "@emotion/styled";
 import { surface } from "@/styles/surface";
+import { overlayBackdrop, overlayPanel } from "@/styles/motion";
 import { TableToolbar } from "./Admin.styled";
 
 /**
@@ -221,41 +222,32 @@ export const SheetOverlay = styled.div`
   align-items: flex-end;
   /* 이미지 고르기 막과 같은 값. 두 테마 모두 검정이어야 한다 */
   background-color: rgba(0, 0, 0, 0.4);
-  /* 막을 끌어도 뒤 페이지가 움직이지 않는다. 시트 안은 아래 aside 가 세로 스크롤만 다시 허용한다 */
+  /* 막을 끌어도 뒤 페이지가 움직이지 않는다. 시트 안은 SheetPanel 이 세로 스크롤만 다시 허용한다 */
   touch-action: none;
   overscroll-behavior: contain;
 
-  /* 막은 흐려졌다 짙어지고, 시트는 아래에서 올라온다. 닫을 때는 반대로 — 닫힘이 조금 더 빠르다 */
-  animation: image-sheet-fade-in 240ms ease-out;
-  > aside { animation: image-sheet-up 240ms cubic-bezier(0.2, 0.8, 0.2, 1); }
-  &[data-closing] {
-    pointer-events: none;
-    animation: image-sheet-fade-out 200ms ease-in forwards;
-  }
-  &[data-closing] > aside { animation: image-sheet-down 200ms ease-in forwards; }
+  /* 막은 흐려졌다 짙어지고 닫힐 때 다시 흐려진다(공용 움직임). 시트 자체는 SheetPanel */
+  ${overlayBackdrop}
+`;
 
-  @keyframes image-sheet-fade-in { from { opacity: 0; } }
-  @keyframes image-sheet-fade-out { to { opacity: 0; } }
-  @keyframes image-sheet-up { from { transform: translateY(100%); } }
-  @keyframes image-sheet-down { to { transform: translateY(100%); } }
-
-  /* 움직임 줄이기면 애니메이션 없이 바로 뜨고 바로 닫힌다(닫힘은 ImageDetailSheet 가 처리) */
-  @media (prefers-reduced-motion: reduce) {
-    &, > aside, &[data-closing], &[data-closing] > aside { animation: none; }
-  }
-
-  > aside {
-    position: static;
-    width: 100%;
-    max-height: 85dvh;
-    overflow-y: auto;
-    /* 시트 끝까지 굴려도 뒤 페이지로 스크롤이 넘어가지 않는다 */
-    overscroll-behavior: contain;
-    touch-action: pan-y;
-    border-bottom: 0;
-    border-radius: 14px 14px 0 0;
-    padding-bottom: max(14px, env(safe-area-inset-bottom));
-  }
+/**
+ * 좁은 화면의 상세 시트 본체. 옆 패널(DetailPanel)의 내용 모양을 그대로 쓰고 자리·움직임만 바꾼다.
+ * 막(SheetOverlay)의 data-closing 을 보고 아래로 내려간다 — 막 안의 자식 컴포넌트여야
+ * 공용 움직임의 "[data-closing] &" 가 걸린다(막의 "> aside" 로 적으면 막 자신이 조상이 아니라 안 걸린다).
+ */
+export const SheetPanel = styled(DetailPanel)`
+  position: static;
+  width: 100%;
+  max-height: 85dvh;
+  overflow-y: auto;
+  /* 시트 끝까지 굴려도 뒤 페이지로 스크롤이 넘어가지 않는다 */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+  /* 아래에서 올라오고 아래로 내려간다(공용 움직임) */
+  ${overlayPanel("sheet")}
 
   .sheet-head {
     display: flex;
