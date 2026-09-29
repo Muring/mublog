@@ -159,7 +159,7 @@ export function AdminCommentsSkeleton() {
     );
 }
 
-/** 상태 필터·요약 줄·카드 그리드·상세 패널 자리를 실제 이미지 관리와 맞춘다. */
+/** 상태 필터·글 필터·카드 그리드·상세 패널 자리를 실제 이미지 관리와 맞춘다. */
 export function AdminImagesSkeleton() {
     return (
         <div role="status" aria-label="이미지 목록을 불러오는 중">
@@ -170,11 +170,13 @@ export function AdminImagesSkeleton() {
                             <button key={label} type="button" tabIndex={-1} aria-pressed={i === 0}>{label}</button>
                         ))}
                     </div>
-                    <input type="search" tabIndex={-1} readOnly placeholder="파일 경로 · 글 제목 · 주소 검색" aria-label="이미지 검색" />
+                    <input type="search" tabIndex={-1} readOnly placeholder="경로 · 글 제목 검색" aria-label="이미지 검색" />
+                    <Dropdown className="post-filter" label="글 필터" size="control" value="" options={[{ value: "", label: "모든 글" }]} onChange={() => {}} />
                     <Dropdown label="이미지 정렬" size="control" value="newest" options={[{ value: "newest", label: "최신순" }]} onChange={() => {}} />
+                    <button type="button" tabIndex={-1} disabled>초기화</button>
                     <button type="button" tabIndex={-1} disabled>삭제 예정 지금 삭제</button>
                 </TableToolbar>
-                <p className={styles.summary}><Skeleton style={{ width: "22rem", maxWidth: "100%", height: "1.45rem" }} /></p>
+                <p className={styles.summary}><Skeleton style={{ width: "26rem", maxWidth: "100%", height: "1.45rem" }} /></p>
                 <ImagesLayout>
                     <AdminListScroll>
                         <div className="grid">

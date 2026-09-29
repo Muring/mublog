@@ -44,6 +44,19 @@ export const DetailPanel = styled.aside`
     color: var(--desccolor);
   }
 
+  .preview-button {
+    display: block;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    cursor: zoom-in;
+    outline: 1px solid transparent;
+    transition: outline-color 150ms ease;
+  }
+  .preview-button:hover { outline-color: var(--linkhovercolor); }
+  .preview-button:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+
   .preview {
     display: block;
     width: 100%;
@@ -73,17 +86,24 @@ export const DetailPanel = styled.aside`
     margin: 0 0 6px;
   }
 
-  /* 상태 설명. 손볼 거리(삭제 예정)만 상태색을 쓴다 */
+  /*
+   * 상태 안내. 본문 callout(PostContent 의 aside)과 같은 모양 — 왼쪽 굵은 막대 + 옅은 테두리.
+   * 손볼 거리(삭제 예정)만 막대·테두리를 상태색으로 바꾼다.
+   */
   .state {
-    padding: 8px 10px;
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--calloutborder);
+    border-left: 0.35rem solid var(--calloutaccent);
     border-radius: 8px;
-    border: var(--border-width) solid var(--bordercolor);
-    background-color: var(--codefontbgcolor);
     color: var(--foreground);
     line-height: 1.6;
   }
+  .state .icon { flex-shrink: 0; font-weight: 700; }
   .state.scheduled {
     border-color: var(--warnborder);
+    border-left-color: var(--warncolor);
     background-color: var(--warnbg);
     color: var(--warncolor);
   }
@@ -141,6 +161,4 @@ export const DetailPanel = styled.aside`
     gap: 6px;
   }
   .actions > * { flex: 1 1 auto; justify-content: center; }
-  .actions > a { display: flex; text-decoration: none; }
-  .actions > a > span { flex: 1; justify-content: center; }
 `;
