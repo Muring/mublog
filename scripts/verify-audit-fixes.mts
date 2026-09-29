@@ -29,6 +29,13 @@ assert.deepEqual(referencedImagePaths(`![](${prefix}a.png?download=1)![](${prefi
 assert.deepEqual(referencedImagePaths(`<img src="${prefix}%ED%95%9C%EA%B8%80%20%281%29.png?x=2">`, "post-images"), ["한글 (1).png"]);
 assert.deepEqual(referencedImagePaths(`${prefix}a%3Fb%23c.png`, "post-images"), ["a?b#c.png"]);
 assert.throws(() => referencedImagePaths(`${prefix}bad%ZZ.png`, "post-images"));
+// 공개 주소가 아니어도 그 파일을 쓰는 것이다. 놓치면 sweep 이 쓰는 중인 이미지를 지운다.
+const origin = "https://example.invalid/storage/v1";
+assert.deepEqual(
+    referencedImagePaths(`![](${origin}/render/image/public/post-images/posts/a/image-1.png?width=600) ${origin}/object/sign/post-images/b.png?token=x`, "post-images"),
+    ["posts/a/image-1.png", "b.png"]
+);
+assert.deepEqual(referencedImagePaths(`${origin}/object/public/other-bucket/a.png ${origin}/object/public/post-images-old/b.png`, "post-images"), []);
 assert.equal(slugSchema.safeParse("privacy").success, false);
 assert.equal(slugSchema.safeParse("privacy-guide").success, true);
 

@@ -13,13 +13,13 @@ try {
     // 플랫폼이 환경변수를 직접 주입하는 경우
 }
 
-const { sweepOrphanImages } = await import("../src/lib/storage");
+const { sweepOrphanImages, GRACE_HOURS } = await import("../src/lib/storage");
 const { prisma } = await import("../src/lib/prisma");
 
 const args = process.argv.slice(2);
 const apply = args.includes("--apply");
 const graceIndex = args.indexOf("--grace");
-const graceHours = graceIndex !== -1 ? Number(args[graceIndex + 1]) : 24;
+const graceHours = graceIndex !== -1 ? Number(args[graceIndex + 1]) : GRACE_HOURS;
 
 const kb = (bytes: number) => (bytes / 1024).toFixed(1) + " KB";
 

@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import type { PostStatus } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { referencedImagePaths } from "@/lib/image-references";
 
@@ -60,24 +61,45 @@ async function listAllObjects(): Promise<StoredObject[]> {
     return objects;
 }
 
+/** 이미지를 쓰는 글. 관리 화면이 제목·상태를 보여주고 편집 화면으로 이어준다. */
+export type ImageUser = { id: string; slug: string; title: string; status: PostStatus };
+type ImageUsage = { thumbnail: ImageUser[]; body: ImageUser[] };
+
 /**
- * 모든 포스트(초안 포함)에서 이 버킷을 가리키는 경로를 모은다.
+ * 모든 포스트(초안 포함)가 이 버킷의 어느 경로를 어떻게 쓰는지.
+ *
+ * 쓰는지 판정은 여기 한 곳이다. sweep·이미지 고르기·이미지 관리가 모두 이걸 본다.
+ * 예전에는 고르기 화면이 문자열 포함으로 따로 판정해서, 인코딩된 파일명은 "미사용" 으로,
+ * 공개 주소가 아닌 변환 주소는 "사용 중" 으로 sweep 과 반대로 보였다.
  *
  * 본문과 썸네일을 둘 다 본다. 썸네일 주소는 본문에 나타나지 않으므로 빠뜨리면
- * 쓰고 있는 대표 이미지가 고아로 잡혀 --apply 에서 지워진다.
+ * 쓰고 있는 대표 이미지가 고아로 잡혀 지워진다.
  * 이미지를 담는 컬럼이 늘어나면 여기에도 함께 더해야 한다.
  */
-async function collectReferencedPaths(): Promise<Set<string>> {
-    const posts = await prisma.post.findMany({ select: { contentMd: true, thumbnail: true } });
-    const referenced = new Set<string>();
-    for (const post of posts) {
-        for (const text of [post.contentMd, post.thumbnail ?? ""]) {
-            for (const path of referencedImagePaths(text, POST_IMAGE_BUCKET)) referenced.add(path);
-        }
+async function collectImageUsage(): Promise<Map<string, ImageUsage>> {
+    const posts = await prisma.post.findMany({
+        select: { id: true, slug: true, title: true, status: true, contentMd: true, thumbnail: true },
+    });
+    const usage = new Map<string, ImageUsage>();
+    const add = (path: string, kind: keyof ImageUsage, user: ImageUser) => {
+        const entry = usage.get(path) ?? { thumbnail: [], body: [] };
+        // 한 글이 같은 이미지를 본문에 두 번 넣어도 한 번만 센다
+        if (!entry[kind].some((u) => u.id === user.id)) entry[kind].push(user);
+        usage.set(path, entry);
+    };
+    for (const { contentMd, thumbnail, ...user } of posts) {
+        for (const path of referencedImagePaths(thumbnail ?? "", POST_IMAGE_BUCKET)) add(path, "thumbnail", user);
+        for (const path of referencedImagePaths(contentMd, POST_IMAGE_BUCKET)) add(path, "body", user);
     }
-    return referenced;
+    return usage;
 }
 
+/**
+ * 참조를 잃은 뒤 이만큼은 남겨둔다.
+ * 에디터에서 이미지를 올린 뒤 아직 저장하지 않은 초안이 있을 수 있고,
+ * 그것까지 지우면 작성 중인 글이 깨진다.
+ */
+export const GRACE_HOURS = 24;
 type SweepResult = {
     total: number;
     referenced: number;
@@ -95,18 +117,16 @@ type SweepResult = {
  *   2) 올려놓고 저장 없이 창을 닫은 경우
  *   3) 포스트를 삭제해 딸린 이미지가 고아가 된 경우
  *
- * graceHours: 방금 올린 파일은 건드리지 않는다.
- *   에디터에서 이미지를 올린 뒤 아직 저장하지 않은 초안이 있을 수 있고,
- *   그것까지 지우면 작성 중인 글이 깨진다.
+ * graceHours: 방금 올린 파일은 건드리지 않는다 (GRACE_HOURS 참고).
  */
 export async function sweepOrphanImages(
     options: { dryRun?: boolean; graceHours?: number } = {}
 ): Promise<SweepResult> {
-    const { dryRun = true, graceHours = 24 } = options;
+    const { dryRun = true, graceHours = GRACE_HOURS } = options;
 
     // 참조 목록을 먼저 확보한다. 이 조회가 실패하면 무엇이 고아인지 알 수 없으므로
     // 삭제 단계로 넘어가지 않고 그대로 예외를 던진다.
-    const referenced = await collectReferencedPaths();
+    const referenced = await collectImageUsage();
     const objects = await listAllObjects();
 
     const cutoff = Date.now() - graceHours * 60 * 60 * 1000;
@@ -163,46 +183,21 @@ export type LibraryImage = {
  * 통째로 함수 번들에 싣는다 — 그게 배포마다 쌓여 Vercel Function Storage 를 먹었다.
  * 글 이미지를 다시 public/ 에 두지 않는다 (next.config 의 outputFileTracingExcludes 가 안전망).
  *
- * 쓰임은 본문과 썸네일을 문자열 포함으로 찾는다. 정규식으로 주소를 파싱하지 않는 이유는
- * 마크다운·HTML·프론트매터 어디에 있든 걸려야 하기 때문이다.
+ * 쓰임은 본문과 썸네일로 나눠 본다. 고르는 사람에게는 그게 파일 위치보다 중요하다.
  */
 export async function listImageLibrary(): Promise<LibraryImage[]> {
-    const posts = await prisma.post.findMany({
-        select: { slug: true, contentMd: true, thumbnail: true },
-    });
-    /*
-     * 쓰임을 본문과 썸네일로 나눠 본다. 합쳐서 세면 "이 이미지가 무엇으로 쓰이는지"
-     * 를 알 수 없는데, 고르는 사람에게는 그게 파일 위치보다 중요한 정보다.
-     * 한 이미지가 둘 다일 수도 있다 - 그때는 둘 다 표시된다.
-     */
-    const usersOf = (needle: string) => ({
-        usedAsThumbnail: posts
-            .filter((post) => (post.thumbnail ?? "").includes(needle))
-            .map((post) => post.slug),
-        usedInBody: posts.filter((post) => post.contentMd.includes(needle)).map((post) => post.slug),
-    });
-
-    const images: LibraryImage[] = [];
-
-    for (const object of await listAllObjects()) {
-        images.push({
-            url: publicUrlOf(object.path),
-            // 마지막 조각만 보여준다. 지금은 uuid 라 읽히지 않지만
-            // 아래 "사용 중" 표시가 어느 글의 것인지 알려준다.
-            name: object.path.split("/").pop() ?? object.path,
-            size: object.size,
-            createdAt: object.createdAt.toISOString(),
-            // 주소 전체가 아니라 버킷 안 경로로 찾는다. 프로젝트 주소가 바뀌어도 걸린다.
-            ...usersOf(object.path),
-        });
-    }
+    const usage = await collectImageUsage();
+    const supabase = createStorageClient();
+    const images = (await listAllObjects()).map((object): LibraryImage => ({
+        url: supabase.storage.from(POST_IMAGE_BUCKET).getPublicUrl(object.path).data.publicUrl,
+        // 마지막 조각만 보여준다. 아래 "사용 중" 표시가 어느 글의 것인지 알려준다.
+        name: object.path.split("/").pop() ?? object.path,
+        size: object.size,
+        createdAt: object.createdAt.toISOString(),
+        usedAsThumbnail: usage.get(object.path)?.thumbnail.map((post) => post.slug) ?? [],
+        usedInBody: usage.get(object.path)?.body.map((post) => post.slug) ?? [],
+    }));
 
     // 최근에 올린 것을 먼저 본다
     return images.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}
-
-/** 버킷 안 경로를 공개 주소로 */
-function publicUrlOf(path: string): string {
-    const supabase = createStorageClient();
-    return supabase.storage.from(POST_IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
 }
