@@ -361,7 +361,8 @@ page.tsx (서버)  ──▶  DAL 조회  ──▶  props  ──▶  클라이
 ```
 
 `SideMenu`처럼 root layout 안에 있어 서버 props를 받을 수 없는 컴포넌트는
-`/api/posts/summary`를 TanStack Query로 페치합니다.
+`/api/posts/summary`를 TanStack Query로 페치합니다. 메뉴 버튼에 포인터가 닿거나 포커스되는 순간
+미리 받아 두어, 메뉴를 열 때 "불러오는 중"을 거치지 않습니다.
 
 ### 상태
 

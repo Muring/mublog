@@ -9,6 +9,13 @@ import Link from "next/link";
 import type { PostSummary } from "@/types/post";
 import { fetchPostsSummary, queryKeys } from "@/lib/queries";
 
+/** 메뉴를 열기 전에 헤더가 미리 받아 둘 수 있도록 옵션을 한곳에 둔다 */
+export const postsSummaryQuery = {
+  queryKey: queryKeys.postsSummary,
+  queryFn: fetchPostsSummary,
+  staleTime: 5 * 60_000,
+};
+
 type Props = {
   type?: string; // 기본값 없음, recent일 때만 최근 포스트
   onLinkClick?: () => void;
@@ -19,11 +26,7 @@ export default function SideList({ type, onLinkClick }: Props) {
   const title = isRecent ? "Recently viewed" : "Latest posts";
 
   const { recentPosts, isLoading: isRecentLoading } = useRecentPosts();
-  const { data: posts = [], isLoading: isPostsLoading } = useQuery({
-    queryKey: queryKeys.postsSummary,
-    queryFn: fetchPostsSummary,
-    staleTime: 5 * 60_000,
-  });
+  const { data: posts = [], isLoading: isPostsLoading } = useQuery(postsSummaryQuery);
 
   const isLoading = isPostsLoading || (isRecent && isRecentLoading);
 
