@@ -15,14 +15,3 @@
 .summary { font-size:13px; color:var(--desccolor); margin:12px 0; line-height:1.8; }
 .compact { padding:18px 0; font-size:14px; color:var(--desccolor); }
 @media(max-width:560px) { .navigation a { flex:1; text-align:center; padding:10px 8px; } }
-
-.analyticsSummary { color:var(--foreground); font-size:14px; line-height:1.6; margin:8px 0 12px; }
-.analyticsSummary strong { font-weight:800; }
-.analyticsSummary small { display:block; color:var(--desccolor); font-size:12px; }
-
-.analyticsToolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 16px; }
-
-.analyticsSummary { display:flex; align-items:flex-start; justify-content:space-between; gap:8px 16px; }
-.analyticsText { flex:1; min-width:0; }
-.analyticsSummary > :last-child { flex-shrink:0; }
-@media(max-width:560px) { .analyticsSummary { gap:8px; } }

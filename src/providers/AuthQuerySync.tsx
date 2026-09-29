@@ -14,6 +14,8 @@ export default function AuthQuerySync() {
             queueMicrotask(() => {
                 void client.cancelQueries({ queryKey: ["likes"] });
                 client.removeQueries({ queryKey: ["likes"] });
+                // 활성 화면도 즉시 비우고 현재 세션으로 다시 인가받는다.
+                void client.resetQueries({ queryKey: ["admin-analytics"] });
                 void client.resetQueries({ queryKey: queryKeys.me });
             });
         });

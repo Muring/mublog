@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { statusBadgeBase } from "@/styles/status-badge";
 import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
 import { segmented } from "@/styles/segmented";
 import { thinScrollbar } from "@/styles/scrollbar";
@@ -237,39 +238,7 @@ export const PostTable = styled.table`
     ${truncate}
   }
 
-  .badge {
-    display: inline-block;
-    padding: 0.15rem 0.55rem;
-    border-radius: 999px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    /* 글자가 두 자뿐이라 쪼개지면 배지로 보이지 않는다 */
-    white-space: nowrap;
-    border: var(--border-width) solid var(--bordercolor);
-  }
-
-  /*
-   * 두 상태가 한눈에 갈려야 한다.
-   * 회색으로 조용히 두었더니 배경(--codefontbgcolor)과 글자(--desccolor)가
-   * 둘 다 무채색이라 "상태" 가 아니라 그냥 흐린 글씨로 보였다.
-   * 켜져 있음은 초록, 아직임은 앰버로 색을 갈라 놓는다.
-   */
-  .badge.published {
-    background-color: var(--okbg);
-    color: var(--okcolor);
-    border-color: var(--okborder);
-  }
-
-  /*
-   * 초안은 "아직 안 보이는 글" 이라 눈에 걸려야 한다.
-   * 예전에는 #b26a00 을 하드코딩해 다크 3.51 / 라이트 4.24 로 양쪽 다 미달이었고
-   * 테마도 따르지 않았다. 토큰으로 바꿔 라이트 6.44 / 다크 8.91 을 만든다.
-   */
-  .badge.draft {
-    background-color: var(--warnbg);
-    color: var(--warncolor);
-    border-color: var(--warnborder);
-  }
+  .badge { ${statusBadgeBase} }
 
   .row-edit, .row-delete {
     display: inline-flex;
@@ -609,7 +578,13 @@ export const TableToolbar = styled.div`
   }
   html.dark &.comment-search input[type="date"] { color-scheme: dark; }
   @container admin (max-width: 650px) {
-    &.comment-search input[type="date"] { order: 1; flex: 1 1 0; width: 0; min-width: 120px; }
-    &.comment-search .date-label, &.comment-search .date-sep { order: 1; }
+    &.comment-search {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
+    &.comment-search > * { order: 0; min-width: 0; }
+    &.comment-search input[type="search"], &.comment-search .date-label { grid-column: 1 / -1; width: 100%; }
+    &.comment-search input[type="date"] { width: 100%; min-width: 0; }
+    &.comment-search .date-sep { text-align: center; }
   }
 `;

@@ -36,8 +36,15 @@ export const EditorWrapper = styled.div`
 
   .actions {
     display: flex;
+    flex-wrap: wrap;
+    min-width: 0;
     gap: 0.5rem;
     align-items: center;
+  }
+  .actions button, .actions a { white-space: nowrap; }
+  @media (max-width: 480px) {
+    .actions { width: 100%; }
+    .actions > [role="status"] { flex-basis: 100%; }
   }
 
   .status-text {
@@ -296,7 +303,7 @@ export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
   .pane-preview {
     height: var(--pane-height);
     /* 화면이 아주 낮아도 몇 줄은 보여야 한다 */
-    min-height: 22rem;
+    min-height: min(22rem, max(12rem, var(--pane-height)));
   }
 
   /*
@@ -317,13 +324,17 @@ export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
 
   @media (max-width: 900px) {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    /* 탭과 간격도 전체 높이에 포함한다. 주소창·키보드로 화면이 줄어도 본문이 밀리지 않는다. */
+    height: max(12rem, var(--pane-height));
+    .pane-write, .pane-preview { height: 100%; min-height: 0; }
 
     /* 책갈피처럼 가로를 반씩 나눠 갖는다 */
     .pane-tabs {
       display: grid;
       grid-template-columns: 1fr 1fr;
       border-bottom: 1px solid var(--bordercolor);
-      margin-bottom: 0.75rem;
+      margin-bottom: 0;
     }
 
     /* 고른 쪽만 남긴다. 감추는 쪽은 DOM 에 그대로 두어

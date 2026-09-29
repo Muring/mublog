@@ -9,11 +9,13 @@ export default function AdminNavigation() {
     const pathname = usePathname();
     const params = useSearchParams();
     const comments = pathname === "/admin/comments";
-    const returnTo = comments ? safeAdminReturn(params.get("returnTo")) : postListUrl(postListState(new URLSearchParams(params)));
+    const stats = pathname === "/admin/stats";
+    const returnTo = comments || stats ? safeAdminReturn(params.get("returnTo")) : postListUrl(postListState(new URLSearchParams(params)));
     return (
         <nav className={styles.navigation} aria-label="콘텐츠 관리">
-            <Link href={returnTo} aria-current={!comments ? "page" : undefined}>포스트 관리</Link>
+            <Link href={returnTo} aria-current={pathname === "/admin" ? "page" : undefined}>포스트 관리</Link>
             <Link href={commentListUrl({ returnTo })} aria-current={comments ? "page" : undefined}>댓글 관리</Link>
+            <Link href={stats ? `/admin/stats${params.size ? `?${params}` : ""}` : returnTo === "/admin" ? "/admin/stats" : `/admin/stats?${new URLSearchParams({ returnTo })}`} aria-current={stats ? "page" : undefined}>통계</Link>
         </nav>
     );
 }

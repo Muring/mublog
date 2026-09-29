@@ -1,21 +1,7 @@
 import assert from "node:assert/strict";
-import { bucketPoints, lineSegments } from "../src/lib/admin-chart";
+import { lineSegments } from "../src/lib/admin-chart";
 import { commentDateRange, commentDates, commentPage, commentListUrl, commentQuery, filterAdminPosts, pageWindow, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
 
-const today = "2026-09-17";
-const points = [{ date: "2026-09-16", value: 2 }, { date: today, value: 0 }];
-const daily = bucketPoints(points, "daily", "2026", today);
-assert.equal(daily.length, 30);
-assert.equal(daily.at(-1)?.value, 0);
-assert.equal(daily.at(-2)?.value, 2);
-assert.equal(daily.at(-3)?.value, null);
-assert.equal(bucketPoints(points, "weekly", "2026", today).at(-1)?.value, 2);
-const months = bucketPoints(points, "monthly", "2026", today);
-assert.equal(months[8].value, 2);
-assert.equal(months[9].value, null);
-assert.equal(bucketPoints(points, "monthly", "2025", today).every((point) => point.value === null), true);
-assert.equal(bucketPoints([{ date: "2025-12-31", value: 3 }, { date: "2026-01-01", value: 4 }], "weekly", "2026", "2026-01-01").at(-1)?.value, 7);
-assert.equal(bucketPoints([{ date: "2026-09-18", value: 99 }], "daily", "2026", today).every((point) => point.value === null), true);
 assert.equal(lineSegments([1, null, 2], 4).length, 2);
 for (const unsafe of ["https://evil.example/admin", "//evil.example", "/admin/posts/1", "/admin/../login", "/admin?returnTo=https://evil.example"]) assert.equal(safeAdminReturn(unsafe), "/admin");
 const returnTo = "/admin?q=react&status=DRAFT&sort=views";
