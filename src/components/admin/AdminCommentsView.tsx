@@ -22,8 +22,8 @@ export default function AdminCommentsView({ result, status, sort, q, from, to, p
     const total = result.counts[status];
     return (
         <>
-            <CommentFilters post={postSlug} author={authorId} q={q ?? ""} from={from} to={to} status={status} sort={sort} counts={result.counts} returnTo={returnTo} options={result.options}>
-                <p className={styles.summary}>{total === 0 ? "0개" : `${total.toLocaleString('ko-KR')}개 중 ${result.skip + 1}–${result.skip + result.comments.length}개 표시`} · {sort === "oldest" ? "오래된순" : "최신순"}</p>
+            <CommentFilters post={postSlug} author={authorId} q={q ?? ""} from={from} to={to} status={status} sort={sort} counts={result.counts} returnTo={returnTo} options={result.options}
+                summary={total === 0 ? "0개 표시" : `${total.toLocaleString("ko-KR")}개 중 ${result.skip + 1}–${result.skip + result.comments.length}개 표시`}>
                 <AdminListScroll key={href()}>
                     {result.comments.length ? <AdminCommentList comments={result.comments} postFiltered={Boolean(postSlug)} /> : <p className={styles.compact}>해당 조건의 댓글이 없습니다.</p>}
                 </AdminListScroll>

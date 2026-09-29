@@ -4,7 +4,7 @@ import { css } from "@emotion/react";
  * 상호배타 선택 두 가지 모양.
  *
  * segmented — 회색 트랙 위에 고른 항목만 흰 칩으로 떠오른다. 표 툴바(포스트·댓글 목록의 상태 필터).
- *   높이 38px 은 TableToolbar 의 입력창·드롭다운·버튼과 같다.
+ *   높이 38px 은 FilterBar 의 입력창·드롭다운·버튼과 같다.
  * pills — 알약 트랙 안에 작은 알약이 서고 고른 것만 --activecolor 로 채운다. 통계 카드(종류·집계 단위).
  *   트랙이 있는 건 segmented 와 같고, 모서리와 채우는 색만 다르다.
  *
@@ -29,7 +29,8 @@ export const segmented = css`
         font: inherit;
         font-size: 12px;
         white-space: nowrap;
-        background: transparent;
+        /* 트랙과 같은 불투명 색에서 전환해 투명도 합성을 피한다. */
+        background: var(--codefontbgcolor);
         color: var(--desccolor);
         cursor: pointer;
         transition: background-color 0.15s, color 0.15s;
@@ -43,7 +44,7 @@ export const segmented = css`
     }
     button:hover {
         color: var(--foreground);
-        background: color-mix(in srgb, var(--foreground) 8%, var(--background));
+        background: color-mix(in srgb, var(--foreground) 8%, var(--codefontbgcolor));
     }
     button[aria-pressed="true"]:hover,
     button[aria-selected="true"]:hover {

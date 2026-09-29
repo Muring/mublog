@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { buttonQuiet } from "@/styles/button";
 import { cardHoverLift } from "@/styles/surface";
+import { mobile } from "@/styles/breakpoints";
 
 export const CARD_GAP = 20;
 
@@ -15,7 +16,7 @@ const Container = styled.div`
     padding: 2rem 0;
   }
 
-  @media (max-width: 600px) {
+  ${mobile} {
     padding: 0 40px 40px 40px;
   }
 `;

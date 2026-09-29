@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { buttonGhost } from "@/styles/button";
 import { surface } from "@/styles/surface";
 import { thinScrollbar } from "@/styles/scrollbar";
 
@@ -14,7 +15,7 @@ export const DropdownRoot = styled.div`
     }
 `;
 
-export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
+export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control"; $variant: "default" | "ghost" }>`
     position: relative;
     display: inline-flex;
     align-items: center;
@@ -77,6 +78,8 @@ export const DropdownButton = styled.button<{ $size: "sm" | "md" | "control" }>`
     &[aria-expanded="true"]::after {
         transform: translateY(-20%) rotate(225deg);
     }
+
+    ${({ $variant }) => $variant === "ghost" && buttonGhost}
 `;
 
 /* 펼친 목록의 바탕. 검색형은 이 판 위에 검색창과 목록을 함께 얹고, 목록 자체는 판 안에 흐르게 둔다 */
@@ -96,6 +99,22 @@ export const DropdownPanel = styled.div<{ $align: "left" | "right" }>`
     width: max-content;
     max-width: min(32rem, calc(100vw - 32px));
     padding: 6px;
+
+    &[popover] {
+        position: fixed;
+        inset: auto;
+        margin: 0;
+        box-sizing: border-box;
+        min-width: 0;
+        width: var(--dropdown-popup-width, min(326px, calc(100vw - 32px)));
+        max-width: calc(100vw - 16px);
+        overflow: hidden;
+    }
+    &[popover]:popover-open { display: flex; flex-direction: column; }
+    &[popover] .dropdown-search { flex-shrink: 0; }
+    &[popover] [role="listbox"] { min-height: 0; max-height: 260px; overscroll-behavior: contain; }
+    &[popover] [role="option"] { min-height: 44px; box-sizing: border-box; }
+    &[popover] .option-label { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 
     .dropdown-search {
         box-sizing: border-box;

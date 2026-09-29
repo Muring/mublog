@@ -1,11 +1,15 @@
+import { withinAdminDates } from "./admin-filters";
+
 export type PostStatusFilter = "all" | "PUBLISHED" | "DRAFT";
 export type PostSort = "newest" | "updated" | "views" | "comments";
 /** tag·series 는 값 그대로 비교한다(정확히 같은 것만). 비어 있으면 거르지 않는다 */
-export type PostListState = { q: string; status: PostStatusFilter; sort: PostSort; tag: string; series: string };
+export type PostListState = { q: string; status: PostStatusFilter; sort: PostSort; tag: string; series: string; from?: string; to?: string; hasComments?: "" | "yes" | "no" };
 export function postListState(params: URLSearchParams): PostListState {
     const rawStatus = params.get("status");
     const rawSort = params.get("sort");
     return {
+        ...commentDates(params.get("from"), params.get("to")),
+        hasComments: params.get("hasComments") === "yes" ? "yes" : params.get("hasComments") === "no" ? "no" : "",
         q: params.get("q") ?? "",
         status: (rawStatus === "PUBLISHED" || rawStatus === "DRAFT" ? rawStatus : "all") as PostStatusFilter,
         sort: (["updated", "views", "comments"].includes(rawSort ?? "") ? rawSort : "newest") as PostSort,
@@ -15,6 +19,10 @@ export function postListState(params: URLSearchParams): PostListState {
 }
 export function postListUrl(state: PostListState) {
     const params = new URLSearchParams();
+    const dates = commentDates(state.from, state.to);
+    if (dates.from) params.set("from", dates.from);
+    if (dates.to) params.set("to", dates.to);
+    if (state.hasComments) params.set("hasComments", state.hasComments);
     if (state.q) params.set("q", state.q);
     if (state.tag) params.set("tag", state.tag);
     if (state.series) params.set("series", state.series);
@@ -103,6 +111,8 @@ export function filterAdminPosts<T extends SortablePost>(posts: T[], state: Omit
     return posts.filter((post) => (state.status === "all" || post.status === state.status) &&
         (!state.tag || post.tags.includes(state.tag)) &&
         (!state.series || post.series === state.series) &&
+        withinAdminDates(post.createdAt, state.from, state.to) &&
+        (!state.hasComments || (state.hasComments === "yes" ? post.commentCount > 0 : post.commentCount === 0)) &&
         (!query || [post.title, post.slug, ...post.tags].some((text) => text.toLowerCase().includes(query)))
     ).sort((a, b) => {
         const difference = state.sort === "views" ? b.viewCount - a.viewCount

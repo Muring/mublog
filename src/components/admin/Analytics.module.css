@@ -66,13 +66,15 @@
 .tableScroll { min-width:0; max-width:100%; }
 .tableScroll:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:2px; }
 .toolbar > [role="group"] { min-width:0; max-width:100%; flex-wrap:wrap; }
-@container analytics (max-width:760px) {
+/* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
+@media (max-width: 640px) {
     .summary, .charts, .secondary { grid-template-columns:minmax(0,1fr); }
     .periodControls { display:grid; grid-template-columns:minmax(0,1fr); }
     .dates { grid-template-columns:repeat(2,minmax(0,1fr)) auto; }
     .shortcuts { justify-content:flex-end; }
 }
-@container analytics (max-width:480px) {
+/* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
+@media (max-width: 640px) {
     .panel { padding:14px; }
     .dashboard { gap:16px; }
     .summary { gap:10px; }
@@ -112,7 +114,8 @@
 .postHeading a { min-width:0; overflow-wrap:anywhere; }
 .postHeading > span { flex-shrink:0; }
 .mobileComparison { display:none; }
-@container analytics (max-width:560px) {
+/* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
+@media (max-width: 640px) {
     .performanceTable, .performanceTable tbody { display:block; }
     .performanceTable thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
     .performanceTable tr { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 8px; padding:10px 0; border-bottom:var(--border-width) solid var(--bordercolor); }

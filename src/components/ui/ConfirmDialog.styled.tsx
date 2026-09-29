@@ -79,11 +79,11 @@ export const ConfirmBox = styled.div`
 
     /* 좁은 화면에서는 두 버튼이 가로를 반씩 나눠 갖는다 */
     ${mobile} {
-        .actions {
-            flex-direction: column-reverse;
-        }
-        button {
-            width: 100%;
+        button,
+        button.danger {
+            flex: 1;
+            min-width: 0;
+            padding: 0.7rem 0.9rem;
         }
     }
 `;

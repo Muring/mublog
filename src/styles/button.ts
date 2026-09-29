@@ -32,6 +32,46 @@ export const buttonBase = css`
     }
 `;
 
+/** 관리 컨트롤: 기본 모양은 같고, 호버만 현재 테마의 면 안에서 한 톤 바뀐다. */
+export const buttonSubtle = css`
+    ${buttonBase}
+    &:hover:not(:disabled) {
+        background-color: var(--control-hover-bg);
+        color: var(--foreground);
+    }
+`;
+
+/** 정렬·보기 옵션 같은 보조 동작. 테두리 없이 호버와 펼침 상태를 면으로 구분한다. */
+export const buttonGhost = css`
+    ${buttonBase}
+    border-color: transparent;
+    background-color: transparent;
+    color: var(--foreground);
+    font-weight: 400;
+    outline: var(--border-width) solid transparent;
+    outline-offset: calc(-1 * var(--border-width));
+
+    &:hover:not(:disabled) {
+        border-color: transparent;
+        outline-color: transparent;
+        background-color: var(--control-hover-bg);
+        color: var(--foreground);
+    }
+    &[aria-expanded="true"] {
+        border-color: transparent;
+        outline-color: transparent;
+        background-color: var(--codefontbgcolor);
+        color: var(--foreground);
+    }
+    &[aria-expanded="true"]:hover:not(:disabled) {
+        background-color: color-mix(in srgb, var(--foreground) 8%, var(--codefontbgcolor));
+    }
+    &:focus-visible, &:hover:focus-visible, &[aria-expanded="true"]:focus-visible {
+        outline: 2px solid var(--linkhovercolor);
+        outline-offset: 2px;
+    }
+`;
+
 /**
  * 배경을 채우지 않고 테두리만 강조하는 변형.
  *

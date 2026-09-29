@@ -1,23 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Dropdown from "@/components/ui/Dropdown";
 import FilterChips from "./FilterChips";
-import styles from "./Management.module.css";
 import ImageViewer from "@/components/ui/ImageViewer";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import { useConfirm } from "@/providers/Confirm";
 import { useToast } from "@/providers/Toast";
 import type { ImageUser, ManagedImage } from "@/lib/storage";
-import { AdminListScroll, Button } from "./Admin.styled";
+import { AdminListScroll, Button, ResultBar } from "./Admin.styled";
 import { ImageCard } from "./ImagePicker.styled";
-import { DetailPanel, ImageToolbar, ImagesLayout, SHEET_MEDIA } from "./AdminImages.styled";
-import DetailSheet from "./ImageDetailSheet";
+import { DetailPanel, ImageSheetPanel, ImagesLayout, SHEET_MEDIA } from "./AdminImages.styled";
+import { adminDateLabel, IMAGE_SIZES } from "@/lib/admin-filters";
+import FilterBar from "./FilterBar";
+import AdminSheet from "./AdminSheet";
 
-type Filter = "all" | "thumbnail" | "body" | "unused" | "scheduled";
-type Sort = "newest" | "oldest" | "size";
+import { imagePageUrl, type ImageFilter as Filter, type ImageSort as Sort, type ImagePage } from "@/lib/admin-image-query";
+import { useAdminImages } from "@/hooks/useAdminImages";
 
 const FILTERS: { key: Filter; label: string; match: (image: ManagedImage) => boolean }[] = [
     { key: "all", label: "전체", match: () => true },
@@ -46,10 +46,11 @@ function kst(iso: string, withTime = true) {
     return withTime ? `${date} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}` : date;
 }
 
-/** 정리 시각. Hobby 의 cron 은 정시가 아니라 그 한 시간 안 어딘가에 돈다 */
+/** 정리 시각. Hobby 의 cron 은 정시가 아니라 그 한 시간 안 어딘가에 돌아서 구간으로 적는다 */
 function sweepTime(iso: string) {
     const d = new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000);
-    return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${d.getUTCHours()}시대`;
+    const hour = d.getUTCHours();
+    return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${hour}~${(hour + 1) % 24}시 사이`;
 }
 
 /** 썸네일로도 본문에도 쓰는 글은 한 줄로 합친다 */
@@ -65,23 +66,7 @@ function usersOf(image: ManagedImage) {
     return [...users.values()];
 }
 
-/** 업로드 경로의 글 폴더. posts/<slug>/… · thumbnails/<slug>/… 가 아니면 null */
-function folderSlug(path: string) {
-    return /^(?:posts|thumbnails)\/([^/]+)\//.exec(path)?.[1] ?? null;
-}
-
-type PostOption = { id: string; slug: string; title: string; count: number };
-
-/**
- * 이 글의 이미지인가. 지금 쓰는 것에 더해, 그 글 폴더에 올라갔지만 본문에서 빠진 것도 포함한다 —
- * "이 글에 딸린 이미지 중 무엇이 버려졌나" 를 보려는 것이라 미사용이 빠지면 쓸모가 반이다.
- * slug 를 바꾼 글은 옛 폴더의 미사용 이미지가 걸리지 않는다(업로드 라우트 주석 참고).
- */
-function belongsTo(image: ManagedImage, post: PostOption) {
-    return usersOf(image).some(({ user }) => user.id === post.id) || folderSlug(image.path) === post.slug;
-}
-
-type Props = { images: ManagedImage[]; nextSweepAt: string };
+type Props = { initialPage: ImagePage };
 
 /**
  * Storage 의 글 이미지 전부를 쓰임·상태와 함께 본다.
@@ -89,17 +74,29 @@ type Props = { images: ManagedImage[]; nextSweepAt: string };
  * 상태는 서버(classifyImages)가 sweep 과 같은 판정으로 정해 보낸다. 여기서 다시 계산하지 않는다.
  * 지울 수 있는 것은 아무 글도 쓰지 않는 이미지뿐이다. 쓰는 이미지는 먼저 글에서 빼야 한다.
  */
-export default function AdminImagesView({ images, nextSweepAt }: Props) {
-    const router = useRouter();
+export default function AdminImagesView({ initialPage }: Props) {
     const toast = useToast();
     const confirm = useConfirm();
     const [filter, setFilter] = useState<Filter>("all");
     const [sort, setSort] = useState<Sort>("newest");
     const [query, setQuery] = useState("");
     const [postId, setPostId] = useState("");
+    const [imageFilters, setImageFilters] = useState({ from: "", to: "", format: "", size: "" });
+    const requestQuery = { filter, sort, q: query, post: postId, ...imageFilters };
+    const { page, pending, stale, loadingMore, error, loadMore, refresh, retry } = useAdminImages(initialPage, requestQuery);
+    const { images, posts, formats, counts, nextSweepAt } = page;
+    const scrollRoot = useRef<HTMLDivElement>(null);
+    const sentinel = useRef<HTMLDivElement>(null);
+    const queryKey = JSON.stringify(requestQuery);
+    const currentQuery = useRef(queryKey);
+    useEffect(() => {
+        currentQuery.current = queryKey;
+        scrollRoot.current?.scrollTo({ top: 0 });
+    }, [queryKey]);
     const composing = useRef(false);
     const search = useRef<HTMLInputElement>(null);
-    const [selectedPath, setSelectedPath] = useState<string | null>(null);
+    const [selection, setSelection] = useState<ManagedImage | null>(null);
+    const selectedPath = selection?.path ?? null;
     const [deleting, setDeleting] = useState(false);
     const [viewing, setViewing] = useState(false);
     // 좁은 화면에서 상세를 시트로 띄웠는가. 넓은 화면은 옆 패널이 늘 보이므로 쓰지 않는다
@@ -113,7 +110,7 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
      * 하이드레이션 전에는 알 수 없어서 화면이 갈린다(AGENTS §3 레이아웃).
      */
     const select = (path: string) => {
-        setSelectedPath(path);
+        setSelection(images.find(image => image.path === path) ?? null);
         if (window.matchMedia(SHEET_MEDIA).matches) setSheetOpen(true);
     };
 
@@ -126,61 +123,34 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
         return () => media.removeEventListener("change", onChange);
     }, [sheetOpen]);
 
-    /** 이미지가 하나라도 딸린 글. 제목순 — 글을 이름으로 찾아 들어오는 목록이다 */
-    const posts = useMemo(() => {
-        const byId = new Map<string, PostOption>();
-        for (const image of images) {
-            for (const { user } of usersOf(image)) {
-                if (!byId.has(user.id)) byId.set(user.id, { id: user.id, slug: user.slug, title: user.title, count: 0 });
-            }
-        }
-        const list = [...byId.values()];
-        for (const post of list) post.count = images.filter((image) => belongsTo(image, post)).length;
-        // numeric: "개발기 10" 이 "개발기 2" 앞에 오지 않게 숫자는 값으로 견준다
-        return list.sort((a, b) => a.title.localeCompare(b.title, "ko", { numeric: true }));
-    }, [images]);
-    const post = posts.find((p) => p.id === postId) ?? null;
-
-    /** 글·검색어로 거른 목록. 상태 버튼의 숫자도 이 안에서 센다 — "이 글에 미사용이 몇 장인가" 가 바로 보인다 */
-    const scoped = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        return images.filter((image) => {
-            if (post && !belongsTo(image, post)) return false;
-            if (!q) return true;
-            return (
-                image.path.toLowerCase().includes(q) ||
-                usersOf(image).some(({ user }) => user.title.toLowerCase().includes(q) || user.slug.toLowerCase().includes(q))
-            );
-        });
-    }, [images, post, query]);
-
-    const counts = useMemo(
-        () => Object.fromEntries(FILTERS.map(({ key, match }) => [key, scoped.filter(match).length])) as Record<Filter, number>,
-        [scoped]
-    );
-    // 일괄 삭제는 지금 걸린 글·검색어 범위 안의 삭제 예정만 지운다. 보이는 숫자(삭제 예정 N)와 지워지는 수가 같아야 한다
-    const scheduled = scoped.filter((image) => image.state === "scheduled");
-    const scopedLabel = post || query.trim() ? "지금 조건의 " : "";
-    const total = (list: ManagedImage[]) => list.reduce((sum, image) => sum + image.size, 0);
-
-    const visible = useMemo(() => {
-        const match = FILTERS.find((f) => f.key === filter)!.match;
-        const list = scoped.filter(match);
-        if (sort === "oldest") return [...list].reverse();
-        if (sort === "size") return [...list].sort((a, b) => b.size - a.size);
-        return list;
-    }, [scoped, filter, sort]);
+    // 홈페이지 PostGrid처럼 끝을 감지하되, 다음 묶음은 서버에서 받아온다.
+    useEffect(() => {
+        if (pending || loadingMore || error || !page.nextCursor || !sentinel.current || !scrollRoot.current) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) void loadMore();
+        }, { root: scrollRoot.current, rootMargin: "0px 0px 120px 0px" });
+        observer.observe(sentinel.current);
+        return () => observer.disconnect();
+    }, [pending, loadingMore, error, page.nextCursor, loadMore]);
+    const post = posts.find(p => p.id === postId) ?? null;
+    const visible = images;
+    const scopedLabel = post || query.trim() || Object.values(imageFilters).some(Boolean) ? "지금 조건의 " : "";
 
     const clearQuery = () => {
         if (search.current) search.current.value = "";
         setQuery("");
     };
 
-    const selected = images.find((image) => image.path === selectedPath) ?? null;
+    const selected = images.find((image) => image.path === selectedPath) ?? selection;
     // 필터를 바꿔 고른 이미지가 목록에서 빠졌으면 그 한 장만 본다
-    const viewList = selected && !visible.includes(selected) ? [selected] : visible;
+    const viewList = selected && !visible.some(image => image.path === selected.path) ? [selected] : visible;
+    useEffect(() => {
+        if (viewing && !pending && !error && page.nextCursor && images.slice(-3).some(image => image.path === selectedPath)) {
+            void loadMore();
+        }
+    }, [viewing, pending, error, page.nextCursor, images, selectedPath, loadMore]);
 
-    async function remove(targets: ManagedImage[], title: string, description: string) {
+    async function remove(targets: { path: string; size: number }[], title: string, description: string) {
         if (deleting || targets.length === 0) return;
         if (!(await confirm({ title, description, confirmLabel: "삭제", danger: true }))) return;
         setDeleting(true);
@@ -192,8 +162,8 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                 freed += result.freedBytes;
             }
             toast.success(`${targets.length}개를 삭제했습니다. ${bytes(freed)} 확보.`);
-            if (selected && targets.includes(selected)) {
-                setSelectedPath(null);
+            if (selected && targets.some(image => image.path === selected.path)) {
+                setSelection(null);
                 setSheetOpen(false);
             }
         } catch (error) {
@@ -201,9 +171,25 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
         } finally {
             setDeleting(false);
             // 일부 묶음만 지워졌을 수 있으므로 실패해도 목록을 다시 받는다
-            router.refresh();
+            scrollRoot.current?.scrollTo({ top: 0 });
+            refresh();
         }
     }
+
+    const [preparingDelete, setPreparingDelete] = useState(false);
+    const removeScheduled = async () => {
+        if (preparingDelete || deleting || pending || stale || error) return;
+        setPreparingDelete(true);
+        try {
+            // 아직 불러오지 않은 항목까지 포함해 확인 대화상자 전에 대상을 확정한다.
+            const { targets } = await fetchJson<{ targets: { path: string; size: number }[] }>(imagePageUrl(requestQuery, undefined, true));
+            if (currentQuery.current !== queryKey) return;
+            if (!targets.length) { toast.success("삭제 예정 이미지가 없습니다."); refresh(); return; }
+            await remove(targets, `${scopedLabel}삭제 예정 ${targets.length}개를 지금 삭제할까요?`,
+                `어떤 글도 쓰지 않고 올린 지 하루가 지난 이미지입니다(${bytes(targets.reduce((sum, image) => sum + image.size, 0))}). 두면 ${sweepTime(nextSweepAt)} 자동 정리에서 지워집니다. 되돌릴 수 없습니다.`);
+        } catch (cause) { toast.error(cause instanceof Error ? cause.message : "삭제 대상을 불러오지 못했습니다."); }
+        finally { setPreparingDelete(false); }
+    };
 
     const removeOne = (image: ManagedImage) =>
         remove(
@@ -275,53 +261,77 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
         </>
     );
 
+    const chips = [
+        ...(filter !== "all" ? [{ key: "usage", name: "쓰임", value: FILTERS.find((item) => item.key === filter)!.label }] : []),
+        ...(post ? [{ key: "post", name: "글", value: post.title }] : []),
+        ...(imageFilters.from || imageFilters.to ? [{ key: "date", name: "업로드일", value: adminDateLabel(imageFilters.from, imageFilters.to) }] : []),
+        ...(imageFilters.format ? [{ key: "format", name: "형식", value: imageFilters.format.toUpperCase() }] : []),
+        ...(imageFilters.size ? [{ key: "size", name: "용량", value: IMAGE_SIZES.find((item) => item.value === imageFilters.size)!.label }] : []),
+    ];
+    // 초기화는 걸린 조건만 푼다. 정렬은 보는 방식이지 조건이 아니다(포스트·댓글과 같다)
+    const resetFilters = () => { setFilter("all"); setPostId(""); setImageFilters({ from: "", to: "", format: "", size: "" }); clearQuery(); };
+
     return (
         <>
-            {/* 윗줄은 걸러 보기·정렬·일괄 동작, 아랫줄은 찾기. 줄마다 할 일을 정해 두어 폭이 바뀌어도 섞이지 않는다 */}
-            <ImageToolbar className="filters-row">
-                <div className="status-filters" role="group" aria-label="이미지 쓰임">
-                    {FILTERS.map(({ key, label }) => (
-                        <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>
-                            {label} <span className="filter-count">{counts[key]}</span>
-                        </button>
-                    ))}
-                </div>
-                <Dropdown className="sort-control" label="이미지 정렬" size="control" value={sort}
-                    options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }, { value: "size", label: "용량순" }]}
-                    onChange={(value) => setSort(value as Sort)} />
-                <button type="button" className="reset" disabled={filter === "all" && !postId && !query && sort === "newest"}
-                    onClick={() => { setFilter("all"); setPostId(""); setSort("newest"); clearQuery(); }}>초기화</button>
-                <button type="button" className="bulk-delete" disabled={deleting || scheduled.length === 0}
-                    onClick={() => remove(scheduled, `${scopedLabel}삭제 예정 ${scheduled.length}개를 지금 삭제할까요?`,
-                        `어떤 글도 쓰지 않고 올린 지 하루가 지난 이미지입니다(${bytes(total(scheduled))}). 두면 ${sweepTime(nextSweepAt)} 자동 정리에서 지워집니다. 되돌릴 수 없습니다.`)}>
-                    삭제 예정 지금 삭제
-                </button>
-            </ImageToolbar>
-            <ImageToolbar className="search-row">
-                <input type="search" ref={search} defaultValue="" placeholder="경로 · 글 제목 검색" aria-label="이미지 검색"
-                    onCompositionStart={() => { composing.current = true; }}
-                    onCompositionEnd={(event) => { composing.current = false; setQuery(event.currentTarget.value); }}
-                    onChange={(event) => { if (!composing.current) setQuery(event.currentTarget.value); }} />
-                <Dropdown className="post-filter" label="글 필터" size="control" value={postId} searchable="글 제목 검색"
-                    options={[{ value: "", label: "모든 글" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))]}
-                    onChange={setPostId} />
-            </ImageToolbar>
+            <FilterBar
+                status={
+                    <div className="status-filters" role="group" aria-label="이미지 쓰임">
+                        {FILTERS.map(({ key, label }) => (
+                            <button key={key} type="button" aria-pressed={filter === key} onClick={() => setFilter(key)}>
+                                {label} <span className="filter-count">{counts[key]}</span>
+                            </button>
+                        ))}
+                    </div>
+                }
+                sort={
+                    <Dropdown className="sort-control" label="이미지 정렬" size="control" variant="ghost" value={sort} align="right"
+                        options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }, { value: "size", label: "용량순" }]}
+                        onChange={(value) => setSort(value as Sort)} />
+                }
+                search={
+                    <input type="search" ref={search} defaultValue="" placeholder="경로 · 글 제목 검색" aria-label="이미지 검색"
+                        onCompositionStart={() => { composing.current = true; }}
+                        onCompositionEnd={(event) => { composing.current = false; setQuery(event.currentTarget.value); }}
+                        onChange={(event) => { if (!composing.current) setQuery(event.currentTarget.value); }} />
+                }
+                fields={[
+                    { key: "post", label: "글", search: "글 제목 검색", options: [{ value: "", label: "전체" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))] },
+                    { key: "format", label: "파일 형식", options: [{ value: "", label: "전체" }, ...formats.map((value) => ({ value, label: value.toUpperCase() }))] },
+                    { key: "size", label: "용량", options: IMAGE_SIZES },
+                ]}
+                dateRange="업로드일"
+                dateBefore="format"
+                values={{ post: postId, ...imageFilters }}
+                onApply={({ post, from, to, format, size }) => { setPostId(post); setImageFilters({ from, to, format, size }); }}
+                fieldCount={chips.filter((chip) => chip.key !== "usage").length}
+                pending={pending}
+                summary={error ? "목록을 불러오지 못했습니다." : `${page.count.toLocaleString("ko-KR")}개 중 ${images.length.toLocaleString("ko-KR")}개 표시`}
+                chips={<FilterChips items={chips} onClear={resetFilters} canClear={chips.length > 0 || Boolean(query.trim()) || filter !== "all"}
+                    onRemove={(key) => {
+                        if (key === "usage") setFilter("all");
+                        else if (key === "post") setPostId("");
+                        else setImageFilters((current) => ({ ...current, ...(key === "date" ? { from: "", to: "" } : { [key]: "" }) }));
+                    }} />}
+            />
 
-            <FilterChips items={[
-                ...(filter !== "all" ? [{ key: "status", name: "쓰임", value: FILTERS.find((f) => f.key === filter)!.label }] : []),
-                ...(post ? [{ key: "post", name: "글", value: post.title }] : []),
-                ...(query.trim() ? [{ key: "q", name: "검색", value: query.trim() }] : []),
-            ]} onRemove={(key) => (key === "status" ? setFilter("all") : key === "post" ? setPostId("") : clearQuery())} />
+            {/*
+              결과 요약 아래에 용량·정리 안내를 둔다.
+              일괄 삭제는 조건이 아니라 결과에 거는 동작이라 필터 바가 아니라 이 줄의 오른쪽 끝에 둔다.
+            */}
+            <ResultBar>
+                <p>
+                    총 용량 {bytes(page.totalBytes)}
+                    {page.count !== page.totalCount && ` · 지금 목록 ${bytes(page.bytes)}`}
+                    <span className="cleanup-note">다음 자동 정리 {sweepTime(nextSweepAt)} (KST). 미사용 이미지는 업로드 하루 후 정리됩니다.</span>
+                </p>
+                <Button type="button" className="danger" disabled={deleting || preparingDelete || pending || stale || Boolean(error) || page.scheduledCount === 0}
+                    onClick={removeScheduled}>
+                    {preparingDelete ? "삭제 대상 확인 중…" : `삭제 예정 ${page.scheduledCount}개 지금 삭제`}
+                </Button>
+            </ResultBar>
 
-            {/* 개수는 상태 버튼에 있으니 여기엔 버튼이 말하지 않는 용량과 정리 시각만 둔다 */}
-            <p className={styles.summary}>
-                총 용량 {bytes(total(images))}
-                {visible.length !== images.length && ` · 지금 목록 ${bytes(total(visible))}`}
-                {` · 다음 자동 정리 ${sweepTime(nextSweepAt)} (KST) — 어떤 글도 쓰지 않고 올린 지 하루가 지난 이미지를 지웁니다`}
-            </p>
-
-            <ImagesLayout>
-                <AdminListScroll>
+            <ImagesLayout aria-busy={pending || stale}>
+                <AdminListScroll ref={scrollRoot}>
                     {visible.length === 0 ? (
                         <p className="empty">해당 조건의 이미지가 없습니다.</p>
                     ) : (
@@ -347,20 +357,26 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                             })}
                         </div>
                     )}
+                    <div ref={sentinel} className="load-more">
+                        {error && <p role="alert">{error}</p>}
+                        {(page.nextCursor || error) && <Button type="button" disabled={pending || loadingMore} onClick={() => void (error ? retry() : loadMore())}>
+                            {loadingMore ? "이미지를 더 불러오는 중…" : error ? "다시 시도" : "이미지 더 보기"}
+                        </Button>}
+                    </div>
                 </AdminListScroll>
 
                 {/* 넓은 화면에서는 그리드 옆에 붙어 있고, 좁은 화면에서는 CSS 가 숨기고 아래 시트가 대신한다 */}
                 <DetailPanel className="inline-panel" aria-label="이미지 정보">
-                    {details ?? <p className="placeholder">이미지를 고르면 쓰임과 정보가 여기 나옵니다.</p>}
+                    {details ?? <p className="placeholder">이미지를 선택하세요.</p>}
                 </DetailPanel>
             </ImagesLayout>
 
             {sheetOpen && details && (
-                <DetailSheet onClose={closeSheet}>{details}</DetailSheet>
+                <AdminSheet title="이미지 정보" onClose={closeSheet} Panel={ImageSheetPanel}>{details}</AdminSheet>
             )}
 
             {/*
-              지금 걸러진 목록을 그대로 넘겨 뷰어 안에서 이전·다음으로 넘긴다.
+              지금 불러온 목록으로 이전·다음을 넘기고, 끝에 가까워지면 다음 묶음을 받는다.
               넘기면 상세 패널도 같은 이미지로 따라가서, 닫았을 때 보던 이미지의 정보가 남는다.
               원본 파일은 뷰어 툴바의 "이미지 파일" 링크가 새 탭으로 연다.
             */}
@@ -369,7 +385,7 @@ export default function AdminImagesView({ images, nextSweepAt }: Props) {
                 title="이미지 관리"
                 images={viewList.map((image) => ({ src: image.url, caption: image.path }))}
                 index={Math.max(0, viewList.findIndex((image) => image.path === selectedPath))}
-                onIndexChange={(next) => setSelectedPath(viewList[next]?.path ?? null)}
+                onIndexChange={(next) => setSelection(viewList[next] ?? null)}
                 onClose={() => setViewing(false)}
             />
         </>

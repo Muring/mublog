@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * 고를 수 있는 이미지 목록 (관리자 전용).
  *
  * 캐시하지 않는다. 방금 올린 이미지가 목록에 없으면 그 화면의 쓸모가 없다.
- * 개수가 수백 장이 되면 그때 페이지를 나눈다 — 지금은 스무 장 남짓이다.
+ * 에디터 이미지 선택용이다. 관리 화면의 페이지 조회는 /api/admin/images/list를 쓴다.
  */
 export async function GET() {
     try {

@@ -2,11 +2,11 @@
 
 import styled from "@emotion/styled";
 import { statusBadgeBase } from "@/styles/status-badge";
-import { buttonBase, buttonDanger, buttonPrimary } from "@/styles/button";
-import { segmented } from "@/styles/segmented";
+import { buttonSubtle, buttonDanger, buttonPrimary, buttonGhost } from "@/styles/button";
 import { thinScrollbar } from "@/styles/scrollbar";
 import { surface } from "@/styles/surface";
 import { truncate } from "@/styles/text";
+import { mobile } from "@/styles/breakpoints";
 
 // 홈 헤더와 방문자 수도 같은 것을 쓰게 되어 ui/ 로 옮겼다. 기존 import 경로는 유지한다.
 export { Skeleton } from "@/components/ui/Skeleton.styled";
@@ -44,7 +44,8 @@ export const AdminWrapper = styled.div`
     margin-bottom: 1.25rem;
   }
 
-  @container admin (max-width: 620px) {
+  ${mobile} {
+    .admin-head a { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; }
     .stat-row {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -259,7 +260,7 @@ export const PostTable = styled.table`
     cursor: pointer;
     transition: background-color .15s, border-color 150ms ease;
   }
-  .row-edit:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
+  .row-edit:hover { background: var(--control-hover-bg); color: var(--foreground); }
   .row-delete { color: var(--desccolor); }
   .row-delete:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
   .row-delete:disabled { opacity: .5; cursor: wait; }
@@ -318,7 +319,7 @@ export const PostTable = styled.table`
    * 열을 더 접느니 행을 카드로 바꾼다. 헤더를 감추고 각 셀이 data-label 로
    * 제 이름표를 달고 나온다.
    */
-  @container admin (max-width: 560px) {
+  ${mobile} {
     .compact-tags, .compact-comments, .compact-likes { display: none; }
     display: block;
     table-layout: auto;
@@ -399,6 +400,10 @@ export const PostTable = styled.table`
       padding-top: 0.75rem;
     }
 
+    .row-edit, .row-delete { min-width: 44px; height: 44px; }
+    .title-link { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; }
+    td:not(.title-cell) .title-link { justify-content: center; }
+
     /* 카드가 곧 행이라 배경을 또 바꾸면 어수선하다 */
     tbody tr:hover {
       background-color: var(--cardbackground);
@@ -414,12 +419,16 @@ export const Button = styled.button`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  ${buttonBase}
+  ${buttonSubtle}
   padding: 0.5rem 0.9rem;
   font-size: 0.85rem;
 
+  ${mobile} { min-width: 44px; min-height: 44px; box-sizing: border-box; }
+
+  &.ghost { ${buttonGhost} }
+
   &.quiet-danger { background: transparent; border-color: transparent; color: var(--desccolor); outline: 1px solid transparent; outline-offset: calc(-1 * var(--border-width)); transition: outline-color 150ms ease, color 0.15s ease-in-out; }
-  &.quiet-danger:hover { color: var(--dangercolor, #b42318); outline-color: var(--bordercolor); }
+  &.quiet-danger:hover:not(:disabled) { background-color: transparent; color: var(--dangercolor); outline-color: var(--bordercolor); }
   &.quiet-danger:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
 
   &.primary {
@@ -467,124 +476,21 @@ export const AdminListScroll = styled.div`
   }
 `;
 
-/** 검색 줄. 표 바로 위에 두어 무엇을 거르는지 분명히 한다 */
-export const TableToolbar = styled.div`
+/**
+ * 결과 요약 줄: 왼쪽은 개수·용량 같은 요약, 오른쪽 끝은 결과 전체에 거는 일괄 동작(이미지의 "삭제 예정 지금 삭제").
+ * 일괄 동작은 필터가 아니라 결과에 대한 것이라 필터 바에 두지 않는다.
+ */
+export const ResultBar = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-
-  /*
-   * 툴바에 홀로 선 버튼(포스트·댓글의 초기화). 틀은 공용 buttonBase, 호버는 buttonPrimary 로 전경/배경을 뒤집는다
-   * — 라이트는 검은 바탕 + 흰 글씨, 다크는 밝은 바탕 + 검은 글씨(사용자 결정, 2026-09-28).
-   * 선택 상태가 없는 버튼이라 --activecolor 를 호버에 써도 "호버 ≠ 선택" 규칙과 부딪치지 않는다.
-   * 크기·바탕·굵기는 옆 입력창·드롭다운에 맞춰야 하므로 아래 공통 규칙이 덮는다(그래서 이 조각이 먼저 온다).
-   */
-  > button { ${buttonBase} font-weight: 400; background-clip: padding-box; }
-  > button:hover:not(:disabled) { ${buttonPrimary} }
-  input, > button {
-    box-sizing: border-box;
-    height: 38px;
-    font-family: inherit;
-    font-size: 13px;
-    border: var(--border-width) solid var(--bordercolor);
-    border-radius: 8px;
-    background: var(--background);
-    color: var(--foreground);
-    padding: 0 12px;
-  }
-  > button:disabled { opacity: .45; cursor: default; }
-  input { flex: 1; min-width: 160px; width: 0; }
-  /* 댓글 툴바의 글 드롭다운. 검색창처럼 남는 폭을 가져가고 긴 제목은 버튼 안에서 말줄임된다 */
-  .post-filter { flex: 1; min-width: 160px; width: 0; }
-  .post-filter > button { width: 100%; }
-  input:focus-visible, button:focus-visible {
-    outline: 2px solid var(--linkhovercolor);
-    outline-offset: 2px;
-  }
-  .status-filters { ${segmented} }
-  /* 로딩에서도 컨트롤의 폭은 그대로 두고 문구·아이콘을 막대로 대체한다. */
-  &[data-loading] {
-    input { color: transparent; background: var(--codefontbgcolor); }
-    input::placeholder { color: transparent; }
-    button, .status-filters button {
-      position: relative;
-      color: transparent;
-      opacity: 1;
-      box-shadow: none;
-    }
-    button * { visibility: hidden; }
-    button::after {
-      content: "";
-      position: absolute;
-      inset: 50% 10px auto;
-      width: auto;
-      height: .75rem;
-      border: 0;
-      border-radius: .4rem;
-      background: var(--bordercolor);
-      transform: translateY(-50%);
-    }
-  }
-  .filter-count { display: inline-block; position: relative; min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
-  .filter-count-placeholder { position: absolute; inset: 50% 0 auto; height: .7em; transform: translateY(-50%); }
-
-  .count {
-    flex-shrink: 0;
-    min-width: 3rem;
-    text-align: right;
-    font-size: 12px;
-    color: var(--desccolor);
-    font-variant-numeric: tabular-nums;
-  }
-  @container admin (max-width: 650px) {
-    .status-filters { flex: 1 1 auto; }
-    .status-filters button { flex: 1; }
-    input, .post-filter { order: 1; flex: 1 1 100%; }
-    .count { order: 2; }
-  }
-
-  /*
-   * 댓글 관리의 둘째 줄: 본문 검색 + 작성일 범위.
-   * 날짜 칸은 위의 input 규칙(남는 폭을 다 가져감)을 받으면 달력 칸이 검색창만큼 늘어나서 폭을 고정한다.
-   * 달력 아이콘은 브라우저가 그리므로 color-scheme 으로 테마를 알려줘야 다크에서 검은 아이콘이 묻히지 않는다.
-   * OS 설정(prefers-color-scheme)이 아니라 html.dark 를 따른다(AGENTS §3).
-   */
-  &.comment-search {
-    input[type="date"] { flex: 0 0 auto; width: 150px; min-width: 0; padding: 0 10px; color-scheme: light; }
-    /*
-     * 날짜 칸은 눌러서 달력을 여는 컨트롤이라 드롭다운 버튼과 같은 호버를 준다 — 포커스 링과 같은 outline + 8% 섞기.
-     * outline 은 none ↔ solid 를 못 넘어가므로 늘 투명한 링을 깔고 색만 바꾼다(DropdownButton 과 같은 방식).
-     */
-    input[type="date"] {
-      cursor: pointer;
-      background-clip: padding-box;
-      outline: 1px solid transparent;
-      outline-offset: calc(-1 * var(--border-width));
-      transition: background-color .15s, border-color 150ms ease, outline-color .15s;
-    }
-    input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; }
-    /* 시작·끝 순서가 거꾸로면 적용하지 않는다. 브라우저 안내 말풍선은 몇 초 뒤 사라지므로 칸 테두리로도 남겨 둔다 */
-    input[type="date"]:invalid { border-color: var(--dangercolor); }
-    input[type="date"]:hover:not(:read-only):not(:focus-visible) {
-      border-color: transparent;
-      outline-color: var(--foreground);
-      background-color: color-mix(in srgb, var(--foreground) 8%, var(--background));
-    }
-    .date-label { flex-shrink: 0; font-size: 13px; color: var(--foreground); }
-    .date-label small { font-size: 12px; color: var(--desccolor); }
-    .date-sep { color: var(--desccolor); }
-  }
-  html.dark &.comment-search input[type="date"] { color-scheme: dark; }
-  @container admin (max-width: 650px) {
-    &.comment-search {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    }
-    &.comment-search > * { order: 0; min-width: 0; }
-    &.comment-search input[type="search"], &.comment-search .date-label { grid-column: 1 / -1; width: 100%; }
-    &.comment-search input[type="date"] { width: 100%; min-width: 0; }
-    &.comment-search .date-sep { text-align: center; }
-  }
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin: 12px 0;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--desccolor);
+  > p { margin: 0; min-width: 0; }
+  .cleanup-note { display: block; font-size: 12px; margin-top: 2px; }
+  > button { margin-left: auto; }
 `;

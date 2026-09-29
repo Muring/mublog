@@ -4,7 +4,7 @@
 .navigation a:not([aria-current="page"]):hover { color:var(--foreground); }
 .pagination a, .pagination span { padding:8px 12px; border: var(--border-width) solid var(--bordercolor); border-radius:8px; background:var(--background); color:var(--foreground); text-decoration:none; font:inherit; font-size:13px; }
 .pagination a { outline:1px solid transparent; outline-offset:calc(-1 * var(--border-width)); transition: outline-color 150ms ease, border-color 150ms ease, background-color .15s, color .15s; }
-.pagination a:hover { border-color:transparent; outline-color:var(--foreground); background:var(--hovercolor); color:var(--hoverfontcolor); }
+.pagination a:hover { border-color:transparent; outline-color:var(--foreground); background:var(--control-hover-bg); color:var(--foreground); }
 .navigation a:focus-visible, .pagination a:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:2px; }
 .pagination { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; margin-top:24px; }
 .pagination [aria-disabled="true"] { color:var(--desccolor); }
@@ -14,4 +14,8 @@
 .pagination .gap { border-color:transparent; background:none; color:var(--desccolor); min-width:auto; padding:8px 2px; }
 .summary { font-size:13px; color:var(--desccolor); margin:12px 0; line-height:1.8; }
 .compact { padding:18px 0; font-size:14px; color:var(--desccolor); }
-@media(max-width:560px) { .navigation a { flex:1; text-align:center; padding:10px 8px; } }
+/* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
+@media (max-width: 640px) {
+  .navigation a { flex:1; display:flex; align-items:center; justify-content:center; min-height:44px; box-sizing:border-box; text-align:center; padding:10px 8px; }
+  .pagination a, .pagination span:not(.gap) { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; }
+}

@@ -5,6 +5,7 @@
   --font-body: "NanumSquareNeo", "Noto Sans KR", "Pretendard", sans-serif;
   --background: #ffffff;
   --foreground: #171717;
+  --control-hover-bg: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
   --hovercolor: #f4f4f4;
   --hoverfontcolor: black;
   /* 호버 면 위의 보조 텍스트.
@@ -68,6 +69,7 @@
 html.dark {
   --background: #101010;
   --foreground: #cacaca;
+  --control-hover-bg: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
   --hovercolor: #dadada;
   --hoverfontcolor: black;
   --activecolor: #dadada;
@@ -142,8 +144,8 @@ html.dark {
   }
 }
 
-/* 1열로 바뀌는 지점 */
-@media (max-width: 627px) {
+/* 1열로 바뀌는 지점. 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
+@media (max-width: 640px) {
   :root {
     --card-width: calc(min(1050px, 100vw) - 2rem);
   }

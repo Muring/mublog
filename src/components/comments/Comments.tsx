@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CommentsWrapper, CommentList, SignInPrompt } from "./Comments.styled";
+import { CommentsWrapper, CommentList, CommentRow, SignInPrompt } from "./Comments.styled";
+import { Skeleton } from "@/components/ui/Skeleton.styled";
 import CommentForm from "./CommentForm";
 import CommentItem from "./CommentItem";
 import { useToast } from "@/providers/Toast";
@@ -109,7 +110,12 @@ export default function Comments({ slug }: { slug: string }) {
         <CommentsWrapper>
             <div className="comments-title">
                 <h4>댓글</h4>
-                <span className="count">{visibleCount}</span>
+                {/* 불러오는 동안 0 을 보이면 댓글이 없는 것처럼 읽힌다. 개수 자리는 막대로 지킨다 */}
+                {isLoading ? (
+                    <Skeleton aria-hidden style={{ display: "inline-block", width: "1.6rem", height: "1.1rem", borderRadius: 999 }} />
+                ) : (
+                    <span className="count">{visibleCount}</span>
+                )}
             </div>
 
             {me?.user ? (
@@ -127,7 +133,23 @@ export default function Comments({ slug }: { slug: string }) {
             )}
 
             {isLoading ? (
-                <p className="status-text">댓글을 불러오는 중...</p>
+                // 실제 댓글 행(아바타·메타·본문)과 같은 자리를 먼저 깐다
+                <CommentList role="status" aria-label="댓글을 불러오는 중">
+                    {Array.from({ length: 3 }, (_, i) => (
+                        <li key={i} aria-hidden>
+                            <CommentRow>
+                                <div className="avatar-col"><Skeleton className="avatar" style={{ borderRadius: "50%" }} /></div>
+                                <div className="content">
+                                    <div className="meta">
+                                        <Skeleton style={{ width: "5rem", height: "1rem" }} />
+                                        <Skeleton style={{ width: "4rem", height: "0.8rem" }} />
+                                    </div>
+                                    <div className="body"><Skeleton style={{ width: i % 2 ? "55%" : "80%", height: "1.2rem" }} /></div>
+                                </div>
+                            </CommentRow>
+                        </li>
+                    ))}
+                </CommentList>
             ) : isError ? (
                 <p className="status-text">댓글을 불러오지 못했습니다.</p>
             ) : roots.length === 0 ? (

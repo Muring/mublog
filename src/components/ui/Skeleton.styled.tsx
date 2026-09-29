@@ -37,3 +37,18 @@ export const Skeleton = styled.span`
         animation: none;
     }
 `;
+
+/**
+ * 문구 자리를 지키는 막대. 글자는 투명하게 두고 그 폭만 빌린다.
+ *
+ * 스켈레톤에 제목·열 이름 같은 고정 문구를 그대로 두면 그 글자만 먼저 떠서
+ * 다 불러온 것처럼 읽힌다. 문구는 폭을 재는 데만 쓰고 보이지 않게 한다.
+ */
+export const SkeletonText = styled(Skeleton)`
+    display: inline-block;
+    max-width: 100%;
+    color: transparent;
+    line-height: 1;
+    vertical-align: middle;
+    user-select: none;
+`;

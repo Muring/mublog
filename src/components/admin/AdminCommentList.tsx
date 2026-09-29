@@ -11,6 +11,7 @@ import { useToast } from "@/providers/Toast";
 import { fetchJson } from "@/lib/fetcher";
 import { formatRelative } from "@/lib/date";
 import type { AdminComment } from "@/lib/comments";
+import { mobile } from "@/styles/breakpoints";
 
 /**
  * 관리 화면의 댓글 목록.
@@ -186,6 +187,10 @@ export const CompactList = styled(CommentList)`
     .row-action { margin-left: auto; padding: 3px 8px; border-radius: 4px; flex-shrink: 0; font-size: 12px; }
     .row-action:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
     .row-action:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+    ${mobile} {
+        .row-action, .expand { min-width: 44px; min-height: 44px; }
+        .post-link { display: inline-flex; align-items: center; min-height: 44px; }
+    }
 
     .badge.draft { background-color: var(--warnbg); color: var(--warncolor); border: 1px solid var(--warnborder); }
 

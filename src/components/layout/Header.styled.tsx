@@ -1,6 +1,7 @@
 import styled from "@emotion/styled";
 import { fadeSlide, overlayBackdrop } from "@/styles/motion";
 import { truncate } from "@/styles/text";
+import { mobile } from "@/styles/breakpoints";
 
 export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
     background-color: var(--background);
@@ -74,8 +75,8 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
             ${fadeSlide({ visible: true, hiddenY: -6, durationMs: 200 })}
         }
 
-        /* 765px 이하: fast-route-container만 부드럽게 숨김 */
-        @media (max-width: 765px) {
+        /* 모바일 기준선에서 fast-route-container만 부드럽게 숨김 */
+        ${mobile} {
             .fast-route-container {
                 ${fadeSlide({ visible: false, hiddenY: -6, durationMs: 200 })}
                 /* visibility 만 끄면 자리는 그대로 남아 타이틀이 쓸 폭을 잡아먹는다 */

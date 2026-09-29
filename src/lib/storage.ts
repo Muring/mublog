@@ -14,7 +14,7 @@ function createStorageClient() {
     });
 }
 
-type StoredObject = { path: string; size: number; createdAt: Date };
+export type StoredObject = { path: string; size: number; createdAt: Date };
 
 /**
  * 생성 시각을 못 읽으면 "방금 올린 것"으로 취급한다.
@@ -36,34 +36,57 @@ async function listAllObjects(): Promise<StoredObject[]> {
     const supabase = createStorageClient();
     const objects: StoredObject[] = [];
 
+    // 폴더 수만큼 왕복을 직렬로 기다리지 않는다. 요청은 최대 6개로 제한한다.
+    const folders = [""];
+    const batchSize = 1000;
     const walk = async (prefix: string) => {
-        const { data: entries, error } = await supabase.storage
-            .from(POST_IMAGE_BUCKET)
-            .list(prefix, { limit: 1000 });
-        if (error) throw new Error(`버킷 목록 조회 실패(${prefix || "/"}): ${error.message}`);
+        for (let offset = 0; ; offset += batchSize) {
+            const { data: entries, error } = await supabase.storage
+                .from(POST_IMAGE_BUCKET)
+                .list(prefix, { limit: batchSize, offset, sortBy: { column: "name", order: "asc" } });
+            if (error) throw new Error(`버킷 목록 조회 실패(${prefix || "/"}): ${error.message}`);
 
-        for (const entry of entries ?? []) {
-            const path = prefix ? `${prefix}/${entry.name}` : entry.name;
-            // id 가 null 이면 폴더다
-            if (entry.id === null) {
-                await walk(path);
-                continue;
+            for (const entry of entries ?? []) {
+                const path = prefix ? `${prefix}/${entry.name}` : entry.name;
+                if (entry.id === null) folders.push(path);
+                else objects.push({
+                    path,
+                    size: entry.metadata?.size ?? 0,
+                    createdAt: toDate(entry.created_at),
+                });
             }
-            objects.push({
-                path,
-                size: entry.metadata?.size ?? 0,
-                createdAt: toDate(entry.created_at),
-            });
+            if (!entries || entries.length < batchSize) break;
         }
     };
 
-    await walk("");
+    while (folders.length) {
+        await Promise.all(folders.splice(0, 6).map(walk));
+    }
     return objects;
+}
+
+/**
+ * 목록 표시용 메타데이터는 폴더별 HTTP 왕복 없이 한 번에 읽는다.
+ * storage 스키마는 읽기 전용으로만 사용한다. 삭제 전 재확인과 실제 삭제는
+ * 기존 Storage API 경로를 유지한다.
+ * https://supabase.com/docs/guides/storage/schema/design
+ */
+async function listObjectMetadata(): Promise<StoredObject[]> {
+    const rows = await prisma.$queryRaw<{ path: string; size: string | null; createdAt: Date | null }[]>`
+        SELECT name AS path, metadata->>'size' AS size, created_at AS "createdAt"
+        FROM storage.objects
+        WHERE bucket_id = ${POST_IMAGE_BUCKET}
+    `;
+    return rows.map((row) => ({
+        path: row.path,
+        size: Number(row.size ?? 0),
+        createdAt: row.createdAt ?? new Date(),
+    }));
 }
 
 /** 이미지를 쓰는 글. 관리 화면이 제목·상태를 보여주고 편집 화면으로 이어준다. */
 export type ImageUser = { id: string; slug: string; title: string; status: PostStatus };
-type ImageUsage = { thumbnail: ImageUser[]; body: ImageUser[] };
+export type ImageUsage = { thumbnail: ImageUser[]; body: ImageUser[] };
 
 /**
  * 모든 포스트(초안 포함)가 이 버킷의 어느 경로를 어떻게 쓰는지.
@@ -76,7 +99,7 @@ type ImageUsage = { thumbnail: ImageUser[]; body: ImageUser[] };
  * 쓰고 있는 대표 이미지가 고아로 잡혀 지워진다.
  * 이미지를 담는 컬럼이 늘어나면 여기에도 함께 더해야 한다.
  */
-async function collectImageUsage(): Promise<Map<string, ImageUsage>> {
+export async function collectImageUsage(): Promise<Map<string, ImageUsage>> {
     const posts = await prisma.post.findMany({
         select: { id: true, slug: true, title: true, status: true, contentMd: true, thumbnail: true },
     });
@@ -104,7 +127,7 @@ export const GRACE_HOURS = 24;
 const SWEEP_HOUR_UTC = 3;
 
 /** after 이후 처음 도는 정리 시각 */
-function nextSweepAt(after: Date): Date {
+export function nextSweepAt(after: Date): Date {
     const next = new Date(after);
     next.setUTCHours(SWEEP_HOUR_UTC, 0, 0, 0);
     if (next <= after) next.setUTCDate(next.getUTCDate() + 1);
@@ -201,12 +224,17 @@ export type ManagedImage = {
  * 실제로 다음 정리에서 지워지는 것과 어긋나면 이 화면은 거짓말을 한다.
  */
 export async function classifyImages(now = new Date()): Promise<{ images: ManagedImage[]; nextSweepAt: string }> {
-    const usage = await collectImageUsage();
-    const objects = await listAllObjects();
+    const [usage, objects] = await Promise.all([collectImageUsage(), listObjectMetadata()]);
+    const images = describeImages(objects, usage, now);
+    images.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { images, nextSweepAt: nextSweepAt(now).toISOString() };
+}
+
+/** DB 페이지 조회와 전체 라이브러리가 같은 쓰임·유예 판정을 사용한다. */
+export function describeImages(objects: StoredObject[], usage: Map<string, ImageUsage>, now: Date): ManagedImage[] {
     const supabase = createStorageClient();
     const graceMs = GRACE_HOURS * 60 * 60 * 1000;
-
-    const images = objects.map((object): ManagedImage => {
+    return objects.map((object): ManagedImage => {
         const used = usage.get(object.path);
         const expires = new Date(object.createdAt.getTime() + graceMs);
         // sweep 은 "cutoff 보다 늦게 올린 것" 만 남긴다 — 경계는 sweep 과 같게 둔다
@@ -224,9 +252,6 @@ export async function classifyImages(now = new Date()): Promise<{ images: Manage
         };
     });
 
-    // 최근에 올린 것을 먼저 본다
-    images.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    return { images, nextSweepAt: nextSweepAt(now).toISOString() };
 }
 
 /** 이미지 고르기 화면의 "이 이미지를 쓰는 글". 글 필터가 제목으로 고르게 한다 */

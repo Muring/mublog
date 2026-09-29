@@ -1,10 +1,10 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { buttonBase } from "@/styles/button";
+import { buttonSubtle } from "@/styles/button";
 import { Article } from "@/components/post/PostContent.styled";
 import { surface } from "@/styles/surface";
-import { hoverSurface } from "@/styles/surface";
+import { mobile } from "@/styles/breakpoints";
 
 export const EditorWrapper = styled.div`
   max-width: 1400px;
@@ -42,7 +42,7 @@ export const EditorWrapper = styled.div`
     align-items: center;
   }
   .actions button, .actions a { white-space: nowrap; }
-  @media (max-width: 480px) {
+  ${mobile} {
     .actions { width: 100%; }
     .actions > [role="status"] { flex-basis: 100%; }
   }
@@ -167,7 +167,7 @@ export const MetaGrid = styled.div`
   }
 
   .thumb-upload {
-    ${buttonBase}
+    ${buttonSubtle}
     padding: 0.5rem 0.7rem;
     font-size: 0.78rem;
     white-space: nowrap;
@@ -248,11 +248,11 @@ export const MetaGrid = styled.div`
 
 
   /*
-   * 목록이 1열이 되는 지점(627px)에서 에디터도 한 열로 쌓는다.
+   * 목록이 1열이 되는 지점(모바일 기준선)에서 에디터도 한 열로 쌓는다.
    * 이 아래로는 카드 폭이 곧 화면 폭이라 옆에 붙일 자리가 없다.
    * 컨테이너가 아니라 뷰포트를 보는 이유는 목록의 열 수가 뷰포트로 정해지기 때문이다.
    */
-  @media (max-width: 627px) {
+  ${mobile} {
     grid-template-columns: minmax(0, 1fr);
 
     .thumb-row,
@@ -322,7 +322,7 @@ export const SplitPane = styled.div<{ activeTab: "write" | "preview" }>`
     display: none;
   }
 
-  @media (max-width: 900px) {
+  ${mobile} {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(0, 1fr);
     /* 탭과 간격도 전체 높이에 포함한다. 주소창·키보드로 화면이 줄어도 본문이 밀리지 않는다. */
@@ -465,8 +465,10 @@ export const ToolbarButton = styled.button`
   font-weight: 700;
   cursor: pointer;
 
-  &:hover {
-    ${hoverSurface}
+  transition: background-color 150ms ease, color 150ms ease;
+  &:hover:not(:disabled) {
+    background-color: var(--control-hover-bg);
+    color: var(--foreground);
   }
 
   /*

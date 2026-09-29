@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { DropdownRoot, DropdownButton, DropdownList, DropdownPanel } from "./Dropdown.styled";
 
 /** hint 는 항목 오른쪽에 흐리게 붙는 보조 정보(개수 등). 검색 대상이 아니고 버튼에도 안 나온다 */
@@ -12,7 +12,13 @@ type Props = {
     onChange: (value: string) => void;
     /** 스크린리더용 이름. 화면에 라벨이 따로 없을 때 반드시 준다. */
     label: string;
+    labelledBy?: string;
+    /** 스크롤 가능한 필터 창에서는 목록만 최상단 레이어에 띄운다. */
+    floating?: boolean;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
     size?: "sm" | "md" | "control";
+    variant?: "default" | "ghost";
     /** 목록을 버튼의 어느 쪽에 맞출지. 오른쪽 끝에 놓인 버튼은 right. */
     align?: "left" | "right";
     /** 자리는 지키고 보이지만 않게 한다. */
@@ -41,19 +47,31 @@ export default function Dropdown({
     options,
     onChange,
     label,
+    labelledBy,
+    floating = false,
+    open: controlledOpen,
+    onOpenChange,
     size = "md",
+    variant = "default",
     align = "left",
     hidden = false,
     className,
     searchable,
 }: Props) {
-    const [open, setOpen] = useState(false);
+    const [localOpen, setLocalOpen] = useState(false);
+    const open = controlledOpen ?? localOpen;
+    const setOpen = (next: boolean) => {
+        setLocalOpen(next);
+        onOpenChange?.(next);
+    };
     const [focused, setFocused] = useState(0);
     const [query, setQuery] = useState("");
     const composing = useRef(false);
     const root = useRef<HTMLDivElement>(null);
     const button = useRef<HTMLButtonElement>(null);
     const list = useRef<HTMLUListElement>(null);
+    const panel = useRef<HTMLDivElement>(null);
+    const placePopup = useRef<(() => void) | null>(null);
     const listId = useId();
     const current = options.find((option) => option.value === value) ?? options[0];
     const needle = query.trim().toLowerCase();
@@ -62,16 +80,63 @@ export default function Dropdown({
     useEffect(() => {
         if (!open) return;
         const close = (event: PointerEvent) => {
-            if (!root.current?.contains(event.target as Node)) setOpen(false);
+            if (!root.current?.contains(event.target as Node)) {
+                setLocalOpen(false);
+                onOpenChange?.(false);
+            }
         };
         document.addEventListener("pointerdown", close);
         return () => document.removeEventListener("pointerdown", close);
-    }, [open]);
+    }, [open, onOpenChange]);
+
+    useLayoutEffect(() => {
+        if (!open || !floating || !panel.current || !button.current) return;
+        const popup = panel.current;
+        popup.showPopover();
+        const position = () => {
+            const rect = button.current!.getBoundingClientRect();
+            const viewport = window.visualViewport;
+            const top = (viewport?.offsetTop ?? 0) + 8;
+            const bottom = (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 8;
+            const below = Math.max(0, bottom - rect.bottom - 6);
+            const above = Math.max(0, rect.top - top - 6);
+            const upwards = below < 240 && above > below;
+            popup.style.maxHeight = `${Math.min(320, upwards ? above : below)}px`;
+            popup.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - popup.offsetWidth - 8))}px`;
+            popup.style.top = `${upwards ? rect.top - popup.offsetHeight - 6 : rect.bottom + 6}px`;
+        };
+        placePopup.current = position;
+        position();
+        popup.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+        const onScroll = (event: Event) => { if (!popup.contains(event.target as Node)) position(); };
+        window.addEventListener("resize", position);
+        window.addEventListener("scroll", onScroll, true);
+        window.visualViewport?.addEventListener("resize", position);
+        window.visualViewport?.addEventListener("scroll", position);
+        return () => {
+            placePopup.current = null;
+            if (popup.matches(":popover-open")) popup.hidePopover();
+            window.removeEventListener("resize", position);
+            window.removeEventListener("scroll", onScroll, true);
+            window.visualViewport?.removeEventListener("resize", position);
+            window.visualViewport?.removeEventListener("scroll", position);
+        };
+    }, [open, floating]);
+
+    // 검색으로 목록 높이가 바뀌어도 위로 펼친 목록은 버튼 바로 위에 붙인다.
+    useLayoutEffect(() => { placePopup.current?.(); }, [query]);
 
     // 키보드로 움직인 항목이 스크롤 밖에 있으면 따라간다. 항목이 많은 검색형에서만 실제로 필요하다.
     useEffect(() => {
-        if (open) list.current?.querySelector<HTMLElement>(`[data-index="${focused}"]`)?.scrollIntoView({ block: "nearest" });
-    }, [open, focused]);
+        if (!open || !list.current) return;
+        const item = list.current.querySelector<HTMLElement>(`[data-index="${focused}"]`);
+        if (!item) return;
+        if (!floating) { item.scrollIntoView({ block: "nearest" }); return; }
+        const bounds = list.current.getBoundingClientRect();
+        const rect = item.getBoundingClientRect();
+        if (rect.top < bounds.top) list.current.scrollTop -= bounds.top - rect.top;
+        else if (rect.bottom > bounds.bottom) list.current.scrollTop += rect.bottom - bounds.bottom;
+    }, [open, focused, floating]);
 
     function openList() {
         setQuery("");
@@ -148,7 +213,7 @@ export default function Dropdown({
     }
 
     const items = (
-        <DropdownList ref={list} id={listId} role="listbox" aria-label={label} $align={align} $inPanel={Boolean(searchable)}>
+        <DropdownList ref={list} id={listId} role="listbox" aria-label={label} $align={align} $inPanel={Boolean(searchable || floating)}>
             {shown.map((option, index) => (
                 <li
                     key={option.value}
@@ -169,12 +234,14 @@ export default function Dropdown({
     );
 
     return (
-        <DropdownRoot ref={root} className={className} data-hidden={hidden} onKeyDown={onKeyDown}>
+        <DropdownRoot ref={root} className={className} data-hidden={hidden} data-floating={floating || undefined} onKeyDown={onKeyDown}>
             <DropdownButton
                 ref={button}
                 type="button"
                 $size={size}
+                $variant={variant}
                 aria-label={label}
+                aria-labelledby={labelledBy}
                 aria-haspopup="listbox"
                 aria-expanded={open}
                 aria-controls={listId}
@@ -182,9 +249,9 @@ export default function Dropdown({
             >
                 <span>{current?.label}</span>
             </DropdownButton>
-            {open && (searchable ? (
-                <DropdownPanel $align={align}>
-                    <input
+            {open && (searchable || floating ? (
+                <DropdownPanel ref={panel} $align={align} popover={floating ? "manual" : undefined}>
+                    {searchable && <input
                         type="search"
                         className="dropdown-search"
                         placeholder={searchable}
@@ -193,11 +260,11 @@ export default function Dropdown({
                         aria-expanded="true"
                         aria-controls={listId}
                         aria-activedescendant={shown.length ? `${listId}-${focused}` : undefined}
-                        autoFocus
+                        autoFocus={!floating}
                         onCompositionStart={() => { composing.current = true; }}
                         onCompositionEnd={(event) => { composing.current = false; search(event.currentTarget.value); }}
                         onChange={(event) => { if (!composing.current) search(event.currentTarget.value); }}
-                    />
+                    />}
                     {items}
                 </DropdownPanel>
             ) : items)}

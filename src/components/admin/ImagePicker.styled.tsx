@@ -1,9 +1,10 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { buttonBase } from "@/styles/button";
+import { buttonSubtle } from "@/styles/button";
 import { surface } from "@/styles/surface";
 import { overlayBackdrop, overlayPanel } from "@/styles/motion";
+import { mobile } from "@/styles/breakpoints";
 
 export const PickerOverlay = styled.div`
   position: fixed;
@@ -66,7 +67,7 @@ export const PickerBox = styled.div`
     min-width: 0;
   }
   .picker-filters .post-filter > button { width: 100%; }
-  @media (max-width: 560px) {
+  ${mobile} {
     .picker-filters input[type="search"] { flex-basis: 100%; }
     .picker-filters .post-filter { flex: 1 1 0; }
   }
@@ -106,8 +107,7 @@ export const PickerBox = styled.div`
     gap: 0.75rem;
   }
 
-  .empty,
-  .loading {
+  .empty {
     padding: 3rem 0;
     text-align: center;
     font-size: 0.85rem;
@@ -128,7 +128,7 @@ export const PickerBox = styled.div`
 
 /** 출처 거르개. 고른 쪽만 면이 진해진다 */
 export const SourceTab = styled.button`
-  ${buttonBase}
+  ${buttonSubtle}
   padding: 0.4rem 0.7rem;
   font-size: 0.78rem;
   white-space: nowrap;
@@ -137,6 +137,11 @@ export const SourceTab = styled.button`
     background-color: var(--foreground);
     color: var(--background);
     border-color: var(--foreground);
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--foreground) 92%, var(--background));
+      color: var(--background);
+      border-color: var(--foreground);
+    }
   }
 `;
 
@@ -232,5 +237,6 @@ export const ImageCard = styled.button`
   &.current {
     border-color: var(--foreground);
     box-shadow: inset 0 0 0 1px var(--foreground);
+    &:hover { border-color: var(--foreground); outline-color: transparent; }
   }
 `;

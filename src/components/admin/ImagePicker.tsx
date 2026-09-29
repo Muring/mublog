@@ -6,7 +6,7 @@ import { fetchJson } from "@/lib/fetcher";
 import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 import { useToast } from "@/providers/Toast";
 import type { LibraryImage, LibraryUser } from "@/lib/storage";
-import { Button } from "./Admin.styled";
+import { Button, Skeleton } from "./Admin.styled";
 import { PickerOverlay, PickerBox, SourceTab, ImageCard } from "./ImagePicker.styled";
 
 /** 무엇으로 쓰이는지로 거른다. 고르러 온 사람에게 중요한 건 파일 위치가 아니라 쓰임이다. */
@@ -223,7 +223,16 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
 
                 <div className="picker-body">
                     {images === null ? (
-                        <p className="loading">불러오는 중...</p>
+                        // 이미지 관리 스켈레톤과 같은 카드 자리
+                        <div className="grid" role="status" aria-label="이미지를 불러오는 중">
+                            {Array.from({ length: 12 }, (_, i) => (
+                                <ImageCard key={i} as="span" aria-hidden>
+                                    <Skeleton style={{ width: "100%", aspectRatio: "16 / 9", height: "auto" }} />
+                                    <span className="name"><Skeleton style={{ display: "inline-block", width: "80%", height: "0.8em" }} /></span>
+                                    <span className="meta"><Skeleton style={{ display: "inline-block", width: "50%", height: "0.8em" }} /></span>
+                                </ImageCard>
+                            ))}
+                        </div>
                     ) : filtered.length === 0 ? (
                         <p className="empty">찾는 이미지가 없습니다.</p>
                     ) : (
@@ -269,10 +278,15 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
                 </div>
 
                 <div className="picker-foot">
-                    <span>
-                        {filtered.length}개
-                        {unused > 0 && ` · 미사용 ${unused}개`}
-                    </span>
+                    {/* 불러오는 동안 "0개" 를 보이면 이미지가 없는 것처럼 읽힌다. 개수 자리는 막대로 지킨다 */}
+                    {images === null ? (
+                        <Skeleton aria-hidden style={{ width: "4rem", height: "0.9rem" }} />
+                    ) : (
+                        <span>
+                            {filtered.length}개
+                            {unused > 0 && ` · 미사용 ${unused}개`}
+                        </span>
+                    )}
                     <Button type="button" onClick={close}>
                         닫기
                     </Button>

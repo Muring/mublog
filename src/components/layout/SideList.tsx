@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { SideListWrapper } from "./SideList.styled";
 import { useRecentPosts } from "@/hooks/useRecentPosts";
 import SidePost from "./SidePost";
+import { SidePostWrapper } from "./SidePost.styled";
+import { Skeleton } from "@/components/ui/Skeleton.styled";
 import Link from "next/link";
 import type { PostSummary } from "@/types/post";
 import { fetchPostsSummary, queryKeys } from "@/lib/queries";
@@ -46,7 +48,20 @@ export default function SideList({ type, onLinkClick }: Props) {
         </div>
         <div className="side-list-content">
           {isLoading ? (
-            <p className="status-text desc">불러오는 중...</p>
+            // 실제 항목과 같은 썸네일·두 줄 자리. 최근 본 글은 개수를 이미 알고(localStorage) 있어 그만큼만 깐다
+            <div role="status" aria-label="포스트를 불러오는 중">
+              {Array.from({ length: isRecent ? recentPosts.length : 5 }, (_, i) => (
+                <div key={i} className="side-link" aria-hidden>
+                  <SidePostWrapper>
+                    <Skeleton style={{ width: 40, height: 40, flexShrink: 0, borderRadius: "0.5rem" }} />
+                    <div className="text-container" style={{ flex: 1 }}>
+                      <Skeleton style={{ width: i % 2 ? "70%" : "85%", height: "0.95rem" }} />
+                      <Skeleton style={{ width: "55%", height: "0.7rem" }} />
+                    </div>
+                  </SidePostWrapper>
+                </div>
+              ))}
+            </div>
           ) : postsToRender.length === 0 ? (
             <p className="status-text">표시할 포스트가 없습니다.</p>
           ) : (

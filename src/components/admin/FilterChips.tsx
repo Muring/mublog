@@ -1,6 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
+import { mobile } from "@/styles/breakpoints";
 
 export type FilterChip = { key: string; name: string; value: string };
 
@@ -8,9 +9,11 @@ export type FilterChip = { key: string; name: string; value: string };
  * 걸려 있는 필터를 칩으로 늘어놓는다. 칩을 누르면 그 조건 하나만 풀린다.
  * 드롭다운 버튼만으로는 무엇이 걸려 있는지 한눈에 안 들어온다. 포스트·댓글 관리가 같이 쓴다.
  */
-export default function FilterChips({ items, onRemove }: { items: FilterChip[]; onRemove: (key: string) => void }) {
-    if (items.length === 0) return null;
+export default function FilterChips({ items, onRemove, onClear, canClear = items.length > 0 }: { items: FilterChip[]; onRemove: (key: string) => void; onClear: () => void; canClear?: boolean }) {
+    if (items.length === 0 && !canClear) return null;
+    // 초기화는 걸린 조건 바로 옆, 칩 줄의 오른쪽 끝에 둔다. 걸린 것이 없으면 줄째 사라진다 — 세 관리 화면 공통
     return (
+        <ChipRow>
         <Chips aria-label="적용된 필터">
             {items.map((chip) => (
                 <li key={chip.key}>
@@ -22,8 +25,47 @@ export default function FilterChips({ items, onRemove }: { items: FilterChip[]; 
                 </li>
             ))}
         </Chips>
+        <button type="button" className="chips-clear" onClick={onClear}>전체 초기화</button>
+        </ChipRow>
     );
 }
+
+const ChipRow = styled.div`
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+
+    /* 조건 칩보다 눈에 덜 띄는 텍스트 버튼. 호버 때만 옅은 면을 보여준다. */
+    .chips-clear {
+        flex-shrink: 0;
+        margin-left: auto;
+        padding: 4px 8px;
+        border: 0;
+        border-radius: 6px;
+        background: none;
+        color: var(--linkcolor);
+        font: inherit;
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 1.5;
+        cursor: pointer;
+        box-shadow: inset 0 0 0 var(--border-width) transparent;
+        transition: background-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+    }
+    .chips-clear:hover {
+        background: color-mix(in srgb, var(--linkcolor) 6%, var(--background));
+        box-shadow: inset 0 0 0 var(--border-width) color-mix(in srgb, var(--linkcolor) 20%, transparent);
+        color: var(--linkhovercolor);
+    }
+    .chips-clear:active {
+        background: color-mix(in srgb, var(--linkcolor) 10%, var(--background));
+    }
+    .chips-clear:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+    ${mobile} {
+        .chips-clear { min-height: 44px; }
+    }
+`;
 
 /*
  * 적용된 필터 칩.
@@ -36,8 +78,9 @@ const Chips = styled.ul`
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    /* 아래가 표(포스트)든 요약 줄(댓글)이든 툴바와 같은 12px 을 둔다. 댓글 쪽은 요약 줄 margin 과 겹쳐 접힌다 */
-    margin: 0 0 12px;
+    flex: 1;
+    min-width: 0;
+    margin: 0;
     padding: 0;
     list-style: none;
 
@@ -67,8 +110,11 @@ const Chips = styled.ul`
         color: var(--foreground);
     }
     button:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+    ${mobile} {
+        button { min-height: 44px; }
+    }
     .chip-name { flex-shrink: 0; color: var(--desccolor); }
-    .chip-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+    .chip-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
     /* × 는 글꼴마다 굵기·높이가 달라 두 선을 돌려 그린다. currentColor 라 테마를 따라간다 */
     .chip-x { position: relative; flex-shrink: 0; width: 10px; height: 10px; }
     .chip-x::before, .chip-x::after { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 1.5px; border-radius: 1px; background: currentColor; }
