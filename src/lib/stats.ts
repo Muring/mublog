@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { seoulDateKey } from "@/lib/date";
-import { compareTags } from "@/lib/tags";
 
 export const VISIT_COOKIE = "mublog_seen";
 /** 포스트별 중복 집계를 막는 쿠키 접두사 */
@@ -90,44 +89,6 @@ export async function recordPostView(slug: string, dateKey: string): Promise<voi
     `;
 }
 
-export type TagDailyViews = { tag: string; points: DailyPoint[]; total: number };
-
-/**
- * 태그별 일일 조회. 글의 태그마다 그 글의 일일 조회를 더한다 — 태그가 둘인 글은 둘 다에 들어간다.
- * 기록 시작일부터 오늘까지 하루도 빠짐없이 채운다(getDailyVisitors 와 같은 규칙).
- * 합산은 DB 에서 하고(unnest), 돌아오는 건 태그 x 날짜 행뿐이다.
- */
-export async function getTagDailyViews(): Promise<TagDailyViews[]> {
-    const rows = await prisma.$queryRaw<{ tag: string; date: Date; views: number }[]>`
-        SELECT t.tag, v.date, SUM(v.views)::int AS views
-          FROM post_daily_views v
-          JOIN posts p ON p.id = v.post_id, unnest(p.tags) AS t(tag)
-         GROUP BY t.tag, v.date
-    `;
-    if (rows.length === 0) return [];
-
-    const key = (d: Date) => d.toISOString().slice(0, 10);
-    const since = rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date);
-    const today = new Date(`${seoulDateKey()}T00:00:00Z`);
-    const days: string[] = [];
-    for (const cursor = new Date(since); cursor <= today; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
-        days.push(key(cursor));
-    }
-
-    const byTag = new Map<string, Map<string, number>>();
-    for (const r of rows) {
-        const m = byTag.get(r.tag) ?? new Map<string, number>();
-        m.set(key(r.date), r.views);
-        byTag.set(r.tag, m);
-    }
-    return [...byTag.entries()]
-        .map(([tag, m]) => {
-            const points = days.map((d) => ({ date: d, visitors: m.get(d) ?? 0 }));
-            return { tag, points, total: points.reduce((sum, p) => sum + p.visitors, 0) };
-        })
-        .sort((a, b) => compareTags(a.tag, b.tag));
-}
-
 /**
  * 사이트 전체 방문 통계.
  *
@@ -150,39 +111,6 @@ export async function getSiteStats(): Promise<SiteStats> {
         today: todayRow?.visitors ?? 0,
         total: aggregate._sum.visitors ?? 0,
     };
-}
-
-export type DailyPoint = { date: string; visitors: number };
-
-/**
- * 방문자 추이의 원본. 관리 화면의 차트가 쓴다.
- *
- * 기간을 서버에서 자르지 않고 기록 전체를 준다. 하루 1행이라 한 해가 365행이고
- * 날짜와 숫자뿐이라, 몇 해가 쌓여도 payload 가 수십 KB 를 넘지 않는다.
- * 관리자만 보는 화면이고 기간·연도 전환이 잦아, 매번 왕복하는 것보다 낫다.
- *
- * 첫 기록일부터 오늘까지를 하루도 빠짐없이 채운다. 행이 없다는 건 그날 아무도
- * 오지 않아 recordVisit 이 한 번도 불리지 않았다는 뜻이라 진짜 0 이다.
- * 다만 첫 기록일 **이전**은 만들지 않는다. 그 0 은 "아무도 안 왔다" 가 아니라
- * "세지 않았다" 라서, 그려두면 없던 사실을 만들어낸다.
- */
-export async function getDailyVisitors(): Promise<DailyPoint[]> {
-    const rows = await prisma.dailyStat.findMany({
-        orderBy: { date: "asc" },
-        select: { date: true, visitors: true },
-    });
-    if (rows.length === 0) return [];
-
-    const key = (d: Date) => d.toISOString().slice(0, 10);
-    const byDate = new Map(rows.map((r) => [key(r.date), r.visitors]));
-
-    const today = new Date(`${seoulDateKey()}T00:00:00Z`);
-    const points: DailyPoint[] = [];
-    for (const cursor = new Date(rows[0].date); cursor <= today; cursor.setUTCDate(cursor.getUTCDate() + 1)) {
-        const k = key(cursor);
-        points.push({ date: k, visitors: byDate.get(k) ?? 0 });
-    }
-    return points;
 }
 
 /** 다음 KST 자정까지 남은 초. 방문 쿠키의 수명으로 쓴다. */

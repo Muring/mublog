@@ -2,50 +2,6 @@
 
 import styled from "@emotion/styled";
 
-/** 범례. 계열이 여럿이라 늘 보인다. 항목을 누르면 그 선을 껐다 켠다 */
-export const Legend = styled.div`
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 0.9rem;
-    margin-top: 0.6rem;
-
-    button {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        padding: 0.15rem 0.2rem;
-        border: 0;
-        background: none;
-        color: var(--foreground);
-        font-family: inherit;
-        font-size: 0.72rem;
-        font-weight: 700;
-        cursor: pointer;
-        border-radius: 4px;
-        &:hover { background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground)); }
-        &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
-    }
-    button .swatch {
-        width: 10px;
-        height: 10px;
-        border-radius: 2px;
-        background: var(--series);
-    }
-    button .total {
-        color: var(--desccolor);
-        font-weight: 500;
-        font-variant-numeric: tabular-nums;
-    }
-    /* 꺼진 계열. 글자는 남기고 색 조각만 비운다 — 대비를 opacity 로 낮추지 않는다 */
-    button[aria-pressed="false"] .swatch {
-        background: transparent;
-        box-shadow: inset 0 0 0 1.5px var(--series);
-    }
-    button[aria-pressed="false"] {
-        color: var(--desccolor);
-    }
-`;
-
 /** 한 칸(날짜)에 걸친 세로 띠 + 그 칸의 값 전부를 담은 툴팁 */
 export const Column = styled.div`
     position: absolute;
@@ -53,7 +9,7 @@ export const Column = styled.div`
     bottom: 0;
     left: var(--x);
     width: var(--w);
-    transform: translateX(-50%);
+    transform: translateX(var(--hit-offset, -50%));
     cursor: default;
 
     &:focus-visible {
@@ -65,7 +21,7 @@ export const Column = styled.div`
         position: absolute;
         top: 0;
         bottom: 0;
-        left: 50%;
+        left: var(--marker-x, 50%);
         width: 1px;
         background: var(--bordercolor);
         opacity: 0;
@@ -79,7 +35,7 @@ export const Column = styled.div`
     .dot {
         position: absolute;
         top: var(--y);
-        left: 50%;
+        left: var(--marker-x, 50%);
         width: 8px;
         height: 8px;
         margin: -4px 0 0 -4px;
@@ -97,7 +53,7 @@ export const Column = styled.div`
     .tip {
         position: absolute;
         top: 0;
-        left: 50%;
+        left: var(--marker-x, 50%);
         transform: translate(-50%, -0.4rem);
         z-index: 5;
         display: none;

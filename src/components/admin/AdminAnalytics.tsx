@@ -1,97 +1,98 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
-import type { DailyPoint, TagDailyViews } from "@/lib/stats";
-import { bucketPoints, BUCKETS, lineSegments, niceCeil, type BucketKey } from "@/lib/admin-chart";
-import { ChartCard, Plot, Axis, Pills } from "./VisitorChart.styled";
-import { Legend, Column } from "./TagViewsChart.styled";
-import Dropdown from "@/components/ui/Dropdown";
-import styles from "./Management.module.css";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { analyticsDateError, analyticsDataKey, analyticsDataUrl, analyticsRange, analyticsUrl, type AnalyticsData, type AnalyticsRange } from "@/lib/admin-analytics";
+import { fetchJson } from "@/lib/fetcher";
+import { safeAdminReturn } from "@/lib/admin-navigation";
+import { Button } from "./Admin.styled";
+import AnalyticsResults from "./AnalyticsResults";
+import { Skeleton } from "@/components/ui/Skeleton.styled";
+import AnalyticsSkeleton from "./AnalyticsSkeleton";
+import styles from "./Analytics.module.css";
 
-export default function AdminAnalytics({ points, tags, today, totalVisitors }: {
-    points: DailyPoint[]; tags: TagDailyViews[]; today: string; totalVisitors: number;
-}) {
-    const [metric, setMetric] = useState<"visits" | "tags">("visits");
-    const [bucket, setBucket] = useState<BucketKey>("daily");
-    const [year, setYear] = useState(today.slice(0, 4));
-    const [hidden, setHidden] = useState<string[]>([]);
-    const years = [...new Set([today.slice(0, 4), ...points.map((p) => p.date.slice(0, 4)), ...tags.flatMap((t) => t.points.map((p) => p.date.slice(0, 4)))])].sort().reverse();
-    const source = metric === "visits" ? [{ tag: "방문", color: "var(--chartbar)", points }]
-        : tags.map((tag, index) => ({ ...tag, color: `var(--series-${index % 8 + 1})` }));
-    const series = source.map((s) => ({ ...s, bars: bucketPoints(s.points.map((p) => ({ date: p.date, value: p.visitors })), bucket, year, today) }));
-    const visible = series.filter((s) => metric === "visits" || !hidden.includes(s.tag));
-    const columns = bucketPoints([], bucket, year, today);
-    const unit = metric === "visits" ? "명" : "회";
-    const todayVisits = points.find((p) => p.date === today)?.visitors ?? 0;
-    const todayValue = visible.reduce((sum, s) => sum + (s.points.find((p) => p.date === today)?.visitors ?? 0), 0);
-    const periodTotal = visible.reduce((sum, s) => sum + s.bars.reduce((n, b) => n + (b.value ?? 0), 0), 0);
-    const known = columns.filter((_, i) => visible.some((s) => s.bars[i].value !== null));
-    const ceiling = niceCeil(Math.max(1, ...visible.flatMap((s) => s.bars.map((b) => b.value ?? 0))));
-    const xAt = (i: number) => i / (columns.length - 1) * 100;
-    const step = Math.ceil((columns.length - 1) / 4);
-    const shown = new Set<number>();
-    for (let i = columns.length - 1; i >= 0; i -= step) shown.add(i);
-    if (Math.min(...shown) >= step * 0.6) shown.add(0);
-    const periodStart = columns[0].key + (bucket === "monthly" ? "-01" : "");
-    const calendarEnd = bucket === "monthly" ? `${year}-12-31` : columns.at(-1)!.period.split(" ~ ").at(-1)!;
-    const periodLabel = `${periodStart} ~ ${calendarEnd > today ? today : calendarEnd}`;
-    return (
-        <ChartCard>
-            <summary><span className="title">방문·조회 통계</span><span className="summary-value">오늘 방문 <strong>{todayVisits.toLocaleString("ko-KR")}</strong>명</span></summary>
-            <div className="body">
-                <div className={styles.analyticsToolbar}>
-                <Pills role="tablist" aria-label="통계 종류">
-                    {([['visits', '방문'], ['tags', '태그별 조회']] as const).map(([key, title]) => (
-                        <button type="button" role="tab" id={`analytics-tab-${key}`} aria-controls="analytics-panel" aria-selected={metric === key} tabIndex={metric === key ? 0 : -1} key={key}
-                            onClick={() => setMetric(key)} onKeyDown={(event) => {
-                                if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
-                                event.preventDefault();
-                                const next = event.key === "Home" ? "visits" : event.key === "End" ? "tags" : metric === "visits" ? "tags" : "visits";
-                                setMetric(next); document.getElementById(`analytics-tab-${next}`)?.focus();
-                            }}>{title}</button>
-                    ))}
-                </Pills>
-                <div className="controls">
-                    <Pills role="group" aria-label="집계 기간">
-                        {BUCKETS.map((b) => <button type="button" key={b.key} aria-pressed={bucket === b.key} onClick={() => setBucket(b.key)}>{b.label}</button>)}
-                    </Pills>
-                </div>
-                </div>
-                <div id="analytics-panel" role="tabpanel" aria-labelledby={`analytics-tab-${metric}`}>
-                    <div className={styles.analyticsSummary}>
-                        <div className={styles.analyticsText}>
-                        <div>오늘 ({today}) <strong>{todayValue.toLocaleString("ko-KR")}{unit}</strong> · 선택 기간 <strong>{periodTotal.toLocaleString("ko-KR")}{unit}</strong>
-                        {metric === "visits" && <> · 누적 <strong>{totalVisitors.toLocaleString("ko-KR")}명</strong></>}</div>
-                        <div>집계 기간 <strong>{periodLabel}</strong> · 한국 시간(KST)</div>
-                        <small>{metric === "tags" ? "선택 태그 합산 · 여러 태그가 붙은 글의 조회는 중복 포함" : "방문 수는 일별 순 방문자의 합계"} · 오늘은 현재까지 집계 · 집계 시작 전과 미래는 기록 없음</small>
-                        </div>
-                        <Dropdown label="연도 선택" size="control" align="right" hidden={bucket !== "monthly"} value={year} options={years.map((value) => ({ value, label: `${value}년` }))} onChange={setYear} />
-                    </div>
-                    {known.length < 2 ? <div className="empty" role="status"><strong>{known.length ? "추이를 표시하려면 두 구간 이상의 기록이 필요합니다." : "선택 기간에 집계된 기록이 없습니다."}</strong><span>{known.length ? `${known[0].period}의 집계 값은 위 요약에서 확인할 수 있습니다.` : "다른 기간을 선택하거나 기록이 쌓인 뒤 확인해 주세요."}</span></div> : <>
-                        <Plot>
-                            {[ceiling, ceiling / 2, 0].map((tick) => <div key={tick} className="gridline" data-base={tick === 0} style={{ bottom: `${tick / ceiling * 100}%` }} aria-hidden><span>{tick}</span></div>)}
-                            <div className="series">
-                                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
-                                    {visible.flatMap((s) => lineSegments(s.bars.map((b) => b.value), ceiling).map((d, index) => <path key={`${s.tag}-${index}`} className="line" d={d} style={{ stroke: s.color }} vectorEffect="non-scaling-stroke" />))}
-                                </svg>
-                                {columns.map((column, i) => <Column key={column.key} tabIndex={0} role="img"
-                                    aria-label={`${column.period}: ${visible.map((s) => `${s.tag} ${s.bars[i].value === null ? '기록 없음' : `${s.bars[i].value}${unit}`}`).join(', ')}`}
-                                    data-edge={i < 3 ? "first" : i >= columns.length - 3 ? "last" : undefined}
-                                    style={{ "--x": `${xAt(i)}%`, "--w": `${100 / columns.length}%` } as CSSProperties}>
-                                    <span className="rule" />
-                                    {visible.map((s) => s.bars[i].value !== null && <span className="dot" key={s.tag} style={{ "--y": `${100 - s.bars[i].value! / ceiling * 100}%`, "--series": s.color } as CSSProperties} />)}
-                                    <span className="tip"><span className="date">{column.period}</span>{visible.map((s) => <span className="row" key={s.tag} style={{ "--series": s.color } as CSSProperties}><span className="swatch" />{s.tag}<span className="value">{s.bars[i].value === null ? "기록 없음" : `${s.bars[i].value}${unit}`}</span></span>)}</span>
-                                </Column>)}
-                            </div>
-                        </Plot>
-                        <Axis>{columns.map((c, i) => <span key={c.key} style={{ "--x": `${xAt(i)}%` } as CSSProperties} data-show={shown.has(i)} data-edge={i === 0 ? "first" : i === columns.length - 1 ? "last" : undefined}>{c.label}</span>)}</Axis>
-                    </>}
-                    {metric === "tags" && series.length > 0 && <Legend aria-label="표시할 태그 · 수치는 선택 기간 합계">{series.map((s) => <button type="button" key={s.tag} aria-pressed={!hidden.includes(s.tag)} style={{ "--series": s.color } as CSSProperties}
-                        onClick={() => setHidden((previous) => previous.includes(s.tag) ? previous.filter((tag) => tag !== s.tag) : previous.length < series.length - 1 ? [...previous, s.tag] : previous)}>
-                        <span className="swatch" />{s.tag}<span className="total">{s.bars.reduce((sum, b) => sum + (b.value ?? 0), 0)}회</span>
-                    </button>)}</Legend>}
+/** 기간 선택기는 데이터 로딩·실패와 무관하게 같은 DOM을 유지한다. */
+export default function AdminAnalytics({ today }: { today: string }) {
+    const params = useSearchParams();
+    const range = analyticsRange(new URLSearchParams(params), today);
+    const [dateError, setDateError] = useState<string | null>(null);
+    const urlError = params.get("period") === "custom" ? analyticsDateError(params.get("from"), params.get("to"), today) : null;
+    const fromInput = useRef<HTMLInputElement>(null);
+    const toInput = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        if (fromInput.current) { fromInput.current.value = range.from; fromInput.current.max = range.to; }
+        if (toInput.current) { toInput.current.value = range.to; toInput.current.min = range.from; }
+    }, [range.from, range.to]);
+
+    const query = useQuery({
+        // 단위와 정렬은 표시 방식이다. 요청·캐시 키에 넣으면 같은 데이터를 다시 기다리게 된다.
+        queryKey: analyticsDataKey(range, today),
+        queryFn: ({ signal }) => fetchJson<AnalyticsData>(analyticsDataUrl(range), { signal, cache: "no-store" }),
+        retry: false,
+        enabled: !urlError,
+        placeholderData: keepPreviousData,
+    });
+    const pending = query.isPending || query.isFetching;
+    const navigate = (next: AnalyticsRange) => {
+        setDateError(null);
+        const url = analyticsUrl(next, safeAdminReturn(params.get("returnTo")));
+        const selected = analyticsRange(new URL(url, window.location.origin).searchParams, today);
+        if (fromInput.current) { fromInput.current.value = selected.from; fromInput.current.max = selected.to; }
+        if (toInput.current) { toInput.current.value = selected.to; toInput.current.min = selected.from; }
+        if (`${window.location.pathname}${window.location.search}` !== url) window.history.pushState(null, "", url);
+    };
+    const submitDates = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const fields = new FormData(event.currentTarget);
+        const from = String(fields.get("from")), to = String(fields.get("to"));
+        const error = analyticsDateError(from, to, today);
+        setDateError(error);
+        if (error) { toInput.current?.focus(); return; }
+        navigate({ ...range, preset: "custom", from, to });
+    };
+    const updateDates = () => {
+        const from = fromInput.current?.value ?? "", to = toInput.current?.value ?? "";
+        if (fromInput.current) fromInput.current.max = to || today;
+        if (toInput.current) toInput.current.min = from || "1970-01-01";
+        setDateError(analyticsDateError(from, to, today));
+    };
+    const displayedData = query.data && { ...query.data, range: { ...query.data.range, bucket: range.bucket } };
+    const comparisonRange = query.isPlaceholderData && displayedData ? displayedData.range : range;
+    return <div className={`${styles.dashboard} ${styles.analyticsRoot}`}>
+        <section className={styles.panel} aria-label="통계 기간">
+            <div className={styles.toolbar}>
+                <h3>조회 기간</h3>
+                <span className={styles.note} role="status">{range.from} ~ {range.to} · KST</span>
+            </div>
+            <div className={styles.periodControls}>
+                <form className={styles.dates} onSubmit={submitDates} onChange={updateDates} noValidate>
+                    <label>시작일<input ref={fromInput} name="from" type="date" required min="1970-01-01" max={range.to} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.from} /></label>
+                    <label>종료일<input ref={toInput} name="to" type="date" required min={range.from} max={today} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.to} /></label>
+                    <Button type="submit">기간 적용</Button>
+                </form>
+                <div className={styles.shortcuts} role="group" aria-label="기간 빠른 조회">
+                    <span>빠른 조회</span>
+                    {[7, 30, 90].map(days => <Button key={days} type="button" onClick={() => navigate({ ...range, preset: String(days) })}>최근 {days}일</Button>)}
                 </div>
             </div>
-        </ChartCard>
-    );
+            {(dateError || urlError) && <p id="analytics-date-error" className={styles.note} role="alert">{dateError || urlError}</p>}
+            {!urlError && <div className={styles.comparison} aria-label="증감 비교 기준">
+                <span><strong>{query.isPlaceholderData ? "현재 표시 결과의 비교 대상" : "비교 대상"} · 선택 기간 바로 앞 {comparisonRange.days}일</strong> {comparisonRange.previousFrom} ~ {comparisonRange.previousTo}</span>
+                <span>모든 증감은 선택한 {comparisonRange.days}일 합계에서 위 기간의 합계를 뺀 값입니다.{comparisonRange.to === today && " 오늘은 집계 중입니다."}</span>
+            </div>}
+            <div className={styles.refreshStatus} role="status">
+                {pending && displayedData && !urlError && <><Skeleton aria-hidden style={{ width: "100%", height: 3 }} /><span>조회 중 · 현재 표시는 {displayedData.range.from} ~ {displayedData.range.to} 결과</span></>}
+            </div>
+        </section>
+        <div className={styles.dashboard} aria-busy={pending && !urlError} aria-label="통계 결과">
+            {urlError ? null : query.isError ? <section className={styles.panel} role="alert">
+                <h3>통계를 불러오지 못했습니다.</h3><p className={styles.note}>{query.error.message}</p>
+                <Button type="button" onClick={() => void query.refetch()}>다시 시도</Button>
+            </section> : <>
+                {displayedData ? <AnalyticsResults data={displayedData} onBucketChange={bucket => navigate({ ...range, bucket })} /> : <AnalyticsSkeleton />}
+            </>}
+
+        </div>
+    </div>;
 }

@@ -8,7 +8,6 @@ import Dropdown from "@/components/ui/Dropdown";
 import TagChips from "@/components/ui/TagChips";
 import PostTableHead from "./PostTableHead";
 import PostTableToolbar from "./PostTableToolbar";
-import { ChartCard } from "./VisitorChart.styled";
 import { CompactList } from "./AdminCommentList";
 import { CommentRow } from "@/components/comments/Comments.styled";
 import styles from "./Management.module.css";
@@ -16,7 +15,8 @@ import { AdminWrapper, PostTable, AdminListScroll, TableToolbar, Button, Skeleto
 
 /** 관리 탭 사이에서 유지되는 공통 프레임. 페이지 로딩은 children 내부만 교체한다. */
 export function AdminShell({ children }: { children: React.ReactNode }) {
-    const title = usePathname() === "/admin/comments" ? "댓글 관리" : "포스트 관리";
+    const pathname = usePathname();
+    const title = pathname === "/admin/stats" ? "통계" : pathname === "/admin/comments" ? "댓글 관리" : "포스트 관리";
     return (
         <AdminWrapper>
             <div className="admin-head">
@@ -103,17 +103,11 @@ function CommentToolbarSkeleton() {
     );
 }
 
-/** 접힌 통계 카드 → 필터 툴바 → 스크롤 표 순서를 실제 포스트 관리와 맞춘다. */
+/** 필터 툴바 → 스크롤 표 순서를 실제 포스트 관리와 맞춘다. */
 export default function AdminSkeleton() {
     return (
         <div role="status" aria-label="포스트 목록을 불러오는 중">
             <div aria-hidden inert>
-                <ChartCard>
-                    <summary tabIndex={-1}>
-                        <span style={{ fontSize: ".9rem", fontWeight: 800 }}><TextSkeleton width="8em" /></span>
-                        <span className="summary-value"><TextSkeleton width="7em" /></span>
-                    </summary>
-                </ChartCard>
                 <PostTableToolbar loading state={{ q: "", status: "all", sort: "newest", tag: "", series: "" }} counts={{ all: 0, PUBLISHED: 0, DRAFT: 0 }} onChange={() => {}} />
                 <AdminListScroll><PostTableSkeleton /></AdminListScroll>
             </div>
