@@ -109,6 +109,8 @@ export const AdminWrapper = styled.div`
 
 export const PostTable = styled.table`
   width: 100%;
+  /* 라이트 페이지 배경(--background)은 순백보다 살짝 낮다. 표는 흰 면에 두되 다크는 그대로 둔다 */
+  background-color: var(--tablesurface);
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.875rem;

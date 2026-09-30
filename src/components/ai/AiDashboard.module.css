@@ -13,7 +13,7 @@
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
 .card strong { display: block; font-size: clamp(1rem, 1.45vw, 1.2rem); margin-top: .4rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; flex-shrink: 0; }
-.tableScroll { overflow: auto; min-height: 0; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; scrollbar-gutter: stable; }
+.tableScroll { overflow: auto; min-height: 0; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; scrollbar-gutter: stable; background: var(--cardbackground); }
 .tableScroll table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: .85rem; white-space: nowrap; }
 .tableScroll th, .tableScroll td { padding: .75rem; text-align: left; border-bottom: var(--border-width) solid var(--bordercolor); }
 .tableScroll th { position: sticky; top: 0; background: var(--cardbackground); z-index: 1; }

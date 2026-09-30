@@ -3,7 +3,8 @@
   /* 본문 폰트. 서식 버튼(B/I)처럼 일부러 다른 폰트를 쓰는 자리에서
      기본으로 되돌아올 때 이 값을 쓴다 */
   --font-body: "NanumSquareNeo", "Noto Sans KR", "Pretendard", sans-serif;
-  --background: #ffffff;
+  /* 순백은 눈이 부셔 아주 조금만 낮춘다. 카드(--cardbackground)는 흰색 그대로라 살짝 떠 보인다 */
+  --background: #fcfcfc;
   --foreground: #171717;
   --control-hover-bg: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
   --hovercolor: #f4f4f4;
@@ -19,15 +20,17 @@
   /* 밝은 배경에서 #ff7b00 은 2.36:1 로 읽기 힘들다. 주황을 유지한 채 톤만 낮춘다 (5.02) */
   --codefontcolor: #a94f00;
   /* 본문·댓글 안의 링크. 다크에서 이 파랑을 그대로 쓰면 4.18:1 로 미달해
-     테마마다 따로 준다 (라이트 4.55 / 다크 8.86) */
-  --linkcolor: #0070f3;
+     테마마다 따로 준다 (라이트 배경 4.71·카드 4.83 / 다크 8.86) */
+  --linkcolor: #006ceb;
   /* 가리켰을 때의 링크. --linkcolor 를 그대로 쓰면 행 호버면(#f4f4f4) 위에서
-     4.14:1 로 미달이라 한 단계 진하게 둔다 (호버면 4.95 / 기본면 5.45) */
+     4.39:1 로 미달이라 한 단계 진하게 둔다 (호버면 4.95 / 배경 5.31) */
   --linkhovercolor: #0064dc;
   --bordercolor: #e6e6e6;
   --cardbackground: #ffffff;
+  /* 관리 목록 표의 면. 라이트는 살짝 낮춘 페이지 배경 대신 흰 면, 다크는 페이지 배경 그대로 */
+  --tablesurface: #ffffff;
   --shadowcolor: rgba(0, 0, 0, 0.1);
-  /* 흰 배경에서 #888 은 3.54:1 로 AA 미달이라 한 단계 어둡게 잡는다 (5.33:1) */
+  /* 흰 배경에서 #888 은 3.54:1 로 AA 미달이라 한 단계 어둡게 잡는다 (카드 5.33 / 배경 5.19) */
   --desccolor: #6b6b6b;
   --portfolio-description: #6b6b6b;
   --portfolio-description-highlight: #171717;
@@ -84,6 +87,7 @@ html.dark {
   --linkhovercolor: #79bbff;
   --bordercolor: #5c5c5c;
   --cardbackground: #27272a;
+  --tablesurface: #101010;
   --shadowcolor: rgba(255, 255, 255, 0.1);
   --calloutborder: #685800;
   --calloutaccent: #ffd700;

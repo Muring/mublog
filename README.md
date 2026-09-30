@@ -518,6 +518,7 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 | --------------------------------------- | ----------------------------- |
 | `--background` / `--foreground`         | 페이지 바탕과 본문            |
 | `--cardbackground` / `--bordercolor`    | 카드·버튼 면과 테두리         |
+| `--tablesurface`                        | 관리 목록 표의 면 (라이트는 흰 면, 다크는 페이지 바탕) |
 | `--desccolor`                           | 설명·날짜 등 보조 텍스트      |
 | `--codefontcolor` / `--codefontbgcolor` | 인라인 코드                   |
 | `--dangercolor` / `--dangerfontcolor`   | 삭제 등 되돌릴 수 없는 동작   |
