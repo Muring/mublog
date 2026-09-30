@@ -8,7 +8,7 @@ import { publicYear, visibleWeeks, sumTotals, DEFAULT_AI_INTRO, type UsageYear }
 import { Button } from "@/components/admin/Admin.styled";
 import Dropdown from "@/components/ui/Dropdown";
 import { AiSegments, number, UsageCards, WeekTable } from "./AiUsageView";
-import { AiScroll } from "./AiControls";
+import { AiBadge, AiScroll, type Tone } from "./AiControls";
 import ParagraphText from "./ParagraphText";
 import AiIntroTitle from "./AiIntroTitle";
 import styles from "./AiDashboard.module.css";
@@ -72,18 +72,46 @@ export default function AdminAi({ asOf }: { asOf: string }) {
             {tab === "usage" ? <>
                 {view === "weeks" ? <WeekTable weeks={publicWeeks} compact /> : <>
 
-                    <AiScroll className={styles.tableScroll} tabIndex={0} aria-label="프로젝트별 집계 스크롤"><table><thead><tr>{["주", "프로젝트", "도구", "모델", "추론", "캐시 제외 입력", "출력", "응답"].map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{filtered.map((g, i) => <tr key={i}><td>{g.week}</td><td>{g.project}</td><td>{g.tool}</td><td>{g.model}</td><td>{g.effort}</td><td data-number>{number(g.totals.non_cache_read_input)}</td><td data-number>{number(g.totals.output)}</td><td data-number>{number(g.totals.responses)}</td></tr>)}</tbody></table>{!filtered.length && <p>선택 조건의 기록이 없습니다.</p>}</AiScroll>
+                    <AiScroll className={styles.tableScroll} tabIndex={0} aria-label="프로젝트별 집계 스크롤"><table><thead><tr>{["주", "프로젝트", "도구", "모델", "추론", "캐시 제외 입력", "출력", "응답"].map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{filtered.map((g, i) => <tr key={i}><td data-center>{g.week}</td><td>{g.project}</td><td data-center>{g.tool}</td><td>{g.model}</td><td data-center>{g.effort}</td><td data-number>{number(g.totals.non_cache_read_input)}</td><td data-number>{number(g.totals.output)}</td><td data-number>{number(g.totals.responses)}</td></tr>)}</tbody></table>{!filtered.length && <p>선택 조건의 기록이 없습니다.</p>}</AiScroll>
                 </>}
             </> : privateYear ? <Quality year={privateYear} weeks={weeks} tasks={tasks} /> : <p>수집 데이터가 아직 없습니다.</p>}
         </>}
     </section>;
 }
-const observedTime = (value: string | null) => value ? new Date(value).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", dateStyle: "short", timeStyle: "short" }) + " KST" : "미상";
+const observedTime = (value: string | null) => value ? new Date(Date.parse(value) + 9 * 3600_000).toISOString().slice(0, 16).replace("T", " ") + " KST" : "미상";
+const TASK_TYPES: Record<string, string> = { feature: "기능", fix: "수정", bugfix: "수정", docs: "문서", refactor: "리팩터링", test: "테스트", chore: "관리", research: "조사" };
+const TASK_STATUS: Record<string, [string, Tone]> = { completed: ["완료", "ok"], done: ["완료", "ok"], in_progress: ["진행 중", "neutral"], blocked: ["막힘", "warn"], failed: ["실패", "danger"], abandoned: ["중단", "warn"] };
+const RESULTS = [["pass", "통과", "ok"], ["fail", "실패", "danger"], ["not_run", "미실행", "warn"], ["unknown", "미상", "neutral"]] as const;
+const rework = (value: UsageYear["tasks"][number]["rework"]) => value === null ? "미상" : value === true ? "있음" : value === false || value === 0 ? "없음" : `${value}회`;
+const DIAGNOSTICS = ["큰 출력", "잘림", "반복 호출", "KB 검색", "KB 선택", "KB 적용", "미분류 토큰"];
+
+/** Collection health, weekly diagnostics and recorded tasks, each on its own card like the other admin panels. */
 function Quality({ year, weeks, tasks }: { year: UsageYear; weeks: UsageYear["weeks"]; tasks: UsageYear["tasks"] }) {
-    return <AiScroll className={`${styles.tableScroll} ${manage.quality}`} tabIndex={0} aria-label="작업과 수집 품질 스크롤">
-        <table><caption>기기별 자료 범위 · 건강 상태</caption><thead><tr><th>기기</th><th>관측 시작</th><th>관측 종료</th><th>확인할 사항</th></tr></thead><tbody>{year.devices.map(d => <tr key={d.device}><td data-label="기기">{d.device}</td><td data-label="관측 시작">{observedTime(d.since)}</td><td data-label="관측 종료">{observedTime(d.until)}</td><td data-label="확인할 사항">{year.quality.problems.filter(p => p.device === d.device).map(p => p.code).join(", ") || "보고된 문제 없음"}</td></tr>)}</tbody></table>
-        <p className={styles.note}>식별 불확실 {year.quality.fallback_identities} · 작업 충돌 {year.quality.task_conflicts} · 연결 모호 {year.quality.ambiguous_task_responses}. 미기록은 실패나 성공으로 추정하지 않습니다.</p>
-        <table><caption>선택 기간의 진단 · 반복 호출은 낭비의 확정치가 아닙니다</caption><thead><tr>{["주", "큰 출력", "잘림", "반복 호출", "KB 검색", "KB 선택", "KB 적용", "미분류 토큰"].map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td data-label="주">{w.week}</td>{[w.diagnostics.large_outputs, w.diagnostics.truncations, w.diagnostics.repeated_calls, w.diagnostics.kb_searches, w.diagnostics.kb_selections, w.diagnostics.kb_applications, w.states.unclassified?.total ?? 0].map((n, i) => <td data-number data-label={["큰 출력", "잘림", "반복 호출", "KB 검색", "KB 선택", "KB 적용", "미분류 토큰"][i]} key={i}>{number(n)}</td>)}</tr>)}</tbody></table>
-        <table><caption>기록된 작업 · 연결된 토큰만 선택 연도의 합계에 포함, 연결 시각이 없는 작업 목록은 전체 기록</caption><thead><tr>{["프로젝트 / 작업", "유형", "상태", "검증", "재작업", "연결 토큰"].map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{tasks.map(t => <tr key={t.project + "/" + t.id}><td data-label="프로젝트 / 작업">{t.project} / {t.id}</td><td data-label="유형">{t.type ?? "미상"}</td><td data-label="상태">{t.conflict ? "충돌" : t.status}</td><td data-label="검증">{t.verification.map(v => `${v.name}: ${v.result}`).join(" · ") || "미상"}</td><td data-label="재작업">{t.rework === null ? "미상" : String(t.rework)}</td><td data-number data-label="연결 토큰">{t.totals.responses ? number(t.totals.total) : "연결 없음"}</td></tr>)}</tbody></table>
+    return <AiScroll className={`${styles.contentScroll} ${manage.quality}`}>
+        <section className={manage.qualityPanel} aria-labelledby="quality-devices">
+            <header><h3 id="quality-devices">기기별 자료 범위</h3><p className={styles.note}>식별 불확실 {year.quality.fallback_identities} · 작업 충돌 {year.quality.task_conflicts} · 연결 모호 {year.quality.ambiguous_task_responses}. 미기록은 실패나 성공으로 추정하지 않습니다.</p></header>
+            <AiScroll className={manage.qualityTable} tabIndex={0} aria-label="기기별 자료 범위 스크롤"><table><thead><tr><th>기기</th><th>관측 시작</th><th>관측 종료</th><th>상태</th></tr></thead><tbody>{year.devices.map(d => {
+                const problems = year.quality.problems.filter(p => p.device === d.device);
+                return <tr key={d.device}><td data-label="기기">{d.device}</td><td data-label="관측 시작" data-center>{observedTime(d.since)}</td><td data-label="관측 종료" data-center>{observedTime(d.until)}</td><td data-label="상태" data-center><span className={manage.badges}>{problems.length ? problems.map(p => <AiBadge key={p.code} data-tone="warn">{p.code}</AiBadge>) : <AiBadge data-tone="ok">정상</AiBadge>}</span></td></tr>;
+            })}</tbody></table></AiScroll>
+        </section>
+        <section className={manage.qualityPanel} aria-labelledby="quality-diagnostics">
+            <header><h3 id="quality-diagnostics">주별 진단</h3><p className={styles.note}>선택 기간 기준입니다. 반복 호출은 낭비의 확정치가 아닙니다.</p></header>
+            <AiScroll className={manage.qualityTable} tabIndex={0} aria-label="주별 진단 스크롤"><table><thead><tr><th>주</th>{DIAGNOSTICS.map(x => <th key={x} data-number>{x}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td data-label="주" data-center>{w.week}</td>{[w.diagnostics.large_outputs, w.diagnostics.truncations, w.diagnostics.repeated_calls, w.diagnostics.kb_searches, w.diagnostics.kb_selections, w.diagnostics.kb_applications, w.states.unclassified?.total ?? 0].map((n, i) => <td data-number data-label={DIAGNOSTICS[i]} key={i}>{number(n)}</td>)}</tr>)}</tbody></table></AiScroll>
+        </section>
+        <section className={manage.qualityPanel} aria-labelledby="quality-tasks">
+            <header><h3 id="quality-tasks">기록된 작업</h3><p className={styles.note}>연결된 토큰만 선택 연도 합계에 포함합니다. 연결 시각이 없는 작업도 목록에는 모두 표시합니다.</p></header>
+            <AiScroll className={manage.qualityTable} tabIndex={0} aria-label="기록된 작업 스크롤"><table className={manage.taskTable}><thead><tr><th>작업</th><th>유형</th><th>상태</th><th>검증</th><th>재작업</th><th data-number>연결 토큰</th></tr></thead><tbody>{tasks.map(t => {
+                const [status, tone] = t.conflict ? ["충돌", "warn" as Tone] : TASK_STATUS[t.status] ?? [t.status, "neutral" as Tone];
+                return <tr key={t.project + "/" + t.id}>
+                    <td data-label="작업"><span><span className={manage.taskProject}>{t.project === "unmapped" ? "프로젝트 미분류" : t.project}</span><span className={manage.taskId}>{t.id}</span></span></td>
+                    <td data-label="유형" data-center>{t.type ? TASK_TYPES[t.type] ?? t.type : "미상"}</td>
+                    <td data-label="상태" data-center><span className={manage.badges}><AiBadge data-tone={tone}>{status}</AiBadge></span></td>
+                    <td data-label="검증">{t.verification.length ? <details className={manage.checks}><summary>{RESULTS.map(([key, label, tone]) => { const n = t.verification.filter(v => v.result === key).length; return n ? <AiBadge key={key} data-tone={tone}>{label} {n}</AiBadge> : null; })}<svg className={manage.chevron} viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></summary><ul>{t.verification.map((v, i) => <li key={i}><AiBadge data-tone={RESULTS.find(r => r[0] === v.result)![2]}>{RESULTS.find(r => r[0] === v.result)![1]}</AiBadge>{v.name}</li>)}</ul></details> : "미상"}</td>
+                    <td data-label="재작업" data-center>{rework(t.rework)}</td>
+                    <td data-number data-label="연결 토큰">{t.totals.responses ? number(t.totals.total) : "연결 없음"}</td>
+                </tr>;
+            })}</tbody></table>{!tasks.length && <p className={styles.note}>기록된 작업이 없습니다.</p>}</AiScroll>
+        </section>
     </AiScroll>;
 }

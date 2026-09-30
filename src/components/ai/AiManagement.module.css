@@ -17,7 +17,6 @@
 .panel p { margin-top: 0; }
 .filters { display: flex; flex-wrap: wrap; gap: .5rem; }
 .filters > * { min-width: 0; max-width: 100%; }
-.quality td { white-space: normal; overflow-wrap: anywhere; min-width: 7rem; max-width: 30rem; }
 .editor { min-width: 0; }
 .editor > div:first-child { margin-bottom: .5rem; }
 @media (max-width: 760px) {
@@ -37,7 +36,6 @@
  .filters > * { width: 100%; }
  .editor > div:first-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
  .quality table, .quality tbody, .quality tr, .quality td { display: block; width: auto; }
- .quality caption { display: block; font-weight: 600; white-space: normal; }
  .quality thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
  .quality tr { padding: .5rem .75rem; border-bottom: var(--border-width) solid var(--bordercolor); }
  .quality td { display: grid; grid-template-columns: 6rem minmax(0, 1fr); gap: .5rem; min-width: 0; max-width: none; padding: .35rem 0; border: 0; text-align: left; }
@@ -85,3 +83,50 @@
 .editorForm > *, .editorForm input, .editorForm textarea { min-width: 0; max-width: 100%; }
 
 .collectionStatus { margin: 0; flex-shrink: 0; font-size: .75rem; line-height: 1.5; }
+
+/* Admin tables share the blog's list-table header: a tinted band with body-coloured text, so it never reads as a first row. */
+.workspace table th { background: var(--codefontbgcolor); color: var(--foreground); font-size: .75rem; font-weight: 800; letter-spacing: .03em; box-shadow: inset 0 1px 0 var(--bordercolor), inset 0 -2px 0 var(--bordercolor); border-bottom: 0; }
+/* Headers are centred like the blog list tables; number cells stay right-aligned. */
+.workspace table th { text-align: center; }
+.workspace table td[data-number] { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Quality tab: one card per table, like the analytics panels. */
+.quality { display: grid; gap: .75rem; align-content: start; }
+.qualityPanel { display: grid; gap: .75rem; min-width: 0; padding: 1rem; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; background: var(--cardbackground); }
+.qualityPanel header h3 { margin: 0; font-size: 1rem; letter-spacing: -.02em; }
+.qualityPanel header p { margin: .25rem 0 0; }
+.qualityTable { overflow-x: auto; min-width: 0; }
+.qualityTable table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .85rem; }
+.qualityTable th, .qualityTable td { padding: .65rem .75rem; white-space: nowrap; }
+.qualityTable td { text-align: left; }
+/* Fixed-format or short values (dates, type, status, rework) sit under their centred header, as in the post list table. */
+.qualityTable td[data-center] { text-align: center; }
+.qualityTable td[data-center] .badges { justify-content: center; }
+.qualityTable td { border-bottom: var(--border-width) solid var(--bordercolor); vertical-align: top; }
+.qualityTable tbody tr:last-child td { border-bottom: 0; }
+.badges { display: flex; flex-wrap: wrap; gap: .25rem; }
+.taskTable td:first-child { white-space: normal; min-width: 14rem; max-width: 22rem; }
+.taskProject { display: block; font-size: .72rem; color: var(--desccolor); }
+.taskId { display: block; overflow-wrap: anywhere; }
+.quality .checks summary { padding: 0; background: none; }
+.quality .checks summary:hover { background: none; color: var(--foreground); }
+.checks summary { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; width: fit-content; border-radius: 6px; color: var(--desccolor); cursor: pointer; list-style: none; }
+.checks summary::-webkit-details-marker { display: none; }
+/* No hover surface behind the coloured chips: the chips darken their own border and the chevron darkens instead. */
+.checks summary [data-tone] { transition: border-color 150ms; }
+.checks summary:hover [data-tone] { border-color: currentColor; }
+.checks summary:hover { color: var(--foreground); }
+.chevron { width: .75rem; height: .75rem; flex-shrink: 0; transition: transform 150ms, color 150ms; }
+.checks[open] .chevron { transform: rotate(180deg); }
+.checks summary:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 2px; }
+.checks ul { display: grid; gap: .35rem; max-width: 26rem; margin: .5rem 0 0; padding: 0; list-style: none; font-size: .78rem; white-space: normal; }
+.checks li { display: flex; align-items: baseline; gap: .4rem; overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+ .qualityPanel { padding: .75rem; }
+ .qualityTable td { padding: .35rem 0; border: 0; white-space: normal; }
+ .qualityTable tbody tr:last-child { border-bottom: 0; }
+ .taskTable td:first-child { min-width: 0; max-width: none; }
+ .workspace .qualityTable td[data-number], .qualityTable td[data-center] { text-align: left; }
+ .qualityTable td[data-center] .badges { justify-content: flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { .chevron, .checks summary [data-tone] { transition: none; } }

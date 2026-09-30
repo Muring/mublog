@@ -16,6 +16,8 @@
 .tableScroll { overflow: auto; min-height: 0; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; scrollbar-gutter: stable; background: var(--cardbackground); }
 .tableScroll table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: .85rem; white-space: nowrap; }
 .tableScroll th, .tableScroll td { padding: .75rem; text-align: left; border-bottom: var(--border-width) solid var(--bordercolor); }
+/* Headers are centred; fixed-format values (dates, short states) are centred too since every value has the same width. */
+.tableScroll th, .tableScroll td[data-center] { text-align: center; }
 .tableScroll th { position: sticky; top: 0; background: var(--cardbackground); z-index: 1; }
 .tableScroll td[data-number] { text-align: right; font-variant-numeric: tabular-nums; }
 .tableScroll caption { text-align: left; padding: .75rem; color: var(--desccolor); }
