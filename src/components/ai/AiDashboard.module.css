@@ -153,4 +153,3 @@
  .digitStrip, .infoTip { transition: none; }
 }
 
-.heroActions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; }

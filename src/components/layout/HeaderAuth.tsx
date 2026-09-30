@@ -20,6 +20,7 @@ export default function HeaderAuth() {
                 <Skeleton style={{ width: 26, height: 26, borderRadius: "50%" }} />
                 <Skeleton style={{ width: 47, height: 14 }} />
                 <Skeleton style={{ width: 48, height: 31 }} />
+                <Skeleton style={{ width: 62, height: 31 }} />
                 <Skeleton style={{ width: 72, height: 31 }} />
             </AuthWrapper>
         );
@@ -57,9 +58,14 @@ export default function HeaderAuth() {
             <span className="name">{data.user.username}</span>
 
             {data.isAdmin && (
-                <Link href="/admin" className="auth-action">
-                    관리
-                </Link>
+                <>
+                    <Link href="/admin" className="auth-action">
+                        관리
+                    </Link>
+                    <Link href="/ai/manage" className="auth-action">
+                        AI 관리
+                    </Link>
+                </>
             )}
 
             {/* GET 로그아웃은 img 태그만으로도 트리거되므로 POST 폼으로 처리한다 */}

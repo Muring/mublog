@@ -55,9 +55,9 @@ export default function AdminAi({ asOf }: { asOf: string }) {
     const filtered = groups.filter(g => Object.entries(filters).every(([k, v]) => !v || g[k as keyof typeof filters] === v));
     const tasks = privateYear?.tasks ?? [];
     const cardWeeks = view === "groups" ? publicWeeks.map(w => ({ ...w, totals: sumTotals(filtered.filter(g => g.week === w.week).map(g => g.totals)), observed: filtered.some(g => g.week === w.week) })) : publicWeeks;
-    return <section className={`${styles.workspace} ${manage.workspace}`} aria-label="AI 현황" data-ai-workspace>
-        <header className={manage.heading}><h1>AI 현황</h1><Link className={`${styles.link} ${manage.publicLink}`} href="/ai">공개 화면 ↗</Link>
-        <div className={manage.navigation}><AiSegments aria-label="AI 현황 항목">{[["usage", "사용량"], ["quality", "작업·품질"], ["content", "공개 소개"]].map(([value, label]) => <button key={value} aria-pressed={tab === value} onClick={() => setTab(value)}>{label}</button>)}</AiSegments><Button className={manage.refresh} onClick={() => query.refetch()} disabled={query.isFetching} aria-label={query.isFetching ? "새로고침 중" : "새로고침"} title="새로고침" aria-busy={query.isFetching}><ControlIcon kind="refresh" /></Button></div></header>
+    return <section className={`${styles.workspace} ${manage.workspace}`} aria-label="AI 관리" data-ai-workspace>
+        <header className={manage.heading}><h1>AI 관리</h1><Link className={`${styles.link} ${manage.publicLink}`} href="/ai">공개 화면 ↗</Link>
+        <div className={manage.navigation}><AiSegments aria-label="AI 관리 항목">{[["usage", "사용량"], ["quality", "작업·품질"], ["content", "공개 소개"]].map(([value, label]) => <button key={value} aria-pressed={tab === value} onClick={() => setTab(value)}>{label}</button>)}</AiSegments><Button className={manage.refresh} onClick={() => query.refetch()} disabled={query.isFetching} aria-label={query.isFetching ? "새로고침 중" : "새로고침"} title="새로고침" aria-busy={query.isFetching}><ControlIcon kind="refresh" /></Button></div></header>
         {query.isError && <p className={styles.warning} role="alert">{query.error.message} · 기존 데이터가 있으면 유지합니다.</p>}
         {!data ? <p role="status">{query.isPending ? "AI 데이터를 불러오는 중…" : "데이터 연결을 확인해 주세요."}</p> : tab === "content" ? <Editor data={data} /> : <>
             <div className={manage.controls}>
