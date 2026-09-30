@@ -1,0 +1,11 @@
+{
+  "generator": "Built-in image_gen",
+  "file": "muring-kb-development-2-titled.png",
+  "references": [
+    "muring-kb-development-2.png",
+    "episode 1 published thumbnail"
+  ],
+  "prompt": "Edit the first attached thumbnail for episode 2. The second image is episode 1 and is the typography and layout reference. Create a finished 16:9 thumbnail matching episode 1's strong LEFT-aligned title hierarchy and soft warm ivory/navy/teal tactile illustration. On the left, write exactly these three lines of perfectly legible text: line 1 \"MuRing-KB\", line 2 \"개발기 2\", and below in smaller gray bold type \"검증 편\". Match the episode 1 large heavy dark navy sans serif title, generous left margin, and small horizontal rule before subtitle. Do not include quotation marks. Keep all title text within safe crop margins, correctly spelled Korean and Latin letters. Recompose the first image's existing objects into the RIGHT half and lower-right area so the title has an uncluttered ivory background and does not overlap the artwork. Preserve the organized knowledge cards, magnifying glass selecting a useful card, and browser reuse/check motif. Keep the soft paper texture, gentle studio lighting, restrained shadows, and series illustration quality. No extra text, logos, watermark or people. This must look like the next episode in the same series as image two, not a screenshot or a collage.",
+  "approved": true,
+  "thumbnail_url": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/muring-kb-development-2/illustration-1c44f6486332.jpg"
+}

@@ -1,0 +1,8 @@
+{
+  "generator": "Built-in image_gen",
+  "file": "muring-kb-development-3.png",
+  "reference": "/home/muring/dev/mublog/output/imagegen/blog-development-thumbnails/muring-kb-development-2.png",
+  "prompt": "Create ONE finished landscape 16:9 thumbnail for episode 3 of a personal knowledge-base development series, about tracking AI usage consistently and connecting measurements to verified work and reusable knowledge. Use the attached image solely as a STYLE reference, not content to copy. New composition: one central tidy browser dashboard with paired cobalt and teal vertical bars across a short timeline, a compact stack of index cards with a check mark on the left, and a small circular pair of arrows connecting the cards and dashboard. A small orange marker on the timeline suggests a documented improvement rather than a guaranteed downward trend. Keep the graph abstract with no labels or readable numbers. Make the chart and knowledge cards the two large focal objects. Avoid robots, brains, currency symbols, and a cluttered infographic. Match warm ivory background, deep navy outlines, muted cobalt blue and teal, tiny orange accents, flat geometric editorial illustration with subtle paper grain. Few large readable shapes, generous breathing room, legible at 320px. Central safe area, no important elements at crop edges. No written text, no letters or numbers, no logos, no watermark, no people. This is one standalone thumbnail.",
+  "approved": true,
+  "thumbnail_url": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/muring-kb-development-3/illustration-1c09cded7d3a.jpg"
+}
