@@ -15,12 +15,6 @@
 .tableScroll td[data-number] { text-align: right; font-variant-numeric: tabular-nums; }
 .tableScroll caption { text-align: left; padding: .75rem; color: var(--desccolor); }
 .publicTable { max-height: 24rem; }
-.chart { height: 180px; width: 100%; color: var(--chartbar); display: block; }
-.chart path { fill: none; stroke: currentColor; stroke-width: 2; vector-effect: non-scaling-stroke; }
-.chart circle { fill: currentColor; }
-.legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .75rem 0; }
-.meter { width: 100%; height: 6px; background: var(--bordercolor); border-radius: 3px; overflow: hidden; margin-top: .4rem; }
-.meter span { display: block; height: 100%; background: var(--chartbar); }
 .timeline { list-style: none; padding: 0; display: grid; gap: 1rem; }
 .timeline h3 { margin: .5rem 0; }
 .link { color: var(--linkcolor); text-decoration: underline; text-underline-offset: 4px; }
@@ -48,7 +42,67 @@
 }
 @media (max-height: 650px) { .workspace .grid { display: none; } }
 
-.tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .contentScroll summary { cursor: pointer; padding: .6rem; border-radius: 8px; }
 .contentScroll summary:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
 .contentScroll summary:focus-visible { outline: 2px solid var(--linkcolor); }
+
+/* Public narrative spacing is separate from the compact admin workspace. */
+.page .hero { margin-bottom: 3rem; max-width: 850px; }
+.hero h1 { line-height: 1.28; text-wrap: balance; word-break: keep-all; }
+.highlight { color: var(--linkhovercolor); }
+.page .hero .prose { max-width: 720px; color: var(--desccolor); }
+.page .section { display: flex; flex-direction: column; gap: 1.5rem; margin: 3.5rem 0 0; }
+.page .section > .grid { margin: 0; }
+.page .section > p, .sectionHeading p, .comparison > p { margin: 0; }
+.sectionHeading { display: flex; flex-direction: column; align-items: flex-start; gap: .65rem; }
+.sectionHeading h2, .sectionHeading h3 { margin: 0; line-height: 1.5; word-break: keep-all; }
+.sectionHeading h2 { font-size: 1.7rem; letter-spacing: -.035em; }
+.sectionHeading h3 { font-size: 1.15rem; }
+.process { gap: 1rem; }
+.process .card { padding: 1.25rem; }
+.process h2 { font-size: .95rem; margin: 0 0 .65rem; }
+.process p { margin: 0; }
+.page .card { padding: 1.25rem; }
+.page .card strong { font-size: clamp(1rem, 1.5vw, 1.25rem); margin-top: .6rem; }
+.page .timeline { margin: 0; }
+.emptyState { padding: 1.5rem; border: var(--border-width) dashed var(--bordercolor); border-radius: 12px; color: var(--desccolor); font-size: .9rem; line-height: 1.8; }
+.comparison { display: flex; flex-direction: column; gap: 1.25rem; }
+.toolTotals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; padding-bottom: 1.25rem; border-bottom: var(--border-width) solid var(--bordercolor); }
+.toolTotals > div { min-width: 0; }
+.comparison [data-tool="Codex"] { --tool-color: var(--chartbar); }
+.comparison [data-tool="Claude"] { --tool-color: var(--desccolor); }
+.toolName { display: flex; align-items: center; gap: .5rem; font-size: .85rem; }
+.toolName i { width: .65rem; height: .65rem; border-radius: 2px; background: var(--tool-color); }
+.toolTotals small { font-size: .75rem; color: var(--desccolor); font-weight: normal; }
+.comparisonScroll { overflow: auto; max-height: 34rem; scrollbar-gutter: stable; }
+.comparisonScroll:focus-visible, .tableScroll:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 3px; }
+.chartScale { display: flex; justify-content: space-between; margin-left: 168px; margin-right: 116px; padding-bottom: .65rem; font-size: .72rem; color: var(--desccolor); font-variant-numeric: tabular-nums; }
+.comparisonWeeks { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; }
+.comparisonWeek { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 1rem; padding-bottom: 1rem; border-bottom: var(--border-width) solid var(--bordercolor); }
+.comparisonWeek:last-child { padding-bottom: .25rem; border-bottom: 0; }
+.weekHeading { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; }
+.weekHeading .note { font-size: .72rem; }
+.weekBars { display: grid; gap: .65rem; min-width: 0; }
+.barRow { display: grid; grid-template-columns: 48px minmax(0, 1fr) 104px; align-items: center; gap: .75rem; }
+.barLabel { font-size: .75rem; color: var(--desccolor); }
+.barValue { text-align: right; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.barTrack { display: block; height: 16px; border-left: var(--border-width) solid var(--bordercolor); background: linear-gradient(to right, transparent calc(100% - 1px), var(--bordercolor) 0) 0 0 / 50% 100%; }
+.barFill { display: block; height: 100%; border-radius: 0 3px 3px 0; background: var(--tool-color); }
+.missingWeek { margin: 0; padding: .75rem 0; font-size: .8rem; color: var(--desccolor); }
+@media (max-width: 640px) {
+ .page { padding-left: 1.25rem; padding-right: 1.25rem; }
+ .page .section { margin-top: 2.75rem; gap: 1.25rem; }
+ .page .card { padding: 1rem; }
+ .process { gap: .75rem; }
+ .sectionHeading h2 { font-size: 1.5rem; }
+ .toolTotals { gap: .75rem; }
+ .toolTotals strong { white-space: normal; overflow-wrap: anywhere; }
+ .toolTotals small { display: block; margin-top: .25rem; }
+ .comparisonWeek { grid-template-columns: minmax(0, 1fr); gap: .75rem; }
+ .weekHeading { flex-direction: row; align-items: baseline; justify-content: space-between; }
+ .barRow { grid-template-columns: 43px minmax(0, 1fr) 88px; gap: .5rem; }
+ .barValue { font-size: .73rem; }
+ .chartScale { margin-left: 51px; margin-right: 96px; font-size: .65rem; }
+ .comparisonScroll { max-height: 38rem; }
+ .emptyState { padding: 1.25rem; }
+}
