@@ -1,0 +1,7 @@
+{
+  "generator": "Built-in image_gen",
+  "episode": 11,
+  "file": "blog-development-11.png",
+  "prompt": "Create ONE finished landscape 16:9 thumbnail for episode 11 of a developer's blog-building series, about building admin management tools: an image library that shows which images are used and which will be cleaned up, shared filters, and an analytics tab. Use the attached image solely as the series STYLE reference, not as content to copy. New composition: one central tidy browser window showing a neat grid of six small image tiles. Four tiles have a small teal check badge, one has a muted orange clock badge, one is faded with a small navy trash-can badge. Above the grid, a slim filter bar with three rounded chips. To the right, a small separate card with a simple line chart rising gently. A compact teal database cylinder at the lower left connects to the grid with one clean restrained line, subtly conveying that the server decides each tile's state. Keep the scene simple and cohesive, emphasize the image grid and its badges, not an infographic or technical schema. Match warm ivory background, deep navy outlines, muted cobalt blue and teal, tiny orange accents, flat geometric editorial illustration with subtle paper grain. Few large readable shapes, generous breathing room, legible at 320px. Central safe area, no important elements at crop edges. No written text, no letters or numbers, no logos, no watermark, no people. This is one standalone thumbnail.",
+  "reference": "blog-development-10.png"
+}
