@@ -64,8 +64,10 @@ export default async function Image({ params }: { params: Promise<{ slug: string
 
     const thumbnail = await thumbnailDataUri(post.thumbnail);
     const titleSize = post.title.length > 28 ? 52 : 60;
-    // "개발기 7 (" 처럼 여는 괄호 앞에서 줄이 끊기지 않게 그 공백만 붙여 둔다.
-    const title = post.title.replace(/ \(/g, "\u00a0(");
+    // 짧은 괄호 부제를 별도 줄에 둔다. Satori의 인라인 줄바꿈에 의존하지 않는다.
+    const titleParts = /^(.*?)\s+(\([^()\n]{1,10}\))$/u.exec(post.title);
+    const title = titleParts?.[1] ?? post.title;
+    const subtitle = titleParts?.[2];
 
     return new ImageResponse(
         (
@@ -88,8 +90,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
                                 </div>
                             ))}
                         </div>
-                        <div style={{ fontSize: titleSize, fontWeight: 700, color: COLORS.foreground, lineHeight: 1.3, wordBreak: "keep-all", display: "block", lineClamp: 3 }}>
-                            {title}
+                        <div style={{ fontSize: titleSize, fontWeight: 700, color: COLORS.foreground, lineHeight: 1.3, display: "flex", flexDirection: "column" }}>
+                            <div style={{ wordBreak: "keep-all", display: "block", lineClamp: subtitle ? 2 : 3 }}>{title}</div>
+                            {subtitle && <div style={{ whiteSpace: "nowrap" }}>{subtitle}</div>}
                         </div>
                         {post.description && (
                             <div style={{ marginTop: 24, fontSize: 28, color: COLORS.desc, lineHeight: 1.5, wordBreak: "keep-all", display: "block", lineClamp: 2 }}>
