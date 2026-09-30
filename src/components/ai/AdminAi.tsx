@@ -7,7 +7,7 @@ import { publicYear, visibleWeeks, sumTotals, DEFAULT_AI_INTRO, type UsageYear }
 import { Button } from "@/components/admin/Admin.styled";
 import Dropdown from "@/components/ui/Dropdown";
 import { AiSegments, number, UsageCards, WeekTable } from "./AiUsageView";
-import SentenceText from "./SentenceText";
+import ParagraphText from "./ParagraphText";
 import AiIntroTitle from "./AiIntroTitle";
 import styles from "./AiDashboard.module.css";
 
@@ -36,7 +36,7 @@ function Editor({ data }: { data: AdminAiData }) {
             <div className={styles.toolbar}><Button type="button" onClick={() => setPreview(!preview)} aria-expanded={preview}>미리보기</Button><Button disabled={busy} type="submit">{busy ? "저장 중…" : "비공개로 저장"}</Button><Button disabled={busy || !form.title.trim() || !form.body.trim()} type="button" onClick={e => save(e, true)}>검토 완료 · 공개</Button></div>
             <p className={styles.status} role="status">{message}</p>
         </form>
-        {preview && <article className={styles.card}><span className={styles.note}>{form.date} · 미리보기</span><h2>{form.kind === "intro" ? <AiIntroTitle title={form.title} /> : form.title}</h2><p className={styles.prose}><SentenceText>{form.body}</SentenceText></p>{form.postId && <p>{data.posts.find(p => p.id === form.postId)?.title}</p>}</article>}
+        {preview && <article className={styles.card}><span className={styles.note}>{form.date} · 미리보기</span><h2>{form.kind === "intro" ? <AiIntroTitle title={form.title} /> : form.title}</h2><p className={styles.prose}><ParagraphText>{form.body}</ParagraphText></p>{form.postId && <p>{data.posts.find(p => p.id === form.postId)?.title}</p>}</article>}
         <details className={styles.section}><summary>내부 개선 기록 참고</summary><p className={styles.note}>이 내용은 자동으로 공개되지 않습니다.</p>{data.snapshots[0]?.data.improvements.map((e, i) => <p key={i}>{e.date} · {e.kind} · {e.summary}</p>)}</details>
     </div>;
 }

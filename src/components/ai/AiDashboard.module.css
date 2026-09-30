@@ -4,8 +4,10 @@
 .eyebrow, .note { color: var(--desccolor); font-size: .85rem; line-height: 1.7; }
 .prose { line-height: 1.85; }
 .prose, .note, .warning, .emptyState { word-break: keep-all; overflow-wrap: anywhere; }
-.sentences, .sentence { display: block; }
-.sentences + .sentences { margin-top: .85em; }
+.paragraph { display: block; }
+.paragraph + .paragraph { margin-top: .85em; }
+/* A sentence moves to the next line whole when it does not fit; a sentence wider than the line still wraps inside. */
+.sentence { display: inline-block; max-width: 100%; }
 .section { margin: 2rem 0; }
 .card { background: var(--cardbackground); border: var(--border-width) solid var(--bordercolor); border-radius: 14px; padding: 1rem; min-width: 0; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
@@ -119,4 +121,31 @@
 }
 @media (prefers-reduced-motion: reduce) {
  .comparisonRow, .barFill { transition: none; }
+}
+
+/* Secondary explanations: an (i) button whose tooltip opens beside it, or below its title row or card when the viewport is narrow. */
+.card, .titleRow { position: relative; }
+.titleRow { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
+.sectionHeading > .titleRow { align-self: stretch; }
+.info { display: inline-flex; }
+.infoButton { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--desccolor); cursor: help; transition: background-color 150ms, color 150ms; }
+.infoButton svg { width: 1rem; height: 1rem; }
+.infoButton:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
+.infoButton:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 1px; }
+.infoTip { position: absolute; left: 0; top: calc(100% + .4rem); z-index: 5; width: max-content; max-width: min(24rem, 100%); box-sizing: border-box; padding: .7rem .85rem; border: var(--border-width) solid var(--bordercolor); border-radius: 10px; background: var(--cardbackground); box-shadow: 0 6px 20px var(--shadowcolor); color: var(--foreground); font-size: .8rem; font-weight: normal; line-height: 1.65; letter-spacing: normal; text-align: left; white-space: normal; word-break: keep-all; overflow-wrap: anywhere; opacity: 0; visibility: hidden; transform: translateY(-2px); transition: opacity 150ms, transform 150ms, visibility 150ms; pointer-events: none; }
+.infoTip[data-side] { transform: translateX(-2px); }
+.info:hover .infoTip, .info:focus-within .infoTip { opacity: 1; visibility: visible; transform: none; }
+
+/* Odometer digits: three 0-9 cycles per place, shifted by --pos thirtieths of the strip. First paint rolls up from the middle 0. */
+.srOnly { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.rolling { position: relative; }
+.rollingChars { display: inline-flex; vertical-align: bottom; line-height: 1.25; user-select: none; }
+.digit { position: relative; display: inline-block; height: 1.25em; clip-path: inset(0 -1em); }
+.digitSizer { visibility: hidden; }
+.digitStrip { position: absolute; inset: 0 0 auto; display: flex; flex-direction: column; align-items: center; transform: translateY(calc(var(--pos) * -100% / 30)); transition: transform 700ms cubic-bezier(.22, 1, .36, 1); }
+.digitStrip[data-still] { transition: none; }
+.digitStrip > span { height: 1.25em; }
+@starting-style { .digitStrip { transform: translateY(calc(10 * -100% / 30)); } }
+@media (prefers-reduced-motion: reduce) {
+ .digitStrip, .infoTip { transition: none; }
 }
