@@ -12,9 +12,6 @@ import { mobile } from "@/styles/breakpoints";
 export { Skeleton } from "@/components/ui/Skeleton.styled";
 
 export const AdminWrapper = styled.div`
-  &[data-ai] { height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; padding-top: 5rem; padding-bottom: 1rem; }
-  &[data-ai] > * { flex-shrink: 0; }
-  &[data-ai] > [data-ai-workspace] { flex: 1; min-height: 0; }
   /*
    * 표가 뷰포트가 아니라 "자기가 실제로 받은 폭" 을 보고 판단하도록 기준을 만든다.
    * 뷰포트 기준이면 이 영역이 좁아진 다른 이유(사이드 패널 등)에는 반응하지 못한다.

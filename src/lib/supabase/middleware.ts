@@ -50,14 +50,14 @@ export async function updateSession(request: NextRequest) {
     //
     // 여기서 로컬 검증으로 바꿔도 안전한 이유는 이 호출이 인가 결정이 아니기 때문이다.
     // 이 값은 /admin 미인증 방문자를 /login 으로 보내는 UX 용도로만 쓴다.
-    // 실제 인가는 admin/layout.tsx 의 requireAdmin() 이 확정하며, 그쪽은 계속
+    // 실제 인가는 관리 페이지의 requireAdmin() 이 확정하며, 그쪽은 계속
     // getUser() 로 Auth 서버에 물어본다. 그래야 토큰을 원격 폐기했을 때 즉시 막힌다.
     //
     // getSession() 으로 대신하지 않는다. 그것은 쿠키를 읽기만 하고 서명을 검증하지 않는다.
     const { data } = await supabase.auth.getClaims(undefined, await jwksOption());
     const isSignedIn = Boolean(data?.claims?.sub);
 
-    if (!isSignedIn && request.nextUrl.pathname.startsWith("/admin")) {
+    if (!isSignedIn && (request.nextUrl.pathname.startsWith("/admin") || request.nextUrl.pathname === "/ai/manage" || request.nextUrl.pathname.startsWith("/ai/manage/"))) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
         url.searchParams.set("next", request.nextUrl.pathname);

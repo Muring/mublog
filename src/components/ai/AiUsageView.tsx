@@ -7,7 +7,7 @@ import ToolComparison from "./ToolComparison";
 import { sumTotals, visibleWeeks, type PublicYear, type PublicWeek } from "@/lib/ai-usage";
 import styles from "./AiDashboard.module.css";
 
-import { AiSegments, number } from "./AiControls";
+import { AiScroll, AiSegments, number } from "./AiControls";
 export { AiSegments, number } from "./AiControls";
 export function UsageCards({ weeks, cacheObserved, rolling = false }: { weeks: PublicWeek[]; cacheObserved: boolean; rolling?: boolean }) {
     const totals = sumTotals(weeks.map(w => w.totals));
@@ -15,7 +15,7 @@ export function UsageCards({ weeks, cacheObserved, rolling = false }: { weeks: P
     return <div className={styles.grid}>{[["전체 토큰", observed ? number(totals.total) : "—"], ["캐시 제외 입력", observed ? number(totals.non_cache_read_input) : "—"], ["출력", observed ? number(totals.output) : "—"], ["캐시 읽기 비율", cacheObserved && totals.input ? `${(100 * totals.cache_read / totals.input).toFixed(1)}%` : "미상"]].map(([label, value]) => <div className={styles.card} key={label}><span className={styles.note}>{label}</span><strong>{rolling ? <RollingNumber value={value} /> : value}</strong></div>)}</div>;
 }
 export function WeekTable({ weeks, compact = false }: { weeks: PublicWeek[]; compact?: boolean }) {
-    return <div className={`${styles.tableScroll} ${compact ? "" : styles.publicTable}`} tabIndex={0} aria-label="주별 사용량 표 스크롤"><table><caption>월요일 시작 · KST · 캐시는 입력에 포함</caption><thead><tr>{["주 시작", "관측", "전체 토큰", "캐시 제외 입력", "캐시 읽기", "출력"].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td>{w.week}</td><td>{!w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : "관측됨"}</td>{[w.totals.total, w.totals.non_cache_read_input, w.totals.cache_read, w.totals.output].map((v, i) => <td data-number key={i}>{w.observed ? number(v) : "—"}</td>)}</tr>)}</tbody></table>{!weeks.length && <p className={styles.note}>선택 기간의 기록이 없습니다.</p>}</div>;
+    return <AiScroll className={`${styles.tableScroll} ${compact ? "" : styles.publicTable}`} tabIndex={0} aria-label="주별 사용량 표 스크롤"><table><caption>월요일 시작 · KST · 캐시는 입력에 포함</caption><thead><tr>{["주 시작", "관측", "전체 토큰", "캐시 제외 입력", "캐시 읽기", "출력"].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td>{w.week}</td><td>{!w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : "관측됨"}</td>{[w.totals.total, w.totals.non_cache_read_input, w.totals.cache_read, w.totals.output].map((v, i) => <td data-number key={i}>{w.observed ? number(v) : "—"}</td>)}</tr>)}</tbody></table>{!weeks.length && <p className={styles.note}>선택 기간의 기록이 없습니다.</p>}</AiScroll>;
 }
 export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf: string }) {
     const [year, setYear] = useState(String(years[0]?.year ?? ""));

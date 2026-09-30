@@ -36,8 +36,6 @@
 .form input:focus-visible, .form textarea:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 2px; }
 .form input:hover, .form textarea:hover { border-color: var(--foreground); }
 .status { margin: 0; font-size: .85rem; }
-:global(body:has([data-ai-workspace])) { overflow: hidden; }
-:global(body:has([data-ai-workspace]) footer) { display: none; }
 @media (max-width: 640px) {
  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
  .card { padding: .7rem; }
@@ -45,7 +43,7 @@
  .workspace .note { font-size: .75rem; }
  .workspace .card strong { font-size: 1.1rem; }
 }
-@media (max-height: 650px) { .workspace .grid { display: none; } }
+
 
 .contentScroll summary { cursor: pointer; padding: .6rem; border-radius: 8px; }
 .contentScroll summary:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
@@ -149,3 +147,5 @@
 @media (prefers-reduced-motion: reduce) {
  .digitStrip, .infoTip { transition: none; }
 }
+
+.heroActions { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .75rem; }

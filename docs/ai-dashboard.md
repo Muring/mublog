@@ -1,6 +1,6 @@
 # AI 활용 페이지 운영
 
-`/ai`는 공개 소개·주별 집계·검토된 개선 기록이고 `/admin/ai`는 관리자용 분석·편집 화면이다. 통계 계산의 원본은 dev-bootstrap `skills/usage-report/scripts/usage_store.py`이며, `usage_publish.py`가 블로그용 집계만 전송한다. 기존 승인된 HTML 보고서도 같은 집계를 사용한다.
+`/ai`는 공개 소개·주별 집계·검토된 개선 기록이고 `/ai/manage`는 관리자용 분석·편집 화면이다. 통계 계산의 원본은 dev-bootstrap `skills/usage-report/scripts/usage_store.py`이며, `usage_publish.py`가 블로그용 집계만 전송한다. 기존 승인된 HTML 보고서도 같은 집계를 사용한다.
 
 ## 연결 순서
 

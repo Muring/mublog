@@ -1,6 +1,6 @@
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
-import AdminAi from "@/components/ai/AdminAi";
-export default async function AiAdminPage() {
+export default async function LegacyAiAdminPage() {
     await requireAdmin();
-    return <AdminAi asOf={new Date().toISOString()} />;
+    redirect("/ai/manage");
 }
