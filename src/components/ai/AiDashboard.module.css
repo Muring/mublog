@@ -2,7 +2,10 @@
 .hero { margin-bottom: 2.5rem; }
 .hero h1 { font-size: clamp(2rem, 5vw, 3.6rem); margin: .5rem 0 1rem; letter-spacing: -.05em; }
 .eyebrow, .note { color: var(--desccolor); font-size: .85rem; line-height: 1.7; }
-.prose { white-space: pre-wrap; line-height: 1.85; overflow-wrap: anywhere; }
+.prose { line-height: 1.85; }
+.prose, .note, .warning, .emptyState { word-break: keep-all; overflow-wrap: anywhere; }
+.sentences, .sentence { display: block; }
+.sentences + .sentences { margin-top: .85em; }
 .section { margin: 2rem 0; }
 .card { background: var(--cardbackground); border: var(--border-width) solid var(--bordercolor); border-radius: 14px; padding: 1rem; min-width: 0; }
 .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
@@ -50,7 +53,7 @@
 .page .hero { margin-bottom: 3rem; max-width: 850px; }
 .hero h1 { line-height: 1.28; text-wrap: balance; word-break: keep-all; }
 .highlight { color: var(--linkhovercolor); }
-.page .hero .prose { max-width: 720px; color: var(--desccolor); }
+.page .hero .prose { max-width: none; color: var(--desccolor); }
 .page .section { display: flex; flex-direction: column; gap: 1.5rem; margin: 3.5rem 0 0; }
 .page .section > .grid { margin: 0; }
 .page .section > p, .sectionHeading p, .comparison > p { margin: 0; }
@@ -77,9 +80,9 @@
 .comparisonScroll { overflow: auto; max-height: 34rem; scrollbar-gutter: stable; }
 .comparisonScroll:focus-visible, .tableScroll:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 3px; }
 .chartScale { display: flex; justify-content: space-between; margin-left: 168px; margin-right: 116px; padding-bottom: .65rem; font-size: .72rem; color: var(--desccolor); font-variant-numeric: tabular-nums; }
-.comparisonWeeks { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; }
-.comparisonWeek { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 1rem; padding-bottom: 1rem; border-bottom: var(--border-width) solid var(--bordercolor); }
-.comparisonWeek:last-child { padding-bottom: .25rem; border-bottom: 0; }
+.comparisonWeeks { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.comparisonWeek { display: grid; grid-template-columns: 92px minmax(0, 1fr); align-items: center; gap: 1rem; padding: .75rem 0; border-bottom: var(--border-width) solid var(--bordercolor); }
+.comparisonRow:last-child .comparisonWeek { border-bottom: 0; }
 .weekHeading { display: flex; flex-direction: column; gap: .3rem; font-size: .85rem; }
 .weekHeading .note { font-size: .72rem; }
 .weekBars { display: grid; gap: .65rem; min-width: 0; }
@@ -87,7 +90,7 @@
 .barLabel { font-size: .75rem; color: var(--desccolor); }
 .barValue { text-align: right; font-size: .8rem; font-variant-numeric: tabular-nums; }
 .barTrack { display: block; height: 16px; border-left: var(--border-width) solid var(--bordercolor); background: linear-gradient(to right, transparent calc(100% - 1px), var(--bordercolor) 0) 0 0 / 50% 100%; }
-.barFill { display: block; height: 100%; border-radius: 0 3px 3px 0; background: var(--tool-color); }
+.barFill { display: block; height: 100%; border-radius: 0 3px 3px 0; background: var(--tool-color); transition: width 360ms cubic-bezier(.22, 1, .36, 1); }
 .missingWeek { margin: 0; padding: .75rem 0; font-size: .8rem; color: var(--desccolor); }
 @media (max-width: 640px) {
  .page { padding-left: 1.25rem; padding-right: 1.25rem; }
@@ -105,4 +108,15 @@
  .chartScale { margin-left: 51px; margin-right: 96px; font-size: .65rem; }
  .comparisonScroll { max-height: 38rem; }
  .emptyState { padding: 1.25rem; }
+}
+
+.comparisonRow { display: grid; grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows 300ms ease, opacity 220ms ease; }
+.comparisonRow[data-visible="false"] { grid-template-rows: 0fr; opacity: 0; pointer-events: none; }
+.comparisonClip { min-height: 0; overflow: hidden; }
+@starting-style {
+ .comparisonRow[data-visible="true"] { grid-template-rows: 0fr; opacity: 0; }
+ .barFill { width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .comparisonRow, .barFill { transition: none; }
 }

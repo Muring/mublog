@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Dropdown from "@/components/ui/Dropdown";
+import SentenceText from "./SentenceText";
 import ToolComparison from "./ToolComparison";
 import { sumTotals, visibleWeeks, type PublicYear, type PublicWeek } from "@/lib/ai-usage";
 import styles from "./AiDashboard.module.css";
@@ -27,9 +28,9 @@ export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf
         {!years.length ? <p className={styles.note}>아직 공개 집계가 연결되지 않았습니다. 데이터가 도착하면 여기에 표시합니다.</p> : <>
             {(stale || selected?.attention) && <p className={styles.warning}>일부 자료가 늦게 도착했거나 수집 상태를 확인 중입니다. 현재 표시된 관측 범위로 해석해 주세요.</p>}
             <UsageCards weeks={weeks} cacheObserved={selected?.cacheObserved ?? false} />
-            <ToolComparison weeks={weeks} />
+            <ToolComparison weeks={weeks} allWeeks={selected?.weeks} />
             <WeekTable weeks={weeks} />
-            <p className={styles.note}>자료 기준: {selected?.observedUntil ? new Date(Date.parse(selected.observedUntil) + 9 * 3600_000).toISOString().slice(0, 19).replace("T", " ") + " KST" : "미상"}. 요청 로그에서 관측한 수치이며 생산성·청구 금액·구독 잔여량을 뜻하지 않습니다. 기록이 없는 주는 사용량 0과 구분합니다.</p>
+            <p className={styles.note}><SentenceText>{`자료 기준: ${selected?.observedUntil ? new Date(Date.parse(selected.observedUntil) + 9 * 3600_000).toISOString().slice(0, 19).replace("T", " ") + " KST" : "미상"}. 요청 로그에서 관측한 수치이며 생산성·청구 금액·구독 잔여량을 뜻하지 않습니다. 기록이 없는 주는 사용량 0과 구분합니다.`}</SentenceText></p>
         </>}
     </section>;
 }
