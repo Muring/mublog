@@ -37,6 +37,9 @@ export function visibleWeeks<T extends { week: string }>(weeks: T[], period: str
     end.setUTCDate(end.getUTCDate() - (n - 1) * 7);
     return weeks.filter(w => w.week >= end.toISOString().slice(0, 10));
 }
-export const publicationSchema = z.object({ id: z.string().max(100).optional(), kind: z.enum(["intro", "improvement"]), title: z.string().trim().min(1).max(100), body: z.string().trim().min(1).max(8000), date, postId: z.string().max(100).nullable(), published: z.boolean() }).strict();
+/** Only the page intro is written by hand; related writing comes from published blog posts in AI_POST_SERIES. */
+export const publicationSchema = z.object({ kind: z.literal("intro"), title: z.string().trim().min(1).max(100), body: z.string().trim().min(1).max(8000), date, published: z.boolean() }).strict();
+/** Series whose published posts are listed as related writing on /ai. */
+export const AI_POST_SERIES = ["MuRing-KB 개발기"];
 
 export const DEFAULT_AI_INTRO = { title: "AI를 쓰고, 기록하고, 개선합니다.", body: "Codex와 Claude를 개발에 활용하고, 결과를 검증합니다. 다시 쓸 지식과 선호는 MuRing-KB에 모으고, 사용 기록을 살펴 반복 작업을 줄입니다. 이곳에는 그 운영 방식과 관측한 데이터를 함께 남깁니다." };

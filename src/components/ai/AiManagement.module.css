@@ -64,10 +64,8 @@
 .editor .editorForm { max-width: none; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 11rem; gap: .6rem .75rem; align-items: start; }
 .formNote, .bodyField, .formStatus { grid-column: 1 / -1; }
 .editor .formNote { margin: 0; }
-.titleField { grid-column: 1; }
-.dateField { grid-column: 2; }
+.titleField { grid-column: 1 / -1; }
 .bodyField textarea { min-height: clamp(140px, 20dvh, 220px); }
-.editor .postField { grid-column: 1 / -1; max-width: 100%; }
 .editor .formActions { grid-column: 1 / -1; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; position: sticky; bottom: 0; padding: .5rem 0; background: var(--background); border-top: var(--border-width) solid var(--bordercolor); }
 .editor > details { margin-block: .75rem; }
 .editor .formStatus:empty { display: none; }
@@ -78,7 +76,7 @@
  .summaryCards > div > div { padding: .45rem .6rem; }
  .workspace .summaryCards strong { font-size: .95rem; }
 }
-@media (max-width: 360px) { .editor .editorForm { grid-template-columns: minmax(0, 1fr); } .dateField { grid-column: 1; } }
+@media (max-width: 360px) { .editor .editorForm { grid-template-columns: minmax(0, 1fr); } }
 
 .editorForm > *, .editorForm input, .editorForm textarea { min-width: 0; max-width: 100%; }
 
@@ -130,3 +128,4 @@
  .qualityTable td[data-center] .badges { justify-content: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { .chevron, .checks summary [data-tone] { transition: none; } }
+.editor article h2 { word-break: keep-all; }

@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import type { AdminAiData } from "@/lib/ai-usage-data";
-import { publicYear, visibleWeeks, sumTotals, DEFAULT_AI_INTRO, type UsageYear } from "@/lib/ai-usage";
+import { publicYear, visibleWeeks, sumTotals, AI_POST_SERIES, DEFAULT_AI_INTRO, type UsageYear } from "@/lib/ai-usage";
 import { Button } from "@/components/admin/Admin.styled";
 import Dropdown from "@/components/ui/Dropdown";
 import { AiSegments, number, UsageCards, WeekTable } from "./AiUsageView";
@@ -18,33 +18,30 @@ function ControlIcon({ kind }: { kind: "refresh" | "filter" }) {
     return <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{kind === "refresh" ? <><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M6.1 6.1A8 8 0 0 1 19.7 10M4.3 14A8 8 0 0 0 17.9 17.9" /></> : <><path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="2" fill="var(--cardbackground)" /><circle cx="15" cy="17" r="2" fill="var(--cardbackground)" /></>}</svg>;
 }
 
-const blank = () => ({ id: undefined as string | undefined, kind: "improvement", title: "", body: "", date: new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" }), postId: null as string | null, published: false });
+const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
+/** Edits the /ai intro only. Related writing below it is the published posts of AI_POST_SERIES. */
 function Editor({ data }: { data: AdminAiData }) {
     const client = useQueryClient();
-    const [form, setForm] = useState(blank);
+    const [form, setForm] = useState({ title: data.intro?.title ?? DEFAULT_AI_INTRO.title, body: data.intro?.body ?? DEFAULT_AI_INTRO.body });
     const [preview, setPreview] = useState(false);
     const [busy, setBusy] = useState(false);
     const [message, setMessage] = useState("");
     async function save(event: FormEvent, published: boolean) {
         event.preventDefault(); if (busy) return;
         setBusy(true); setMessage("");
-        try { const result = await fetchJson<{ id: string }>("/api/admin/ai/content", jsonRequest("POST", { ...form, published })); setForm(f => ({ ...f, id: result.id, published })); await client.invalidateQueries({ queryKey: ["admin-ai"] }); setMessage(published ? "공개했습니다." : "비공개로 저장했습니다."); }
+        try { await fetchJson<{ id: string }>("/api/admin/ai/content", jsonRequest("POST", { kind: "intro", ...form, date: today(), published })); await client.invalidateQueries({ queryKey: ["admin-ai"] }); setMessage(published ? "공개했습니다." : "비공개로 저장했습니다. 공개 화면에는 기본 소개가 보입니다."); }
         catch (e) { setMessage(e instanceof Error ? e.message : "저장 실패"); }
         finally { setBusy(false); }
     }
     return <AiScroll className={`${styles.contentScroll} ${manage.editor}`}>
-        <div className={styles.toolbar}><Dropdown floating label="편집할 항목" value={form.id ?? "new"} options={[{ value: "new", label: "새 개선 기록" }, ...data.entries.map(e => ({ value: e.id, label: `${e.published ? "공개" : "비공개"} · ${e.title}` }))]} onChange={id => { const entry = data.entries.find(e => e.id === id); setForm(entry ? { id: entry.id, kind: entry.kind, title: entry.title, body: entry.body, date: entry.date, postId: entry.postId, published: entry.published } : blank()); setMessage(""); }} /><Button onClick={() => { const entry = data.entries.find(e => e.kind === "intro"); setForm(entry ? { id: entry.id, kind: entry.kind, title: entry.title, body: entry.body, date: entry.date, postId: entry.postId, published: entry.published } : { ...blank(), id: "intro", kind: "intro", ...DEFAULT_AI_INTRO }); }}>소개 편집</Button></div>
         <form className={`${styles.form} ${manage.editorForm}`} onSubmit={e => save(e, false)}>
-            <p className={`${styles.note} ${manage.formNote}`}>{form.kind === "intro" ? "공개 페이지 상단 소개" : "개선 기록"} · 효과를 단정하기보다 변경·관찰·미확인 범위를 함께 작성하세요.</p>
+            <p className={`${styles.note} ${manage.formNote}`}>공개 페이지 상단 소개{data.intro ? ` · 현재 ${data.intro.published ? "공개" : "비공개"}` : " · 아직 저장하지 않아 기본 소개가 보입니다"}. 하단 관련 글은 {AI_POST_SERIES.join(", ")} 시리즈의 발행 글이 자동으로 표시됩니다.</p>
             <label className={manage.titleField}>제목<input required maxLength={100} value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></label>
-            <label className={manage.dateField}>날짜<input required type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></label>
             <label className={manage.bodyField}>내용<textarea required maxLength={8000} value={form.body} onChange={e => setForm({ ...form, body: e.target.value })} /></label>
-            <Dropdown floating className={manage.postField} label="관련 발행 글" value={form.postId ?? ""} options={[{ value: "", label: "관련 글 없음" }, ...data.posts.map(p => ({ value: p.id, label: p.title }))]} onChange={id => setForm({ ...form, postId: id || null })} searchable="글 제목 검색" />
             <div className={`${styles.toolbar} ${manage.formActions}`}><Button type="button" onClick={() => setPreview(!preview)} aria-expanded={preview}>미리보기</Button><Button disabled={busy} type="submit">{busy ? "저장 중…" : "비공개로 저장"}</Button><Button disabled={busy || !form.title.trim() || !form.body.trim()} type="button" onClick={e => save(e, true)}>검토 완료 · 공개</Button></div>
             <p className={`${styles.status} ${manage.formStatus}`} role="status">{message}</p>
         </form>
-        {preview && <article className={styles.card}><span className={styles.note}>{form.date} · 미리보기</span><h2>{form.kind === "intro" ? <AiIntroTitle title={form.title} /> : form.title}</h2><p className={styles.prose}><ParagraphText>{form.body}</ParagraphText></p>{form.postId && <p>{data.posts.find(p => p.id === form.postId)?.title}</p>}</article>}
-        <details className={styles.section}><summary>내부 개선 기록 참고</summary><p className={styles.note}>이 내용은 자동으로 공개되지 않습니다.</p>{data.snapshots[0]?.data.improvements.map((e, i) => <p key={i}>{e.date} · {e.kind} · {e.summary}</p>)}</details>
+        {preview && <article className={styles.card}><span className={styles.note}>미리보기</span><h2><AiIntroTitle title={form.title} /></h2><p className={styles.prose}><ParagraphText>{form.body}</ParagraphText></p></article>}
     </AiScroll>;
 }
 export default function AdminAi({ asOf }: { asOf: string }) {
@@ -60,7 +57,7 @@ export default function AdminAi({ asOf }: { asOf: string }) {
     const cardWeeks = view === "groups" ? publicWeeks.map(w => ({ ...w, totals: sumTotals(filtered.filter(g => g.week === w.week).map(g => g.totals)), observed: filtered.some(g => g.week === w.week) })) : publicWeeks;
     return <section className={`${styles.workspace} ${manage.workspace}`} aria-label="AI 현황" data-ai-workspace>
         <header className={manage.heading}><h1>AI 현황</h1><Link className={`${styles.link} ${manage.publicLink}`} href="/ai">공개 화면 ↗</Link>
-        <div className={manage.navigation}><AiSegments aria-label="AI 현황 항목">{[["usage", "사용량"], ["quality", "작업·품질"], ["content", "공개 콘텐츠"]].map(([value, label]) => <button key={value} aria-pressed={tab === value} onClick={() => setTab(value)}>{label}</button>)}</AiSegments><Button className={manage.refresh} onClick={() => query.refetch()} disabled={query.isFetching} aria-label={query.isFetching ? "새로고침 중" : "새로고침"} title="새로고침" aria-busy={query.isFetching}><ControlIcon kind="refresh" /></Button></div></header>
+        <div className={manage.navigation}><AiSegments aria-label="AI 현황 항목">{[["usage", "사용량"], ["quality", "작업·품질"], ["content", "공개 소개"]].map(([value, label]) => <button key={value} aria-pressed={tab === value} onClick={() => setTab(value)}>{label}</button>)}</AiSegments><Button className={manage.refresh} onClick={() => query.refetch()} disabled={query.isFetching} aria-label={query.isFetching ? "새로고침 중" : "새로고침"} title="새로고침" aria-busy={query.isFetching}><ControlIcon kind="refresh" /></Button></div></header>
         {query.isError && <p className={styles.warning} role="alert">{query.error.message} · 기존 데이터가 있으면 유지합니다.</p>}
         {!data ? <p role="status">{query.isPending ? "AI 데이터를 불러오는 중…" : "데이터 연결을 확인해 주세요."}</p> : tab === "content" ? <Editor data={data} /> : <>
             <div className={manage.controls}>

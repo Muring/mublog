@@ -11,6 +11,10 @@ interface CarouselSliderProps {
   posts: PostSummary[];
   tags?: string[];
   currentSlug: string;
+  /** 슬라이더 제목. 바깥에 이미 제목이 있으면 null 로 숨긴다 */
+  heading?: string | null;
+  /** 놓이는 화면에서 폭·여백을 조정할 때. 넘길 때만 data-looping="true" 가 붙는다 */
+  className?: string;
 }
 
 const MAX_RELATED = 5;
@@ -53,11 +57,10 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSliderProps) {
+export default function CarouselSlider({ posts, tags, currentSlug, heading = "연관된 글", className }: CarouselSliderProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   // 서버에서는 폭을 알 수 없다. CSS 가 폭을 나누므로 장수만 있으면 그려진다.
   const [visible, setVisible] = useState(MAX_VISIBLE);
-  const [currentIndex, setCurrentIndex] = useState(MAX_VISIBLE);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -83,6 +86,14 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
 
     return result.slice(0, MAX_RELATED);
   }, [posts, tags, currentSlug]);
+
+  /*
+   * 넘길 글이 있으면 앞쪽 복제본(visible 장) 뒤의 첫 진짜 카드에서, 없으면 0 에서 시작한다.
+   * 늘 MAX_VISIBLE 에서 시작했더니 글이 3편 이하인 목록(/ai 관련 글)은 첫 화면부터
+   * 트랙이 왼쪽으로 밀려 카드가 하나도 보이지 않았다. 아래 layoutKey 보정은
+   * 장수가 "바뀔 때"만 돌아서 첫 렌더를 바로잡지 못한다.
+   */
+  const [currentIndex, setCurrentIndex] = useState(() => (relatedPosts.length > MAX_VISIBLE ? MAX_VISIBLE : 0));
 
   useLayoutEffect(() => {
     const el = wrapperRef.current;
@@ -178,12 +189,14 @@ export default function CarouselSlider({ posts, tags, currentSlug }: CarouselSli
 
   return (
     <Carousel.Container
+      className={className}
+      data-looping={isLooping}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       onFocusCapture={() => setIsPaused(true)}
       onBlurCapture={() => setIsPaused(false)}
     >
-      <h4>연관된 글</h4>
+      {heading !== null && <h4>{heading}</h4>}
 
       {isLooping && (
         <Carousel.ArrowButton

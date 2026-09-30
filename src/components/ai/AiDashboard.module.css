@@ -24,6 +24,9 @@
 .publicTable { max-height: 24rem; }
 .timeline { list-style: none; padding: 0; display: grid; gap: 1rem; }
 .timeline h3 { margin: .5rem 0; }
+/* The shared post slider is centred at 900px with arrow gutters; here it spans the section and drops the gutters unless it has arrows. */
+.section .relatedSlider { max-width: none; margin: 0; padding-bottom: .5rem; }
+.section .relatedSlider:not([data-looping="true"]) { padding-inline: 0; }
 .link { color: var(--linkcolor); text-decoration: underline; text-underline-offset: 4px; }
 .link:hover { color: var(--linkhovercolor); }
 .warning { color: var(--warncolor); background: var(--warnbg); padding: .75rem; border-radius: 8px; }
