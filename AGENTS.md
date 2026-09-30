@@ -206,6 +206,10 @@ Vercel이 이 스크립트를 그대로 돌리므로 **lint 오류는 배포를 
 이미 닫은 취약점을 다시 보고하고, 그 "수정" 으로 Prisma 를 6 으로 내리며 `yarn.lock` 을 v1 로 바꾼다.
 감사는 `yarn npm audit --all --recursive` 로 한다.
 
+**Vercel 은 환경 변수 `ENABLE_EXPERIMENTAL_COREPACK=1` 이 있어야 yarn 4 로 설치한다.** 지우면 `packageManager` 를
+무시하고 yarn 1 로 돌아가 `yarn.lock` 을 버리고 새로 푼다. 그때는 `이름@npm:범위` 같은 yarn 4 전용
+`resolutions` 키가 설치 단계에서 배포를 깬다. 로컬 `yarn install --immutable` 로는 재현되지 않는다.
+
 **`yarn start`가 떠 있는 채로 다시 빌드하지 않는다.** 청크가 어긋나 클라이언트 예외가 나고,
 Windows에서는 sharp DLL이 잠겨 `EPERM`으로 설치가 실패한다. 먼저 서버를 내린다.
 
