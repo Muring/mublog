@@ -1,0 +1,54 @@
+.page { max-width: 1000px; margin: auto; padding: 7rem 1.25rem 4rem; }
+.hero { margin-bottom: 2.5rem; }
+.hero h1 { font-size: clamp(2rem, 5vw, 3.6rem); margin: .5rem 0 1rem; letter-spacing: -.05em; }
+.eyebrow, .note { color: var(--desccolor); font-size: .85rem; line-height: 1.7; }
+.prose { white-space: pre-wrap; line-height: 1.85; overflow-wrap: anywhere; }
+.section { margin: 2rem 0; }
+.card { background: var(--cardbackground); border: var(--border-width) solid var(--bordercolor); border-radius: 14px; padding: 1rem; min-width: 0; }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
+.card strong { display: block; font-size: clamp(1rem, 1.45vw, 1.2rem); margin-top: .4rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; flex-shrink: 0; }
+.tableScroll { overflow: auto; min-height: 0; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; scrollbar-gutter: stable; }
+.tableScroll table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: .85rem; white-space: nowrap; }
+.tableScroll th, .tableScroll td { padding: .75rem; text-align: left; border-bottom: var(--border-width) solid var(--bordercolor); }
+.tableScroll th { position: sticky; top: 0; background: var(--cardbackground); z-index: 1; }
+.tableScroll td[data-number] { text-align: right; font-variant-numeric: tabular-nums; }
+.tableScroll caption { text-align: left; padding: .75rem; color: var(--desccolor); }
+.publicTable { max-height: 24rem; }
+.chart { height: 180px; width: 100%; color: var(--chartbar); display: block; }
+.chart path { fill: none; stroke: currentColor; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.chart circle { fill: currentColor; }
+.legend { display: flex; flex-wrap: wrap; gap: 1rem; margin: .75rem 0; }
+.meter { width: 100%; height: 6px; background: var(--bordercolor); border-radius: 3px; overflow: hidden; margin-top: .4rem; }
+.meter span { display: block; height: 100%; background: var(--chartbar); }
+.timeline { list-style: none; padding: 0; display: grid; gap: 1rem; }
+.timeline h3 { margin: .5rem 0; }
+.link { color: var(--linkcolor); text-decoration: underline; text-underline-offset: 4px; }
+.link:hover { color: var(--linkhovercolor); }
+.warning { color: var(--warncolor); background: var(--warnbg); padding: .75rem; border-radius: 8px; }
+.workspace { flex: 1; display: flex; flex-direction: column; gap: .75rem; min-height: 0; min-width: 0; }
+.workspace .grid { margin: 0; }
+.workspace .tableScroll, .contentScroll { flex: 1; }
+.contentScroll { overflow: auto; min-height: 0; padding: .25rem; }
+.form { display: grid; gap: .75rem; max-width: 760px; }
+.form label { display: grid; gap: .4rem; font-size: .85rem; }
+.form input, .form textarea { background: var(--cardbackground); color: var(--foreground); border: var(--border-width) solid var(--bordercolor); border-radius: 8px; padding: .65rem; font: inherit; width: 100%; box-sizing: border-box; }
+.form textarea { min-height: 140px; resize: vertical; }
+.form input:focus-visible, .form textarea:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 2px; }
+.form input:hover, .form textarea:hover { border-color: var(--foreground); }
+.status { margin: 0; font-size: .85rem; }
+:global(body:has([data-ai-workspace])) { overflow: hidden; }
+:global(body:has([data-ai-workspace]) footer) { display: none; }
+@media (max-width: 640px) {
+ .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+ .card { padding: .7rem; }
+ .page { padding-top: 6rem; }
+ .workspace .note { font-size: .75rem; }
+ .workspace .card strong { font-size: 1.1rem; }
+}
+@media (max-height: 650px) { .workspace .grid { display: none; } }
+
+.tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.contentScroll summary { cursor: pointer; padding: .6rem; border-radius: 8px; }
+.contentScroll summary:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
+.contentScroll summary:focus-visible { outline: 2px solid var(--linkcolor); }

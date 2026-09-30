@@ -13,6 +13,7 @@ const RESERVED_SLUGS = new Set([
     "auth",
     "api",
     "about",
+    "ai",
     "portfolio",
     "privacy",
     "feed.xml",

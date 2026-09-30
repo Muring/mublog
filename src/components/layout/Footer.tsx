@@ -15,6 +15,8 @@ export default function Footer() {
       <nav className="links" aria-label="사이트 정보">
         <Link href="/about">소개</Link>
         <span aria-hidden="true">·</span>
+        <Link href="/ai">AI 활용</Link>
+        <span aria-hidden="true">·</span>
         <Link href="/privacy">개인정보 처리방침</Link>
       </nav>
       <div className="stack">

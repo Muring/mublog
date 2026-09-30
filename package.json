@@ -22,7 +22,9 @@
         "migrate:public-images": "tsx scripts/migrate-public-images.mts",
         "lint:fix": "eslint . --fix",
         "make:og": "tsx scripts/make-og-image.mts",
-        "revalidate": "tsx scripts/revalidate.mts"
+        "revalidate": "tsx scripts/revalidate.mts",
+        "verify:ai": "tsx scripts/verify-ai-usage.mts",
+        "verify:ai-api": "tsx scripts/verify-ai-api.mts"
     },
     "dependencies": {
         "@emotion/react": "^11.14.0",

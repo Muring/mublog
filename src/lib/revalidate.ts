@@ -11,6 +11,8 @@ const PURGE = "max";
  * 지우지 않으면 이전 URL 에 낡은 페이지가 계속 남는다.
  */
 export function revalidatePost(slug: string, previousSlug?: string | null) {
+    // Linked AI entries must disappear immediately when a post becomes private.
+    revalidateTag("ai-public", { expire: 0 });
     revalidateTag("posts:list", PURGE);
     revalidateTag(`post:${slug}`, PURGE);
     revalidatePath("/");
@@ -33,6 +35,7 @@ export function revalidatePost(slug: string, previousSlug?: string | null) {
  * /api/admin/revalidate 가 부른다. 에디터를 거친 변경은 revalidatePost 로 충분하다.
  */
 export function revalidateEverything() {
+    revalidateTag("ai-public", { expire: 0 });
     revalidateTag("posts:list", PURGE);
     revalidatePath("/");
     revalidatePath("/[slug]", "page");

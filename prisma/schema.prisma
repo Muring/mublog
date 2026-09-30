@@ -153,3 +153,27 @@ model CommentLike {
   @@index([userId])
   @@map("comment_likes")
 }
+
+/// Only aggregates; original request/session logs remain in the private KB.
+model AiUsageSnapshot {
+  year           Int      @id
+  sequence       BigInt
+  sourceRevision String   @map("source_revision")
+  generatedAt    DateTime @map("generated_at")
+  receivedAt     DateTime @default(now()) @map("received_at")
+  publicData     Json     @map("public_data")
+  privateData    Json     @map("private_data")
+  @@map("ai_usage_snapshots")
+}
+
+model AiPublication {
+  id           String   @id @default(cuid())
+  kind         String   @default("improvement")
+  title        String
+  body         String
+  date         String
+  postId       String?  @map("post_id")
+  published    Boolean  @default(false)
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  @@map("ai_publications")
+}

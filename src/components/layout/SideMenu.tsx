@@ -51,6 +51,7 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
           <Link href="/about" onClick={handleClose} className="side-menu-link">
             <h5>About me</h5>
           </Link>
+          <Link href="/ai" onClick={handleClose} className="side-menu-link"><h5>AI 활용</h5></Link>
           <SideList type="latest" onLinkClick={handleClose} />
           <SideList type="recent" onLinkClick={handleClose} />
         </div>

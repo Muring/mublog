@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import AdminNavigation from "./AdminNavigation";
 import Dropdown from "@/components/ui/Dropdown";
@@ -18,9 +19,10 @@ import { AdminWrapper, PostTable, AdminListScroll, ResultBar, Button, Skeleton }
 
 /** 관리 탭 사이에서 유지되는 공통 프레임. 페이지 로딩은 children 내부만 교체한다. */
 export function AdminShell({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
     // 제목은 모든 탭에 공통이다. 어느 탭인지는 바로 아래 탭 줄이 말한다 — 탭마다 "○○ 관리" 를 붙이면 좁은 폭에서 줄이 꺾인다
     return (
-        <AdminWrapper>
+        <AdminWrapper data-ai={pathname === "/admin/ai" ? true : undefined}>
             <div className="admin-head">
                 <h2>블로그 관리</h2>
                 <Link href="/admin/posts/new">
