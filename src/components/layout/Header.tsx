@@ -7,6 +7,7 @@ import { HeaderWrapper, DiagonalLine, ButtonWrapper } from "./Header.styled";
 import { useHeaderTitle } from "@/providers/HeaderTitleProvider";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import SideMenu from "./SideMenu";
 import { postsSummaryQuery } from "./SideList";
 import HeaderAuth from "./HeaderAuth";
@@ -15,6 +16,7 @@ import SearchButton from "@/components/search/SearchButton";
 export default function Header() {
     const [scrollRatio, setScrollRatio] = useState(0);
     const [menuOpen, setMenuOpen] = useState(false);
+    const pathname = usePathname();
     const { title } = useHeaderTitle();
     const queryClient = useQueryClient();
     // 메뉴를 연 뒤에 목록을 부르면 요청 한 번만큼 "불러오는 중" 이 보인다. 버튼에 닿는 순간 받아 둔다
@@ -26,13 +28,17 @@ export default function Header() {
             const scrollHeight = document.documentElement.scrollHeight;
             const clientHeight = document.documentElement.clientHeight;
             const maxScroll = scrollHeight - clientHeight;
-            const ratio = Math.min(scrollTop / maxScroll, 1);
+            // 문서가 스크롤되지 않는 화면(/ai/manage 처럼 내부만 스크롤)에서는 0/0 = NaN 이 되고,
+            // scaleX(NaN) 은 transform 전체를 무효로 만들어 선이 가운데부터 오른쪽 끝까지 그려졌다.
+            const ratio = maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0;
             setScrollRatio(ratio);
         };
 
+        // 헤더는 페이지를 옮겨도 남아 있으므로, 이동할 때마다 새 페이지 기준으로 다시 잰다
+        handleScroll();
         window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    }, [pathname]);
 
     return (
         <HeaderWrapper scrollRatio={scrollRatio}>
@@ -69,6 +75,16 @@ export default function Header() {
                             <Image
                                 src="/icons/github.svg"
                                 alt="github icon"
+                                width={24}
+                                height={24}
+                                className="article-detail-icon auto-dark"
+                            />
+                        </Link>
+                        <DiagonalLine />
+                        <Link href="/ai" title="AI 활용">
+                            <Image
+                                src="/icons/ai.svg"
+                                alt="AI 활용"
                                 width={24}
                                 height={24}
                                 className="article-detail-icon auto-dark"
