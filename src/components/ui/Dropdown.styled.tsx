@@ -199,4 +199,23 @@ export const DropdownList = styled.ul<{ $align: "left" | "right"; $inPanel?: boo
         border-bottom: 1.5px solid currentColor;
         transform: translateY(-60%) rotate(45deg);
     }
+
+    /* 다중 선택: 오른쪽 체크 대신 왼쪽 체크박스로 "여러 개 고를 수 있음" 을 드러낸다 */
+    &[aria-multiselectable="true"] {
+        li:not(.empty) { padding-left: 2.15rem; padding-right: 0.75rem; }
+        li:not(.empty)::before {
+            content: "";
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            width: 14px;
+            height: 14px;
+            box-sizing: border-box;
+            border: 1.5px solid var(--desccolor);
+            border-radius: 3px;
+            transform: translateY(-50%);
+        }
+        li[aria-selected="true"]::before { background: var(--foreground); border-color: var(--foreground); }
+        li[aria-selected="true"]::after { right: auto; left: calc(0.75rem + 5px); width: 4px; height: 8px; border-color: var(--cardbackground); }
+    }
 `;

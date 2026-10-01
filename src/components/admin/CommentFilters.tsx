@@ -8,6 +8,7 @@ import { COMMENT_QUERY_MAX, commentListUrl, type CommentSort } from "@/lib/admin
 import { adminDateLabel } from "@/lib/admin-filters";
 import FilterBar from "./FilterBar";
 import FilterChips from "./FilterChips";
+import { splitMulti, withoutMulti } from "@/lib/multi-value";
 
 type Status = "all" | "live" | "deleted";
 type Filter = { post?: string; author?: string; q: string; from: string; to: string; status: Status; sort: CommentSort };
@@ -58,8 +59,9 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
     };
     const chips: { key: string; name: string; value: string; patch: Partial<Filter> }[] = [
         ...(shown.status !== "all" ? [{ key: "status", name: "상태", value: shown.status === "live" ? "게시 중" : "삭제됨", patch: { status: "all" as const } }] : []),
-        ...(shown.post ? [{ key: "post", name: "글", value: options.posts.find((p) => p.slug === shown.post)?.title ?? shown.post, patch: { post: undefined } }] : []),
-        ...(shown.author ? [{ key: "author", name: "작성자", value: options.authors.find((a) => a.id === shown.author)?.username ?? shown.author, patch: { author: undefined } }] : []),
+        // 여러 개를 골랐으면 값마다 칩을 하나씩 두어 하나씩 풀 수 있게 한다
+        ...splitMulti(shown.post).map((slug) => ({ key: `post:${slug}`, name: "글", value: options.posts.find((p) => p.slug === slug)?.title ?? slug, patch: { post: withoutMulti(shown.post, slug) || undefined } })),
+        ...splitMulti(shown.author).map((id) => ({ key: `author:${id}`, name: "작성자", value: options.authors.find((a) => a.id === id)?.username ?? id, patch: { author: withoutMulti(shown.author, id) || undefined } })),
         ...(shown.from || shown.to ? [{ key: "date", name: "작성일", value: adminDateLabel(shown.from, shown.to), patch: { from: "", to: "" } }] : []),
     ];
     return (
@@ -82,13 +84,13 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
                     onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) go({}, true); }}
                     placeholder="댓글 본문 검색" aria-label="댓글 본문 검색" />}
                 fields={[
-                    { key: "post", label: "글", search: "글 제목 검색", options: [{ value: "", label: "전체" }, ...options.posts.map((p) => ({ value: p.slug, label: p.title, hint: String(p.count) }))] },
-                    { key: "author", label: "작성자", search: "이름 검색", options: [{ value: "", label: "전체" }, ...options.authors.map((a) => ({ value: a.id, label: a.username, hint: String(a.count) }))] },
+                    { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.posts.map((p) => ({ value: p.slug, label: p.title, hint: String(p.count) }))] },
+                    { key: "author", label: "작성자", search: "이름 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.authors.map((a) => ({ value: a.id, label: a.username, hint: String(a.count) }))] },
                 ]}
                 values={{ post: shown.post ?? "", author: shown.author ?? "", from: shown.from, to: shown.to }}
                 dateRange
                 onApply={(next) => go({ post: next.post || undefined, author: next.author || undefined, from: next.from, to: next.to })}
-                fieldCount={chips.filter((chip) => chip.key !== "status").length}
+                fieldCount={new Set(chips.filter((chip) => chip.key !== "status").map((chip) => chip.key.split(":")[0])).size}
                 summary={summary}
                 pending={isPending}
                 chips={<FilterChips items={chips} onClear={reset} canClear={chips.length > 0 || Boolean(shown.q) || shown.status !== "all"}

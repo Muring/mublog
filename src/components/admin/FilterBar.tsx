@@ -7,7 +7,8 @@ import { FilterBarRoot, FilterFormRoot, FilterPopover } from "./FilterBar.styled
 import AdminSheet from "./AdminSheet";
 import { mobileQuery } from "@/styles/breakpoints";
 
-export type FilterField = { key: string; label: string; search?: string; options: DropdownOption[] };
+/** multiple 이면 값은 lib/multi-value 로 이은 문자열이다. 같은 조건 안에서는 "또는" 으로 거른다 */
+export type FilterField = { key: string; label: string; search?: string; options: DropdownOption[]; multiple?: boolean };
 type Props = {
     status: ReactNode;
     sort: ReactNode;
@@ -143,7 +144,7 @@ function FilterForm({ fields, values, dateRange, dateBefore, onApply }: Pick<Pro
                         <div className="filter-field">
                             <span id={`${formId}-${field.key}`} className="field-label">{field.label}</span>
                             <Dropdown label={`${field.label} 필터`} labelledBy={`${formId}-${field.key}`} size="control" value={draft[field.key] ?? ""}
-                                options={field.options} searchable={field.search} floating open={openField === field.key}
+                                options={field.options} searchable={field.search} multiple={field.multiple} floating open={openField === field.key}
                                 onOpenChange={(open) => setOpenField(open ? field.key : null)}
                                 onChange={(value) => setDraft((current) => ({ ...current, [field.key]: value }))} />
                         </div>

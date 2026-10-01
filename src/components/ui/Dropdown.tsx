@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { DropdownRoot, DropdownButton, DropdownList, DropdownPanel } from "./Dropdown.styled";
+import { joinMulti, splitMulti } from "@/lib/multi-value";
 
 /** hint 는 항목 오른쪽에 흐리게 붙는 보조 정보(개수 등). 검색 대상이 아니고 버튼에도 안 나온다 */
 export type DropdownOption = { value: string; label: string; hint?: string };
@@ -29,6 +30,11 @@ type Props = {
      * 첫 항목("전체" 같은 초기화 선택지)은 검색해도 늘 남긴다.
      */
     searchable?: string;
+    /**
+     * 여러 개를 고른다. value 는 lib/multi-value 의 구분자로 이은 문자열이다.
+     * 목록을 연 채로 켜고 끄며, 첫 항목(value "")은 "전체" — 고르면 선택을 모두 푼다.
+     */
+    multiple?: boolean;
 };
 
 /**
@@ -57,6 +63,7 @@ export default function Dropdown({
     hidden = false,
     className,
     searchable,
+    multiple = false,
 }: Props) {
     const [localOpen, setLocalOpen] = useState(false);
     const open = controlledOpen ?? localOpen;
@@ -73,7 +80,15 @@ export default function Dropdown({
     const panel = useRef<HTMLDivElement>(null);
     const placePopup = useRef<(() => void) | null>(null);
     const listId = useId();
-    const current = options.find((option) => option.value === value) ?? options[0];
+    const chosen = multiple ? new Set(splitMulti(value)) : null;
+    const isSelected = (option: DropdownOption) =>
+        chosen ? (option.value === "" ? chosen.size === 0 : chosen.has(option.value)) : option.value === value;
+    const chosenLabels = chosen ? options.filter((option) => option.value && chosen.has(option.value)).map((option) => option.label) : [];
+    const buttonLabel = !chosen
+        ? (options.find((option) => option.value === value) ?? options[0])?.label
+        : chosenLabels.length === 0 ? options[0]?.label
+        : chosenLabels.length === 1 ? chosenLabels[0]
+        : `${chosenLabels[0]} 외 ${chosenLabels.length - 1}`;
     const needle = query.trim().toLowerCase();
     const shown = needle ? options.filter((option, index) => index === 0 || option.label.toLowerCase().includes(needle)) : options;
 
@@ -140,7 +155,7 @@ export default function Dropdown({
 
     function openList() {
         setQuery("");
-        setFocused(Math.max(0, options.findIndex((option) => option.value === value)));
+        setFocused(Math.max(0, options.findIndex(isSelected)));
         setOpen(true);
     }
 
@@ -153,6 +168,12 @@ export default function Dropdown({
     function choose(index: number) {
         const option = shown[index];
         if (!option) return;
+        if (chosen) {
+            // 여러 개를 고르는 중이므로 목록을 닫지 않는다
+            if (option.value === "") onChange("");
+            else onChange(joinMulti(chosen.has(option.value) ? [...chosen].filter((v) => v !== option.value) : [...chosen, option.value]));
+            return;
+        }
         if (option.value !== value) onChange(option.value);
         close();
     }
@@ -213,14 +234,14 @@ export default function Dropdown({
     }
 
     const items = (
-        <DropdownList ref={list} id={listId} role="listbox" aria-label={label} $align={align} $inPanel={Boolean(searchable || floating)}>
+        <DropdownList ref={list} id={listId} role="listbox" aria-label={label} aria-multiselectable={multiple || undefined} $align={align} $inPanel={Boolean(searchable || floating)}>
             {shown.map((option, index) => (
                 <li
                     key={option.value}
                     id={`${listId}-${index}`}
                     role="option"
                     data-index={index}
-                    aria-selected={option.value === value}
+                    aria-selected={isSelected(option)}
                     data-focused={index === focused}
                     onPointerEnter={() => setFocused(index)}
                     onClick={() => choose(index)}
@@ -247,7 +268,7 @@ export default function Dropdown({
                 aria-controls={listId}
                 onClick={() => (open ? setOpen(false) : openList())}
             >
-                <span>{current?.label}</span>
+                <span title={chosenLabels.length > 1 ? chosenLabels.join(", ") : undefined}>{buttonLabel}</span>
             </DropdownButton>
             {open && (searchable || floating ? (
                 <DropdownPanel ref={panel} $align={align} popover={floating ? "manual" : undefined}>

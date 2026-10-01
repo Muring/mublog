@@ -77,18 +77,18 @@ export type AdminComment = CommentNode & {
  * 공개 화면(toNode)과 달리 지운 댓글의 본문과 작성자를 **가리지 않는다.**
  * 관리자는 무엇이 왜 지워졌는지 봐야 한다 — 도배·욕설이면 작성자를 알아야 하고,
  * 본인이 지운 거면 그냥 넘기면 된다. 공개 API 로는 여전히 안 나간다(getCommentsByPostSlug 는 그대로).
- * slug 를 주면 그 글의 것만, authorId 를 주면 그 사람 것만, q 를 주면 본문에 그 말이 든 것만,
+ * slugs 를 주면 그 글들의 것만, authorIds 를 주면 그 사람들 것만(각각 여러 개면 그중 하나), q 를 주면 본문에 그 말이 든 것만,
  * from·to 를 주면 그 기간(KST)에 쓴 것만 돌려준다(모두 교집합).
  * 작성자 필터는 도배 대응용이다 — @@index([authorId, createdAt]) 가 받쳐준다.
  * 본문 검색은 인덱스 없는 ILIKE 다. 댓글이 수만 개가 되기 전까지는 이걸로 충분하다.
  */
-export async function getCommentsForAdmin({ slug, authorId, q, from = "", to = "", status = "all", sort = "newest", page = 1 }: {
-    slug?: string; authorId?: string; q?: string; from?: string; to?: string; status?: "all" | "live" | "deleted"; sort?: CommentSort; page?: number;
+export async function getCommentsForAdmin({ slugs = [], authorIds = [], q, from = "", to = "", status = "all", sort = "newest", page = 1 }: {
+    slugs?: string[]; authorIds?: string[]; q?: string; from?: string; to?: string; status?: "all" | "live" | "deleted"; sort?: CommentSort; page?: number;
 } = {}) {
     return prisma.$transaction(async (tx) => {
         const base = {
-            ...(slug ? { post: { slug } } : {}),
-            ...(authorId ? { authorId } : {}),
+            ...(slugs.length ? { post: { slug: { in: slugs } } } : {}),
+            ...(authorIds.length ? { authorId: { in: authorIds } } : {}),
             ...(q ? { body: { contains: q, mode: "insensitive" as const } } : {}),
             ...(from || to ? { createdAt: commentDateRange(from, to) } : {}),
         };
@@ -113,12 +113,10 @@ export async function getCommentsForAdmin({ slug, authorId, q, from = "", to = "
             FROM comments c JOIN profiles a ON a.id = c.author_id
             GROUP BY a.id ORDER BY max(c.created_at) DESC`;
         // 거른 글·사람이 실재하는지. 댓글이 달린 것이면 위 목록에 이미 있으니 따로 묻지 않는다
-        const listed = slug ? postRows.find((row) => row.slug === slug) : undefined;
-        const post = !slug ? null
-            : listed ? postById.get(listed.id)!
-            : await tx.post.findUnique({ where: { slug }, select: { id: true, slug: true, title: true, status: true } });
-        const author = !authorId ? null
-            : authors.find((row) => row.id === authorId) ?? await tx.profile.findUnique({ where: { id: authorId }, select: { id: true, username: true } });
+        const unlistedSlugs = slugs.filter((slug) => !postRows.some((row) => row.slug === slug));
+        const unlistedAuthors = authorIds.filter((id) => !authors.some((row) => row.id === id));
+        const missing = (unlistedSlugs.length > 0 && await tx.post.count({ where: { slug: { in: unlistedSlugs } } }) < unlistedSlugs.length)
+            || (unlistedAuthors.length > 0 && await tx.profile.count({ where: { id: { in: unlistedAuthors } } }) < unlistedAuthors.length);
         // 전체·삭제 수를 한 번에. count 의 select 에 컬럼을 넣으면 그 컬럼이 null 이 아닌 행을 센다
         const tally = await tx.comment.count({ where: base, select: { _all: true, deletedAt: true } });
         const counts = { all: tally._all, live: tally._all - tally.deletedAt, deleted: tally.deletedAt };
@@ -145,7 +143,7 @@ export async function getCommentsForAdmin({ slug, authorId, q, from = "", to = "
             post: postById.get(row.postId)!,
             parent: row.parent ? { id: row.parent.id, body: row.parent.body, deleted: row.parent.deletedAt !== null, author: row.parent.author.username } : null,
         }));
-        return { comments, counts, post, author, options: { posts, authors }, ...pagination };
+        return { comments, counts, missing, options: { posts, authors }, ...pagination };
     }, { isolationLevel: "RepeatableRead" });
 }
 

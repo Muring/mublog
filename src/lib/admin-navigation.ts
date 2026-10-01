@@ -1,8 +1,12 @@
 import { withinAdminDates } from "./admin-filters";
+import { appendMultiParam, readMultiParam, splitMulti } from "./multi-value";
 
 export type PostStatusFilter = "all" | "PUBLISHED" | "DRAFT";
 export type PostSort = "newest" | "updated" | "views" | "comments";
-/** tag·series 는 값 그대로 비교한다(정확히 같은 것만). 비어 있으면 거르지 않는다 */
+/**
+ * tag·series 는 여러 개를 고를 수 있다(lib/multi-value 로 이은 문자열). 고른 것 중 하나와 정확히 같으면 남긴다.
+ * 비어 있으면 거르지 않는다. 주소창에는 ?tag=a&tag=b 로 싣는다.
+ */
 export type PostListState = { q: string; status: PostStatusFilter; sort: PostSort; tag: string; series: string; from?: string; to?: string; hasComments?: "" | "yes" | "no" };
 export function postListState(params: URLSearchParams): PostListState {
     const rawStatus = params.get("status");
@@ -13,8 +17,8 @@ export function postListState(params: URLSearchParams): PostListState {
         q: params.get("q") ?? "",
         status: (rawStatus === "PUBLISHED" || rawStatus === "DRAFT" ? rawStatus : "all") as PostStatusFilter,
         sort: (["updated", "views", "comments"].includes(rawSort ?? "") ? rawSort : "newest") as PostSort,
-        tag: params.get("tag") ?? "",
-        series: params.get("series") ?? "",
+        tag: readMultiParam(params, "tag"),
+        series: readMultiParam(params, "series"),
     };
 }
 export function postListUrl(state: PostListState) {
@@ -24,8 +28,8 @@ export function postListUrl(state: PostListState) {
     if (dates.to) params.set("to", dates.to);
     if (state.hasComments) params.set("hasComments", state.hasComments);
     if (state.q) params.set("q", state.q);
-    if (state.tag) params.set("tag", state.tag);
-    if (state.series) params.set("series", state.series);
+    appendMultiParam(params, "tag", state.tag);
+    appendMultiParam(params, "series", state.series);
     if (state.status !== "all") params.set("status", state.status);
     if (state.sort !== "newest") params.set("sort", state.sort);
     return `/admin${params.size ? `?${params}` : ""}`;
@@ -67,8 +71,8 @@ export function commentListUrl({ post, author, q, from, to, status = "all", sort
 }) {
     const params = new URLSearchParams();
     const dates = commentDates(from, to);
-    if (post) params.set("post", post);
-    if (author) params.set("author", author);
+    appendMultiParam(params, "post", post);
+    appendMultiParam(params, "author", author);
     if (commentQuery(q)) params.set("q", commentQuery(q));
     if (dates.from) params.set("from", dates.from);
     if (dates.to) params.set("to", dates.to);
@@ -109,8 +113,8 @@ type SortablePost = {
 export function filterAdminPosts<T extends SortablePost>(posts: T[], state: Omit<PostListState, "tag" | "series"> & Partial<Pick<PostListState, "tag" | "series">>): T[] {
     const query = state.q.trim().toLowerCase();
     return posts.filter((post) => (state.status === "all" || post.status === state.status) &&
-        (!state.tag || post.tags.includes(state.tag)) &&
-        (!state.series || post.series === state.series) &&
+        (!state.tag || splitMulti(state.tag).some((tag) => post.tags.includes(tag))) &&
+        (!state.series || splitMulti(state.series).includes(post.series ?? "")) &&
         withinAdminDates(post.createdAt, state.from, state.to) &&
         (!state.hasComments || (state.hasComments === "yes" ? post.commentCount > 0 : post.commentCount === 0)) &&
         (!query || [post.title, post.slug, ...post.tags].some((text) => text.toLowerCase().includes(query)))

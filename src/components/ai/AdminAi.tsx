@@ -11,6 +11,7 @@ import { AiSegments, number, UsageCards, WeekTable } from "./AiUsageView";
 import { AiBadge, AiScroll, type Tone } from "./AiControls";
 import ParagraphText from "./ParagraphText";
 import AiIntroTitle from "./AiIntroTitle";
+import { splitMulti } from "@/lib/multi-value";
 import styles from "./AiDashboard.module.css";
 import manage from "./AiManagement.module.css";
 
@@ -55,7 +56,8 @@ export default function AdminAi({ asOf }: { asOf: string }) {
     const privateYear = snapshot?.data; const weeks = visibleWeeks(privateYear?.weeks ?? [], period, new Date(data?.checkedAt ?? asOf));
     const publicWeeks = privateYear ? visibleWeeks(publicYear(privateYear).weeks, period, new Date(data?.checkedAt ?? asOf)) : [];
     const groups = weeks.flatMap(w => w.groups.map(g => ({ ...g, week: w.week })));
-    const filtered = groups.filter(g => Object.entries(filters).every(([k, v]) => !v || g[k as keyof typeof filters] === v));
+    // 같은 조건 안에서는 고른 값 중 하나(또는), 조건끼리는 모두(그리고)
+    const filtered = groups.filter(g => Object.entries(filters).every(([k, v]) => !v || splitMulti(v).includes(g[k as keyof typeof filters])));
     const tasks = privateYear?.tasks ?? [];
     const cardWeeks = view === "groups" ? publicWeeks.map(w => ({ ...w, totals: sumTotals(filtered.filter(g => g.week === w.week).map(g => g.totals)), observed: filtered.some(g => g.week === w.week) })) : publicWeeks;
     return <section className={`${styles.workspace} ${manage.workspace}`} aria-label="AI 관리" data-ai-workspace>
@@ -65,7 +67,7 @@ export default function AdminAi({ asOf }: { asOf: string }) {
         {!data ? <p role="status">{query.isPending ? "AI 데이터를 불러오는 중…" : "데이터 연결을 확인해 주세요."}</p> : tab === "content" ? <Editor data={data} /> : <>
             <div className={manage.controls}>
             <div className={manage.range}><Dropdown floating label="조회 연도" value={String(snapshot?.year ?? "")} options={data.snapshots.map(s => ({ value: String(s.year), label: `${s.year}년` }))} onChange={setYear} /><Dropdown floating label="조회 기간" value={period} options={[{ value: "4", label: "4주" }, { value: "8", label: "8주" }, { value: "12", label: "12주" }, { value: "year", label: "연도 전체" }]} onChange={setPeriod} />{tab === "usage" && <Dropdown floating label="표 구성" value={view} options={[{ value: "groups", label: "프로젝트·모델별" }, { value: "weeks", label: "주별" }]} onChange={setView} />}<Dropdown floating label="정렬" value={sort} options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }]} onChange={v => setSort(v as "newest" | "oldest")} /></div>
-            {tab === "usage" && view === "groups" && <details className={manage.disclosure} name="ai-options"><summary className={manage.filterSummary}><ControlIcon kind="filter" />필터 · {Object.values(filters).filter(Boolean).length ? `${Object.values(filters).filter(Boolean).length}개 적용` : "전체"}</summary><AiScroll className={`${manage.panel} ${manage.filters}`}>{(["project", "tool", "model", "effort"] as const).map((key, i) => <Dropdown floating key={key} label={["프로젝트", "도구", "모델", "추론 수준"][i]} value={filters[key]} options={[{ value: "", label: `${["프로젝트", "도구", "모델", "추론 수준"][i]} 전체` }, ...Array.from(new Set(groups.map(g => g[key]))).sort().map(v => ({ value: v, label: v }))]} onChange={v => setFilters({ ...filters, [key]: v })} />)}<Button onClick={() => setFilters({ project: "", tool: "", model: "", effort: "" })}>필터 초기화</Button></AiScroll></details>}
+            {tab === "usage" && view === "groups" && <details className={manage.disclosure} name="ai-options"><summary className={manage.filterSummary}><ControlIcon kind="filter" />필터 · {Object.values(filters).filter(Boolean).length ? `${Object.values(filters).filter(Boolean).length}개 적용` : "전체"}</summary><AiScroll className={`${manage.panel} ${manage.filters}`}>{(["project", "tool", "model", "effort"] as const).map((key, i) => <Dropdown floating multiple key={key} label={["프로젝트", "도구", "모델", "추론 수준"][i]} value={filters[key]} options={[{ value: "", label: `${["프로젝트", "도구", "모델", "추론 수준"][i]} 전체` }, ...Array.from(new Set(groups.map(g => g[key]))).sort().map(v => ({ value: v, label: v }))]} onChange={v => setFilters({ ...filters, [key]: v })} />)}<Button onClick={() => setFilters({ project: "", tool: "", model: "", effort: "" })}>필터 초기화</Button></AiScroll></details>}
             </div>
             {tab === "usage" && <div className={manage.summaryCards}><UsageCards weeks={cardWeeks} cacheObserved={privateYear ? publicYear(privateYear).cacheObserved : false} /></div>}
             <p className={`${styles.note} ${manage.collectionStatus}`}>수신: {snapshot ? new Date(snapshot.receivedAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }) : "아직 없음"}{snapshot && Date.parse(data.checkedAt ?? asOf) - Date.parse(snapshot.receivedAt) > 48 * 3600_000 ? " · 갱신 지연" : ""}. 작업 연결이 부족하므로 효율 비교는 보류합니다.</p>

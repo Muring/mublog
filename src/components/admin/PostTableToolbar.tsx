@@ -6,6 +6,7 @@ import type { PostListState, PostSort, PostStatusFilter } from "@/lib/admin-navi
 import { adminDateLabel } from "@/lib/admin-filters";
 import FilterBar from "./FilterBar";
 import FilterChips from "./FilterChips";
+import { splitMulti, withoutMulti } from "@/lib/multi-value";
 
 type Option = { name: string; count: number };
 type Props = {
@@ -27,8 +28,9 @@ export default function PostTableToolbar({ state, counts, onChange, options = { 
 
     const chips = [
         ...(state.status !== "all" ? [{ key: "status", name: "상태", value: state.status === "PUBLISHED" ? "공개" : "초안" }] : []),
-        ...(state.tag ? [{ key: "tag", name: "태그", value: state.tag }] : []),
-        ...(state.series ? [{ key: "series", name: "시리즈", value: state.series }] : []),
+        // 여러 개를 골랐으면 값마다 칩을 하나씩 두어 하나씩 풀 수 있게 한다
+        ...splitMulti(state.tag).map((tag) => ({ key: `tag:${tag}`, name: "태그", value: tag })),
+        ...splitMulti(state.series).map((series) => ({ key: `series:${series}`, name: "시리즈", value: series })),
         ...(state.from || state.to ? [{ key: "date", name: "작성일", value: adminDateLabel(state.from ?? "", state.to ?? "") }] : []),
         ...(state.hasComments ? [{ key: "hasComments", name: "댓글", value: state.hasComments === "yes" ? "있음" : "없음" }] : []),
     ];
@@ -61,18 +63,24 @@ export default function PostTableToolbar({ state, counts, onChange, options = { 
                     placeholder="제목 · 주소 · 태그 검색" aria-label="포스트 검색" />
             }
             fields={[
-                { key: "tag", label: "태그", search: "태그 검색", options: [{ value: "", label: "전체" }, ...options.tags.map((t) => ({ value: t.name, label: t.name, hint: String(t.count) }))] },
-                ...(options.series.length > 0 ? [{ key: "series", label: "시리즈", search: "시리즈 검색", options: [{ value: "", label: "전체" }, ...options.series.map((s) => ({ value: s.name, label: s.name, hint: String(s.count) }))] }] : []),
+                { key: "tag", label: "태그", search: "태그 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.tags.map((t) => ({ value: t.name, label: t.name, hint: String(t.count) }))] },
+                ...(options.series.length > 0 ? [{ key: "series", label: "시리즈", search: "시리즈 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.series.map((s) => ({ value: s.name, label: s.name, hint: String(s.count) }))] }] : []),
                 { key: "hasComments", label: "댓글 유무", options: [{ value: "", label: "전체" }, { value: "yes", label: "댓글 있음" }, { value: "no", label: "댓글 없음" }] },
             ]}
             dateRange
             dateBefore="hasComments"
             values={{ tag: state.tag, series: state.series, from: state.from ?? "", to: state.to ?? "", hasComments: state.hasComments ?? "" }}
             onApply={({ tag, series, from, to, hasComments }) => onChange({ tag, series, from, to, hasComments: hasComments as PostListState["hasComments"] })}
-            fieldCount={chips.filter((chip) => chip.key !== "status").length}
+            fieldCount={new Set(chips.filter((chip) => chip.key !== "status").map((chip) => chip.key.split(":")[0])).size}
             summary={`${counts[state.status].toLocaleString("ko-KR")}개 표시`}
             chips={!loading && <FilterChips items={chips} onClear={reset} canClear={chips.length > 0 || Boolean(state.q) || state.status !== "all"}
-                onRemove={(key) => onChange(key === "date" ? { from: "", to: "" } : { [key]: key === "status" ? "all" : "" })} />}
+                onRemove={(key) => {
+                    const cut = key.indexOf(":");
+                    const field = cut < 0 ? key : key.slice(0, cut);
+                    const item = key.slice(cut + 1);
+                    if (field === "tag" || field === "series") onChange({ [field]: withoutMulti(state[field], item) });
+                    else onChange(key === "date" ? { from: "", to: "" } : { [key]: key === "status" ? "all" : "" });
+                }} />}
         />
         </>
     );

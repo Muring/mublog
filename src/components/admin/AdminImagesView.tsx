@@ -6,6 +6,7 @@ import Dropdown from "@/components/ui/Dropdown";
 import FilterChips from "./FilterChips";
 import ImageViewer from "@/components/ui/ImageViewer";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
+import { splitMulti, withoutMulti } from "@/lib/multi-value";
 import { useConfirm } from "@/providers/Confirm";
 import { useToast } from "@/providers/Toast";
 import type { ImageUser, ManagedImage } from "@/lib/storage";
@@ -132,9 +133,9 @@ export default function AdminImagesView({ initialPage }: Props) {
         observer.observe(sentinel.current);
         return () => observer.disconnect();
     }, [pending, loadingMore, error, page.nextCursor, loadMore]);
-    const post = posts.find(p => p.id === postId) ?? null;
+    const chosenPosts = splitMulti(postId);
     const visible = images;
-    const scopedLabel = post || query.trim() || Object.values(imageFilters).some(Boolean) ? "지금 조건의 " : "";
+    const scopedLabel = chosenPosts.length || query.trim() || Object.values(imageFilters).some(Boolean) ? "지금 조건의 " : "";
 
     const clearQuery = () => {
         if (search.current) search.current.value = "";
@@ -263,9 +264,10 @@ export default function AdminImagesView({ initialPage }: Props) {
 
     const chips = [
         ...(filter !== "all" ? [{ key: "usage", name: "쓰임", value: FILTERS.find((item) => item.key === filter)!.label }] : []),
-        ...(post ? [{ key: "post", name: "글", value: post.title }] : []),
+        // 여러 개를 골랐으면 값마다 칩을 하나씩 두어 하나씩 풀 수 있게 한다
+        ...chosenPosts.map((id) => ({ key: `post:${id}`, name: "글", value: posts.find((p) => p.id === id)?.title ?? id })),
         ...(imageFilters.from || imageFilters.to ? [{ key: "date", name: "업로드일", value: adminDateLabel(imageFilters.from, imageFilters.to) }] : []),
-        ...(imageFilters.format ? [{ key: "format", name: "형식", value: imageFilters.format.toUpperCase() }] : []),
+        ...splitMulti(imageFilters.format).map((format) => ({ key: `format:${format}`, name: "형식", value: format.toUpperCase() })),
         ...(imageFilters.size ? [{ key: "size", name: "용량", value: IMAGE_SIZES.find((item) => item.value === imageFilters.size)!.label }] : []),
     ];
     // 초기화는 걸린 조건만 푼다. 정렬은 보는 방식이지 조건이 아니다(포스트·댓글과 같다)
@@ -295,21 +297,22 @@ export default function AdminImagesView({ initialPage }: Props) {
                         onChange={(event) => { if (!composing.current) setQuery(event.currentTarget.value); }} />
                 }
                 fields={[
-                    { key: "post", label: "글", search: "글 제목 검색", options: [{ value: "", label: "전체" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))] },
-                    { key: "format", label: "파일 형식", options: [{ value: "", label: "전체" }, ...formats.map((value) => ({ value, label: value.toUpperCase() }))] },
+                    { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: [{ value: "", label: "전체" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))] },
+                    { key: "format", label: "파일 형식", multiple: true, options: [{ value: "", label: "전체" }, ...formats.map((value) => ({ value, label: value.toUpperCase() }))] },
                     { key: "size", label: "용량", options: IMAGE_SIZES },
                 ]}
                 dateRange="업로드일"
                 dateBefore="format"
                 values={{ post: postId, ...imageFilters }}
                 onApply={({ post, from, to, format, size }) => { setPostId(post); setImageFilters({ from, to, format, size }); }}
-                fieldCount={chips.filter((chip) => chip.key !== "usage").length}
+                fieldCount={new Set(chips.filter((chip) => chip.key !== "usage").map((chip) => chip.key.split(":")[0])).size}
                 pending={pending}
                 summary={error ? "목록을 불러오지 못했습니다." : `${page.count.toLocaleString("ko-KR")}개 중 ${images.length.toLocaleString("ko-KR")}개 표시`}
                 chips={<FilterChips items={chips} onClear={resetFilters} canClear={chips.length > 0 || Boolean(query.trim()) || filter !== "all"}
                     onRemove={(key) => {
                         if (key === "usage") setFilter("all");
-                        else if (key === "post") setPostId("");
+                        else if (key.startsWith("post:")) setPostId((current) => withoutMulti(current, key.slice(5)));
+                        else if (key.startsWith("format:")) setImageFilters((current) => ({ ...current, format: withoutMulti(current.format, key.slice(7)) }));
                         else setImageFilters((current) => ({ ...current, ...(key === "date" ? { from: "", to: "" } : { [key]: "" }) }));
                     }} />}
             />

@@ -10,13 +10,14 @@ const date = z.string().refine(value => !value || commentDate(value) === value);
 const querySchema = z.object({
     filter: z.enum(["all", "thumbnail", "body", "unused", "scheduled"]).default("all"),
     sort: z.enum(["newest", "oldest", "size"]).default("newest"),
-    q: z.string().max(300).default(""), post: z.string().max(100).default(""),
-    from: date.default(""), to: date.default(""), format: z.string().max(30).default(""),
+    // post·format 은 여러 개를 고를 수 있다. lib/multi-value 의 구분자(chr(31))로 이어 온다
+    q: z.string().max(300).default(""), post: z.string().max(2000).default(""),
+    from: date.default(""), to: date.default(""), format: z.string().max(200).default(""),
     size: z.enum(["", "small", "medium", "large"]).default(""),
 }).refine(value => !value.from || !value.to || value.from <= value.to);
 const cursorSchema = z.object({
     path: z.string().min(1).max(1024), size: z.number().nonnegative().finite(),
-    createdAt: z.string().datetime({ offset: true }), at: z.string().datetime(), query: z.string().max(3000),
+    createdAt: z.string().datetime({ offset: true }), at: z.string().datetime(), query: z.string().max(6000),
 });
 export function parseImageQuery(params: URLSearchParams): ImageQuery {
     const parsed = querySchema.safeParse(Object.fromEntries(params));
@@ -58,7 +59,7 @@ users AS (
 scoped AS MATERIALIZED (
     SELECT o.* FROM objects o CROSS JOIN settings s
     WHERE (s.q->>'post' = '' OR EXISTS (
-        SELECT 1 FROM users u WHERE u.id = s.q->>'post' AND (
+        SELECT 1 FROM users u WHERE u.id = ANY(string_to_array(s.q->>'post', chr(31))) AND (
             (o.thumbnail || o.body) @> jsonb_build_array(jsonb_build_object('id', u.id)) OR
             (split_part(o.path, '/', 1) IN ('posts', 'thumbnails') AND split_part(o.path, '/', 2) = u.slug)
         )
@@ -69,7 +70,7 @@ scoped AS MATERIALIZED (
     ))
     AND (s.q->>'from' = '' OR o.created_at >= (nullif(s.q->>'from', '') || 'T00:00:00+09:00')::timestamptz)
     AND (s.q->>'to' = '' OR o.created_at < (nullif(s.q->>'to', '') || 'T00:00:00+09:00')::timestamptz + interval '1 day')
-    AND (s.q->>'format' = '' OR o.format = s.q->>'format')
+    AND (s.q->>'format' = '' OR o.format = ANY(string_to_array(s.q->>'format', chr(31))))
     AND CASE s.q->>'size' WHEN 'small' THEN o.size < 102400
         WHEN 'medium' THEN o.size >= 102400 AND o.size < 1048576
         WHEN 'large' THEN o.size >= 1048576 ELSE true END
