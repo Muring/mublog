@@ -470,6 +470,26 @@ export const AdminListScroll = styled.div`
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
 
+  /*
+   * 비워 둔 스크롤바 자리는 표 밖이라 머리글 띠가 거기서 끊겨 잘린 것처럼 보였다.
+   * 머리글이 있는 표일 때만 머리글 높이를 고정하고, 그 자리 맨 위에 같은 띠(위 1px·아래 2px 선)를 칠한다.
+   * 스크롤 상자 배경은 내용과 함께 움직이지 않으므로 sticky 머리글과 늘 맞는다. 막대는 머리글 아래부터 움직인다.
+   * 댓글 목록처럼 머리글이 없는 목록에는 걸리지 않는다.
+   */
+  --thead-h: 2.5rem;
+  &:has(> table > thead) {
+    background:
+      linear-gradient(to bottom, var(--bordercolor) 0 var(--border-width), var(--codefontbgcolor) var(--border-width) calc(100% - 2px), var(--bordercolor) calc(100% - 2px)) right top / 10px var(--thead-h) no-repeat,
+      var(--tablesurface);
+  }
+  &:has(> table > thead) thead th { height: var(--thead-h); box-sizing: border-box; padding-block: 0; white-space: nowrap; }
+  &:has(> table > thead)::-webkit-scrollbar-track { margin-top: var(--thead-h); }
+  /* 모바일 카드 배치에서는 머리글을 숨기므로 띠도 트랙 여백도 걷는다 */
+  ${mobile} {
+    &:has(> table > thead) { background: none; }
+    &:has(> table > thead)::-webkit-scrollbar-track { margin-top: 0; }
+  }
+
   .empty {
     padding: 2.5rem 0;
     text-align: center;
