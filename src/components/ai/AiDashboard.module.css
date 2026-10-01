@@ -21,7 +21,8 @@
 .tableScroll th { position: sticky; top: 0; background: var(--cardbackground); z-index: 1; }
 .tableScroll td[data-number] { text-align: right; font-variant-numeric: tabular-nums; }
 .tableScroll caption { text-align: left; padding: .75rem; color: var(--desccolor); }
-.publicTable { max-height: 24rem; }
+/* 공개 표는 필터로 행 수가 바뀌지 않아 스크롤바 자리를 미리 비울 이유가 없다. 비워 두면 스크롤이 없을 때 오른쪽 10px 이 비고 행 선이 끊긴다 */
+.publicTable { max-height: 24rem; scrollbar-gutter: auto; }
 .timeline { list-style: none; padding: 0; display: grid; gap: 1rem; }
 .timeline h3 { margin: .5rem 0; }
 /* The shared post slider is centred at 900px with arrow gutters; here it spans the section and drops the gutters unless it has arrows. */
@@ -153,3 +154,18 @@
  .digitStrip, .infoTip { transition: none; }
 }
 
+/* 클래스는 이 파일의 .workspace·.tableScroll 이어야 한다. CSS 모듈은 파일마다 이름을 바꾸므로 AiManagement.module.css 에 두면 표에 걸리지 않는다. */
+/*
+ * 스크롤바 자리(scrollbar-gutter: stable, 10px)는 표 밖이라 머리글 띠가 거기서 끊겨 잘린 것처럼 보였다.
+ * 머리글 높이를 고정하고, 상자 배경으로 그 자리 맨 위에 같은 띠(위 1px·아래 2px 선 포함)를 칠한다.
+ * 스크롤 상자의 배경은 내용과 함께 움직이지 않으므로 sticky 머리글과 늘 맞는다.
+ * 막대는 머리글 아래부터 움직이게 트랙을 그 높이만큼 내린다.
+ */
+.workspace .tableScroll {
+  --thead-h: 2.5rem;
+  background:
+    linear-gradient(to bottom, var(--bordercolor) 0 var(--border-width), var(--codefontbgcolor) var(--border-width) calc(100% - 2px), var(--bordercolor) calc(100% - 2px)) right top / 10px var(--thead-h) no-repeat,
+    var(--cardbackground);
+}
+.workspace .tableScroll th { height: var(--thead-h); box-sizing: border-box; padding-block: 0; white-space: nowrap; }
+.workspace .tableScroll::-webkit-scrollbar-track { margin-top: var(--thead-h); }

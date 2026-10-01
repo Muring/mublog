@@ -131,18 +131,3 @@
 }
 @media (prefers-reduced-motion: reduce) { .chevron, .checks summary [data-tone] { transition: none; } }
 .editor article h2 { word-break: keep-all; }
-
-/*
- * 스크롤바 자리(scrollbar-gutter: stable, 10px)는 표 밖이라 머리글 띠가 거기서 끊겨 잘린 것처럼 보였다.
- * 머리글 높이를 고정하고, 상자 배경으로 그 자리 맨 위에 같은 띠(위 1px·아래 2px 선 포함)를 칠한다.
- * 스크롤 상자의 배경은 내용과 함께 움직이지 않으므로 sticky 머리글과 늘 맞는다.
- * 막대는 머리글 아래부터 움직이게 트랙을 그 높이만큼 내린다.
- */
-.workspace .tableScroll {
-  --thead-h: 2.5rem;
-  background:
-    linear-gradient(to bottom, var(--bordercolor) 0 var(--border-width), var(--codefontbgcolor) var(--border-width) calc(100% - 2px), var(--bordercolor) calc(100% - 2px)) right top / 10px var(--thead-h) no-repeat,
-    var(--cardbackground);
-}
-.workspace .tableScroll th { height: var(--thead-h); box-sizing: border-box; padding-block: 0; white-space: nowrap; }
-.workspace .tableScroll::-webkit-scrollbar-track { margin-top: var(--thead-h); }
