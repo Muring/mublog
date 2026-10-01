@@ -32,6 +32,8 @@
  .range { width: 100%; margin-right: 0; display: grid; grid-template-columns: 1fr 1fr 1.35fr; gap: .35rem; }
  .range button { width: 100%; min-width: 0; font-size: .75rem; padding-inline: .5rem; }
  .range > * { width: 100%; }
+ /* 정렬까지 네 개면 3열에 하나만 남지 않게 2×2 로 */
+ .range:has(> :nth-child(4)) { grid-template-columns: 1fr 1fr; }
  .filters { display: grid; grid-template-columns: minmax(0, 1fr); }
  .filters > * { width: 100%; }
  .editor > div:first-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; }

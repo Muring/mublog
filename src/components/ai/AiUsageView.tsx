@@ -30,7 +30,8 @@ export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf
             {(stale || selected?.attention) && <p className={styles.warning}>일부 자료가 늦게 도착했거나 수집 상태를 확인 중입니다. 현재 표시된 관측 범위로 해석해 주세요.</p>}
             <UsageCards weeks={weeks} cacheObserved={selected?.cacheObserved ?? false} rolling />
             <ToolComparison weeks={weeks} allWeeks={selected?.weeks} />
-            <WeekTable weeks={weeks} />
+            {/* 표는 최신 주가 위. 비교 차트는 시간 흐름대로 위에서 아래로 둔다 */}
+            <WeekTable weeks={[...weeks].reverse()} />
             <p className={`${styles.note} ${styles.titleRow}`}>자료 기준: {selected?.observedUntil ? new Date(Date.parse(selected.observedUntil) + 9 * 3600_000).toISOString().slice(0, 19).replace("T", " ") + " KST" : "미상"}<Info label="자료 기준 설명">요청 로그에서 관측한 수치이며 생산성·청구 금액·구독 잔여량을 뜻하지 않습니다. 기록이 없는 주는 사용량 0과 구분합니다.</Info></p>
         </>}
     </section>;
