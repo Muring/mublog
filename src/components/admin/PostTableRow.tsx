@@ -14,6 +14,9 @@ import { commentListUrl } from "@/lib/admin-navigation";
 
 type Props = {
     returnTo: string;
+    /** 태그를 누르면 목록 태그 필터에 넣거나 뺀다 */
+    onTagSelect?: (tag: string) => void;
+    selectedTags?: string[];
     post: {
         id: string;
         slug: string;
@@ -28,7 +31,7 @@ type Props = {
     };
 };
 
-export default function PostTableRow({ post, returnTo }: Props) {
+export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags }: Props) {
     const router = useRouter();
     const toast = useToast();
     const confirm = useConfirm();
@@ -74,14 +77,14 @@ export default function PostTableRow({ post, returnTo }: Props) {
                     {post.title}
                 </Link>
                 <span className="slug">/{post.slug}</span>
-                <div className="compact-tags"><TagChips tags={post.tags} /></div>
+                <div className="compact-tags"><TagChips tags={post.tags} onSelect={onTagSelect} selected={selectedTags} /></div>
                 <Link href={commentsHref} className="compact-comments">댓글 {post.commentCount}개</Link>
                 <span className="compact-likes">좋아요 {post.likeCount.toLocaleString("ko-KR")}개</span>
             </td>
             <td data-label="상태">
                 <PostStatusBadge status={post.status} publishedLabel="공개" />
             </td>
-            <td data-label="태그">{post.tags.length ? <TagChips tags={post.tags} visibleCount={1} alignEnd /> : "-"}</td>
+            <td data-label="태그">{post.tags.length ? <TagChips tags={post.tags} visibleCount={1} alignEnd onSelect={onTagSelect} selected={selectedTags} /> : "-"}</td>
             {/* 초안은 발행된 적이 없다. 만든 날로 메우지 않고 비운 채로 둔다 */}
             <td data-label="발행일">
                 {post.publishedAt ? formatCardDate(post.publishedAt) : "-"}

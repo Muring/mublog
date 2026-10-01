@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { filterAdminPosts, postListState, postListUrl, type PostListState } from "@/lib/admin-navigation";
 import { PostTable, AdminListScroll } from "./Admin.styled";
 import PostTableRow from "./PostTableRow";
+import { joinMulti, splitMulti, withoutMulti } from "@/lib/multi-value";
 import PostTableHead from "./PostTableHead";
 import PostTableToolbar from "./PostTableToolbar";
 
@@ -41,6 +42,10 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
         window.history.replaceState(null, "", postListUrl({ ...state, ...patch }));
     };
 
+    // 표의 태그를 누르면 태그 필터에 더한다(같은 조건이라 "또는"). 이미 걸린 태그면 뺀다
+    const selectedTags = splitMulti(state.tag);
+    const toggleTag = (tag: string) => update({ tag: selectedTags.includes(tag) ? withoutMulti(state.tag, tag) : joinMulti([...selectedTags, tag]) });
+
     const matching = filterAdminPosts(posts, { ...state, status: "all" });
     const filtered = matching.filter((post) => state.status === "all" || post.status === state.status);
 
@@ -55,7 +60,7 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
                     <PostTableHead />
                     <tbody>
                         {filtered.map((post) => (
-                            <PostTableRow key={post.id} post={post} returnTo={returnTo} />
+                            <PostTableRow key={post.id} post={post} returnTo={returnTo} onTagSelect={toggleTag} selectedTags={selectedTags} />
                         ))}
                     </tbody>
                 </PostTable>
