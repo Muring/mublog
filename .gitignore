@@ -18,6 +18,8 @@
 
 # next.js
 /.next/
+# next dev 와 next build 가 서로 다른 경로로 다시 쓰는 생성 파일이라 추적하지 않는다
+/next-env.d.ts
 /out/
 /export/
 /build
