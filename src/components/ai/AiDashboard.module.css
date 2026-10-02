@@ -167,6 +167,12 @@
  * 스크롤 상자의 배경은 내용과 함께 움직이지 않으므로 sticky 머리글과 늘 맞는다.
  * 막대는 머리글 아래부터 움직이게 트랙을 그 높이만큼 내린다.
  */
+/*
+ * 스크롤바 자리(scrollbar-gutter: stable, 10px)는 오른쪽에만 따로 둔다. 표의 좌우 안쪽 여백은 양 끝 칸이 같은 1rem 으로 맡고,
+ * 스크롤바는 그 바깥 제 자리에서 움직여 마지막 칸 글자에 붙지 않는다.
+ * 비운 자리는 표 밖이라 머리글 띠가 거기서 끊기므로, 상자 배경으로 그 자리 맨 위에 같은 띠(위 1px·아래 2px 선 포함)를 칠한다.
+ * 막대는 머리글 아래부터 움직이게 트랙을 그 높이만큼 내린다.
+ */
 .workspace .tableScroll {
   --thead-h: 2.5rem;
   background:
@@ -175,6 +181,4 @@
 }
 .workspace .tableScroll th { height: var(--thead-h); box-sizing: border-box; padding-block: 0; white-space: nowrap; }
 .workspace .tableScroll::-webkit-scrollbar-track { margin-top: var(--thead-h); }
-/* 관리 표는 스크롤바 자리(10px)를 늘 비워 두므로, 마지막 칸 여백에서 그만큼 빼서 좌우 바깥 여백을 맞춘다 */
-.workspace .tableScroll th:last-child, .workspace .tableScroll td:last-child { padding-right: calc(1rem - 10px); }
 .tableNote { margin: 0; flex-shrink: 0; }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { ingestSchema, publicYear, emptyTotals, visibleWeeks, publicationSchema, type UsageYear } from "../src/lib/ai-usage";
+import { ingestSchema, publicYear, emptyTotals, visibleWeeks, type UsageYear } from "../src/lib/ai-usage";
 import { slugSchema } from "../src/lib/validation";
 const totals = { ...emptyTotals(), input: 100, cache_read: 60, output: 20, total: 120, non_cache_read_input: 40, responses: 1 };
 const week = { week: "2026-09-28", ended: false, observed: true, partial: true, totals, groups: [{ project: "PRIVATE_PROJECT", tool: "Codex" as const, model: "PRIVATE_MODEL", effort: "PRIVATE_EFFORT", totals }], states: { unclassified: totals }, diagnostics: {} };
@@ -25,5 +25,41 @@ assert.equal(ingestSchema.safeParse({ ...envelope, rawText: "private" }).success
 assert.equal(visibleWeeks([{ week: "2026-08-24" }, { week: "2026-09-28" }], "4", new Date("2026-09-30T00:00:00Z")).length, 1);
 assert.equal(visibleWeeks([{ week: "2025-12-01" }, { week: "2025-12-29" }], "4", new Date("2026-09-30T00:00:00Z")).length, 1);
 assert.equal(slugSchema.safeParse("ai").success, false);
-assert.equal(publicationSchema.safeParse({ kind: "improvement", title: "", body: "x", date: "2026-09-30", postId: null, published: true }).success, false);
-console.log("AI usage: 17 schema, privacy, totals, period and publication assertions passed");
+console.log("AI usage: 16 schema, privacy, totals and period assertions passed");
+
+// Old tasks remain readable; presentation never enters the public projection.
+const { selectTaskPeriod } = await import("../src/lib/ai-task-records");
+const oldTask = { id: "PRIVATE_TASK", project: "PRIVATE_PROJECT", type: "docs", status: "completed", verification: [{ name: "delegated implementation", result: "not_run" as const }], rework: null, conflict: false, totals };
+const presentation = { title: "PRIVATE_TITLE", summary: "PRIVATE_SUMMARY", occurredAt: null as string | null, checks: [], followUps: [{ title: "별도 구현", status: "delegated" as const, note: "완료 여부 미상" }], knowledge: [{ document: "PRIVATE_KB", usage: "reference" as const, note: "참고만 확인" }], evidence: ["기록 대조"] };
+assert.ok(ingestSchema.safeParse({ ...envelope, years: [{ ...year, tasks: [oldTask] }] }).success);
+const withPresentation = { ...oldTask, presentation };
+assert.ok(ingestSchema.safeParse({ ...envelope, years: [{ ...year, tasks: [withPresentation] }] }).success);
+assert.equal(JSON.stringify(publicYear({ ...year, tasks: [withPresentation] })).includes("PRIVATE"), false);
+assert.equal(ingestSchema.safeParse({ ...envelope, years: [{ ...year, tasks: [{ ...withPresentation, presentation: { ...presentation, rawLog: "forbidden" } }] }] }).success, false);
+const taskAt = (id: string, date: string) => ({ ...withPresentation, id, presentation: { ...presentation, occurredAt: date } });
+const records = [oldTask, taskAt("before", "2026-09-06T14:59:59Z"), taskAt("boundary", "2026-09-06T15:00:00Z"), taskAt("latest", "2026-10-01T00:00:00Z"), taskAt("other-year", "2025-12-31T00:00:00Z")];
+const selected = selectTaskPeriod(records, year, "4", "newest", new Date("2026-10-01T00:00:00Z"));
+assert.deepEqual(selected.dated.map(t => t.id), ["latest", "boundary"]);
+assert.deepEqual(selected.undated.map(t => t.id), ["PRIVATE_TASK"]);
+assert.deepEqual(selectTaskPeriod(records, year, "4", "oldest", new Date("2026-10-01T00:00:00Z")).dated.map(t => t.id), ["boundary", "latest"]);
+assert.equal(selectTaskPeriod(records, year, "year", "newest", new Date("2026-10-01T00:00:00Z")).dated.length, 3);
+assert.equal(selectTaskPeriod(records, { ...year, weeks: [] }, "4", "newest", new Date("2026-10-01T00:00:00Z")).dated.length, 2);
+console.log("AI task records: compatibility, privacy, presentation contract and KST/undated ordering checks passed");
+
+const { groupTaskProjects } = await import("../src/lib/ai-task-records");
+const projectGroups = groupTaskProjects([{ ...oldTask, project: "muring/mublog" }, { ...oldTask, project: "muring/muring-kb" }], [{ ...oldTask, project: "unmapped" }, { ...oldTask, project: "muring/mublog", id: "undated" }]);
+assert.equal(projectGroups.projects.length, 1);
+assert.equal(projectGroups.projects[0].dated.length, 1);
+assert.equal(projectGroups.projects[0].undated[0].id, "undated");
+assert.equal(projectGroups.knowledge.dated.length, 1);
+assert.equal(projectGroups.unassigned.undated.length, 1);
+console.log("Project grouping: dated/undated, KB workspace and unassigned records preserved");
+
+const { taskDate } = await import("../src/lib/ai-task-records");
+assert.deepEqual(taskDate({ ...oldTask, id: "2026-09-30-work" }), { day: "2026-09-30", basis: "name" });
+assert.deepEqual(taskDate({ ...oldTask, id: "work-20261001" }), { day: "2026-10-01", basis: "name" });
+assert.equal(taskDate({ ...oldTask, id: "work-20260230" }), null);
+assert.equal(taskDate({ ...oldTask, id: "work-20260930-20261001" }), null);
+assert.equal(taskDate(taskAt("2026-09-30-work", "2026-10-01T15:00:00Z"))?.day, "2026-10-02");
+assert.equal(selectTaskPeriod([{ ...oldTask, id: "2026-09-30-work" }], year, "4", "newest", new Date("2026-10-01T00:00:00Z")).dated.length, 0);
+console.log("Task dates: source priority, ID date labels, invalid/ambiguous dates and period exclusion passed");

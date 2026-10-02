@@ -1,6 +1,7 @@
 /** Integration check against an isolated, running local server. Never production. */
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { DEFAULT_AI_INTRO } from "../src/lib/ai-usage";
 const base = process.env.AI_TEST_URL;
 const key = process.env.AI_TEST_KEY;
 const fixture = process.env.AI_TEST_PAYLOAD;
@@ -18,6 +19,7 @@ assert.equal((await send("/api/admin/ai")).status, 404);
 assert.equal((await send("/api/admin/ai/content", { title: "unauthorized" })).status, 404);
 const publicResponse = await send("/ai"); assert.equal(publicResponse.status, 200);
 const html = await publicResponse.text();
+assert.ok(html.includes(DEFAULT_AI_INTRO.body));
 for (const year of payload.years) {
     for (const device of year.devices) assert.equal(html.includes(device.device), false);
     for (const week of year.weeks) for (const group of week.groups) if (group.project !== "unmapped") assert.equal(html.includes(group.project), false);
@@ -34,23 +36,24 @@ if (adminCookie && userCookie && postId?.startsWith("ai-test-")) {
     }
     assert.equal((await authenticated("/api/admin/ai", userCookie)).status, 404);
     assert.equal((await authenticated("/api/admin/ai", adminCookie)).status, 200);
-    const entry = { id: undefined as string | undefined, kind: "improvement", title: "AI_API_PUBLICATION_TEST", body: "Local integration fixture", date: "2026-09-30", postId, published: false };
-    assert.equal((await authenticated("/api/admin/ai/content", userCookie, "POST", entry)).status, 404);
-    const created = await authenticated("/api/admin/ai/content", adminCookie, "POST", entry); assert.equal(created.status, 200); entry.id = (await created.json()).id;
-    assert.equal((await (await send("/ai")).text()).includes(entry.title), false);
+    const entry = { kind: "intro", title: "AI_API_INTRO_TEST", body: "Removed editor", date: "2026-10-01", published: true };
+    for (const cookie of [userCookie, adminCookie]) assert.equal((await authenticated("/api/admin/ai/content", cookie, "POST", entry)).status, 404);
+    const adminData = await (await authenticated("/api/admin/ai", adminCookie)).json();
+    assert.equal("intro" in adminData, false);
     const postPath = `/api/admin/posts/${postId}`;
-    assert.equal((await authenticated(postPath, adminCookie, "PATCH", { status: "PUBLISHED" })).status, 200);
-    entry.published = true;
-    assert.equal((await authenticated("/api/admin/ai/content", adminCookie, "POST", entry)).status, 200);
-    assert.equal((await (await send("/ai")).text()).includes(entry.title), true);
-    assert.equal((await authenticated(postPath, adminCookie, "PATCH", { status: "DRAFT" })).status, 200);
-    assert.equal((await (await send("/ai")).text()).includes(entry.title), false);
-    assert.equal((await authenticated(postPath, adminCookie, "PATCH", { status: "PUBLISHED" })).status, 200);
-    assert.equal((await (await send("/ai")).text()).includes(entry.title), true);
-    entry.published = false;
-    assert.equal((await authenticated("/api/admin/ai/content", adminCookie, "POST", entry)).status, 200);
-    assert.equal((await (await send("/ai")).text()).includes(entry.title), false);
-    console.log("AI API: signed-session role checks and publication/post visibility lifecycle passed");
+    const fixtureTitle = `AI_RELATED_POST_${postId}`;
+    // The isolated ai-test-* fixture is a dedicated draft, never a real post.
+    try {
+        assert.equal((await authenticated(postPath, adminCookie, "PATCH", { title: fixtureTitle, series: "MuRing-KB 개발기", status: "PUBLISHED", publishedAt: new Date().toISOString() })).status, 200);
+        assert.equal((await (await send("/ai")).text()).includes(fixtureTitle), true);
+        assert.equal((await authenticated(postPath, adminCookie, "PATCH", { status: "DRAFT" })).status, 200);
+        assert.equal((await (await send("/ai")).text()).includes(fixtureTitle), false);
+        assert.equal((await authenticated(postPath, adminCookie, "PATCH", { status: "PUBLISHED" })).status, 200);
+        assert.equal((await (await send("/ai")).text()).includes(fixtureTitle), true);
+    } finally {
+        assert.equal((await authenticated(postPath, adminCookie, "PATCH", { status: "DRAFT" })).status, 200);
+    }
+    console.log("AI API: signed-session role checks, removed editor and related post visibility passed");
 } else {
     console.log("Signed-session checks skipped: set AI_TEST_ADMIN_COOKIE, AI_TEST_USER_COOKIE and AI_TEST_POST_ID=ai-test-* for local fixtures");
 }

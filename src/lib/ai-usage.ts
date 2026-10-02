@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { activitySchema } from "./ai-activity";
 
 const count = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const text = z.string().max(300);
@@ -7,7 +8,15 @@ export const totalsSchema = z.object({ input: count, cache_read: count, cache_wr
 const groupSchema = z.object({ project: text, tool: z.enum(["Codex", "Claude"]), model: text, effort: text, totals: totalsSchema }).strict();
 const diagnosticsSchema = z.object(Object.fromEntries(["calls", "outputs", "output_chars", "large_outputs", "truncations", "repeated_calls", "known_failed_outputs", "unknown_output_outcomes", "kb_searches", "kb_empty_searches", "kb_selections", "kb_applications", "kb_search_mentions", "compactions"].map(k => [k, count])));
 export const weekSchema = z.object({ week: date, ended: z.boolean(), observed: z.boolean(), partial: z.boolean(), totals: totalsSchema, groups: z.array(groupSchema), states: z.record(z.string(), totalsSchema), diagnostics: diagnosticsSchema }).strict();
-const taskSchema = z.object({ id: text, project: text, type: text.nullable(), status: text, verification: z.array(z.object({ name: text, result: z.enum(["pass", "fail", "not_run", "unknown"]) }).strict()), rework: z.union([count, z.boolean()]).nullable(), conflict: z.boolean(), totals: totalsSchema }).strict();
+export const taskPresentationSchema = z.object({
+    title: text, summary: z.string().max(2000), occurredAt: z.iso.datetime({ offset: true }).nullable(),
+    checks: z.array(z.object({ title: text, method: z.string().max(1000), result: z.enum(["pass", "fail", "not_run", "unknown"]), reason: z.string().max(1000).nullable() }).strict()),
+    followUps: z.array(z.object({ title: text, status: z.enum(["pending", "delegated", "unknown"]), note: z.string().max(1000) }).strict()),
+    knowledge: z.array(z.object({ document: text, usage: z.enum(["reference", "applied"]), note: z.string().max(1000) }).strict()),
+    evidence: z.array(z.string().max(1000)),
+}).strict();
+export type TaskPresentation = z.infer<typeof taskPresentationSchema>;
+const taskSchema = z.object({ id: text, project: text, type: text.nullable(), status: text, verification: z.array(z.object({ name: text, result: z.enum(["pass", "fail", "not_run", "unknown"]) }).strict()), rework: z.union([count, z.boolean()]).nullable(), conflict: z.boolean(), totals: totalsSchema, presentation: taskPresentationSchema.optional(), activity: activitySchema.optional() }).strict().refine(t => (t.activity?.handoffs ?? []).every(h => [h.from, h.to].some(e => e.project === t.project && (e.taskId === null || e.taskId === t.id))), "인계 작업 연결 불일치");
 export const yearSchema = z.object({ year: z.number().int().min(2020).max(2200), weeks: z.array(weekSchema).max(54), devices: z.array(z.object({ device: text, since: z.iso.datetime({ offset: true }).nullable(), until: z.iso.datetime({ offset: true }).nullable() }).strict()), tasks: z.array(taskSchema), quality: z.object({ problems: z.array(z.object({ device: text.optional(), code: text, count: count.optional() }).strict()), fallback_identities: count, task_conflicts: count, ambiguous_task_responses: count, comparison: z.literal("withheld") }).strict(), fieldObservations: z.record(z.string(), count) }).strict().refine(y => new Set(y.weeks.map(w => w.week)).size === y.weeks.length && y.weeks.every(w => w.week.startsWith(String(y.year)) && new Date(w.week).getUTCDay() === 1), "주 중복 또는 연도 불일치");
 export const ingestSchema = z.object({ schema: z.literal(1), metrics: z.literal("usage-v1"), sequence: z.number().int().positive().max(Number.MAX_SAFE_INTEGER), sourceRevision: z.string().regex(/^[a-f0-9]{40,64}$/), generatedAt: z.iso.datetime({ offset: true }), years: z.array(yearSchema).min(1).max(100), improvements: z.array(z.object({ date, kind: text, summary: z.string().max(3000) }).strict()) }).strict().refine(v => new Set(v.years.map(y => y.year)).size === v.years.length, "연도 중복");
 export type Totals = z.infer<typeof totalsSchema>;
@@ -37,8 +46,6 @@ export function visibleWeeks<T extends { week: string }>(weeks: T[], period: str
     end.setUTCDate(end.getUTCDate() - (n - 1) * 7);
     return weeks.filter(w => w.week >= end.toISOString().slice(0, 10));
 }
-/** Only the page intro is written by hand; related writing comes from published blog posts in AI_POST_SERIES. */
-export const publicationSchema = z.object({ kind: z.literal("intro"), title: z.string().trim().min(1).max(100), body: z.string().trim().min(1).max(8000), date, published: z.boolean() }).strict();
 /** Series whose published posts are listed as related writing on /ai. */
 export const AI_POST_SERIES = ["MuRing-KB 개발기"];
 

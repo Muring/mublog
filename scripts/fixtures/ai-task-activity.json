@@ -1,0 +1,5254 @@
+[
+  {
+    "name": "all_unknown",
+    "valid": true,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "unknown",
+      "purpose": null,
+      "actions": null,
+      "aiRole": null,
+      "humanRole": null,
+      "outcomes": null,
+      "verification": null,
+      "followUps": null,
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": null,
+        "basis": "unknown",
+        "evidenceRefs": [],
+        "occurredOn": null,
+        "precision": "unknown",
+        "labelDate": null
+      },
+      "evidence": [],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "known_work",
+    "valid": true,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "approved_projection",
+    "valid": true,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": {
+        "status": "approved",
+        "projection": {
+          "slug": "example-case",
+          "title": "예제 개선",
+          "problem": "반복 오류",
+          "aiUse": "재현과 수정",
+          "result": "예제 검사 통과",
+          "verification": "격리된 테스트에서 확인",
+          "limitations": [
+            "운영 배포 미검증"
+          ],
+          "sourceUrl": "https://example.com/cases/example"
+        },
+        "evidenceRefs": [
+          "test"
+        ],
+        "review": {
+          "reviewedAt": "2026-10-02T09:00:00+09:00",
+          "reviewer": "example-reviewer",
+          "evidenceRef": "user"
+        }
+      }
+    }
+  },
+  {
+    "name": "draft_no_review",
+    "valid": true,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": {
+        "status": "draft",
+        "projection": {
+          "slug": "example-case",
+          "title": "예제 개선",
+          "problem": "반복 오류",
+          "aiUse": "재현과 수정",
+          "result": "예제 검사 통과",
+          "verification": "격리된 테스트에서 확인",
+          "limitations": [
+            "운영 배포 미검증"
+          ],
+          "sourceUrl": "https://example.com/cases/example"
+        },
+        "evidenceRefs": [
+          "test"
+        ],
+        "review": null
+      }
+    }
+  },
+  {
+    "name": "measured_zero",
+    "valid": true,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "measured",
+          "metric": "duration",
+          "unit": "minutes",
+          "before": 0,
+          "after": 0,
+          "method": "같은 fixture의 전후 측정",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "publicCase": null
+    }
+  },
+  {
+    "name": "unknown_key",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "extra": true
+    }
+  },
+  {
+    "name": "null_activity",
+    "valid": false,
+    "activity": null
+  },
+  {
+    "name": "unsupported_version",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 2,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "wrong_category",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "kb",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "blank_purpose",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "  ",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "duplicate_evidence",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        },
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "dangling_evidence",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "missing"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "outcome_no_evidence",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": []
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "check_no_evidence",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": []
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "role_no_evidence",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "unknown",
+      "purpose": null,
+      "actions": null,
+      "aiRole": {
+        "tools": [
+          "Claude"
+        ],
+        "contributions": [
+          "추정"
+        ]
+      },
+      "humanRole": null,
+      "outcomes": null,
+      "verification": null,
+      "followUps": null,
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": null,
+        "basis": "unknown",
+        "evidenceRefs": [],
+        "occurredOn": null,
+        "precision": "unknown",
+        "labelDate": null
+      },
+      "evidence": [],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "unknown_with_date",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "unknown",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "naive_time",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-02T09:00:00",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "reversed_time",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": "2026-10-02T10:00:00Z",
+        "endedAt": "2026-10-02T09:00:00Z",
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "measured_missing_baseline",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "measured",
+          "metric": "duration",
+          "unit": "minutes",
+          "before": null,
+          "after": null,
+          "method": "같은 fixture의 전후 측정",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "publicCase": null
+    }
+  },
+  {
+    "name": "confirmed_without_user",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "user_confirmed",
+          "metric": "duration",
+          "unit": "minutes",
+          "before": 0,
+          "after": 0,
+          "method": "같은 fixture의 전후 측정",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "publicCase": null
+    }
+  },
+  {
+    "name": "partial_effect",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "measured",
+          "metric": "duration",
+          "unit": "minutes",
+          "before": null,
+          "after": 0,
+          "method": "같은 fixture의 전후 측정",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "publicCase": null
+    }
+  },
+  {
+    "name": "unreviewed_approval",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": {
+        "status": "approved",
+        "projection": {
+          "slug": "example-case",
+          "title": "예제 개선",
+          "problem": "반복 오류",
+          "aiUse": "재현과 수정",
+          "result": "예제 검사 통과",
+          "verification": "격리된 테스트에서 확인",
+          "limitations": [
+            "운영 배포 미검증"
+          ],
+          "sourceUrl": "https://example.com/cases/example"
+        },
+        "evidenceRefs": [
+          "test"
+        ],
+        "review": null
+      }
+    }
+  },
+  {
+    "name": "private_path",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": {
+        "status": "draft",
+        "projection": {
+          "slug": "example-case",
+          "title": "예제 개선",
+          "problem": "/home/user/private",
+          "aiUse": "재현과 수정",
+          "result": "예제 검사 통과",
+          "verification": "격리된 테스트에서 확인",
+          "limitations": [
+            "운영 배포 미검증"
+          ],
+          "sourceUrl": "https://example.com/cases/example"
+        },
+        "evidenceRefs": [
+          "test"
+        ],
+        "review": null
+      }
+    }
+  },
+  {
+    "name": "url_query",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": {
+        "status": "draft",
+        "projection": {
+          "slug": "example-case",
+          "title": "예제 개선",
+          "problem": "반복 오류",
+          "aiUse": "재현과 수정",
+          "result": "예제 검사 통과",
+          "verification": "격리된 테스트에서 확인",
+          "limitations": [
+            "운영 배포 미검증"
+          ],
+          "sourceUrl": "https://example.com/?token=abc"
+        },
+        "evidenceRefs": [
+          "test"
+        ],
+        "review": null
+      }
+    }
+  },
+  {
+    "name": "private_host",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": {
+        "status": "draft",
+        "projection": {
+          "slug": "example-case",
+          "title": "예제 개선",
+          "problem": "반복 오류",
+          "aiUse": "재현과 수정",
+          "result": "예제 검사 통과",
+          "verification": "격리된 테스트에서 확인",
+          "limitations": [
+            "운영 배포 미검증"
+          ],
+          "sourceUrl": "https://127.0.0.1/case"
+        },
+        "evidenceRefs": [
+          "test"
+        ],
+        "review": null
+      }
+    }
+  },
+  {
+    "name": "verified_date_only",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": null,
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": "2026-10-01",
+        "precision": "date",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    },
+    "valid": true
+  },
+  {
+    "name": "date_and_fabricated_midnight",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T00:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": "2026-10-01",
+        "precision": "date",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    },
+    "valid": false
+  },
+  {
+    "name": "invalid_calendar_date",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": null,
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": "2026-02-30",
+        "precision": "date",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    },
+    "valid": false
+  },
+  {
+    "name": "label_date_only",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "unknown",
+      "purpose": null,
+      "actions": null,
+      "aiRole": null,
+      "humanRole": null,
+      "outcomes": null,
+      "verification": null,
+      "followUps": null,
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": null,
+        "basis": "unknown",
+        "evidenceRefs": [],
+        "occurredOn": null,
+        "precision": "unknown",
+        "labelDate": {
+          "date": "2026-09-15",
+          "basis": "record_id"
+        }
+      },
+      "evidence": [],
+      "effects": null,
+      "publicCase": null
+    },
+    "valid": true
+  },
+  {
+    "name": "date_without_evidence",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": null,
+        "basis": "source_record",
+        "evidenceRefs": [],
+        "occurredOn": "2026-10-01",
+        "precision": "date",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    },
+    "valid": false
+  },
+  {
+    "name": "utf16_limit",
+    "valid": false,
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null
+    }
+  },
+  {
+    "name": "handoff_dispatch_accepted",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "dispatch_accepted",
+              "reportedBy": "transport",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            }
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "handoff_unknown",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": null
+    },
+    "valid": true
+  },
+  {
+    "name": "handoff_none",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": []
+    },
+    "valid": true
+  },
+  {
+    "name": "handoff_recipient_completed",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "completed",
+              "reportedBy": "recipient",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": {
+                "summary": "계약 반영 완료",
+                "artifacts": [
+                  "private/result.json"
+                ],
+                "verification": "격리 검사 통과"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "handoff_transport_not_receipt",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "received",
+              "reportedBy": "transport",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            }
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "handoff_completion_without_result",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "completed",
+              "reportedBy": "recipient",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            }
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "handoff_no_evidence",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "dispatch_accepted",
+              "reportedBy": "transport",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [],
+              "result": null
+            }
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "handoff_duplicate_event",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "dispatch_accepted",
+              "reportedBy": "transport",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            },
+            {
+              "id": "send-1",
+              "kind": "dispatch_accepted",
+              "reportedBy": "transport",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            }
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "handoff_duplicate_id",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "dispatch_accepted",
+              "reportedBy": "transport",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            }
+          ]
+        },
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "dispatch_accepted",
+              "reportedBy": "transport",
+              "at": null,
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            }
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "handoff_fabricated_midnight",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "handoffs": [
+        {
+          "id": "handoff-example",
+          "from": {
+            "project": "example/kb",
+            "taskId": "example-task"
+          },
+          "to": {
+            "project": "example/app",
+            "taskId": null
+          },
+          "request": "공용 계약 반영",
+          "events": [
+            {
+              "id": "send-1",
+              "kind": "dispatch_accepted",
+              "reportedBy": "transport",
+              "at": "2026-10-02T00:00:00Z",
+              "occurredOn": "2026-10-02",
+              "precision": "date",
+              "summary": "전송 도구가 입력 접수",
+              "evidenceRefs": [
+                "test"
+              ],
+              "result": null
+            }
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "knowledge_applied",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "knowledge_direct",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "direct",
+          "searchRefs": [],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "knowledge_reference_only",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "reference_only",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": null,
+          "verification": null,
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "knowledge_not_applicable",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "not_applicable",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": null,
+          "verification": null,
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "knowledge_deferred",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "deferred",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": null,
+          "verification": null,
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "knowledge_unknown",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "unknown",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": null,
+          "verification": null,
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": true
+  },
+  {
+    "name": "knowledge_unverified_application",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": null,
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "knowledge_search_without_link",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "knowledge_no_evidence",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": []
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "knowledge_path_escape",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "../private.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "knowledge_duplicate",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": null,
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": [
+            "test"
+          ]
+        },
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": false
+  },
+  {
+    "name": "knowledge_legacy_contradiction",
+    "activity": {
+      "schemaVersion": 1,
+      "category": "work_execution",
+      "purpose": "예제 요청 처리",
+      "actions": [
+        "예제 구현"
+      ],
+      "aiRole": {
+        "tools": [
+          "Codex"
+        ],
+        "contributions": [
+          "구현과 검사"
+        ]
+      },
+      "humanRole": {
+        "decisions": [
+          "범위 선택"
+        ],
+        "corrections": []
+      },
+      "outcomes": [
+        {
+          "summary": "회귀 오류 수정",
+          "artifact": "private/example.patch",
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ],
+      "verification": {
+        "checks": [
+          {
+            "name": "회귀 검사",
+            "method": "격리 fixture 실행",
+            "result": "pass",
+            "limitation": "운영 배포 미검증",
+            "evidenceRefs": [
+              "test"
+            ]
+          }
+        ],
+        "unverified": [
+          "운영 배포"
+        ]
+      },
+      "followUps": [
+        {
+          "summary": "운영 확인",
+          "status": "pending"
+        }
+      ],
+      "knowledge": [
+        {
+          "document": "knowledge/example.md",
+          "usage": "reference",
+          "note": null
+        }
+      ],
+      "timing": {
+        "startedAt": null,
+        "endedAt": null,
+        "occurredAt": "2026-10-01T15:00:00Z",
+        "basis": "source_record",
+        "evidenceRefs": [
+          "test"
+        ],
+        "occurredOn": null,
+        "precision": "timestamp",
+        "labelDate": null
+      },
+      "evidence": [
+        {
+          "id": "test",
+          "kind": "tool_result",
+          "reference": "private/example-test.log",
+          "note": "가상 테스트 근거"
+        },
+        {
+          "id": "user",
+          "kind": "user_statement",
+          "reference": "private/example-review",
+          "note": "가상 검토 승인"
+        }
+      ],
+      "effects": null,
+      "publicCase": null,
+      "knowledgeDecisions": [
+        {
+          "id": "decision-1",
+          "document": "knowledge/example.md",
+          "selection": "search",
+          "searchRefs": [
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          ],
+          "decision": "applied",
+          "reason": "실제 수정에 기준을 적용하고 회귀 확인",
+          "plannedUse": "입력 검증 구현",
+          "verification": {
+            "method": "격리 회귀",
+            "result": "pass",
+            "note": null,
+            "evidenceRefs": [
+              "test"
+            ]
+          },
+          "evidenceRefs": [
+            "test"
+          ]
+        }
+      ]
+    },
+    "valid": false
+  }
+]

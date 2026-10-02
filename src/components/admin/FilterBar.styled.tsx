@@ -25,6 +25,7 @@ export const FilterBarRoot = styled.div`
     .filter-count { font-variant-numeric: tabular-nums; font-weight: 400; }
     .bar-main { display: flex; flex: 1 1 260px; gap: 8px; min-width: 0; }
     .bar-search { position: relative; flex: 1; min-width: 0; }
+    .bar-main:not(:has(.bar-search)) { justify-content: flex-end; }
     .bar-search > svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--desccolor); pointer-events: none; }
     .bar-search > input {
         box-sizing: border-box;

@@ -12,7 +12,8 @@ export type FilterField = { key: string; label: string; search?: string; options
 type Props = {
     status: ReactNode;
     sort: ReactNode;
-    search: ReactNode;
+    /** 검색할 내용이 없는 화면은 생략한다. 그때 필터·정렬은 오른쪽에 붙는다 */
+    search?: ReactNode;
     fields: FilterField[];
     values: Record<string, string>;
     dateRange?: boolean | string;
@@ -63,10 +64,10 @@ export default function FilterBar({ status, sort, search, fields, values, dateRa
             <div className="bar-controls">
                 <div className="bar-status">{status}</div>
                 <div className="bar-main">
-                    <div className="bar-search">
+                    {search && <div className="bar-search">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4 4" /></svg>
                         {search}
-                    </div>
+                    </div>}
                     <div className="bar-anchor" ref={anchor}>
                         <button ref={trigger} type="button" className="bar-toggle" aria-haspopup="dialog" aria-expanded={presentation !== null}
                             aria-controls={presentation ? dialogId : undefined} onClick={() => presentation ? close() : setPresentation(window.matchMedia(mobileQuery).matches ? "sheet" : "popover")}>

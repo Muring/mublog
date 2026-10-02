@@ -298,24 +298,9 @@
 .projectLinks svg {
     flex-shrink: 0;
 }
+/* 공용 링크 모양(styles/link.module.css). AI 관리의 연결 작업 링크도 같은 것을 쓴다 */
 .animatedLink {
-    position: relative;
-    border-bottom: 1px solid var(--bordercolor);
-}
-.animatedLink::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;
-    height: 1px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 280ms ease;
-}
-.animatedLink:is(:hover, :focus-visible)::after {
-    transform: scaleX(1);
+    composes: animated from "../../styles/link.module.css";
 }
 .summary {
     font-size: 17px;
@@ -737,7 +722,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
     .imageTrack,
-    .animatedLink::after,
     .skillProjects a::after {
         transition: none;
     }

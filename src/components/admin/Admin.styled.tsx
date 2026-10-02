@@ -5,6 +5,7 @@ import { statusBadgeBase } from "@/styles/status-badge";
 import { buttonSubtle, buttonDanger, buttonPrimary, buttonGhost } from "@/styles/button";
 import { thinScrollbar } from "@/styles/scrollbar";
 import { surface } from "@/styles/surface";
+import { listTableBase } from "@/styles/list-table";
 import { truncate } from "@/styles/text";
 import { mobile } from "@/styles/breakpoints";
 
@@ -105,42 +106,7 @@ export const AdminWrapper = styled.div`
 `;
 
 export const PostTable = styled.table`
-  width: 100%;
-  /* 라이트 페이지 배경(--background)은 순백보다 살짝 낮다. 표는 흰 면에 두되 다크는 그대로 둔다 */
-  background-color: var(--tablesurface);
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: 0.875rem;
-
-  /*
-   * auto 레이아웃은 내용이 긴 열(제목의 slug, 태그 목록)이 폭을 독차지하고
-   * 나머지를 굶긴다. 그 결과 "발행" 배지가 "발/행" 으로, 버튼이 "수/정" 으로
-   * 세로로 쪼개졌다. 각 열이 필요한 만큼을 미리 정해준다.
-   */
-  table-layout: fixed;
-
-  /* 스크롤해도 열 이름이 남아야 어느 열인지 알 수 있다 */
-  thead th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    /*
-     * 배경색과 같은 흰 바탕에 회색 글씨로 두었더니 머리글이 첫 행처럼 보였다.
-     * 한 톤 다른 면으로 깔고 글자를 본문색으로 올려 "여기부터 값" 이 갈리게 한다.
-     * 행 호버도 같은 토큰을 쓰지만, 머리글은 글자가 진하고 아래 선이 2px 라
-     * 지나가는 호버와 섞이지 않는다.
-     */
-    background-color: var(--codefontbgcolor);
-    color: var(--foreground);
-    letter-spacing: 0.03em;
-    /*
-     * 구분선을 border 가 아니라 inset 그림자로 그린다.
-     * border-collapse: collapse 인 표에서 sticky 로 띄운 칸의 border 는
-     * 스크롤하면 원래 자리에 남아 헤더에서 떨어져 나간다.
-     * 그림자는 칸에 붙어 따라오므로 스크롤 중에도 경계가 유지된다.
-     */
-    box-shadow: inset 0 1px 0 var(--bordercolor), inset 0 -2px 0 var(--bordercolor);
-  }
+  ${listTableBase}
 
   th:nth-of-type(2) { width: 5rem; }    /* 상태 */
   th:nth-of-type(3) { width: 9rem; }    /* 태그 */
@@ -172,30 +138,6 @@ export const PostTable = styled.table`
   td:nth-of-type(7),
   td:nth-of-type(8) {
     text-align: center;
-  }
-
-  th,
-  td {
-    border-bottom: 1px solid var(--bordercolor);
-    padding: 0.75rem 0.5rem;
-    text-align: left;
-    vertical-align: middle;
-  }
-
-  th {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-align: center;
-  }
-
-  /*
-    --hovercolor 는 다크 모드에서 #dadada 라 글자색(--foreground #cacaca)과
-    거의 같아져 내용이 묻힌다. --hoverfontcolor 를 함께 쓰는 버튼과 달리
-    행은 안쪽 글자색이 제각각이라 배경만 은은하게 바꾸는 편이 안전하다.
-    --codefontbgcolor 는 라이트/다크 모두 배경보다 한 톤만 다른 값이다.
-  */
-  tbody tr:hover {
-    background-color: var(--codefontbgcolor);
   }
 
   .title-cell {

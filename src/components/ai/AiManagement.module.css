@@ -1,42 +1,23 @@
 .shell { height: 100dvh; box-sizing: border-box; max-width: 1200px; margin: auto; padding: 4.75rem 1.25rem max(.75rem, env(safe-area-inset-bottom)); display: flex; min-width: 0; }
-.workspace { position: relative; gap: .5rem; }
-.heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-shrink: 0; }
-.heading h1 { margin: 0; font-size: 1.25rem; white-space: nowrap; letter-spacing: -.035em; }
-.heading a { font-size: .8rem; white-space: nowrap; }
-.publicLink { order: 2; }
-.controls { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; position: relative; flex-shrink: 0; }
-.navigation { margin-left: auto; display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-shrink: 0; }
-.range { display: flex; flex-wrap: wrap; gap: .5rem; flex-shrink: 0; margin-right: auto; }
-.range > * { min-width: 0; }
-.disclosure { flex-shrink: 0; }
-.disclosure[open] .panel { position: absolute; top: 100%; z-index: 4; left: 0; right: 0; box-shadow: 0 6px 20px var(--shadowcolor); }
-.disclosure summary { cursor: pointer; padding: .5rem .75rem; border: var(--border-width) solid var(--bordercolor); border-radius: 8px; font-size: .85rem; width: fit-content; }
-.disclosure summary:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
-.disclosure summary:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 2px; }
-.panel { padding: .75rem; margin-top: .5rem; background: var(--cardbackground); border: var(--border-width) solid var(--bordercolor); border-radius: 12px; max-height: 40dvh; overflow: auto; }
-.panel p { margin-top: 0; }
-.filters { display: flex; flex-wrap: wrap; gap: .5rem; }
-.filters > * { min-width: 0; max-width: 100%; }
-.editor { min-width: 0; }
-.editor > div:first-child { margin-bottom: .5rem; }
+.workspace { position: relative; gap: 1rem; }
+/* 제목 · 밑줄 탭 · 새로고침이 한 줄. 탭 모양은 블로그 관리(Management.module.css 의 .navigation)와 같다 */
+.heading { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; column-gap: 1.25rem; flex-shrink: 0; min-width: 0; border-bottom: var(--border-width) solid var(--bordercolor); }
+.heading h1 { margin: 0; padding-bottom: .55rem; font-size: 1.25rem; white-space: nowrap; letter-spacing: -.035em; }
+.heading .refresh { margin-bottom: .35rem; }
+.tabs { display: flex; gap: 6px; min-width: 0; }
+.tabs button { margin-bottom: calc(-1 * var(--border-width)); padding: 10px 16px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--desccolor); font: inherit; font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer; transition: color 150ms ease, border-color 150ms ease; }
+.tabs button[aria-selected="true"] { color: var(--linkhovercolor); border-bottom-color: var(--linkhovercolor); }
+.tabs button:not([aria-selected="true"]):hover { color: var(--foreground); border-bottom-color: var(--bordercolor); }
+.tabs button:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: -2px; border-radius: 6px 6px 0 0; }
+
+/* 공용 FilterBar 를 화면 고정 골격 안에 맞춘다. 바깥 여백은 workspace gap 이 맡는다 */
+.filterBar { flex-shrink: 0; min-width: 0; }
+.filterBar > div { margin-bottom: 0; }
+.periodControls { display: flex; flex-wrap: wrap; gap: 8px; }
+.empty { margin: 0; padding: 2.5rem 1rem; text-align: center; color: var(--desccolor); font-size: .85rem; }
 @media (max-width: 760px) {
  .shell { padding: 4.5rem .75rem max(.75rem, env(safe-area-inset-bottom)); }
- .heading { display: grid; grid-template-columns: 1fr auto; gap: .5rem; }
- .publicLink { order: initial; }
- .workspace { gap: .5rem; }
- .heading h1 { font-size: 1.25rem; }
- .navigation { grid-column: 1 / -1; margin-left: 0; }
- .navigation > div { flex: 1; display: flex; }
- .navigation > div button { flex: 1; padding-inline: .5rem; }
- .navigation > button { font-size: .75rem; padding-inline: .5rem; }
- .range { width: 100%; margin-right: 0; display: grid; grid-template-columns: 1fr 1fr 1.35fr; gap: .35rem; }
- .range button { width: 100%; min-width: 0; font-size: .75rem; padding-inline: .5rem; }
- .range > * { width: 100%; }
- /* 정렬까지 네 개면 3열에 하나만 남지 않게 2×2 로 */
- .range:has(> :nth-child(4)) { grid-template-columns: 1fr 1fr; }
- .filters { display: grid; grid-template-columns: minmax(0, 1fr); }
- .filters > * { width: 100%; }
- .editor > div:first-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+ .workspace { gap: .75rem; }
  .quality table, .quality tbody, .quality tr, .quality td { display: block; width: auto; }
  .quality thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
  .quality tr { padding: .5rem .75rem; border-bottom: var(--border-width) solid var(--bordercolor); }
@@ -47,8 +28,6 @@
 @media (max-height: 500px) {
  .shell { padding-top: 4.25rem; padding-bottom: .5rem; }
  .workspace { gap: .3rem; }
- .disclosure summary { padding-block: .25rem; }
- .disclosure[open] .panel { position: absolute; z-index: 4; left: 0; right: 0; max-height: 35dvh; box-shadow: 0 6px 20px var(--shadowcolor); }
 }
 
 :global(body):has(.shell) { overflow: hidden; }
@@ -58,31 +37,27 @@
 .refresh[aria-busy="true"] svg { animation: refreshSpin 1s linear infinite; }
 @keyframes refreshSpin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .refresh[aria-busy="true"] svg { animation: none; } }
-.disclosure .filterSummary { display: flex; align-items: center; gap: .4rem; list-style: none; }
-.filterSummary::-webkit-details-marker { display: none; }
 .summaryCards { flex-shrink: 0; min-width: 0; }
 .summaryCards > div > div { padding: .55rem .75rem; border-radius: 10px; }
 .workspace .summaryCards strong { margin-top: .2rem; font-size: clamp(.85rem, 1.5vw, 1.15rem); }
-.editor .editorForm { max-width: none; width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 11rem; gap: .6rem .75rem; align-items: start; }
-.formNote, .bodyField, .formStatus { grid-column: 1 / -1; }
-.editor .formNote { margin: 0; }
-.titleField { grid-column: 1 / -1; }
-.bodyField textarea { min-height: clamp(140px, 20dvh, 220px); }
-.editor .formActions { grid-column: 1 / -1; display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .5rem; position: sticky; bottom: 0; padding: .5rem 0; background: var(--background); border-top: var(--border-width) solid var(--bordercolor); }
-.editor > details { margin-block: .75rem; }
-.editor .formStatus:empty { display: none; }
 @media (max-width: 760px) {
- .editor .editorForm { grid-template-columns: minmax(0, 1fr) 9rem; gap: .5rem; }
- .editor .formActions button { flex: 1; font-size: .75rem; padding-inline: .4rem; }
  .summaryCards > div { gap: .4rem; }
  .summaryCards > div > div { padding: .45rem .6rem; }
  .workspace .summaryCards strong { font-size: .95rem; }
 }
-@media (max-width: 360px) { .editor .editorForm { grid-template-columns: minmax(0, 1fr); } }
 
-.editorForm > *, .editorForm input, .editorForm textarea { min-width: 0; max-width: 100%; }
 
-.collectionStatus { margin: 0; flex-shrink: 0; font-size: .75rem; line-height: 1.5; }
+/* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값.
+   탭은 아래 줄을 꽉 채우고, 기간·표 구성 두 묶음은 한 줄을 나눠 쓴다(공용 바는 묶음 하나가 한 줄을 차지한다) */
+@media (max-width: 640px) {
+ .heading { grid-template-columns: minmax(0, 1fr) auto; align-items: center; row-gap: .25rem; }
+ .heading h1 { padding-bottom: 0; }
+ .heading .refresh { margin-bottom: 0; width: 44px; height: 44px; }
+ .tabs { grid-column: 1 / -1; grid-row: 2; }
+ .tabs button { flex: 1; min-height: 44px; padding: 10px 8px; }
+ .filterBar :global(.bar-status) :global(.status-filters) { width: auto; flex: 1 1 auto; min-height: 44px; }
+ .filterBar :global(.bar-status) :global(.status-filters) button { min-height: 38px; }
+}
 
 /* Admin tables share the blog's list-table header: a tinted band with body-coloured text, so it never reads as a first row. */
 .workspace table th { background: var(--codefontbgcolor); color: var(--foreground); font-size: .75rem; font-weight: 800; letter-spacing: .03em; box-shadow: inset 0 1px 0 var(--bordercolor), inset 0 -2px 0 var(--bordercolor); border-bottom: 0; }
@@ -91,13 +66,17 @@
 .workspace table td[data-number] { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Quality tab: one card per table, like the analytics panels. */
-.quality { display: grid; gap: .75rem; align-content: start; }
+/* 펼친 내역으로 세로 스크롤바가 생겨도 폭이 줄지 않게 자리를 미리 잡는다 */
+/* 펼친 내역으로 세로 스크롤바가 생겨도 폭이 줄지 않게 자리를 잡되, 양쪽에 같은 폭으로 잡아 카드 좌우 여백이 같다.
+   스크롤바가 화면 위에 겹치는 기기(대부분의 휴대폰)에서는 양쪽 다 0 이라 위 필터 바와 줄이 맞는다 */
+.quality { display: grid; gap: .75rem; align-content: start; scrollbar-gutter: stable both-edges; }
+.workspace .quality { padding-inline: 0; }
 .qualityPanel { display: grid; gap: .75rem; min-width: 0; padding: 1rem; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; background: var(--cardbackground); }
 .qualityPanel header h3 { margin: 0; font-size: 1rem; letter-spacing: -.02em; }
 .qualityPanel header p { margin: .25rem 0 0; }
 .qualityTable { overflow-x: auto; min-width: 0; }
 .qualityTable table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .85rem; }
-.qualityTable th, .qualityTable td { padding: .65rem .75rem; white-space: nowrap; }
+.qualityTable th, .qualityTable td { padding: .65rem .6rem; white-space: nowrap; }
 .qualityTable td { text-align: left; }
 /* Fixed-format or short values (dates, type, status, rework) sit under their centred header, as in the post list table. */
 .qualityTable td[data-center] { text-align: center; }
@@ -105,29 +84,288 @@
 .qualityTable td { border-bottom: var(--border-width) solid var(--bordercolor); vertical-align: top; }
 .qualityTable tbody tr:last-child td { border-bottom: 0; }
 .badges { display: flex; flex-wrap: wrap; gap: .25rem; }
-.taskTable td:first-child { white-space: normal; min-width: 14rem; max-width: 22rem; }
-.taskProject { display: block; font-size: .72rem; color: var(--desccolor); }
-.taskId { display: block; overflow-wrap: anywhere; }
-.quality .checks summary { padding: 0; background: none; }
-.quality .checks summary:hover { background: none; color: var(--foreground); }
-.checks summary { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem; width: fit-content; border-radius: 6px; color: var(--desccolor); cursor: pointer; list-style: none; }
-.checks summary::-webkit-details-marker { display: none; }
-/* No hover surface behind the coloured chips: the chips darken their own border and the chevron darkens instead. */
-.checks summary [data-tone] { transition: border-color 150ms; }
-.checks summary:hover [data-tone] { border-color: currentColor; }
-.checks summary:hover { color: var(--foreground); }
-.chevron { width: .75rem; height: .75rem; flex-shrink: 0; transition: transform 150ms, color 150ms; }
-.checks[open] .chevron { transform: rotate(180deg); }
-.checks summary:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 2px; }
-.checks ul { display: grid; gap: .35rem; max-width: 26rem; margin: .5rem 0 0; padding: 0; list-style: none; font-size: .78rem; white-space: normal; }
-.checks li { display: flex; align-items: baseline; gap: .4rem; overflow-wrap: anywhere; }
 @media (max-width: 760px) {
  .qualityPanel { padding: .75rem; }
  .qualityTable td { padding: .35rem 0; border: 0; white-space: normal; }
  .qualityTable tbody tr:last-child { border-bottom: 0; }
- .taskTable td:first-child { min-width: 0; max-width: none; }
  .workspace .qualityTable td[data-number], .qualityTable td[data-center] { text-align: left; }
  .qualityTable td[data-center] .badges { justify-content: flex-start; }
+ .quality tr[data-open] { border-bottom: 0; }
+ .quality .diagTable tbody { display: grid; gap: .6rem; }
+ .quality .diagTable tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem .5rem; padding: .7rem .8rem; border: var(--border-width) solid var(--bordercolor); border-radius: 10px; background: var(--recordbackground); }
+ .quality .diagTable tbody tr:last-child { border-bottom: var(--border-width) solid var(--bordercolor); }
+ .quality .diagTable td { display: flex; flex-direction: column; gap: .1rem; padding: 0; font-variant-numeric: tabular-nums; }
+ .quality .diagTable td::before { font-size: .7rem; line-height: 1.3; }
+ .quality .diagTable td:first-child { grid-column: 1 / -1; font-weight: 700; }
+ .quality .diagTable td:first-child::before { content: none; }
+ .quality .diagTable td:last-child { grid-column: span 2; }
+ }
+
+/* 불러오는 동안의 자리. 카드·표는 실제 클래스를 그대로 써서 도착할 때 상자가 움직이지 않는다 */
+.loadingUsage { display: flex; flex-direction: column; gap: .5rem; flex: 1; min-height: 0; }
+.loadingUsage table { pointer-events: none; table-layout: fixed; }
+.loadingRows { display: grid; gap: .9rem; }
+.loadingRows > span { display: flex; justify-content: space-between; gap: 1rem; }
+
+/* 진단에는 목적과 적용 범위를 함께 표시한다. */
+.qualityPanel header .scope { margin-top: .4rem; font-size: .75rem; line-height: 1.6; color: var(--desccolor); overflow-wrap: anywhere; }
+.metricGuide { min-width: 0; font-size: .82rem; }
+.metricGuide summary { width: fit-content; color: var(--foreground); }
+.metricGuide dl { display: grid; gap: .7rem; margin: .6rem 0 0; padding: .75rem; border: var(--border-width) solid var(--bordercolor); border-radius: 8px; }
+.metricGuide dt { font-weight: 700; }
+.metricGuide dd { margin: .2rem 0 0; line-height: 1.65; color: var(--desccolor); }
+.collectionSummary { margin: 0; font-size: .8rem; line-height: 1.6; color: var(--desccolor); }
+.collectionSummary strong { color: var(--foreground); font-variant-numeric: tabular-nums; }
+.problemList { display: grid; gap: .65rem; margin: 0; padding-left: 1.25rem; font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
+.problemList span { display: block; color: var(--desccolor); }
+.weekScope { display: block; font-size: .7rem; font-weight: 400; color: var(--desccolor); }
+.deviceTable td:first-child { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+ .qualityPanel { gap: .65rem; padding: .75rem; }
 }
-@media (prefers-reduced-motion: reduce) { .chevron, .checks summary [data-tone] { transition: none; } }
-.editor article h2 { word-break: keep-all; }
+
+@media (max-width: 760px) {
+ .quality .deviceTable td[data-meta] { align-items: center; }
+}
+
+.summaryLine { display: inline-flex; align-items: center; flex-wrap: wrap; gap: .3rem; }
+.records { flex: 1; min-height: 0; max-height: none; padding: 0; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; }
+.recordTable { width: 100%; }
+
+.recordTable th:first-child { width: 42%; }
+.recordTable th:nth-child(2) { width: 20%; }
+.recordTable th:nth-child(3) { width: 13%; }
+.recordTable th:nth-child(4) { width: 15%; }
+.recordTable th:nth-child(5) { width: 10%; }
+.recordTable td { overflow-wrap: anywhere; }
+.recordTable td[data-center] { text-align: center; }
+.recordTable tr:not(.recordDetail) { cursor: pointer; }
+.recordTable tr:not(.recordDetail):hover, .recordTable tr[data-open] { background: var(--codefontbgcolor); }
+.recordToggle { display: flex; align-items: center; justify-content: flex-start; gap: .4rem; width: 100%; min-height: 28px; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--foreground); background: transparent; text-align: left; cursor: pointer; }
+/* 줄 높이를 펼침 전후 같게 둔다. 바뀌면 첫 줄 글자가 상자 안에서 위아래로 튀어 펼칠 때 살짝 올라갔다 내려온다 */
+.recordToggle span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.5; }
+.recordChevron { flex-shrink: 0; transition: transform 150ms; }
+.recordToggle:hover { color: var(--linkhovercolor); }
+.recordToggle:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 4px; border-radius: 3px; }
+.recordSummary { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: .1rem 0 0 1.4rem; color: var(--desccolor); font-size: .8rem; line-height: 1.65; }
+.recordSections { display: grid; gap: 1.5rem; overflow-wrap: anywhere; }
+.recordSections h4 { margin: 0 0 .4rem; font-size: .85rem; }
+.recordSections p { margin: .25rem 0 0; font-size: .875rem; line-height: 1.8; }
+.recordChecks { display: grid; gap: .6rem; list-style: none; margin: 0; padding: 0; }
+.recordChecks > li { padding: .75rem 0; border-bottom: var(--border-width) solid var(--bordercolor); }
+.recordChecks > li > div { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; }
+.recordReason, .rawRecord { color: var(--desccolor); }
+.rawRecord { font-size: .8rem; line-height: 1.7; }
+.rawRecord dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .3rem .75rem; }
+.rawRecord dd { margin: 0; }
+@media (max-width: 760px) {
+ .recordTable, .recordTable tbody { display: block; }
+ .recordTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+ .recordTable tr:not(.recordDetail) { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; padding: .75rem .5rem; margin-bottom: .75rem; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; background: var(--cardbackground); }
+ .recordTable td { display: block; padding: 0; border: 0; min-width: 0; }
+ .recordTable td:first-child { flex-basis: 100%; }
+ .recordTable td:not(:first-child) { font-size: .75rem; color: var(--desccolor); }
+ .recordTable td[data-center] { text-align: left; }
+ .recordTable tr[data-open] { border-radius: 0; border-bottom: 0; }
+ .recordDetail { display: block; padding: .8rem; border: 0; border-bottom: var(--border-width) solid var(--bordercolor); border-radius: 0; background: var(--codefontbgcolor); }
+}
+
+.titleWithInfo { display: flex; align-items: center; gap: .35rem; }
+
+.loadingRecord { padding: .8rem; border-bottom: var(--border-width) solid var(--bordercolor); }
+.loadingRecord > span { display: flex; gap: 1rem; }
+.loadingRecord p { margin: .5rem 0; }
+
+.dateBasis { display: block; margin-top: .3rem; color: var(--desccolor); font-size: .72rem; }
+.recordProject { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; line-height: 1.6; color: var(--desccolor); }
+@media (min-width: 761px) and (max-width: 1100px) {
+ .recordTable th:first-child { width: 36%; }
+ .recordTable th:nth-child(2) { width: 21%; }
+ .recordTable th:nth-child(3) { width: 15%; }
+ .recordTable th:nth-child(4) { width: 17%; }
+ .recordTable th:nth-child(5) { width: 11%; }
+ .recordTable td { padding-inline: .4rem; }
+}
+@media (max-width: 760px) {
+ .recordTable td:nth-child(2) { flex-basis: 100%; padding-left: 1.4rem; }
+ .recordTable td:nth-child(3) { margin-left: 1.4rem; }
+ .recordTable td:nth-child(4) { margin-right: auto; }
+}
+
+.linkedTask { margin-bottom: 1rem; border: var(--border-width) solid var(--bordercolor); border-radius: 8px; }
+.linkedTask > div { display: flex; justify-content: space-between; gap: 1rem; padding: .7rem; }
+.linkedTask button { cursor: pointer; }
+.linkedTask > div > button { padding: .35rem .7rem; border: var(--border-width) solid var(--bordercolor); border-radius: 6px; color: var(--foreground); background: var(--background); }
+.linkedTask > div > button:hover { color: var(--hoverfontcolor); background: var(--hovercolor); }
+
+@media (max-width: 760px) {
+ .recordTable tr:not(.recordDetail):hover { background: var(--cardbackground); border-color: var(--desccolor); }
+ .recordTable tr[data-open] { margin-bottom: 0; border-radius: 12px 12px 0 0; }
+ .recordDetail { border: var(--border-width) solid var(--bordercolor); border-top: 0; border-radius: 0 0 12px 12px; margin-bottom: .75rem; }
+}
+
+/* 좁은 화면의 작업 기록은 행마다 카드라 바깥 상자 테두리를 걷는다. 겹치면 테두리가 두 겹으로 보인다 */
+@media (max-width: 760px) {
+ .records { border: 0; border-radius: 0; }
+}
+
+/* 수집 상태 탭의 카드 가장자리를 필터 바·탭 밑줄과 맞춘다. 위아래 여백만 포커스 테두리 자리로 남긴다 */
+.workspace .statusScroll { padding-inline: 0; }
+.statusScroll .quality { scrollbar-gutter: auto; }
+
+/* KB 판단 한 건: 문서 경로는 길어도 줄바꿈되고, 사실은 이름·값 두 열로 읽는다 */
+.decisionDocument { overflow-wrap: anywhere; }
+.decisionFacts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .35rem .9rem; margin: .5rem 0 0; font-size: .85rem; line-height: 1.7; }
+.decisionFacts dt { color: var(--desccolor); }
+.decisionFacts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+ .decisionFacts { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
+ .decisionFacts dd + dt { margin-top: .4rem; }
+}
+
+/* 작업 기록 표의 양 끝 칸 안쪽 여백을 사용량 표와 같은 1rem 으로 맞춘다. 스크롤바는 그 바깥 제 자리에 있다 */
+@media (min-width: 761px) {
+ .recordTable th:first-child, .recordTable td:first-child { padding-left: 1rem; }
+ .recordTable th:last-child, .recordTable td:last-child { padding-right: 1rem; }
+}
+
+/*
+ * 상세 안의 접힘(원본 기록과 근거·작업 근거·인계 식별자·지표 뜻)은 모두 같은 모양의 누를 수 있는 줄이다.
+ * 기본 삼각형 대신 회전하는 꺾쇠, 호버 면은 --hovercolor + --hoverfontcolor(다크에서도 면이 밝아지므로 글자를 어둡게).
+ */
+.recordSections details > summary, .metricGuide > summary {
+ display: inline-flex; align-items: center; gap: .45rem; width: fit-content;
+ margin-left: -.6rem; padding: .4rem .6rem; border-radius: 6px;
+ color: var(--foreground); font-size: .82rem; font-weight: 600; cursor: pointer; list-style: none;
+ transition: background-color 150ms ease, color 150ms ease;
+}
+.recordSections details > summary::-webkit-details-marker, .metricGuide > summary::-webkit-details-marker { display: none; }
+.recordSections details > summary::before, .metricGuide > summary::before {
+ content: ""; width: .4rem; height: .4rem; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor;
+ transform: rotate(-45deg); transition: transform 150ms ease;
+}
+.recordSections details[open] > summary::before, .metricGuide[open] > summary::before { transform: rotate(45deg); }
+.recordSections details > summary:hover, .metricGuide > summary:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
+.recordSections details > summary:focus-visible, .metricGuide > summary:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+/* 원본 기록은 상세의 맨 끝, 구분선 아래에 둔다. 펼친 내용은 보조 글자색 */
+.recordSections > .rawRecord { padding-top: .6rem; border-top: var(--border-width) solid var(--bordercolor); }
+.rawRecord[open] > summary { margin-bottom: .5rem; }
+@media (prefers-reduced-motion: reduce) {
+ .recordSections details > summary, .recordSections details > summary::before, .metricGuide > summary, .metricGuide > summary::before { transition: none; }
+}
+.rawRecord dd { color: var(--foreground); overflow-wrap: anywhere; }
+
+/*
+ * 작업 상세: 한 줄 요약 → 이름·값 줄(가는 구분선으로 나눔) → 맨 끝 원본·근거 하나.
+ * 상세는 행 아래 한 톤 다른 면(--recordbackground) 위에 놓고, 줄 사이에는 읽을 만큼의 숨을 둔다.
+ */
+.recordTable .recordDetail > td { padding: 0; background: var(--recordbackground); }
+/* 상세 펼침: 높이 0 → 내용 높이(grid 0fr → 1fr)와 함께 옅게 나타나고, 닫을 때는 거꾸로 접힌다 */
+.detailBody { display: grid; grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows 220ms ease, opacity 180ms ease; }
+.detailBody > div { min-height: 0; overflow: hidden; }
+.detailBody .recordSections { padding: 1.25rem 1.5rem 1.4rem; }
+@starting-style { .detailBody { grid-template-rows: 0fr; opacity: 0; } }
+.recordDetail[data-closing] .detailBody { grid-template-rows: 0fr; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .detailBody { transition: none; } }
+.recordSections { gap: 1rem; }
+.recordSections p.recordLead { margin: 0; font-size: .95rem; line-height: 1.75; color: var(--foreground); }
+.recordSections p.recordReason { margin: 0; font-size: .82rem; }
+.facts { display: grid; grid-template-columns: 7rem minmax(0, 1fr); margin: 0; font-size: .86rem; line-height: 1.7; border-top: var(--border-width) solid var(--bordercolor); }
+.fact { display: contents; }
+.fact > dt, .fact > dd { padding: .75rem 0; border-bottom: var(--border-width) solid var(--bordercolor); }
+/* 이름 줄 높이를 값의 첫 줄(.86rem × 1.7)과 같게 두어 두 열 글자의 가운데가 맞는다 */
+.fact > dt { padding-right: 1rem; color: var(--desccolor); font-size: .78rem; font-weight: 600; letter-spacing: .01em; line-height: calc(.86rem * 1.7); }
+/* 값이 카드(인계)로 시작하면 이름을 카드 첫 줄 높이로 내린다 */
+.fact:has(.handoff) > dt { padding-top: calc(.75rem + .85rem + var(--border-width)); }
+.fact > dd { margin: 0; min-width: 0; overflow-wrap: anywhere; word-break: keep-all; }
+.fact > dd small, .factList small, .checkList small, .handoff small { display: block; margin-top: .1rem; color: var(--desccolor); font-size: .77rem; line-height: 1.6; }
+.factEmpty { color: var(--desccolor); }
+.factSub { margin-top: .45rem !important; }
+/* 여러 줄 목록은 작은 점으로 줄머리를 잡는다 */
+.factList { display: grid; gap: .35rem; margin: 0; padding: 0; list-style: none; }
+.factList > li { position: relative; padding-left: .9rem; }
+.factList > li::before { content: ""; position: absolute; left: .1rem; top: .72em; width: 4px; height: 4px; border-radius: 50%; background: var(--desccolor); }
+.factTags { display: inline-flex; flex-wrap: wrap; align-items: center; gap: .4rem; margin-right: .5rem; vertical-align: middle; }
+.factCode { font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace); font-size: .78rem; overflow-wrap: anywhere; }
+.checkList { display: grid; gap: .55rem; margin: 0; padding: 0; list-style: none; }
+.checkList > li { display: flex; align-items: flex-start; gap: .6rem; min-width: 0; }
+/* 배지는 오른쪽 글의 첫 줄 가운데에 맞춘다(줄 높이 1.7em, 배지 1.375rem) */
+.checkList > li > [data-tone] { flex-shrink: 0; margin-top: calc((1.7em - 1.375rem) / 2 + .1em); }
+.checkList > li > span:first-child { flex-shrink: 0; }
+.checkList > li > span:last-child { min-width: 0; }
+
+/* 인계: 표면 위 흰 카드 하나, 이벤트는 점과 세로선으로 잇는 타임라인 */
+.handoff { padding: .85rem 1rem; border: var(--border-width) solid var(--bordercolor); border-radius: 10px; background: var(--cardbackground); }
+.handoff + .handoff { margin-top: .6rem; }
+.handoffState { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.handoffHeader { margin-top: .55rem; }
+.handoffRoute { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .6rem; }
+.handoffEnd { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; min-width: 0; overflow-wrap: anywhere; }
+.handoffRoute > .handoffTo { flex-wrap: nowrap; }
+.handoffTo { display: inline-flex; align-items: baseline; gap: .45rem; min-width: 0; }
+.handoffTo > span:last-child { min-width: 0; }
+.handoffArrow { color: var(--desccolor); }
+.handoffEvents { margin: .8rem 0 .2rem; padding: 0; list-style: none; }
+.handoffEvents > li { position: relative; margin: 0; padding: 0 0 .75rem 1.1rem; }
+.handoffEvents > li:last-child { padding-bottom: 0; }
+.handoffEvents > li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--cardbackground); border: 1.5px solid var(--desccolor); box-sizing: border-box; }
+.handoffEvents > li:not(:last-child)::after { content: ""; position: absolute; left: 3px; top: calc(.55em + 9px); bottom: 2px; width: 1px; background: var(--bordercolor); }
+.handoffEvents > li > span { display: block; }
+.eventHead { display: flex !important; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; }
+.eventHead > span { color: var(--desccolor); font-size: .74rem; }
+.handoff details { margin-top: .6rem; }
+.recordSections > .rawRecord { padding-top: 0; border-top: 0; }
+.rawRecord dl { margin: .2rem 0 0; }
+
+/* 포트폴리오와 같은 공용 링크 모양(styles/link.module.css). 버튼이라 기본 모양만 걷고 글자색 전환을 더한다 */
+.handoffLink { composes: animated from "../../styles/link.module.css"; display: inline; padding: 0 0 1px; border-top: 0; border-inline: 0; background: none; color: var(--foreground); font: inherit; font-size: .84rem; font-weight: 600; text-align: left; cursor: pointer; transition: color 150ms ease; }
+.handoffLink:is(:hover, :focus-visible) { color: var(--linkhovercolor); }
+.handoffLink:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 4px; border-radius: 3px; }
+
+@media (max-width: 760px) {
+ /* 카드 안에 다시 상자를 두지 않는다. 펼친 상세는 카드 안쪽 여백 하나만 쓴다 */
+ .recordDetail { padding: 0; }
+ .recordTable .recordDetail > td { padding: 0; border-radius: 0 0 12px 12px; overflow: hidden; }
+ .detailBody .recordSections { padding: 1rem 1rem 1.1rem; }
+ .facts { grid-template-columns: minmax(0, 1fr); }
+ .fact > dt { padding: .7rem 0 0; border-bottom: 0; font-size: .74rem; line-height: 1.6; }
+ .fact:has(.handoff) > dt { padding-top: .7rem; }
+ .fact > dd { padding: .15rem 0 .7rem; }
+ .handoff { padding: .75rem .8rem; }
+ .rawRecord dl { grid-template-columns: minmax(0, 1fr); gap: 0; }
+ .rawRecord dd + dt { margin-top: .5rem; }
+}
+
+/* 인계 링크로 찾아온 행: 머리글 아래에 멈추고, 강조색이 잠깐 비쳤다가 사라진다 */
+.recordTable tbody tr { scroll-margin-top: 2.5rem; }
+.recordTable tr[data-flash] { animation: recordFlash 2.2s ease-out both; }
+/* 도착한 순간 가장 진하고, 잠깐 머문 뒤 서서히 사라진다 */
+@keyframes recordFlash {
+ 0%, 30% { box-shadow: inset 3px 0 0 var(--linkhovercolor); background-color: color-mix(in srgb, var(--linkhovercolor) 16%, transparent); }
+ 100% { box-shadow: inset 3px 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) { .recordTable tr[data-flash] { animation: none; box-shadow: inset 3px 0 0 var(--linkhovercolor); } }
+.linkedTask strong small { display: block; margin-top: .1rem; color: var(--desccolor); font-size: .74rem; font-weight: 400; }
+
+/* 좁은 화면의 작업 기록은 머리글을 숨긴 카드 목록이라, 스크롤바 자리 위에 칠하던 머리글 띠와 트랙 여백을 걷는다 */
+@media (max-width: 760px) {
+ .workspace .records { background: none; }
+ .workspace .records::-webkit-scrollbar-track { margin-top: 0; }
+ .recordTable tbody tr { scroll-margin-top: 0; }
+}
+
+/* 기간·보기 방식 두 묶음이 블로그 목록보다 넓어, 검색 기본 폭을 줄여야 641~700px 에서도 정렬이 홀로 다음 줄로 떨어지지 않는다 */
+@media (min-width: 641px) {
+ .filterBar :global(.bar-main) { flex-basis: 170px; }
+}
+.rawRecord dd small { display: block; margin-top: .1rem; color: var(--desccolor); font-size: .76rem; line-height: 1.6; }
+
+/* 펼친 동안 행의 한 줄 요약은 상세 맨 위로 옮겨 간다(아래 규칙에서 그 자리를 제목이 쓴다) */
+.recordSections p.recordLead small, .recordSections p.recordReason small { display: block; margin-top: .2rem; color: var(--desccolor); font-size: .78rem; }
+/*
+ * 펼친 동안: 요약 줄을 빼고 그 자리까지 제목이 두 줄로 펼쳐진다. 버튼 최소 높이를 '제목 한 줄 + 요약 줄'로 잡아
+ * 한 줄 제목은 그 가운데에, 긴 제목은 두 줄로 다 보인다. 어느 쪽이든 행 높이는 닫혔을 때와 같다.
+ */
+.recordTable tr[data-open] .recordToggle { min-height: calc(28px + .1rem + .8rem * 1.65); }
+.recordTable tr[data-open] .recordToggle > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
+.recordTable tr[data-open] .recordSummary { display: none; }
