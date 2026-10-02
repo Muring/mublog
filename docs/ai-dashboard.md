@@ -30,7 +30,7 @@
 
 `POST /api/internal/ai-usage`: 전용 Bearer key, schema 1 / metrics `usage-v1`, 전체 source SHA, GitHub workflow의 증가하는 `run_number`, 생성 시각, 연도별 집계, 내부 개선 참고 자료. 8 MiB 제한. 공개 조회는 별도 데이터 투영만 사용한다.
 
-인증·형식·합계 검증 후 트랜잭션으로 교체한다. 같은 순번의 재시도와 낮은 순번은 성공 응답의 `accepted:false`로 무시한다. workflow를 삭제·재생성하거나 이름을 바꿔 순번이 초기화되면 이전 최대값보다 큰 순번으로 복구하는 이관이 필요하다. 수집기/지표 버전 불일치와 원본 무결성 실패는 게시하지 않는다. 서버 오류·전송 실패는 Actions 실패로 남으며 수동 재실행한다.
+인증·형식·합계 검증 후 트랜잭션으로 교체한다. 응답은 `{accepted, sequence, sourceRevision}`이다. `accepted:true`는 그 트랜잭션에서 적용한 값이고, `false`는 같은 트랜잭션에서 조회한 DB 최대 순번과 해당 revision이다. 발행기는 같은 순번의 다른 revision을 오류로 처리하고, 더 큰 순번의 ACK를 자기 요청의 적용 완료로 표시하지 않는다. 같은 순번의 재시도와 낮은 순번은 성공 응답의 `accepted:false`로 무시한다. workflow를 삭제·재생성하거나 이름을 바꿔 순번이 초기화되면 이전 최대값보다 큰 순번으로 복구하는 이관이 필요하다. 수집기/지표 버전 불일치와 원본 무결성 실패는 게시하지 않는다. 서버 오류·전송 실패는 Actions 실패로 남으며 수동 재실행한다.
 
 키는 서버와 Actions에서 함께 교체한다. 원격 실행 로그·공개 저장소에 집계 payload나 키를 출력하지 않는다. 관리자 API는 `profiles.role` 기반 기존 인증을 사용한다.
 
@@ -89,3 +89,7 @@ private 작업의 선택 `task.knowledgeReviews`(최대 1000개, 누락=대조 �
 - 행은 KB 반환 그대로이며, source 판단과 모순되는 행(적용 판단에 미적용 상태, 깨진 검색 연결인데 일치 등)·중복/누락 문서·다른 작업·미등록 키·공백 문자열은 받지 않는다. dev-bootstrap 공용 fixture(`scripts/fixtures/ai-knowledge-reviews.json` 사본) 37개와 같은 판정이다.
 - 화면은 작업 상세 `KB 판단` 줄 아래에 시도를 최신 순으로 모두 보여 준다(3개 넘으면 나머지는 접음). 시도마다 상태·대조 시각(당시 관측)·지금 판단과 같은 원본인지를 적고, 문서별 상태를 원래 뜻으로 보여 준다. 최신 시도를 승자로 고르거나 시도를 합치지 않으며, 실패·대조 불가·이전 원본의 결과를 일치나 미사용으로 바꾸지 않는다. 시도가 없으면 적용 판단에 "대조 결과가 아직 없다"는 안내만 남긴다.
 - 공개 투영(`publicYear`)은 바꾸지 않았고, 검사로 이력·source·문서 경로가 실리지 않음을 확인한다.
+
+### Aggregate ACK 격리 검사
+
+`yarn tsx scripts/verify-ai-aggregate-receipt.mts`는 기존 aggregate migration만 적용한 PGlite DB와 loopback Next dev 서버에서 실제 ACK·중복/역순·원자적 롤백·관리자 집계 조회를 확인한다. 운영 DB에 연결하지 않으며 다른 Next dev 서버가 없는 환경에서 실행한다. 합성 실제 request/ACK fixture는 `scripts/fixtures/ai-aggregate-receipt-server.json`이다.

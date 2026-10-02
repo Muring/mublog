@@ -33,17 +33,19 @@ export async function POST(request: Request) {
             const total = sumTotals(week.groups.map(g => g.totals));
             if (Object.keys(total).some(k => total[k as keyof typeof total] !== week.totals[k as keyof typeof total])) throw new HttpError(400, "그룹 합계 불일치");
         }
-        const changed = await prisma.$transaction(async tx => {
+        const receipt = await prisma.$transaction(async tx => {
             await tx.$queryRaw`SELECT 1 FROM pg_advisory_xact_lock(93103001)`;
-            const latest = await tx.aiUsageSnapshot.aggregate({ _max: { sequence: true } });
-            if (latest._max.sequence !== null && latest._max.sequence >= BigInt(data.sequence)) return false;
+            const latest = await tx.aiUsageSnapshot.findFirst({ orderBy: [{ sequence: "desc" }, { year: "desc" }], select: { sequence: true, sourceRevision: true } });
+            if (latest && latest.sequence >= BigInt(data.sequence)) {
+                return { accepted: false, sequence: Number(latest.sequence), sourceRevision: latest.sourceRevision };
+            }
             for (const year of data.years) {
                 const values = { sequence: BigInt(data.sequence), sourceRevision: data.sourceRevision, generatedAt: new Date(data.generatedAt), receivedAt: new Date(), publicData: JSON.parse(JSON.stringify(publicYear(year))), privateData: JSON.parse(JSON.stringify({ ...year, improvements: data.improvements })) };
-                await tx.aiUsageSnapshot.upsert({ where: { year: year.year }, create: { year: year.year, ...values }, update: values });
+                await tx.aiUsageSnapshot.upsert({ where: { year: year.year }, create: { year: year.year, ...values }, update: values, select: { year: true } });
             }
-            return true;
+            return { accepted: true, sequence: data.sequence, sourceRevision: data.sourceRevision };
         }, { timeout: 30_000 });
-        if (changed) revalidateTag("ai-public", { expire: 0 });
-        return NextResponse.json({ accepted: changed });
+        if (receipt.accepted) revalidateTag("ai-public", { expire: 0 });
+        return NextResponse.json(receipt);
     } catch (error) { return handleApiError(error, "ai-usage-ingest", "집계를 저장하지 못했습니다."); }
 }
