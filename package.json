@@ -23,7 +23,7 @@
         "lint:fix": "eslint . --fix",
         "make:og": "tsx scripts/make-og-image.mts",
         "revalidate": "tsx scripts/revalidate.mts",
-        "verify:ai": "tsx scripts/verify-ai-usage.mts && tsx scripts/verify-ai-activity.mts",
+        "verify:ai": "tsx scripts/verify-ai-usage.mts && tsx scripts/verify-ai-activity.mts && tsx scripts/verify-ai-knowledge-review.mts",
         "verify:ai-api": "tsx scripts/verify-ai-api.mts"
     },
     "dependencies": {

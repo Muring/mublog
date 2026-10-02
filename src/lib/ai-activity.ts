@@ -198,7 +198,16 @@ export const activitySchema = structure.superRefine((a, ctx) => {
             if (['completed', 'failed'].includes(e.kind) !== (e.result !== null)) fail('Result mismatch');
         });
     });
-    // KB 판단: MuRing-KB scripts/kb_knowledge.py validate_decisions 와 같은 판정. 검색·선택만으로 적용이 되지 않는다
+    knowledgeDecisionIssues(a).forEach(fail);
+});
+/** 선택 활동의 KB 판단 부분. 대조 결과(knowledge-review)의 source 사본도 같은 모양이다 */
+export const knowledgeDecisionsSchema = structure.shape.knowledgeDecisions.unwrap();
+export const legacyKnowledgeSchema = structure.shape.knowledge;
+export const evidenceSchema = structure.shape.evidence;
+type KnowledgePart = { knowledgeDecisions?: z.infer<typeof knowledgeDecisionsSchema>; knowledge: z.infer<typeof legacyKnowledgeSchema> };
+/** KB 판단: MuRing-KB scripts/kb_knowledge.py validate_decisions 와 같은 판정. 검색·선택만으로 적용이 되지 않는다 */
+export function knowledgeDecisionIssues(a: KnowledgePart): string[] {
+    const issues: string[] = []; const fail = (m: string) => issues.push(m);
     const decisionIds = new Set<string>(), documents = new Set<string>();
     const legacy = new Map((a.knowledge ?? []).map(k => [k.document, k.usage]));
     a.knowledgeDecisions?.forEach(d => {
@@ -213,7 +222,8 @@ export const activitySchema = structure.superRefine((a, ctx) => {
         const usage = legacy.get(d.document);
         if (d.decision !== 'unknown' && usage && (usage === 'applied') !== (d.decision === 'applied')) fail('Legacy knowledge and decision contradict each other');
     });
-});
+    return issues;
+}
 export type Activity = z.infer<typeof activitySchema>;
 export type KnowledgeDecision = NonNullable<Activity['knowledgeDecisions']>[number];
 export type Handoff = NonNullable<Activity['handoffs']>[number];
