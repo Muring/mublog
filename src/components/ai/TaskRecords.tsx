@@ -10,6 +10,7 @@ import { mergeHandoffs, type HandoffView } from "@/lib/ai-handoffs";
 import HandoffTimeline from "./HandoffTimeline";
 import SourceRecord from "./SourceRecord";
 import ActivityDetails from "./ActivityDetails";
+import KnowledgeDecisions from "./KnowledgeDecisions";
 import { Checks, Fact, TagList } from "./RecordFacts";
 
 const STATUS: Record<string, [string, Tone]> = { completed: ["완료", "ok"], done: ["완료", "ok"], partial: ["부분 완료", "warn"], cancelled: ["취소", "neutral"], canceled: ["취소", "neutral"], in_progress: ["진행 중", "neutral"], blocked: ["막힘", "warn"], failed: ["실패", "danger"], abandoned: ["중단", "warn"], stopped: ["중단", "warn"] };
@@ -118,7 +119,8 @@ function Record({ task, handoffs, allTasks, onTask, initiallyOpen = false, focus
             {lead && <p className={bare ? manage.recordReason : manage.recordLead}>{lead}{leadFromOutcome && firstOutcome?.artifact && <small><code className={manage.factCode}>{firstOutcome.artifact}</code></small>}</p>}
             {task.conflict && <p className={manage.recordReason}>같은 작업의 기록이 서로 달라 완료 상태를 확정할 수 없습니다.</p>}
             <dl className={manage.facts}>
-                {task.activity && <ActivityDetails activity={task.activity} showPurpose={Boolean(purpose) && purpose !== lead && purpose !== taskTitle(task)} skipFirstOutcome={leadFromOutcome} />}
+                {task.activity && <ActivityDetails activity={task.activity} showPurpose={Boolean(purpose) && purpose !== lead && purpose !== taskTitle(task)} skipFirstOutcome={leadFromOutcome} reviews={task.knowledgeReviews} project={task.project} taskId={task.id} />}
+                {!task.activity && !!task.knowledgeReviews?.length && <KnowledgeDecisions activity={undefined} reviews={task.knowledgeReviews} project={task.project} taskId={task.id} />}
                 {bare && <Fact label="검증"><Checks checks={task.verification} /></Fact>}
                 {p && !task.activity?.verification && <Fact label="검증"><Checks checks={p.checks.map(c => ({ name: c.title, result: c.result, detail: [c.method, c.result !== "pass" ? `${c.reason || "이유 기록 없음"}${c.result === "fail" ? " · 현재 해결 여부는 이 기록만으로 확정하지 않습니다." : ""}` : null] }))} /></Fact>}
                 {p && task.activity?.followUps == null && <Fact label="남은 일"><TagList items={p.followUps.map(f => ({ badge: <AiBadge data-tone="neutral">{f.status === "delegated" ? "다른 세션에 전달" : f.status === "pending" ? "대기" : "진행 여부 미상"}</AiBadge>, body: <>{f.title}{f.note && <small>{f.note}</small>}</> }))} empty="기록된 남은 일 없음" /></Fact>}

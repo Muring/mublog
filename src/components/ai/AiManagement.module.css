@@ -369,3 +369,9 @@
 .recordTable tr[data-open] .recordToggle { min-height: calc(28px + .1rem + .8rem * 1.65); }
 .recordTable tr[data-open] .recordToggle > span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; }
 .recordTable tr[data-open] .recordSummary { display: none; }
+
+/* KB 적용 이력 대조: 판단 목록 아래 가는 선으로 나눈 시도 목록. 시도마다 상태·원본 일치·시각, 그 아래 문서별 결과 */
+.reviewHistory { margin-top: .75rem; padding-top: .65rem; border-top: var(--border-width) dashed var(--bordercolor); }
+.reviewTitle { margin: 0 0 .45rem !important; }
+.reviewList { display: grid; gap: .8rem; margin: 0; padding: 0; list-style: none; }
+.reviewList > li > .checkList { margin-top: .45rem; }

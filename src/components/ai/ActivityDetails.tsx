@@ -1,4 +1,5 @@
 import type { Activity } from '@/lib/ai-activity';
+import type { KnowledgeReview } from '@/lib/ai-knowledge-review';
 import { AiBadge } from './AiControls';
 import KnowledgeDecisions from './KnowledgeDecisions';
 import { Checks, Fact, Lines, TagList } from './RecordFacts';
@@ -7,7 +8,7 @@ import manage from './AiManagement.module.css';
 const FOLLOW_UPS = { pending: '대기', delegated: '위임', done: '완료', unknown: '미상' } as const;
 
 /** activity 의 이름·값 줄들. 목적은 상세 맨 위 한 줄로, 근거 목록은 맨 끝 '원본 기록과 근거'로 옮겨 여기서는 다루지 않는다 */
-export default function ActivityDetails({ activity: a, showPurpose, skipFirstOutcome = false }: { activity: Activity; showPurpose: boolean; skipFirstOutcome?: boolean }) {
+export default function ActivityDetails({ activity: a, showPurpose, skipFirstOutcome = false, reviews, project, taskId }: { activity: Activity; showPurpose: boolean; skipFirstOutcome?: boolean; reviews?: KnowledgeReview[]; project: string; taskId: string }) {
     // 첫 결과가 상세 맨 위 요약으로 올라갔으면 '결과' 줄에는 나머지만 둔다. 나머지가 없으면 줄을 두지 않는다
     const outcomes = skipFirstOutcome ? a.outcomes?.slice(1) : a.outcomes;
     return <>
@@ -25,7 +26,7 @@ export default function ActivityDetails({ activity: a, showPurpose, skipFirstOut
         </> : <span className={manage.factEmpty}>미수집</span>}</Fact>}
         {a.followUps !== null && <Fact label="남은 일"><TagList items={a.followUps?.map(f => ({ badge: <AiBadge data-tone="neutral">{FOLLOW_UPS[f.status]}</AiBadge>, body: f.summary }))} /></Fact>}
         {!!a.knowledge?.length && <Fact label="연결된 지식"><TagList items={a.knowledge.map(k => ({ badge: <AiBadge data-tone={k.usage === 'applied' ? 'ok' : 'neutral'}>{k.usage === 'applied' ? '적용' : '참고'}</AiBadge>, body: <><code className={manage.factCode}>{k.document}</code>{k.note && <small>{k.note}</small>}</> }))} /></Fact>}
-        <KnowledgeDecisions activity={a} />
+        <KnowledgeDecisions activity={a} reviews={reviews} project={project} taskId={taskId} />
         {!!a.effects?.length && <Fact label="효과"><TagList items={a.effects.map(e => ({ badge: <AiBadge data-tone="neutral">{e.kind === 'measured' ? '측정' : '사용자 확인'}</AiBadge>, body: <><strong>{e.metric}</strong>{e.before !== null && ` ${e.before} → ${e.after}${e.unit ? ` ${e.unit}` : ''}`}<small>{e.method}</small></> }))} /></Fact>}
     </>;
 }
