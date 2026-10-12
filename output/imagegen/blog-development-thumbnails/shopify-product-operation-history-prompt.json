@@ -1,0 +1,7 @@
+{
+  "generator": "Built-in image_gen",
+  "file": "shopify-product-operation-history.png",
+  "title": "Shopify 앱에 작업 기록 붙이기",
+  "prompt": "Create one polished landscape 16:9 Korean developer blog thumbnail. Exact Korean title to render clearly, without any changes: \"Shopify 앱에 작업 기록 붙이기\". Place title across two balanced lines in the central upper region, with generous margins so all letters survive square social-card crops. Typography must be crisp dark forest-green bold Korean sans-serif, large and readable at thumbnail size. Editorial flat geometric illustration with subtle paper texture and restrained soft shadows. Palette: pale mint and warm ivory background, forest green and muted teal interface shapes, tiny amber accents, inspired by a Shopify product-management app but no brand logo needed. Below the title, centrally composed single browser window showing three simplified product-operation history rows, one expanded as a clearly inset white rounded detail panel. A small undo curved arrow connects two history cards, and a compact clock symbol implies recorded changes. Few large elements, elegant spacious composition, no realistic screenshot, no people, no random code, no extra lettering or pseudo-text, no watermark. All important content within central 65% width and 75% height. This is a fresh standalone blog cover, not a collage.",
+  "referencedImages": []
+}
