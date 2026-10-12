@@ -1,0 +1,106 @@
+[
+  {
+    "request": {
+      "sequence": 10,
+      "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "status": 401,
+    "response": {
+      "error": "Unauthorized"
+    }
+  },
+  {
+    "request": {
+      "sequence": 10,
+      "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "status": 200,
+    "response": {
+      "accepted": true,
+      "sequence": 10,
+      "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "request": {
+      "sequence": 10,
+      "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "status": 200,
+    "response": {
+      "accepted": false,
+      "sequence": 10,
+      "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "request": {
+      "sequence": 9,
+      "sourceRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "status": 200,
+    "response": {
+      "accepted": false,
+      "sequence": 10,
+      "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "request": {
+      "sequence": 10,
+      "sourceRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "status": 200,
+    "response": {
+      "accepted": false,
+      "sequence": 10,
+      "sourceRevision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "request": {
+      "sequence": 12,
+      "sourceRevision": "cccccccccccccccccccccccccccccccccccccccc"
+    },
+    "status": 200,
+    "response": {
+      "accepted": true,
+      "sequence": 12,
+      "sourceRevision": "cccccccccccccccccccccccccccccccccccccccc"
+    }
+  },
+  {
+    "request": {
+      "sequence": 11,
+      "sourceRevision": "dddddddddddddddddddddddddddddddddddddddd"
+    },
+    "status": 200,
+    "response": {
+      "accepted": false,
+      "sequence": 12,
+      "sourceRevision": "cccccccccccccccccccccccccccccccccccccccc"
+    }
+  },
+  {
+    "request": {
+      "sequence": 13,
+      "sourceRevision": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    },
+    "status": 500,
+    "response": {
+      "error": "집계를 저장하지 못했습니다."
+    }
+  },
+  {
+    "request": {
+      "sequence": 11,
+      "sourceRevision": "dddddddddddddddddddddddddddddddddddddddd"
+    },
+    "status": 200,
+    "response": {
+      "accepted": false,
+      "sequence": 12,
+      "sourceRevision": "cccccccccccccccccccccccccccccccccccccccc"
+    }
+  }
+]

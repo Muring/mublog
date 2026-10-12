@@ -8,7 +8,7 @@ export const getPublicAi = unstable_cache(async () => {
 }, ["ai-public"], { tags: ["ai-public", "posts:list"], revalidate: 300 });
 
 export async function getAdminAi() {
-    const snapshots = await prisma.aiUsageSnapshot.findMany({ orderBy: { year: "desc" } });
+    const snapshots = await prisma.aiUsageSnapshot.findMany({ orderBy: { year: "desc" }, select: { year: true, sequence: true, sourceRevision: true, generatedAt: true, receivedAt: true, privateData: true } });
     return { checkedAt: new Date().toISOString(), snapshots: snapshots.map(s => ({ year: s.year, sequence: s.sequence.toString(), sourceRevision: s.sourceRevision, generatedAt: s.generatedAt.toISOString(), receivedAt: s.receivedAt.toISOString(), data: s.privateData as UsageYear & { improvements: { date: string; kind: string; summary: string }[] } })) };
 }
 export type AdminAiData = Awaited<ReturnType<typeof getAdminAi>>;
