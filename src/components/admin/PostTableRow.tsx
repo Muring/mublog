@@ -7,7 +7,7 @@ import Link from "next/link";
 import TagChips from "@/components/ui/TagChips";
 import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
-import { fetchJson } from "@/lib/fetcher";
+import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import { useConfirm } from "@/providers/Confirm";
 
 import { commentListUrl } from "@/lib/admin-navigation";
@@ -37,8 +37,24 @@ export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags
     const confirm = useConfirm();
     const [isPending, startTransition] = useTransition();
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isPublishing, setIsPublishing] = useState(false);
+
+    async function publish() {
+        if (busy) return;
+        setIsPublishing(true);
+        try {
+            await fetchJson(`/api/admin/posts/${post.id}`, jsonRequest("PATCH", { status: "PUBLISHED" }));
+            toast.success(`"${post.title}" 을(를) 발행했습니다.`);
+            startTransition(() => router.refresh());
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "발행에 실패했습니다.");
+        } finally {
+            setIsPublishing(false);
+        }
+    }
 
     async function remove() {
+        if (busy) return;
         const ok = await confirm({
             title: `"${post.title}" 을(를) 삭제할까요?`,
             description: "댓글도 함께 삭제되며 되돌릴 수 없습니다.",
@@ -60,7 +76,7 @@ export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags
     }
 
     const commentsHref = commentListUrl({ post: post.slug, returnTo });
-    const busy = isDeleting || isPending;
+    const busy = isDeleting || isPublishing || isPending;
 
     return (
         <tr style={busy ? { opacity: 0.5 } : undefined}>
@@ -99,11 +115,17 @@ export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags
             <td data-label="좋아요">{post.likeCount.toLocaleString("ko-KR")}</td>
             <td className="actions">
                 <div className="action-buttons">
-                    <Link href={`/admin/posts/${post.id}`} className="row-edit">
-                        수정
-                    </Link>
+                    {post.status === "DRAFT" ? (
+                        <button type="button" className="row-publish" onClick={publish} disabled={busy}>
+                            {isPublishing ? "발행 중..." : "발행"}
+                        </button>
+                    ) : (
+                        <Link href={`/admin/posts/${post.id}`} className="row-edit">
+                            수정
+                        </Link>
+                    )}
                     <button type="button" className="row-delete" onClick={remove} disabled={busy}>
-                        {busy ? "삭제 중..." : "삭제"}
+                        {isDeleting ? "삭제 중..." : "삭제"}
                     </button>
                 </div>
             </td>

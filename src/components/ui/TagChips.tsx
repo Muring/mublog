@@ -38,11 +38,11 @@ const Tags = styled.div<{ $alignEnd: boolean }>`
   }
 
   /*
-   * 숨은 태그 목록. +N 칩의 바로 오른쪽에서 펼쳐진다.
+   * 숨은 태그 목록. +N 칩의 바로 아래에서 펼쳐진다.
    * 태그 줄을 기준으로 잡으면 카드 왼쪽 끝에서 열려 무엇에 딸린 것인지 안 보였다.
    *
-   * 색은 다른 툴팁(툴바·차트)과 같은 짝을 쓴다. 배경에 --foreground,
-   * 글자에 --background 라 두 테마 모두 확실히 떠 보인다.
+   * 안에 태그 버튼도 들어가므로 툴팁처럼 색을 반전하지 않고,
+   * 다른 메뉴와 같은 테마 배경·테두리를 사용한다.
    */
   .popover {
     position: absolute;
@@ -53,8 +53,9 @@ const Tags = styled.div<{ $alignEnd: boolean }>`
     display: none;
     padding: 0.25rem 0.5rem;
     border-radius: 8px;
-    background-color: var(--foreground);
-    color: var(--background);
+    background-color: var(--cardbackground);
+    color: var(--foreground);
+    border: var(--border-width) solid var(--bordercolor);
     font-weight: 700;
     box-shadow: 0px 3px 8px -2px var(--shadowcolor);
     /*
@@ -64,10 +65,9 @@ const Tags = styled.div<{ $alignEnd: boolean }>`
     width: max-content;
     max-width: 11rem;
     white-space: normal;
-    font-weight: 700;
   }
 
-  .more:hover, .more:focus-visible { background-color: var(--foreground); color: var(--background); }
+  .more:hover, .more:focus-visible { background-color: var(--control-hover-bg); color: var(--foreground); }
   .more:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   /* 펼친 목록 안의 태그 버튼에 초점이 가도 목록이 닫히지 않게 focus-within 도 본다 */
   .more:hover .popover, .more:focus-visible .popover, .more:focus-within .popover {
@@ -88,8 +88,8 @@ const Tags = styled.div<{ $alignEnd: boolean }>`
   button.chip:hover { box-shadow: inset 0 0 0 var(--border-width) var(--foreground); color: var(--foreground); }
   button.chip:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   button.chip[aria-pressed="true"] { background-color: var(--foreground); color: var(--background); }
-  .popover button.chip { display: inline-block; margin: 0.1rem 0.15rem; background-color: var(--background); color: var(--foreground); }
-  .popover button.chip[aria-pressed="true"] { box-shadow: inset 0 0 0 var(--border-width) var(--background); background-color: transparent; color: var(--background); }
+  .popover button.chip { display: inline-block; margin: 0.1rem 0.15rem; background-color: var(--codefontbgcolor); color: var(--foreground); }
+  .popover button.chip[aria-pressed="true"] { background-color: var(--activecolor); color: var(--activefontcolor); }
   @media (prefers-reduced-motion: reduce) { button.chip { transition: none; } }
 `;
 

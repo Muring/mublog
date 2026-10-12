@@ -2,7 +2,7 @@
 
 import styled from "@emotion/styled";
 import { statusBadgeBase } from "@/styles/status-badge";
-import { buttonSubtle, buttonDanger, buttonPrimary, buttonGhost } from "@/styles/button";
+import { buttonBase, buttonQuiet, buttonSubtle, buttonDanger, buttonPrimary, buttonGhost } from "@/styles/button";
 import { thinScrollbar } from "@/styles/scrollbar";
 import { surface } from "@/styles/surface";
 import { listTableBase } from "@/styles/list-table";
@@ -114,7 +114,7 @@ export const PostTable = styled.table`
   th:nth-of-type(5) { width: 7.5rem; }  /* 수정일 */
   th:nth-of-type(6) { width: 5rem; }     /* 누적 조회 */
   th:nth-of-type(7) { width: 6rem; }    /* 댓글 */
-  th:nth-of-type(9) { width: 7rem; }  /* 수정·삭제 */
+  th:nth-of-type(9) { width: 7rem; }  /* 발행 또는 수정·삭제 */
 
   .views-total {
     text-align: center;
@@ -185,7 +185,7 @@ export const PostTable = styled.table`
 
   .badge { ${statusBadgeBase} }
 
-  .row-edit, .row-delete {
+  .row-edit, .row-delete, .row-publish {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -202,13 +202,35 @@ export const PostTable = styled.table`
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-    transition: background-color .15s, border-color 150ms ease;
+    transition: background-color .15s, color .15s, border-color 150ms ease;
   }
-  .row-edit:hover { background: var(--control-hover-bg); color: var(--foreground); }
+  .row-publish {
+    ${buttonBase}
+    border-radius: 5px;
+    background: transparent;
+    color: var(--okcolor);
+    &:hover:not(:disabled) {
+      background: transparent;
+      border-color: var(--okcolor);
+      color: var(--okcolor);
+    }
+  }
+  .row-edit {
+    ${buttonQuiet}
+    border-radius: 5px;
+    background: transparent;
+    transition: background-color .15s, color .15s, outline-color 150ms ease, border-color 150ms ease;
+    &:hover {
+      background: var(--hovercolor);
+      color: var(--hoverfontcolor);
+      outline-color: var(--hoverfontcolor);
+    }
+  }
   .row-delete { color: var(--desccolor); }
   .row-delete:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
-  .row-delete:disabled { opacity: .5; cursor: wait; }
-  .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+  .row-delete:disabled, .row-publish:disabled { cursor: wait; }
+  .row-edit:focus-visible, .row-delete:focus-visible, .row-publish:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+  .row-publish:focus-visible { outline-color: var(--okcolor); }
   .action-buttons {
     display: flex;
     gap: 0.4rem;

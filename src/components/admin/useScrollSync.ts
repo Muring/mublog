@@ -100,8 +100,10 @@ function buildAnchors(srcTops: number[], pvTops: number[], srcMax: number, pvMax
     const pairs = Math.min(srcTops.length, pvTops.length);
 
     for (let index = 0; index < pairs; index++) {
-        const src = Math.min(srcTops[index], srcMax);
-        const pv = Math.min(pvTops[index], pvMax);
+        const src = srcTops[index];
+        const pv = pvTops[index];
+        // 한쪽만 끝에 맞추면 양쪽의 마지막 위치가 서로 대응하지 않는다.
+        if (src >= srcMax || pv >= pvMax) continue;
         const last = anchors[anchors.length - 1];
         if (src > last.src && pv > last.pv) anchors.push({ src, pv });
     }
@@ -153,8 +155,9 @@ export function useScrollSync(
 
         let anchors: Anchor[] = [];
         let stale = true;
-        // 맞춰준 쪽에서 scroll 이 되올라와 둘이 서로를 밀어내는 것을 막는다
-        let syncing = false;
+        // 이벤트는 다음 프레임보다 늦게 올 수도 있다. 시간 대신 실제로 맞춘
+        // 위치를 기억해 반대쪽에서 돌아온 이벤트만 무시한다.
+        const expected = new Map<HTMLElement, number>();
 
         const remeasure = () => {
             anchors = buildAnchors(
@@ -167,7 +170,9 @@ export function useScrollSync(
         };
 
         const follow = (from: HTMLElement, to: HTMLElement, axis: keyof Anchor) => () => {
-            if (syncing) return;
+            const syncedTop = expected.get(from);
+            if (syncedTop !== undefined && Math.abs(from.scrollTop - syncedTop) < 0.5) return;
+            expected.delete(from);
 
             const toMax = to.scrollHeight - to.clientHeight;
             // 좁은 화면에서는 한 쪽만 보인다. 감춰진 칸은 여기서 걸러진다.
@@ -175,12 +180,12 @@ export function useScrollSync(
 
             if (stale) remeasure();
 
-            syncing = true;
-            to.scrollTop = Math.max(0, Math.min(toMax, project(anchors, from.scrollTop, axis)));
-            // 위 대입이 부른 scroll 이벤트가 지나간 뒤에 푼다
-            requestAnimationFrame(() => {
-                syncing = false;
+            to.scrollTo({
+                top: Math.max(0, Math.min(toMax, project(anchors, from.scrollTop, axis))),
+                behavior: "instant",
             });
+            // 브라우저가 반올림·제한한 최종 좌표를 기록한다.
+            expected.set(to, to.scrollTop);
         };
 
         const onWrite = follow(area, pane, "src");
