@@ -3,6 +3,7 @@
 import styled from "@emotion/styled";
 import { surface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
+import { buttonSubtle } from "@/styles/button";
 
 export const ToastViewport = styled.div`
     position: fixed;
@@ -58,6 +59,20 @@ export const ToastItem = styled.div`
         flex: 1;
         min-width: 0;
         word-break: break-word;
+    }
+
+    .action {
+        ${buttonSubtle}
+        flex-shrink: 0;
+        padding: 0.3rem 0.55rem;
+        font-size: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+
+        &:focus-visible {
+            outline: 2px solid var(--linkhovercolor);
+            outline-offset: 2px;
+        }
     }
 
     .dismiss {

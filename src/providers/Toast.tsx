@@ -2,18 +2,21 @@
 
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { ToastViewport, ToastItem } from "@/components/ui/Toast.styled";
 
 type ToastKind = "success" | "error" | "info";
+type ToastAction = { label: string; href: string };
 
 type Toast = {
     id: string;
     kind: ToastKind;
     message: string;
+    action?: ToastAction;
 };
 
 type ToastApi = {
-    success: (message: string) => void;
+    success: (message: string, action?: ToastAction) => void;
     error: (message: string) => void;
     info: (message: string) => void;
 };
@@ -46,14 +49,24 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
         setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, []);
 
+    // 바로가기를 읽거나 키보드로 조작하는 동안 알림이 사라지지 않게 한다.
+    const pause = (id: string) => {
+        clearTimeout(timers.current.get(id));
+        timers.current.delete(id);
+    };
+    const resume = (toast: Toast) => {
+        pause(toast.id);
+        timers.current.set(toast.id, setTimeout(() => dismiss(toast.id), 8000));
+    };
+
     const push = useCallback(
-        (kind: ToastKind, message: string) => {
+        (kind: ToastKind, message: string, action?: ToastAction) => {
             const id = crypto.randomUUID();
             // 같은 내용이 연달아 쌓이면 화면만 어지러워지므로 이전 것을 걷어낸다
-            setToasts((prev) => [...prev.filter((t) => t.message !== message), { id, kind, message }]);
+            setToasts((prev) => [...prev.filter((t) => t.message !== message), { id, kind, message, action }]);
             timers.current.set(
                 id,
-                setTimeout(() => dismiss(id), DURATION[kind])
+                setTimeout(() => dismiss(id), action ? 8000 : DURATION[kind])
             );
         },
         [dismiss]
@@ -61,7 +74,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
 
     const api = useMemo<ToastApi>(
         () => ({
-            success: (message) => push("success", message),
+            success: (message, action) => push("success", message, action),
             error: (message) => push("error", message),
             info: (message) => push("info", message),
         }),
@@ -77,8 +90,21 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
             */}
             <ToastViewport role="status" aria-live="polite">
                 {toasts.map((toast) => (
-                    <ToastItem key={toast.id} className={toast.kind}>
+                    <ToastItem key={toast.id} className={toast.kind}
+                        onMouseEnter={() => { if (toast.action) pause(toast.id); }}
+                        onMouseLeave={(event) => {
+                            if (toast.action && !event.currentTarget.contains(document.activeElement)) resume(toast);
+                        }}
+                        onFocus={() => { if (toast.action) pause(toast.id); }}
+                        onBlur={(event) => {
+                            if (toast.action && !event.currentTarget.contains(event.relatedTarget) && !event.currentTarget.matches(":hover")) resume(toast);
+                        }}>
                         <span className="message">{toast.message}</span>
+                        {toast.action && (
+                            <Link className="action" href={toast.action.href} prefetch={false} onClick={() => dismiss(toast.id)}>
+                                {toast.action.label}
+                            </Link>
+                        )}
                         <button
                             type="button"
                             className="dismiss"
