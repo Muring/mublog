@@ -37,6 +37,14 @@ export const FilterBarRoot = styled.div`
         font: inherit; font-size: 14px;
     }
     .bar-search > input::placeholder { color: var(--desccolor); }
+    /* 좁은 화면에서 펼친 검색을 접는 버튼. 넓은 화면은 검색창이 늘 펼쳐져 있어 쓰지 않는다 */
+    .search-close {
+        position: absolute; top: 0; right: 0; display: none; align-items: center; justify-content: center;
+        width: 44px; height: 44px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--desccolor); cursor: pointer;
+        transition: color 150ms ease, background-color 150ms ease;
+    }
+    .search-close:hover { background: var(--control-hover-bg); color: var(--foreground); }
+    .search-close svg { width: 18px; height: 18px; }
     .bar-search > input:hover { border-color: var(--foreground); }
     .bar-search > input:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
     .bar-anchor { position: relative; flex-shrink: 0; }
@@ -112,13 +120,64 @@ export const FilterBarRoot = styled.div`
         padding: 8px 0 12px;
         background: var(--background);
         border-image: linear-gradient(var(--background) 0 0) fill 0 / / 0 100vmax;
-        .bar-status { flex-basis: 100%; }
-        .bar-main { flex-basis: 180px; }
-        .status-filters { width: 100%; }
-        .status-filters button { flex: 1 0 auto; min-height: 44px; padding-inline: 10px; }
-        .status-filters { height: auto; min-height: 50px; }
-        .bar-search > input { height: 44px; font-size: 16px; }
-        .bar-toggle, .bar-sort > div > button { min-height: 44px; }
+
+        /*
+         * 상태 · 검색 · 필터 · 정렬을 한 줄에 둔다. 붙어 있는 바가 두세 줄이면 화면의 4분의 1을 덮었다.
+         * 검색은 44px 아이콘 칸으로 접혀 있다가 초점을 받으면 그 줄을 덮고, 필터·정렬은 글자 없이 아이콘만 남긴다.
+         * 상태 칸이 많아 넘치면(이미지) 상태 묶음만 가로로 민다.
+         */
+        .bar-controls { flex-wrap: nowrap; }
+        .bar-status { flex: 1 1 0; }
+        .status-filters { width: 100%; height: auto; min-height: 44px; }
+        .status-filters button { flex: 1 0 auto; min-height: 38px; padding-inline: 8px; gap: 4px; }
+        .bar-main { flex: 0 0 auto; }
+        .bar-search { flex: 0 0 44px; }
+        .bar-search > input { height: 44px; padding: 0; font-size: 16px; color: transparent; caret-color: transparent; cursor: pointer; }
+        .bar-search > input::placeholder { color: transparent; }
+        .bar-search > input::-webkit-search-cancel-button { display: none; }
+        .bar-search > svg { left: 50%; transform: translate(-50%, -50%); }
+        /* 접힌 채로 검색어가 걸려 있으면 점으로 알린다 */
+        &[data-query]:not([data-searching]) .bar-search::after {
+            content: ""; position: absolute; top: 8px; right: 8px; width: 6px; height: 6px;
+            border-radius: 50%; background: var(--linkhovercolor); pointer-events: none;
+        }
+        .bar-toggle { position: relative; width: 44px; height: 44px; padding: 0; gap: 0; font-size: 0; }
+        .bar-badge { position: absolute; top: 3px; right: 5px; font-size: 10px; }
+        .bar-sort > div { display: flex; }
+        .bar-sort button { width: 44px; height: 44px; padding: 0; justify-content: center; }
+        .bar-sort button > span { display: none; }
+        .bar-sort button::after, .bar-sort button[aria-expanded="true"]::after {
+            left: 50%; right: auto; width: 18px; height: 18px; border: 0;
+            background: currentColor; transform: translate(-50%, -50%);
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4v16M4 8l4-4 4 4M16 20V4M12 16l4 4 4-4'/%3E%3C/svg%3E") center / contain no-repeat;
+        }
+        &[data-searching] .bar-status, &[data-searching] .bar-anchor, &[data-searching] .bar-sort { display: none; }
+        &[data-searching] .bar-main, &[data-searching] .bar-search { flex: 1 1 auto; }
+        &[data-searching] .bar-search > input { padding: 0 44px 0 38px; color: var(--foreground); caret-color: auto; cursor: text; }
+        &[data-searching] .bar-search > input::placeholder { color: var(--desccolor); }
+        &[data-searching] .bar-search > svg { left: 12px; transform: translateY(-50%); }
+        &[data-searching] .search-close { display: flex; }
+
+        /*
+         * 상태가 한 줄을 다 쓰는 배치(statusRow). 상태 칸을 옆으로 밀어야 보이게 두면 정리할 때 볼 개수(미사용·삭제 예정)가 가려진다.
+         * 둘째 줄은 개수 요약(왼쪽)과 검색·필터·정렬 아이콘(오른쪽)이 나눠 써서, 줄 수는 늘어도 높이는 거의 같다.
+         * 묶음 상자(.bar-controls·.bar-results)를 풀어 그 안의 칸을 바로 격자에 놓는다.
+         */
+        &[data-status-row] {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            grid-template-areas: "status status status" "summary main sort";
+            gap: 8px;
+        }
+        &[data-status-row] .bar-controls, &[data-status-row] .bar-results { display: contents; }
+        &[data-status-row] .bar-status { grid-area: status; }
+        &[data-status-row] .bar-main { grid-area: main; }
+        &[data-status-row] .bar-sort { grid-area: sort; }
+        &[data-status-row] .bar-summary { grid-area: summary; align-self: center; }
+        &[data-status-row] > :not(.bar-controls):not(.bar-results) { grid-column: 1 / -1; grid-row: 3; }
+        &[data-status-row][data-searching] .bar-status { display: block; }
+        &[data-status-row][data-searching] .bar-summary { display: none; }
+        &[data-status-row][data-searching] .bar-main { grid-column: 1 / -1; }
     }
 `;
 

@@ -93,6 +93,7 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
                 fieldCount={new Set(chips.filter((chip) => chip.key !== "status").map((chip) => chip.key.split(":")[0])).size}
                 summary={summary}
                 pending={isPending}
+                searchActive={Boolean(shown.q)}
                 chips={<FilterChips items={chips} onClear={reset} canClear={chips.length > 0 || Boolean(shown.q) || shown.status !== "all"}
                     onRemove={(key) => go(chips.find((chip) => chip.key === key)!.patch)} />}
             />

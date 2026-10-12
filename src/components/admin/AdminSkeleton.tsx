@@ -78,7 +78,7 @@ export function PostTableSkeleton({ rows = 8 }: { rows?: number }) {
 }
 
 /** 로딩 중에도 세 관리 화면 공용 FilterBar 를 그대로 써서 자리·폭이 실제와 같다. 조작하지 않는다. */
-function ToolbarSkeleton({ statuses }: { statuses: string[] }) {
+function ToolbarSkeleton({ statuses, statusRow }: { statuses: string[]; statusRow?: boolean }) {
     return (
         <FilterBar
             loading
@@ -96,6 +96,7 @@ function ToolbarSkeleton({ statuses }: { statuses: string[] }) {
             fieldCount={0}
             onApply={() => {}}
             summary="불러오는 중"
+            statusRow={statusRow}
         />
     );
 }
@@ -158,6 +159,7 @@ export function AdminImagesSkeleton() {
             <div aria-hidden inert>
                 <ToolbarSkeleton
                     statuses={["전체", "썸네일", "본문", "미사용", "삭제 예정"]}
+                    statusRow
                 />
                 <ResultBar>
                     <p>

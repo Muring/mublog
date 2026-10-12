@@ -73,6 +73,7 @@ export default function PostTableToolbar({ state, counts, onChange, options = { 
             onApply={({ tag, series, from, to, hasComments }) => onChange({ tag, series, from, to, hasComments: hasComments as PostListState["hasComments"] })}
             fieldCount={new Set(chips.filter((chip) => chip.key !== "status").map((chip) => chip.key.split(":")[0])).size}
             summary={`${counts[state.status].toLocaleString("ko-KR")}개 표시`}
+            searchActive={Boolean(state.q)}
             chips={!loading && <FilterChips items={chips} onClear={reset} canClear={chips.length > 0 || Boolean(state.q) || state.status !== "all"}
                 onRemove={(key) => {
                     const cut = key.indexOf(":");

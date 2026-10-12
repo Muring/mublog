@@ -309,6 +309,8 @@ export default function AdminImagesView({ initialPage }: Props) {
                 onApply={({ post, from, to, format, size }) => { setPostId(post); setImageFilters({ from, to, format, size }); }}
                 fieldCount={new Set(chips.filter((chip) => chip.key !== "usage").map((chip) => chip.key.split(":")[0])).size}
                 pending={pending}
+                searchActive={Boolean(query.trim())}
+                statusRow
                 summary={error ? "목록을 불러오지 못했습니다." : `${page.count.toLocaleString("ko-KR")}개 중 ${images.length.toLocaleString("ko-KR")}개 표시`}
                 chips={<FilterChips items={chips} onClear={resetFilters} canClear={chips.length > 0 || Boolean(query.trim()) || filter !== "all"}
                     onRemove={(key) => {

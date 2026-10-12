@@ -46,11 +46,9 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
     const input = useRef<HTMLInputElement>(null);
     const composing = useRef(false);
     /*
-     * 좁은 화면은 컨트롤을 한 줄에 모은다. 검색은 아이콘 자리로 접혀 있다가 누르면 그 줄을 덮어 펼치고,
-     * 표 구성 전환은 필터 시트로 들어간다. 표가 쓸 세로 공간을 넓히려는 것이다.
+     * 좁은 화면은 컨트롤을 한 줄에 모은다(공용 FilterBar). 표 구성 전환은 그 줄에 둘 자리가 없어 필터 시트로 들어간다.
      */
     const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(mobileQuery).matches, () => false);
-    const [searching, setSearching] = useState(false);
     const sheetFields = isMobile && view ? [{ key: "view", label: "표 구성", options: VIEW_OPTIONS }, ...fields] : fields;
     useEffect(() => {
         if (input.current && !composing.current) input.current.value = q;
@@ -81,7 +79,7 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
             : [{ key: field.key, name: field.label, value: label(values[field.key]) }];
     });
 
-    return <div ref={wrapper} className={manage.filterBar} data-searching={searching || undefined} data-query={q ? "" : undefined}>
+    return <div ref={wrapper} className={manage.filterBar}>
         <FilterBar
             loading={loading}
             status={<>
@@ -97,17 +95,11 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
             </>}
             sort={<Dropdown className="sort-control" label="정렬" size="control" variant="ghost" value={sort} align="right"
                 options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }]} onChange={(value) => onSort(value as "newest" | "oldest")} />}
-            search={searchPlaceholder && <><input type="search" ref={input} defaultValue={q} readOnly={loading}
-                onFocus={() => setSearching(true)} onBlur={() => setSearching(false)}
+            search={searchPlaceholder && <input type="search" ref={input} defaultValue={q} readOnly={loading}
                 onCompositionStart={() => { composing.current = true; }}
                 onCompositionEnd={(event) => { composing.current = false; onSearch(event.currentTarget.value); }}
                 onChange={(event) => { if (!composing.current) onSearch(event.currentTarget.value); }}
-                placeholder={searchPlaceholder} aria-label={searchPlaceholder.endsWith("검색") ? searchPlaceholder : `${searchPlaceholder} 검색`} />
-                {/* 입력창이 초점을 잃으면 접히므로, 누르는 순간 초점을 옮기지 않고 직접 내려놓는다 */}
-                <button type="button" className={manage.searchClose} aria-label="검색 닫기" tabIndex={-1}
-                    onPointerDown={(event) => event.preventDefault()} onClick={() => input.current?.blur()}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
-                </button></>}
+                placeholder={searchPlaceholder} aria-label={searchPlaceholder.endsWith("검색") ? searchPlaceholder : `${searchPlaceholder} 검색`} />}
             fields={sheetFields as FilterField[]}
             values={isMobile && view ? { ...values, view: view.value } : values}
             onApply={({ view: nextView, ...next }) => {
@@ -116,6 +108,7 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
             }}
             fieldCount={fields.filter((field) => active(field.key)).length}
             summary={summary}
+            searchActive={Boolean(q)}
             chips={!loading && <FilterChips items={chips} onClear={onReset} canClear={chips.length > 0 || Boolean(q)}
                 onRemove={(key) => {
                     const cut = key.indexOf(":");

@@ -25,10 +25,17 @@ type Props = {
     summary: ReactNode;
     pending?: boolean;
     loading?: boolean;
+    /** 검색어가 걸려 있는가. 좁은 화면에서 검색이 아이콘으로 접혀 있을 때 점으로 알린다 */
+    searchActive?: boolean;
+    /** 상태 칸이 많아 좁은 화면 한 줄에 다 못 들어갈 때(이미지). 상태가 한 줄을 다 쓰고, 개수 요약이 아이콘 줄 왼쪽으로 온다 */
+    statusRow?: boolean;
 };
 
 /** 검색·상태는 즉시, 상세 조건은 폼에서 한 번에 적용한다. */
-export default function FilterBar({ status, sort, search, fields, values, dateRange, dateBefore, fieldCount, onApply, chips, summary, pending, loading = false }: Props) {
+export default function FilterBar({ status, sort, search, fields, values, dateRange, dateBefore, fieldCount, onApply, chips, summary, pending, loading = false, searchActive = false, statusRow = false }: Props) {
+    // 좁은 화면에서 검색창에 초점이 있는 동안 검색이 한 줄을 덮는다(FilterBar.styled)
+    const [searching, setSearching] = useState(false);
+    const searchBox = useRef<HTMLDivElement>(null);
     const [presentation, setPresentation] = useState<"sheet" | "popover" | null>(null);
     const trigger = useRef<HTMLButtonElement>(null);
     const anchor = useRef<HTMLDivElement>(null);
@@ -60,13 +67,21 @@ export default function FilterBar({ status, sort, search, fields, values, dateRa
     );
 
     return (
-        <FilterBarRoot data-filter-bar data-loading={loading || undefined} inert={loading || undefined}>
+        <FilterBarRoot data-filter-bar data-loading={loading || undefined} inert={loading || undefined}
+            data-searching={searching || undefined} data-query={searchActive || undefined} data-status-row={statusRow || undefined}>
             <div className="bar-controls">
                 <div className="bar-status">{status}</div>
                 <div className="bar-main">
-                    {search && <div className="bar-search">
+                    {search && <div className="bar-search" ref={searchBox}
+                        onFocus={(event) => { if (event.target instanceof HTMLInputElement) setSearching(true); }}
+                        onBlur={(event) => { if (event.target instanceof HTMLInputElement) setSearching(false); }}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 4 4" /></svg>
                         {search}
+                        {/* 입력창이 초점을 잃으면 접히므로, 누르는 순간 초점을 옮기지 않고 직접 내려놓는다 */}
+                        <button type="button" className="search-close" aria-label="검색 닫기" tabIndex={-1}
+                            onPointerDown={(event) => event.preventDefault()} onClick={() => searchBox.current?.querySelector("input")?.blur()}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+                        </button>
                     </div>}
                     <div className="bar-anchor" ref={anchor}>
                         <button ref={trigger} type="button" className="bar-toggle" aria-haspopup="dialog" aria-expanded={presentation !== null}
