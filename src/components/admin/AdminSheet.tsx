@@ -132,7 +132,8 @@ export default function AdminSheet({ id, title, onClose, children, footer, Panel
         return () => {
             document.removeEventListener("keydown", onKeyDown);
             // 이미지를 지워 시트가 닫혔으면 연 카드가 없을 수 있다
-            if (opener?.isConnected) opener.focus();
+            // 초점만 돌려준다. 스크롤을 잠근 채 위에 붙은 버튼으로 옮기면 페이지가 맨 위로 튀었다(FilterBar)
+            if (opener?.isConnected) opener.focus({ preventScroll: true });
         };
     }, [requestClose]);
 

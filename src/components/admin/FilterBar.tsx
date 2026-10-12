@@ -42,7 +42,9 @@ export default function FilterBar({ status, sort, search, fields, values, dateRa
     const dialogId = useId();
     const close = useCallback(() => {
         setPresentation(null);
-        trigger.current?.focus();
+        // 좁은 화면의 필터 바는 위에 붙어 늘 보인다. 스크롤을 잠근 채 붙은 요소에 초점을 주면
+        // 브라우저가 그 원래 자리(페이지 맨 위 근처)로 끌어올려, 목록을 내려 둔 위치를 잃었다
+        trigger.current?.focus({ preventScroll: true });
     }, []);
 
     useEffect(() => {
