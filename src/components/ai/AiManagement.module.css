@@ -59,6 +59,55 @@
  .filterBar :global(.bar-status) :global(.status-filters) button { min-height: 38px; }
 }
 
+/*
+ * 좁은 화면은 기간 · 검색 · 필터 · 정렬을 한 줄에 둔다(AiFilterBar 주석). 줄이 셋이면 표가 쓸 높이가 화면의 절반 남짓이었다.
+ * 검색은 44px 아이콘 칸으로 접혀 있다가 초점을 받으면 그 줄을 덮고, 필터·정렬은 글자 없이 아이콘만 남긴다.
+ */
+.searchClose, .narrowLabel { display: none; }
+@media (max-width: 640px) {
+ .wideLabel { display: none; }
+ .narrowLabel { display: inline; }
+ .filterBar .viewToggle { display: none; }
+ .filterBar :global(.bar-controls) { flex-wrap: nowrap; }
+ .filterBar :global(.bar-status) { flex: 1 1 0; }
+ .filterBar :global(.bar-status) :global(.status-filters) { width: 100%; }
+ .filterBar :global(.bar-status) :global(.status-filters) button { flex: 1 1 0; min-width: 0; padding-inline: 4px; }
+ .filterBar :global(.bar-main) { flex: 0 0 auto; }
+ .filterBar :global(.bar-search) { flex: 0 0 44px; }
+ .filterBar :global(.bar-search) > input { padding: 0; color: transparent; caret-color: transparent; cursor: pointer; }
+ .filterBar :global(.bar-search) > input::placeholder { color: transparent; }
+ .filterBar :global(.bar-search) > input::-webkit-search-cancel-button { display: none; }
+ .filterBar :global(.bar-search) > svg { left: 50%; transform: translate(-50%, -50%); }
+ /* 접힌 채로 검색어가 걸려 있으면 점으로 알린다 */
+ .filterBar[data-query]:not([data-searching]) :global(.bar-search)::after { content: ""; position: absolute; top: 8px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--linkhovercolor); pointer-events: none; }
+ .filterBar :global(.bar-toggle) { position: relative; width: 44px; padding: 0; gap: 0; font-size: 0; }
+ .filterBar :global(.bar-badge) { position: absolute; top: 3px; right: 5px; font-size: 10px; }
+ .filterBar :global(.bar-sort) > div { display: flex; }
+ .filterBar :global(.bar-sort) button { width: 44px; height: 44px; padding: 0; justify-content: center; }
+ .filterBar :global(.bar-sort) button > span { display: none; }
+ .filterBar :global(.bar-sort) button::after,
+ .filterBar :global(.bar-sort) button[aria-expanded="true"]::after {
+  left: 50%; right: auto; width: 18px; height: 18px; border: 0;
+  background: currentColor; transform: translate(-50%, -50%);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 4v16M4 8l4-4 4 4M16 20V4M12 16l4 4 4-4'/%3E%3C/svg%3E") center / contain no-repeat;
+ }
+ .filterBar[data-searching] :global(.bar-status),
+ .filterBar[data-searching] :global(.bar-anchor),
+ .filterBar[data-searching] :global(.bar-sort) { display: none; }
+ .filterBar[data-searching] :global(.bar-main),
+ .filterBar[data-searching] :global(.bar-search) { flex: 1 1 auto; }
+ .filterBar[data-searching] :global(.bar-search) > input { padding: 0 44px 0 38px; color: var(--foreground); caret-color: auto; cursor: text; }
+ .filterBar[data-searching] :global(.bar-search) > input::placeholder { color: var(--desccolor); }
+ .filterBar[data-searching] :global(.bar-search) > svg { left: 12px; transform: translateY(-50%); }
+ .filterBar[data-searching] .searchClose {
+  position: absolute; top: 0; right: 0; display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; padding: 0; border: 0; border-radius: 8px; background: none; color: var(--desccolor); cursor: pointer;
+  transition: color 150ms ease, background-color 150ms ease;
+ }
+ .filterBar[data-searching] .searchClose:hover { background: var(--control-hover-bg); color: var(--foreground); }
+ .searchClose svg { width: 18px; height: 18px; }
+}
+
 /* Admin tables share the blog's list-table header: a tinted band with body-coloured text, so it never reads as a first row. */
 .workspace table th { background: var(--codefontbgcolor); color: var(--foreground); font-size: .75rem; font-weight: 800; letter-spacing: .03em; box-shadow: inset 0 1px 0 var(--bordercolor), inset 0 -2px 0 var(--bordercolor); border-bottom: 0; }
 /* Headers are centred like the blog list tables; number cells stay right-aligned. */
@@ -96,7 +145,10 @@
  .quality .diagTable tbody tr:last-child { border-bottom: var(--border-width) solid var(--bordercolor); }
  .quality .diagTable td { display: flex; flex-direction: column; gap: .1rem; padding: 0; font-variant-numeric: tabular-nums; }
  .quality .diagTable td::before { font-size: .7rem; line-height: 1.3; }
+ /* 카드 첫 줄: 주(왼쪽)와 관측 범위(오른쪽) */
  .quality .diagTable td:first-child { grid-column: 1 / -1; font-weight: 700; }
+ .quality .diagTable .weekCell { display: flex; justify-content: space-between; }
+ .quality .diagTable .weekCell > span:first-child { display: none; }
  .quality .diagTable td:first-child::before { content: none; }
  .quality .diagTable td:last-child { grid-column: span 2; }
  }
@@ -118,7 +170,13 @@
 .collectionSummary strong { color: var(--foreground); font-variant-numeric: tabular-nums; }
 .problemList { display: grid; gap: .65rem; margin: 0; padding-left: 1.25rem; font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
 .problemList span { display: block; color: var(--desccolor); }
-.weekScope { display: block; font-size: .7rem; font-weight: 400; color: var(--desccolor); }
+/*
+ * 관측 범위는 날짜 오른쪽 같은 줄에 둔다. 아래 줄로 내리면 그 행만 높아지고, 그냥 이어 붙이면 가운데 정렬된 날짜가
+ * 행마다 밀린다. 양옆을 같은 폭(1fr)으로 잡아 날짜는 늘 열 가운데에 있다.
+ */
+.weekCell { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: baseline; gap: .5rem; }
+.weekScope { justify-self: start; font-size: .7rem; font-weight: 400; color: var(--desccolor); }
+.diagTable td { vertical-align: middle; }
 .deviceTable td:first-child { white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 760px) {
  .qualityPanel { gap: .65rem; padding: .75rem; }
