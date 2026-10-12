@@ -7,7 +7,7 @@ import Link from "next/link";
 import TagChips from "@/components/ui/TagChips";
 import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
-import { fetchJson, jsonRequest } from "@/lib/fetcher";
+import { fetchJson } from "@/lib/fetcher";
 import { useConfirm } from "@/providers/Confirm";
 
 import { commentListUrl } from "@/lib/admin-navigation";
@@ -37,21 +37,6 @@ export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags
     const confirm = useConfirm();
     const [isPending, startTransition] = useTransition();
     const [isDeleting, setIsDeleting] = useState(false);
-    const [isPublishing, setIsPublishing] = useState(false);
-
-    async function publish() {
-        if (busy) return;
-        setIsPublishing(true);
-        try {
-            await fetchJson(`/api/admin/posts/${post.id}`, jsonRequest("PATCH", { status: "PUBLISHED" }));
-            toast.success(`"${post.title}" 을(를) 발행했습니다.`);
-            startTransition(() => router.refresh());
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "발행에 실패했습니다.");
-        } finally {
-            setIsPublishing(false);
-        }
-    }
 
     async function remove() {
         if (busy) return;
@@ -76,7 +61,7 @@ export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags
     }
 
     const commentsHref = commentListUrl({ post: post.slug, returnTo });
-    const busy = isDeleting || isPublishing || isPending;
+    const busy = isDeleting || isPending;
 
     return (
         <tr style={busy ? { opacity: 0.5 } : undefined}>
@@ -102,7 +87,7 @@ export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags
             </td>
             <td data-label="태그">{post.tags.length ? <TagChips tags={post.tags} visibleCount={1} alignEnd onSelect={onTagSelect} selected={selectedTags} /> : "-"}</td>
             {/* 초안은 발행된 적이 없다. 만든 날로 메우지 않고 비운 채로 둔다 */}
-            <td data-label="발행일">
+            <td data-label="발행일" className={post.publishedAt ? undefined : "empty-value"}>
                 {post.publishedAt ? formatCardDate(post.publishedAt) : "-"}
             </td>
             <td data-label="수정일">{formatCardDate(post.updatedAt)}</td>
@@ -115,15 +100,9 @@ export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags
             <td data-label="좋아요">{post.likeCount.toLocaleString("ko-KR")}</td>
             <td className="actions">
                 <div className="action-buttons">
-                    {post.status === "DRAFT" ? (
-                        <button type="button" className="row-publish" onClick={publish} disabled={busy}>
-                            {isPublishing ? "발행 중..." : "발행"}
-                        </button>
-                    ) : (
-                        <Link href={`/admin/posts/${post.id}`} className="row-edit">
-                            수정
-                        </Link>
-                    )}
+                    <Link href={`/admin/posts/${post.id}`} className="row-edit">
+                        수정
+                    </Link>
                     <button type="button" className="row-delete" onClick={remove} disabled={busy}>
                         {isDeleting ? "삭제 중..." : "삭제"}
                     </button>

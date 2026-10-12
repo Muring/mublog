@@ -2,7 +2,7 @@
 
 import styled from "@emotion/styled";
 import { statusBadgeBase } from "@/styles/status-badge";
-import { buttonBase, buttonQuiet, buttonSubtle, buttonDanger, buttonPrimary, buttonGhost } from "@/styles/button";
+import { buttonQuiet, buttonSubtle, buttonDanger, buttonPrimary, buttonGhost } from "@/styles/button";
 import { thinScrollbar } from "@/styles/scrollbar";
 import { surface } from "@/styles/surface";
 import { listTableBase } from "@/styles/list-table";
@@ -114,7 +114,7 @@ export const PostTable = styled.table`
   th:nth-of-type(5) { width: 7.5rem; }  /* 수정일 */
   th:nth-of-type(6) { width: 5rem; }     /* 누적 조회 */
   th:nth-of-type(7) { width: 6rem; }    /* 댓글 */
-  th:nth-of-type(9) { width: 7rem; }  /* 발행 또는 수정·삭제 */
+  th:nth-of-type(9) { width: 7rem; }  /* 수정·삭제 */
 
   .views-total {
     text-align: center;
@@ -139,6 +139,9 @@ export const PostTable = styled.table`
   td:nth-of-type(8) {
     text-align: center;
   }
+
+  /* 날짜는 왼쪽 정렬이지만, 빈 값의 "-" 하나는 왼쪽에 붙으면 떠 보여 가운데로 둔다 */
+  td.empty-value { text-align: center; }
 
   .title-cell {
     font-weight: 700;
@@ -185,7 +188,7 @@ export const PostTable = styled.table`
 
   .badge { ${statusBadgeBase} }
 
-  .row-edit, .row-delete, .row-publish {
+  .row-edit, .row-delete {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -204,17 +207,6 @@ export const PostTable = styled.table`
     cursor: pointer;
     transition: background-color .15s, color .15s, border-color 150ms ease;
   }
-  .row-publish {
-    ${buttonBase}
-    border-radius: 5px;
-    background: transparent;
-    color: var(--okcolor);
-    &:hover:not(:disabled) {
-      background: transparent;
-      border-color: var(--okcolor);
-      color: var(--okcolor);
-    }
-  }
   .row-edit {
     ${buttonQuiet}
     border-radius: 5px;
@@ -228,9 +220,8 @@ export const PostTable = styled.table`
   }
   .row-delete { color: var(--desccolor); }
   .row-delete:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
-  .row-delete:disabled, .row-publish:disabled { cursor: wait; }
-  .row-edit:focus-visible, .row-delete:focus-visible, .row-publish:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
-  .row-publish:focus-visible { outline-color: var(--okcolor); }
+  .row-delete:disabled { cursor: wait; }
+  .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   .action-buttons {
     display: flex;
     gap: 0.4rem;
