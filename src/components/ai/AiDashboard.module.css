@@ -182,3 +182,27 @@
 .workspace .tableScroll th { height: var(--thead-h); box-sizing: border-box; padding-block: 0; white-space: nowrap; }
 .workspace .tableScroll::-webkit-scrollbar-track { margin-top: var(--thead-h); }
 .tableNote { margin: 0; flex-shrink: 0; }
+
+/*
+ * 좁은 관리 화면은 페이지가 스크롤한다(AiManagement.module.css). 상자는 내용 높이대로 펼친다.
+ * 사용량 표는 압축 표(AiUsageView 의 NarrowHead)라 가로로 넘치지 않는다. 그래서 상자를 스크롤 상자가 아닌
+ * overflow: clip 으로 두어(둥근 모서리만 자른다) 머리글이 페이지 기준으로 필터 바 아래(--filter-bottom, AiFilterBar)에 붙는다.
+ */
+.narrowCol, .cellSub, .weekRow { display: none; }
+@media (max-width: 640px) {
+ .workspace .tableScroll, .workspace .contentScroll { flex: none; }
+ .workspace .tableScroll { overflow: clip; scrollbar-gutter: auto; background: var(--cardbackground); }
+ .workspace .contentScroll { overflow: visible; }
+ .workspace .wideCol { display: none; }
+ .workspace .narrowCol { display: table-cell; }
+ .workspace .tableScroll table th { top: var(--filter-bottom, 0px); height: auto; min-height: var(--thead-h); padding-block: .45rem; }
+ .workspace .tableScroll td { white-space: normal; overflow-wrap: anywhere; }
+ .workspace .tableScroll :is(th, td) { width: auto; padding-inline: .75rem; }
+ .workspace .tableScroll td[data-center] { white-space: nowrap; }
+ .workspace .cellSub { display: block; margin-top: .15rem; color: var(--desccolor); font-size: .72rem; line-height: 1.45; word-break: keep-all; }
+ .numStack { display: grid; gap: .15rem; justify-items: end; white-space: nowrap; }
+ /* 프로젝트별 표의 주 구분 줄. 주 열을 숨긴 대신 날짜가 바뀌는 곳에 한 번만 적는다 */
+ .workspace .weekRow { display: table-row; }
+ .workspace .weekRow td { padding-block: .5rem .35rem; background: var(--background); color: var(--desccolor); font-size: .75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+ th .numStack { font-size: .68rem; line-height: 1.3; }
+}

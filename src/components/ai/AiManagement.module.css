@@ -30,8 +30,20 @@
  .workspace { gap: .3rem; }
 }
 
-:global(body):has(.shell) { overflow: hidden; }
-:global(body):has(.shell) :global(footer) { display: none; }
+/* 넓은 화면은 화면 높이에 맞춘 골격 안에서 표만 스크롤한다. 페이지 스크롤과 푸터는 걷는다 */
+@media (min-width: 641px) {
+ :global(body):has(.shell) { overflow: hidden; }
+ :global(body):has(.shell) :global(footer) { display: none; }
+}
+/*
+ * 좁은 화면은 블로그 관리와 같이 페이지 하나로 스크롤한다(Admin.styled 의 AdminListScroll 주석).
+ * 골격 높이를 풀고 표·목록 상자의 세로 스크롤을 걷는다(표 상자는 AiDashboard.module.css). 필터는 헤더(64px) 아래에 붙고, 목록이 끝나면 푸터가 이어진다.
+ * 넓은 표는 가로로만 제 안에서 스크롤한다.
+ */
+@media (max-width: 640px) {
+ .shell { height: auto; min-height: 100dvh; }
+ .filterBar { position: sticky; top: 64px; z-index: 10; }
+}
 
 .refresh { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; padding: 0 !important; flex-shrink: 0; }
 .refresh[aria-busy="true"] svg { animation: refreshSpin 1s linear infinite; }
@@ -409,7 +421,7 @@
 @media (max-width: 760px) {
  .workspace .records { background: none; }
  .workspace .records::-webkit-scrollbar-track { margin-top: 0; }
- .recordTable tbody tr { scroll-margin-top: 0; }
+ .recordTable tbody tr { scroll-margin-top: .5rem; }
 }
 
 /* 기간·보기 방식 두 묶음이 블로그 목록보다 넓어, 검색 기본 폭을 줄여야 641~700px 에서도 정렬이 홀로 다음 줄로 떨어지지 않는다 */

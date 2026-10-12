@@ -99,6 +99,19 @@ export const FilterBarRoot = styled.div`
         }
     }
     ${mobile} {
+        /*
+         * 좁은 화면은 페이지 하나로 스크롤한다(목록이 따로 스크롤하지 않는다, AdminListScroll).
+         * 필터는 헤더(64px) 바로 아래에 붙어 목록이 그 밑으로 지나간다. 바탕을 칠해야 지나가는 행이 비치지 않고,
+         * border-image 로 그 바탕을 좌우 화면 끝까지 늘린다(레이아웃 폭은 그대로).
+         * 바로 위 부모가 목록까지 감싸는 상자여야 붙는다 — 필터만 감싼 상자 안에서는 움직일 자리가 없다.
+         */
+        position: sticky;
+        top: 64px;
+        z-index: 10;
+        margin: -8px 0 0;
+        padding: 8px 0 12px;
+        background: var(--background);
+        border-image: linear-gradient(var(--background) 0 0) fill 0 / / 0 100vmax;
         .bar-status { flex-basis: 100%; }
         .bar-main { flex-basis: 180px; }
         .status-filters { width: 100%; }

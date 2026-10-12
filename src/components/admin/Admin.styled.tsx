@@ -407,10 +407,14 @@ export const Button = styled.button`
  *
  * 페이지 전체를 스크롤하면 통계와 차트가 위로 밀려 나가고, 목록 끝에서 다시
  * 올라와야 한다. 목록에 높이를 주고 그 안에서만 굴리면 화면 구성이 그대로 남는다.
- * 필터·개수 요약·페이지 이동은 밖에 두며, 카드 모드에서도 높이 제한을 유지한다.
+ * 필터·개수 요약·페이지 이동은 밖에 둔다.
  *
  * 높이는 뷰포트 기준이다. 픽셀로 고정하면 큰 화면에서 남는 자리를 못 쓰고
  * 작은 화면에서는 넘친다.
+ *
+ * 좁은 화면(mobile)에서는 높이 제한을 풀어 페이지 하나로 스크롤한다. 터치에서 스크롤 상자가 겹치면
+ * 같은 손짓이 어느 쪽을 움직일지 갈리고, 관성이 경계에서 끊긴다. 대신 필터 바가 위에 붙는다(FilterBar).
+ * 상자를 직접 굴리는 코드는 lib/list-scroll 을 거쳐 두 경우를 함께 다룬다.
  */
 export const AdminListScroll = styled.div`
   max-height: min(60vh, 40rem);
@@ -441,6 +445,10 @@ export const AdminListScroll = styled.div`
   &:has(> table > thead)::-webkit-scrollbar-track { margin-top: var(--thead-h); }
   /* 모바일 카드 배치에서는 머리글을 숨기므로 띠도 트랙 여백도 걷는다 */
   ${mobile} {
+    max-height: none;
+    overflow: visible;
+    scrollbar-gutter: auto;
+    overscroll-behavior: auto;
     &:has(> table > thead) { background: none; }
     &:has(> table > thead)::-webkit-scrollbar-track { margin-top: 0; }
   }

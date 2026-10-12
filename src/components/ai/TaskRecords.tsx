@@ -4,6 +4,7 @@ import type { AiTask } from "@/lib/ai-task-records";
 import { describedTitle, taskDate, taskTitle } from "@/lib/ai-task-records";
 import { AiBadge, AiRecordTable, type Tone } from "./AiControls";
 import { AdminListScroll } from "@/components/admin/Admin.styled";
+import { coveredTop, scrollsInside } from "@/lib/list-scroll";
 import manage from "./AiManagement.module.css";
 
 import { mergeHandoffs, type HandoffView } from "@/lib/ai-handoffs";
@@ -19,20 +20,26 @@ const taskKey = (t: AiTask) => `${t.project}/${t.id}`;
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 /**
  * 작업 기록 상자 안에서만 스크롤한다. scrollIntoView 는 고정해 둔 페이지까지 끌어올려 필터·탭이 화면 밖으로 밀린다.
+ * 좁은 화면은 상자가 펼쳐져 페이지가 스크롤하므로(lib/list-scroll) 페이지를 굴리되, 위에 붙은 필터 바 아래에 멈춘다.
  * 도착하면 onArrive 를 부른다(움직일 거리가 없거나 줄인 움직임이면 바로). scrollend 를 못 받는 브라우저를 위해 시간 안전망을 둔다.
  */
 function scrollInList(el: HTMLElement | null, onArrive?: () => void) {
     const box = el?.closest<HTMLElement>("[data-record-scroll]");
     if (!el || !box) { onArrive?.(); return () => {}; }
     const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
-    const top = Math.max(0, Math.min(box.scrollHeight - box.clientHeight, el.getBoundingClientRect().top - box.getBoundingClientRect().top + box.scrollTop - margin));
-    if (reducedMotion() || Math.abs(box.scrollTop - top) < 2) { box.scrollTop = top; onArrive?.(); return () => {}; }
+    const inside = scrollsInside(box);
+    const scroller: HTMLElement | Window = inside ? box : window;
+    const current = inside ? box.scrollTop : window.scrollY;
+    const max = inside ? box.scrollHeight - box.clientHeight : document.documentElement.scrollHeight - window.innerHeight;
+    const offset = el.getBoundingClientRect().top - (inside ? box.getBoundingClientRect().top : coveredTop()) - margin;
+    const top = Math.max(0, Math.min(max, current + offset));
+    if (reducedMotion() || Math.abs(current - top) < 2) { scroller.scrollTo({ top }); onArrive?.(); return () => {}; }
     let done = false;
-    const arrive = () => { if (done) return; done = true; box.removeEventListener("scrollend", arrive); window.clearTimeout(timer); onArrive?.(); };
+    const arrive = () => { if (done) return; done = true; scroller.removeEventListener("scrollend", arrive); window.clearTimeout(timer); onArrive?.(); };
     const timer = window.setTimeout(arrive, 1200);
-    box.addEventListener("scrollend", arrive);
-    box.scrollTo({ top, behavior: "smooth" });
-    return () => { done = true; box.removeEventListener("scrollend", arrive); window.clearTimeout(timer); };
+    scroller.addEventListener("scrollend", arrive);
+    scroller.scrollTo({ top, behavior: "smooth" });
+    return () => { done = true; scroller.removeEventListener("scrollend", arrive); window.clearTimeout(timer); };
 }
 function Record({ task, handoffs, allTasks, onTask, initiallyOpen = false, focused = false, onFocused }: { task: AiTask; handoffs: HandoffView[]; allTasks: AiTask[]; onTask: (task: AiTask) => void; initiallyOpen?: boolean; focused?: boolean; onFocused?: () => void }) {
     const [open, setOpen] = useState(initiallyOpen);

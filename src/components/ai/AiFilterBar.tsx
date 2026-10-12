@@ -55,6 +55,23 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
     useEffect(() => {
         if (input.current && !composing.current) input.current.value = q;
     }, [q]);
+    /*
+     * 좁은 화면에서 이 바는 헤더 아래에 붙고(AiManagement.module.css), 사용량 표 머리글은 그 아래에 붙는다.
+     * 바 높이는 칩·검색 상태로 바뀌므로 바의 아래 끝을 --filter-bottom 으로 부모(workspace)에 알린다.
+     * 표는 바의 형제 쪽에 있어 CSS 만으로는 이 높이를 알 수 없다.
+     */
+    const wrapper = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const bar = wrapper.current, host = bar?.parentElement;
+        if (!bar || !host) return;
+        const update = () => host.style.setProperty("--filter-bottom", `${(parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight}px`);
+        update();
+        const observer = new ResizeObserver(update);
+        observer.observe(bar);
+        const media = window.matchMedia(mobileQuery);
+        media.addEventListener("change", update);
+        return () => { observer.disconnect(); media.removeEventListener("change", update); host.style.removeProperty("--filter-bottom"); };
+    }, []);
 
     const active = (key: string) => Boolean(values[key]) && values[key] !== defaults[key];
     const chips: FilterChip[] = fields.filter((field) => active(field.key)).flatMap((field) => {
@@ -64,7 +81,7 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
             : [{ key: field.key, name: field.label, value: label(values[field.key]) }];
     });
 
-    return <div className={manage.filterBar} data-searching={searching || undefined} data-query={q ? "" : undefined}>
+    return <div ref={wrapper} className={manage.filterBar} data-searching={searching || undefined} data-query={q ? "" : undefined}>
         <FilterBar
             loading={loading}
             status={<>

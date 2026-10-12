@@ -14,6 +14,7 @@ import { AdminListScroll, Button, ResultBar } from "./Admin.styled";
 import { ImageCard } from "./ImagePicker.styled";
 import { DetailPanel, ImageSheetPanel, ImagesLayout, SHEET_MEDIA } from "./AdminImages.styled";
 import { adminDateLabel, IMAGE_SIZES } from "@/lib/admin-filters";
+import { scrollListToTop, scrollsInside } from "@/lib/list-scroll";
 import FilterBar from "./FilterBar";
 import AdminSheet from "./AdminSheet";
 
@@ -92,7 +93,7 @@ export default function AdminImagesView({ initialPage }: Props) {
     const currentQuery = useRef(queryKey);
     useEffect(() => {
         currentQuery.current = queryKey;
-        scrollRoot.current?.scrollTo({ top: 0 });
+        scrollListToTop(scrollRoot.current);
     }, [queryKey]);
     const composing = useRef(false);
     const search = useRef<HTMLInputElement>(null);
@@ -129,7 +130,8 @@ export default function AdminImagesView({ initialPage }: Props) {
         if (pending || loadingMore || error || !page.nextCursor || !sentinel.current || !scrollRoot.current) return;
         const observer = new IntersectionObserver(([entry]) => {
             if (entry.isIntersecting) void loadMore();
-        }, { root: scrollRoot.current, rootMargin: "0px 0px 120px 0px" });
+        // 좁은 화면은 페이지가 스크롤하므로 화면(root 없음)을 기준으로 끝을 본다
+        }, { root: scrollsInside(scrollRoot.current) ? scrollRoot.current : null, rootMargin: "0px 0px 120px 0px" });
         observer.observe(sentinel.current);
         return () => observer.disconnect();
     }, [pending, loadingMore, error, page.nextCursor, loadMore]);
@@ -172,7 +174,7 @@ export default function AdminImagesView({ initialPage }: Props) {
         } finally {
             setDeleting(false);
             // 일부 묶음만 지워졌을 수 있으므로 실패해도 목록을 다시 받는다
-            scrollRoot.current?.scrollTo({ top: 0 });
+            scrollListToTop(scrollRoot.current);
             refresh();
         }
     }

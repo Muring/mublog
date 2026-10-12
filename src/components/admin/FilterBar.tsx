@@ -60,7 +60,7 @@ export default function FilterBar({ status, sort, search, fields, values, dateRa
     );
 
     return (
-        <FilterBarRoot data-loading={loading || undefined} inert={loading || undefined}>
+        <FilterBarRoot data-filter-bar data-loading={loading || undefined} inert={loading || undefined}>
             <div className="bar-controls">
                 <div className="bar-status">{status}</div>
                 <div className="bar-main">

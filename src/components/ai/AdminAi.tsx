@@ -1,12 +1,12 @@
 "use client";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "@/lib/fetcher";
 import type { AdminAiData } from "@/lib/ai-usage-data";
 import { publicYear, visibleWeeks, sumTotals, type UsageYear } from "@/lib/ai-usage";
 import { Button } from "@/components/admin/Admin.styled";
 import { Skeleton, SkeletonText } from "@/components/ui/Skeleton.styled";
-import { number, UsageCards, WeekTable } from "./AiUsageView";
+import { NarrowHead, NarrowNumbers, number, UsageCards, WeekTable } from "./AiUsageView";
 import AiFilterBar, { countOptions } from "./AiFilterBar";
 import { AiBadge, AiScroll } from "./AiControls";
 import Info from "./Info";
@@ -28,8 +28,8 @@ function LoadingBody({ tab }: { tab: string }) {
     const columns = [["주", "6.5em", "center"], ["프로젝트", "8em"], ["도구", "3.5em", "center"], ["모델", "9em"], ["추론", "4em", "center"], ["캐시 제외 입력", "6em", "number"], ["출력", "5em", "number"], ["응답", "3em", "number"]];
     return <div className={manage.loadingUsage} role="status" aria-label="사용량을 불러오는 중">
         <div className={manage.summaryCards} aria-hidden="true"><div className={styles.grid}>{["전체 토큰", "캐시 제외 입력", "출력", "캐시 읽기 비율"].map(label => <div className={styles.card} key={label}><span className={styles.note}><SkeletonText>{label}</SkeletonText></span><strong><SkeletonText>3,238,083,469</SkeletonText></strong></div>)}</div></div>
-        <div className={styles.tableScroll} aria-hidden="true"><table><thead><tr>{columns.map(([label]) => <th key={label}><SkeletonText>{label}</SkeletonText></th>)}</tr></thead>
-            <tbody>{SKELETON_ROWS.map(row => <tr key={row}>{columns.map(([label, width, align]) => <td key={label} data-center={align === "center" || undefined} data-number={align === "number" || undefined}>{bar(width)}</td>)}</tr>)}</tbody></table></div>
+        <div className={styles.tableScroll} aria-hidden="true"><table><thead><tr>{columns.map(([label], i) => <th key={label} className={i !== 1 ? styles.wideCol : undefined}><SkeletonText>{label}</SkeletonText></th>)}<NarrowHead labels={GROUP_NUMBERS} /></tr></thead>
+            <tbody>{SKELETON_ROWS.map(row => <tr key={row}>{columns.map(([label, width, align], i) => <td key={label} className={i !== 1 ? styles.wideCol : undefined} data-center={align === "center" || undefined} data-number={align === "number" || undefined}>{bar(width)}</td>)}<td data-number className={styles.narrowCol}>{bar("6em")}</td></tr>)}</tbody></table></div>
     </div>;
 }
 
@@ -37,6 +37,8 @@ function LoadingBody({ tab }: { tab: string }) {
 const projectLabel = (v: string) => v === "unmapped" ? "프로젝트 미분류" : v;
 const EFFORTS: Record<string, string> = { none: "없음", minimal: "최소", low: "낮음", medium: "보통", high: "높음", xhigh: "매우 높음", max: "최대", unknown: "미상" };
 const effortLabel = (v: string) => EFFORTS[v] ?? v;
+const GROUP_COLUMNS = ["주", "프로젝트", "도구", "모델", "추론", "캐시 제외 입력", "출력", "응답"];
+const GROUP_NUMBERS = GROUP_COLUMNS.slice(5);
 const GROUP_FIELDS = [["project", "프로젝트"], ["tool", "도구"], ["model", "모델"], ["effort", "추론 수준"]] as const;
 const NO_GROUP_FILTERS = { project: "", tool: "", model: "", effort: "" };
 const NO_TASK_FILTERS = { project: "", type: "", status: "" };
@@ -93,7 +95,11 @@ export default function AdminAi({ asOf }: { asOf: string }) {
             {tab === "usage" ? <>
                 <div className={manage.summaryCards}><UsageCards weeks={shownWeeks} cacheObserved={privateYear ? publicYear(privateYear).cacheObserved : false} /></div>
                 {view === "weeks" ? <WeekTable weeks={byWeek(shownWeeks)} compact /> :
-                    <AiScroll className={styles.tableScroll} tabIndex={0} aria-label="프로젝트별 집계 스크롤"><table><thead><tr>{["주", "프로젝트", "도구", "모델", "추론", "캐시 제외 입력", "출력", "응답"].map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{byWeek(filtered).map((g, i) => <tr key={i}><td data-center>{g.week}</td><td>{projectLabel(g.project)}</td><td data-center>{g.tool}</td><td>{g.model}</td><td data-center>{effortLabel(g.effort)}</td><td data-number>{number(g.totals.non_cache_read_input)}</td><td data-number>{number(g.totals.output)}</td><td data-number>{number(g.totals.responses)}</td></tr>)}</tbody></table>{!filtered.length && <p className={manage.empty}>선택 조건의 기록이 없습니다.</p>}</AiScroll>}
+                    <AiScroll className={styles.tableScroll} tabIndex={0} aria-label="프로젝트별 집계 스크롤"><table><thead><tr>{GROUP_COLUMNS.map((x, i) => <th key={x} className={i !== 1 ? styles.wideCol : undefined}>{x}</th>)}<NarrowHead labels={GROUP_NUMBERS} /></tr></thead><tbody>{byWeek(filtered).map((g, i, rows) => {
+                        const numbers = [g.totals.non_cache_read_input, g.totals.output, g.totals.responses];
+                        // 좁은 화면은 주 열 대신 주가 바뀔 때마다 구분 줄을 둔다. 같은 날짜가 행마다 되풀이되며 폭을 먹지 않게 한다
+                        return <Fragment key={i}>{g.week !== rows[i - 1]?.week && <tr className={styles.weekRow}><td colSpan={GROUP_COLUMNS.length + 1}>{g.week}</td></tr>}<tr><td data-center className={styles.wideCol}>{g.week}</td><td>{projectLabel(g.project)}<span className={styles.cellSub}>{g.tool} · {g.model} · {effortLabel(g.effort)}</span></td><td data-center className={styles.wideCol}>{g.tool}</td><td className={styles.wideCol}>{g.model}</td><td data-center className={styles.wideCol}>{effortLabel(g.effort)}</td>{numbers.map((n, j) => <td key={j} data-number className={styles.wideCol}>{number(n)}</td>)}<NarrowNumbers values={numbers.map(number)} /></tr></Fragment>;
+                    })}</tbody></table>{!filtered.length && <p className={manage.empty}>선택 조건의 기록이 없습니다.</p>}</AiScroll>}
             </> : tab === "status" ? privateYear ? <AiScroll className={`${styles.contentScroll} ${manage.statusScroll}`} tabIndex={0} aria-label="수집 상태 스크롤"><Diagnostics year={privateYear} weeks={byWeek(weeks)} /></AiScroll> : <p>수집 데이터가 아직 없습니다.</p> : privateYear ? <TaskRecords dated={taskGroups.dated} undated={taskGroups.undated} allTasks={data?.snapshots.flatMap(s => s.data.tasks) ?? []} /> : <p>수집 데이터가 아직 없습니다.</p>}
         </>}
     </section>;

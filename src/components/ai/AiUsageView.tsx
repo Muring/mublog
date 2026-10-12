@@ -14,10 +14,28 @@ export function UsageCards({ weeks, cacheObserved, rolling = false }: { weeks: P
     const observed = weeks.some(w => w.observed);
     return <div className={styles.grid}>{[["전체 토큰", observed ? number(totals.total) : "—"], ["캐시 제외 입력", observed ? number(totals.non_cache_read_input) : "—"], ["출력", observed ? number(totals.output) : "—"], ["캐시 읽기 비율", cacheObserved && totals.input ? `${(100 * totals.cache_read / totals.input).toFixed(1)}%` : "미상"]].map(([label, value]) => <div className={styles.card} key={label}><span className={styles.note}>{label}</span><strong>{rolling ? <RollingNumber value={value} /> : value}</strong></div>)}</div>;
 }
+/*
+ * 좁은 관리 화면의 압축 표(AiDashboard.module.css 의 .wideCol·.narrowCol).
+ * 넓은 수치 열들은 숨기고, 그 값을 한 칸에 위아래로 쌓는다. 머리글도 같은 순서로 쌓아 줄끼리 짝이 맞는다.
+ * 가로 스크롤이 없어야 머리글이 페이지 위(필터 바 아래)에 붙을 수 있다.
+ */
+export function NarrowHead({ labels }: { labels: string[] }) {
+    return <th className={styles.narrowCol}><span className={styles.numStack}>{labels.map(label => <span key={label}>{label}</span>)}</span></th>;
+}
+export function NarrowNumbers({ values }: { values: string[] }) {
+    return <td data-number className={styles.narrowCol}><span className={styles.numStack}>{values.map((value, i) => <span key={i}>{value}</span>)}</span></td>;
+}
+const WEEK_COLUMNS = ["주 시작", "관측", "전체 토큰", "캐시 제외 입력", "캐시 읽기", "출력"];
 export function WeekTable({ weeks, compact = false }: { weeks: PublicWeek[]; compact?: boolean }) {
     const caption = "월요일 시작 · KST · 캐시는 입력에 포함";
+    // 좁은 관리 화면은 관측을 주 아래로, 전체 토큰 뒤의 세 수치를 한 칸으로 모은다. 공개 표(compact 아님)는 그대로다
+    const wide = (i: number) => compact && (i === 1 || i > 2) ? styles.wideCol : undefined;
     // 관리 화면(compact)은 머리글이 늘 상자 맨 위에 와야 스크롤바 자리의 머리글 띠와 맞는다. 설명은 표 위로 꺼내고 표 안에는 낭독용으로만 둔다
-    return <>{compact && <p className={`${styles.note} ${styles.tableNote}`}>{caption}</p>}<AiScroll className={`${styles.tableScroll} ${compact ? "" : styles.publicTable}`} tabIndex={0} aria-label="주별 사용량 표 스크롤"><table><caption className={compact ? styles.srOnly : undefined}>{caption}</caption><thead><tr>{["주 시작", "관측", "전체 토큰", "캐시 제외 입력", "캐시 읽기", "출력"].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td data-center>{w.week}</td><td data-center>{!w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : "관측됨"}</td>{[w.totals.total, w.totals.non_cache_read_input, w.totals.cache_read, w.totals.output].map((v, i) => <td data-number key={i}>{w.observed ? number(v) : "—"}</td>)}</tr>)}</tbody></table>{!weeks.length && <p className={styles.note}>선택 기간의 기록이 없습니다.</p>}</AiScroll></>;
+    return <>{compact && <p className={`${styles.note} ${styles.tableNote}`}>{caption}</p>}<AiScroll className={`${styles.tableScroll} ${compact ? "" : styles.publicTable}`} tabIndex={0} aria-label="주별 사용량 표 스크롤"><table><caption className={compact ? styles.srOnly : undefined}>{caption}</caption><thead><tr>{WEEK_COLUMNS.map((h, i) => <th key={h} scope="col" className={wide(i)}>{h}</th>)}{compact && <NarrowHead labels={WEEK_COLUMNS.slice(3)} />}</tr></thead><tbody>{weeks.map(w => {
+        const state = !w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : "관측됨";
+        const values = [w.totals.total, w.totals.non_cache_read_input, w.totals.cache_read, w.totals.output].map(v => w.observed ? number(v) : "—");
+        return <tr key={w.week}><td data-center>{w.week}{compact && <span className={styles.cellSub}>{state}</span>}</td><td data-center className={wide(1)}>{state}</td>{values.map((v, i) => <td data-number key={i} className={wide(i + 2)}>{v}</td>)}{compact && <NarrowNumbers values={values.slice(1)} />}</tr>;
+    })}</tbody></table>{!weeks.length && <p className={styles.note}>선택 기간의 기록이 없습니다.</p>}</AiScroll></>;
 }
 export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf: string }) {
     const [year, setYear] = useState(String(years[0]?.year ?? ""));
