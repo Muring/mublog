@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, type ComponentType, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ComponentType, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Button } from "./Admin.styled";
 import { SheetOverlay, SheetPanel } from "./AdminSheet.styled";
 import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 
@@ -15,10 +14,12 @@ import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
  *
  * 올라오고 내려가는 움직임·움직임 줄이기·닫힘 안전망·뒤 스크롤 잠금은 다른 창들과 같은
  * 공용 동작(hooks/useOverlay, styles/motion 의 overlay*)을 쓴다.
+ *
+ * 닫기 버튼 대신 위쪽 손잡이 막대를 둔다. 막대·제목 줄을 끌어내리면 닫히고, 막대를 눌러도 닫힌다.
+ * 키보드는 막대 버튼과 Escape 로 닫는다.
  */
 type Props = {
     id?: string;
-    iconClose?: boolean;
     title: string;
     onClose: () => void;
     children: ReactNode | ((close: () => void) => ReactNode);
@@ -28,13 +29,53 @@ type Props = {
     Panel?: ComponentType<React.ComponentProps<typeof SheetPanel>>;
 };
 
-export default function AdminSheet({ id, title, iconClose = false, onClose, children, footer, Panel = SheetPanel }: Props) {
+/** 이만큼 끌어내리거나 빠르게 튕기면 닫는다. 그보다 덜 끌면 제자리로 돌아간다 */
+const DISMISS_DISTANCE = 96;
+const DISMISS_VELOCITY = 0.5; // px/ms
+
+export default function AdminSheet({ id, title, onClose, children, footer, Panel = SheetPanel }: Props) {
     const titleId = useId();
     const panel = useRef<HTMLElement>(null);
     const overlay = useRef<HTMLDivElement>(null);
     const closeButton = useRef<HTMLButtonElement>(null);
     const { closing, requestClose, onAnimationEnd } = useExitTransition(onClose);
     useScrollLock();
+    const drag = useRef<{ startY: number; startTime: number; dy: number; moved: boolean; onGrabber: boolean } | null>(null);
+
+    const onDragStart = (event: PointerEvent<HTMLDivElement>) => {
+        if (event.button !== 0 || closing) return;
+        // 빠르게 끌면 첫 이동부터 이 줄 밖이라, 누르는 순간 포인터를 붙잡아 둔다
+        event.currentTarget.setPointerCapture(event.pointerId);
+        drag.current = { startY: event.clientY, startTime: event.timeStamp, dy: 0, moved: false, onGrabber: Boolean((event.target as Element).closest(".sheet-grabber")) };
+        if (panel.current) panel.current.style.transition = "none";
+    };
+    const onDragMove = (event: PointerEvent<HTMLDivElement>) => {
+        const state = drag.current;
+        if (!state || !panel.current) return;
+        // 위로는 따라가지 않는다. 시트가 바닥에서 떨어져 보이면 안 된다
+        state.dy = Math.max(0, event.clientY - state.startY);
+        if (state.dy > 4) state.moved = true;
+        panel.current.style.transform = `translateY(${state.dy}px)`;
+    };
+    const onDragEnd = () => {
+        const state = drag.current;
+        drag.current = null;
+        if (!state || !panel.current) return;
+        // 포인터를 붙잡으면 click 이 막대 버튼에 가지 않는다. 끌지 않고 막대를 누른 것은 여기서 닫는다
+        if (!state.moved) {
+            panel.current.style.transition = "";
+            if (state.onGrabber) requestClose();
+            return;
+        }
+        const velocity = state.dy / Math.max(1, performance.now() - state.startTime);
+        if (state.dy > DISMISS_DISTANCE || (state.moved && velocity > DISMISS_VELOCITY)) {
+            // 끌어 둔 위치에서 그대로 내려간다(닫힘 애니메이션은 to 만 있어 현재 위치에서 시작한다)
+            requestClose();
+            return;
+        }
+        panel.current.style.transition = "transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1)";
+        panel.current.style.transform = "";
+    };
 
     useEffect(() => {
         const viewport = window.visualViewport;
@@ -112,9 +153,13 @@ export default function AdminSheet({ id, title, iconClose = false, onClose, chil
                 aria-modal="true"
                 aria-labelledby={titleId}
             >
-                <div className="sheet-head">
-                    <h2 id={titleId}>{title}</h2>
-                    <Button type="button" ref={closeButton} onClick={requestClose} aria-label={`${title} 닫기`}>{iconClose ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg> : "닫기"}</Button>
+                <div className="sheet-drag" onPointerDown={onDragStart} onPointerMove={onDragMove} onPointerUp={onDragEnd} onPointerCancel={onDragEnd}>
+                    {/* 클릭은 키보드(detail 0)만 받는다. 포인터로 누른 것은 끌기 처리가 닫는다 */}
+                    <button type="button" ref={closeButton} className="sheet-grabber" aria-label={`${title} 닫기`}
+                        onClick={(event) => { if (event.detail === 0) requestClose(); }}>
+                        <span aria-hidden="true" />
+                    </button>
+                    <div className="sheet-head"><h2 id={titleId}>{title}</h2></div>
                 </div>
                 <div className="sheet-body">{typeof children === "function" ? children(requestClose) : children}</div>
                 {footer && <div className="sheet-foot">{footer(requestClose)}</div>}

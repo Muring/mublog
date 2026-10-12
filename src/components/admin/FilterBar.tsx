@@ -83,7 +83,7 @@ export default function FilterBar({ status, sort, search, fields, values, dateRa
             <div className="bar-results">
                 <p className="bar-summary" role="status" aria-busy={pending || undefined}>{pending ? "결과를 불러오는 중…" : summary}</p>
             </div>
-            {presentation === "sheet" && <AdminSheet id={dialogId} title="필터" iconClose onClose={close}>
+            {presentation === "sheet" && <AdminSheet id={dialogId} title="필터" onClose={close}>
                 {(finish) => <FilterForm fields={fields} values={values} dateRange={dateRange} dateBefore={dateBefore} onApply={(next) => { onApply(next); finish(); }} />}
             </AdminSheet>}
         </FilterBarRoot>

@@ -51,16 +51,24 @@ export const SheetPanel = styled.aside`
   /* 아래에서 올라오고 아래로 내려간다(공용 움직임) */
   ${overlayPanel("sheet")}
 
-  .sheet-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-  }
+  .sheet-head { padding: 2px 16px 14px; }
   .sheet-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
-  .sheet-head button { min-height: 44px; }
 
-  .sheet-head { flex-shrink: 0; padding: 14px 16px; }
+  /* 손잡이(grabber): 막대와 제목 줄 전체가 끄는 자리다. 끄는 동안 브라우저 스크롤이 끼어들지 않게 한다 */
+  .sheet-drag { flex-shrink: 0; touch-action: none; cursor: grab; user-select: none; }
+  .sheet-drag:active { cursor: grabbing; }
+  .sheet-grabber {
+    display: flex; align-items: center; justify-content: center;
+    width: 100%; height: 22px; padding: 0; border: 0; background: none; cursor: inherit;
+  }
+  .sheet-grabber > span {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--desccolor);
+    transition: background-color 150ms ease;
+  }
+  .sheet-grabber:hover > span, .sheet-drag:active .sheet-grabber > span { background: var(--foreground); }
+  .sheet-grabber:focus-visible { outline: none; }
+  .sheet-grabber:focus-visible > span { outline: 2px solid var(--linkhovercolor); outline-offset: 3px; }
   .sheet-body { display: flex; flex-direction: column; gap: 14px; min-height: 0; padding: 0 16px max(16px, env(safe-area-inset-bottom)); overflow-y: auto; }
   .sheet-body:has(> form) { padding: 0; overflow: hidden; }
   .sheet-body > form { min-height: 0; }
