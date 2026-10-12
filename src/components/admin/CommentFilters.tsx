@@ -32,15 +32,15 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
     // 같은 프레임에 여러 조작이 들어와도 직전 선택을 잃지 않는다.
     const latest = useRef(shown);
     useEffect(() => { latest.current = shown; }, [shown]);
-    const go = (patch: Partial<Filter>, replace = false) => {
+    // 조건을 바꿔도 뒤로 가기 기록을 쌓지 않는다. 뒤로 가기는 관리 화면을 떠난다(lib/admin-navigation, 다른 목록과 같은 규칙)
+    const go = (patch: Partial<Filter>) => {
         clearTimeout(timer.current);
         const next = { ...latest.current, q: composing.current ? latest.current.q : (queryInput.current?.value.trim() ?? latest.current.q), ...patch };
         latest.current = next;
         startTransition(() => {
             choose(next);
             const url = commentListUrl({ ...next, returnTo, page: 1 });
-            if (replace) router.replace(url, { scroll: false });
-            else router.push(url, { scroll: false });
+            router.replace(url, { scroll: false });
         });
     };
     useEffect(() => {
@@ -50,7 +50,7 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
     const schedule = () => {
         clearTimeout(timer.current);
         timer.current = setTimeout(() => {
-            if (!composing.current && queryInput.current?.value.trim() !== latest.current.q) go({}, true);
+            if (!composing.current && queryInput.current?.value.trim() !== latest.current.q) go({});
         }, SEARCH_DELAY);
     };
     const reset = () => {
@@ -81,7 +81,7 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
                     onCompositionStart={() => { composing.current = true; clearTimeout(timer.current); }}
                     onCompositionEnd={() => { composing.current = false; schedule(); }}
                     onChange={() => { if (!composing.current) schedule(); }}
-                    onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) go({}, true); }}
+                    onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) go({}); }}
                     placeholder="댓글 본문 검색" aria-label="댓글 본문 검색" />}
                 fields={[
                     { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.posts.map((p) => ({ value: p.slug, label: p.title, hint: String(p.count) }))] },

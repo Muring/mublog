@@ -1,5 +1,6 @@
 import { withinAdminDates } from "./admin-filters";
 import { appendMultiParam, readMultiParam, splitMulti } from "./multi-value";
+import type { ImageQuery } from "./admin-image-query";
 
 export type PostStatusFilter = "all" | "PUBLISHED" | "DRAFT";
 export type PostSort = "newest" | "updated" | "views" | "comments";
@@ -126,3 +127,88 @@ export function filterAdminPosts<T extends SortablePost>(posts: T[], state: Omit
         return difference || a.id.localeCompare(b.id);
     });
 }
+
+/*
+ * 관리 화면의 보기 상태(탭·필터·정렬·검색)는 화면 상태가 아니라 주소에 둔다. 새로고침·뒤로 가기·링크로 열어도
+ * 보던 화면 그대로다. 포스트(postListUrl)·댓글(commentListUrl)·이미지·AI 관리가 같은 규칙을 따른다.
+ * - 기본값은 주소에서 뺀다. 다중 선택은 같은 이름을 반복한다(?post=a&post=b).
+ * - 화면 안에서 바꿀 때는 replaceListUrl 로 기록을 쌓지 않고 주소만 바꾼다. useSearchParams 가 바뀐 값을 다시 읽는다.
+ * - 모르는 값은 기본값으로 읽는다. 손으로 고친 주소나 옛 주소가 화면을 깨뜨리지 않게 한다.
+ */
+export type ListField = { fallback: string; multi?: boolean; date?: boolean; allowed?: readonly string[] };
+export type ListState<F extends Record<string, ListField>> = { [K in keyof F]: string };
+export function readListState<F extends Record<string, ListField>>(params: URLSearchParams, fields: F): ListState<F> {
+    const state = {} as ListState<F>;
+    for (const key of Object.keys(fields) as (keyof F & string)[]) {
+        const field = fields[key];
+        const value = field.multi ? readMultiParam(params, key) : params.get(key) ?? "";
+        const valid = field.date ? commentDate(value) === value : !field.allowed || field.allowed.includes(value);
+        state[key] = value && valid ? value : field.fallback;
+    }
+    return state;
+}
+export function listStateUrl<F extends Record<string, ListField>>(pathname: string, state: ListState<F>, fields: F) {
+    const params = new URLSearchParams();
+    for (const key of Object.keys(fields) as (keyof F & string)[]) {
+        const value = state[key];
+        if (!value || value === fields[key].fallback) continue;
+        if (fields[key].multi) appendMultiParam(params, key, value);
+        else params.set(key, value);
+    }
+    return `${pathname}${params.size ? `?${params}` : ""}`;
+}
+/** 기록을 쌓지 않고 주소만 바꾼다. 필터를 고칠 때마다 뒤로 가기 기록이 늘지 않게 한다 */
+export function replaceListUrl(url: string) {
+    window.history.replaceState(null, "", url);
+}
+
+/*
+ * 관리 탭(포스트·댓글·이미지·통계)마다 마지막으로 보던 주소를 기억한다. 다른 탭에 갔다 돌아와도 조건이 남는다.
+ * 브라우저 탭 하나 안에서만 쓰는 편의라 sessionStorage 에 둔다. 막혀 있으면(사생활 보호 모드 등) 기본 주소로 간다.
+ */
+const LIST_MEMORY = "admin-list-url:";
+export function rememberListUrl(pathname: string, url: string) {
+    try { sessionStorage.setItem(LIST_MEMORY + pathname, url); } catch { /* 기억 못 하면 기본 주소로 간다 */ }
+}
+export function rememberedListUrl(pathname: string): string | null {
+    try { return sessionStorage.getItem(LIST_MEMORY + pathname); } catch { return null; }
+}
+
+/** 이미지 관리(/admin/images). 주소의 status 는 화면의 쓰임 필터(ImageQuery.filter)다 — 포스트·댓글과 이름을 맞춘다 */
+export const IMAGE_LIST_FIELDS = {
+    status: { fallback: "all", allowed: ["all", "thumbnail", "body", "unused", "scheduled"] },
+    sort: { fallback: "newest", allowed: ["newest", "oldest", "size"] },
+    q: { fallback: "" },
+    post: { fallback: "", multi: true },
+    from: { fallback: "", date: true },
+    to: { fallback: "", date: true },
+    format: { fallback: "", multi: true },
+    size: { fallback: "", allowed: ["small", "medium", "large"] },
+} satisfies Record<string, ListField>;
+/** 주소의 이미지 목록 상태를 API 조회 조건으로. 키 순서를 DEFAULT_IMAGE_QUERY 와 맞춰야 같은 조건이 같은 문자열이 된다 */
+export function imageQueryOf(state: ListState<typeof IMAGE_LIST_FIELDS>): ImageQuery {
+    const { from, to } = commentDates(state.from, state.to);
+    return {
+        filter: state.status as ImageQuery["filter"], sort: state.sort as ImageQuery["sort"], q: state.q, post: state.post,
+        from, to, format: state.format, size: state.size,
+    };
+}
+
+/** AI 관리(/ai/manage). 사용량 조건(project…effort)과 작업 기록 조건(task…)은 탭마다 따로 남는다 */
+export const AI_TABS = [["usage", "사용량"], ["quality", "작업 기록"], ["status", "수집 상태"]] as const;
+export type AiTab = typeof AI_TABS[number][0];
+export const AI_VIEW_FIELDS = {
+    tab: { fallback: "usage", allowed: AI_TABS.map(([key]) => key) },
+    period: { fallback: "8", allowed: ["4", "8", "12", "year"] },
+    view: { fallback: "groups", allowed: ["groups", "weeks"] },
+    year: { fallback: "" },
+    sort: { fallback: "newest", allowed: ["newest", "oldest"] },
+    q: { fallback: "" },
+    project: { fallback: "", multi: true },
+    tool: { fallback: "", multi: true },
+    model: { fallback: "", multi: true },
+    effort: { fallback: "", multi: true },
+    taskProject: { fallback: "", multi: true },
+    taskType: { fallback: "", multi: true },
+    taskStatus: { fallback: "", multi: true },
+} satisfies Record<string, ListField>;

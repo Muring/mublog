@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { changeLabel, metricSummary, rankPosts, tagPerformance, topPostShare, weekdayAverages, type AnalyticsData } from "@/lib/admin-analytics";
+import { useSearchParams } from "next/navigation";
+import { analyticsRank, changeLabel, metricSummary, rankPosts, tagPerformance, topPostShare, weekdayAverages, type AnalyticsData, type AnalyticsRank } from "@/lib/admin-analytics";
 import type { BucketKey } from "@/lib/admin-chart";
+import { replaceListUrl } from "@/lib/admin-navigation";
 import { Pills } from "./VisitorChart.styled";
 import PostStatusBadge from "./PostStatusBadge";
 import AnalyticsHelp from "./AnalyticsHelp";
@@ -13,7 +14,13 @@ import styles from "./Analytics.module.css";
 const number = (value: number | null, unit = "") => value === null ? "기록 없음" : `${value.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}${unit}`;
 export default function AnalyticsResults({ data, onBucketChange }: { data: AnalyticsData; onBucketChange: (bucket: BucketKey) => void }) {
     const { range, today, visits, views, visitsSince, viewsSince, posts } = data;
-    const [sort, setSort] = useState<"views" | "growth" | "days">("views");
+    // 정렬은 주소(?rank=)에 둔다. 새로고침해도 보던 순서 그대로다(다른 관리 화면과 같은 규칙)
+    const sort = analyticsRank(useSearchParams().get("rank"));
+    const setSort = (rank: AnalyticsRank) => {
+        const url = new URL(window.location.href);
+        if (rank === "views") url.searchParams.delete("rank"); else url.searchParams.set("rank", rank);
+        replaceListUrl(`${url.pathname}${url.search}`);
+    };
     const visitsSummary = metricSummary(visits, visitsSince, range, today);
     const viewsSummary = metricSummary(views, viewsSince, range, today);
     const canCompare = viewsSummary.previous !== null;

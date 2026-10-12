@@ -43,9 +43,15 @@ export function analyticsRange(params: URLSearchParams, today: string): Analytic
     return { from, to, days, previousFrom: dayOffset(from, -days), previousTo: dayOffset(from, -1), preset: selected, bucket: bucket === "weekly" || bucket === "monthly" ? bucket : "daily" };
 }
 
-export function analyticsUrl(range: Pick<AnalyticsRange, "preset" | "from" | "to" | "bucket">, returnTo?: string) {
+/** 인기 글 표의 정렬. 표시 방식이지만 다른 관리 화면처럼 주소에 남겨 새로고침해도 유지한다(lib/admin-navigation) */
+export type AnalyticsRank = "views" | "growth" | "days";
+export function analyticsRank(value?: string | null): AnalyticsRank {
+    return value === "growth" || value === "days" ? value : "views";
+}
+export function analyticsUrl(range: Pick<AnalyticsRange, "preset" | "from" | "to" | "bucket">, returnTo?: string, rank: AnalyticsRank = "views") {
     const params = new URLSearchParams({ period: range.preset, unit: range.bucket });
     if (range.preset === "custom") { params.set("from", range.from); params.set("to", range.to); }
+    if (rank !== "views") params.set("rank", rank);
     if (returnTo && returnTo !== "/admin") params.set("returnTo", returnTo);
     return `/admin/stats?${params}`;
 }

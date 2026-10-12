@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "@/lib/fetcher";
 import type { AdminAiData } from "@/lib/ai-usage-data";
@@ -13,6 +13,8 @@ import Info from "./Info";
 import TaskRecords, { taskStatus } from "./TaskRecords";
 import { selectTaskPeriod } from "@/lib/ai-task-records";
 import { splitMulti } from "@/lib/multi-value";
+import { AI_TABS, AI_VIEW_FIELDS, type AiTab } from "@/lib/admin-navigation";
+import { useListState } from "@/hooks/useListState";
 import styles from "./AiDashboard.module.css";
 import manage from "./AiManagement.module.css";
 
@@ -44,12 +46,20 @@ const NO_GROUP_FILTERS = { project: "", tool: "", model: "", effort: "" };
 const NO_TASK_FILTERS = { project: "", type: "", status: "" };
 export default function AdminAi({ asOf }: { asOf: string }) {
     const query = useQuery({ queryKey: ["admin-ai"], queryFn: () => fetchJson<AdminAiData>("/api/admin/ai"), staleTime: 60_000 });
-    const [tab, setTab] = useState("usage"); const [year, setYear] = useState(""); const [period, setPeriod] = useState("8"); const [view, setView] = useState("groups");
-    const [filters, setFilters] = useState(NO_GROUP_FILTERS);
-    const [taskFilters, setTaskFilters] = useState(NO_TASK_FILTERS);
-    const [q, setQ] = useState("");
+    // 탭·기간·보기·조건·정렬·검색은 주소에 둔다. 새로고침해도 보던 화면 그대로다(블로그 관리 목록과 같은 규칙)
+    const [listState, update] = useListState("/ai/manage", AI_VIEW_FIELDS);
+    const tab = listState.tab as AiTab, { year, period, view, q } = listState;
     // 블로그 관리 목록처럼 최신이 위. 주 문자열(YYYY-MM-DD)은 사전순이 곧 날짜순이다
-    const [sort, setSort] = useState<"newest" | "oldest">("newest");
+    const sort = listState.sort as "newest" | "oldest";
+    const filters = { project: listState.project, tool: listState.tool, model: listState.model, effort: listState.effort };
+    const taskFilters = { project: listState.taskProject, type: listState.taskType, status: listState.taskStatus };
+    const setPeriod = (period: string) => update({ period });
+    const setView = (view: string) => update({ view });
+    const setSort = (sort: string) => update({ sort });
+    const setQ = (q: string) => update({ q });
+    const setYear = (year: string) => update({ year });
+    const setFilters = (next: typeof filters) => update(next);
+    const setTaskFilters = (next: typeof taskFilters) => update({ taskProject: next.project, taskType: next.type, taskStatus: next.status });
     const byWeek = <T extends { week: string }>(rows: T[]) => [...rows].sort((a, b) => sort === "newest" ? b.week.localeCompare(a.week) : a.week.localeCompare(b.week));
     const data = query.data; const snapshot = data?.snapshots.find(s => String(s.year) === year) ?? data?.snapshots[0];
     const latestYear = String(data?.snapshots[0]?.year ?? "");
@@ -75,7 +85,7 @@ export default function AdminAi({ asOf }: { asOf: string }) {
     return <section className={`${styles.workspace} ${manage.workspace}`} aria-label="AI 관리" data-ai-workspace>
         {/* 블로그 관리와 같은 밑줄 탭. 넓으면 제목과 한 줄, 좁으면 탭만 아래 줄을 꽉 채운다 */}
         <header className={manage.heading}><h1>AI 관리</h1>
-            <div className={manage.tabs} role="tablist" aria-label="AI 관리 항목">{[["usage", "사용량"], ["quality", "작업 기록"], ["status", "수집 상태"]].map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={tab === value} onClick={() => { setTab(value); setQ(""); }}>{label}</button>)}</div>
+            <div className={manage.tabs} role="tablist" aria-label="AI 관리 항목">{AI_TABS.map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={tab === value} onClick={() => update({ tab: value, q: "" })}>{label}</button>)}</div>
             <Button className={manage.refresh} onClick={() => query.refetch()} disabled={query.isFetching} aria-label={query.isFetching ? "새로고침 중" : "새로고침"} title="새로고침" aria-busy={query.isFetching}><RefreshIcon /></Button>
         </header>
         {query.isError && <p className={styles.warning} role="alert">{query.error.message} · 기존 데이터가 있으면 유지합니다.</p>}

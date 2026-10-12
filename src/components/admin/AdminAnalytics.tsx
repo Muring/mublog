@@ -3,9 +3,9 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { analyticsDateError, analyticsDataKey, analyticsDataUrl, analyticsRange, analyticsUrl, type AnalyticsData, type AnalyticsRange } from "@/lib/admin-analytics";
+import { analyticsDateError, analyticsDataKey, analyticsDataUrl, analyticsRange, analyticsRank, analyticsUrl, type AnalyticsData, type AnalyticsRange } from "@/lib/admin-analytics";
 import { fetchJson } from "@/lib/fetcher";
-import { safeAdminReturn } from "@/lib/admin-navigation";
+import { replaceListUrl, safeAdminReturn } from "@/lib/admin-navigation";
 import { Button } from "./Admin.styled";
 import AnalyticsResults from "./AnalyticsResults";
 import { Skeleton } from "@/components/ui/Skeleton.styled";
@@ -36,11 +36,12 @@ export default function AdminAnalytics({ today }: { today: string }) {
     const pending = query.isPending || query.isFetching;
     const navigate = (next: AnalyticsRange) => {
         setDateError(null);
-        const url = analyticsUrl(next, safeAdminReturn(params.get("returnTo")));
+        const url = analyticsUrl(next, safeAdminReturn(params.get("returnTo")), analyticsRank(params.get("rank")));
         const selected = analyticsRange(new URL(url, window.location.origin).searchParams, today);
         if (fromInput.current) { fromInput.current.value = selected.from; fromInput.current.max = selected.to; }
         if (toInput.current) { toInput.current.value = selected.to; toInput.current.min = selected.from; }
-        if (`${window.location.pathname}${window.location.search}` !== url) window.history.pushState(null, "", url);
+        // 기간을 바꿔도 뒤로 가기 기록을 쌓지 않는다(다른 관리 목록과 같은 규칙)
+        if (`${window.location.pathname}${window.location.search}` !== url) replaceListUrl(url);
     };
     const submitDates = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();

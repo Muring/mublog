@@ -15,10 +15,12 @@ import { ImageCard } from "./ImagePicker.styled";
 import { DetailPanel, ImageSheetPanel, ImagesLayout, SHEET_MEDIA } from "./AdminImages.styled";
 import { adminDateLabel, IMAGE_SIZES } from "@/lib/admin-filters";
 import { scrollListToTop, scrollsInside } from "@/lib/list-scroll";
+import { IMAGE_LIST_FIELDS, imageQueryOf } from "@/lib/admin-navigation";
+import { useListState } from "@/hooks/useListState";
 import FilterBar from "./FilterBar";
 import AdminSheet from "./AdminSheet";
 
-import { imagePageUrl, type ImageFilter as Filter, type ImageSort as Sort, type ImagePage } from "@/lib/admin-image-query";
+import { imagePageUrl, type ImageFilter as Filter, type ImageSort as Sort, type ImagePage, type ImageQuery } from "@/lib/admin-image-query";
 import { useAdminImages } from "@/hooks/useAdminImages";
 
 const FILTERS: { key: Filter; label: string; match: (image: ManagedImage) => boolean }[] = [
@@ -68,7 +70,7 @@ function usersOf(image: ManagedImage) {
     return [...users.values()];
 }
 
-type Props = { initialPage: ImagePage };
+type Props = { initialPage: ImagePage; initialQuery: ImageQuery };
 
 /**
  * Storage 의 글 이미지 전부를 쓰임·상태와 함께 본다.
@@ -76,16 +78,16 @@ type Props = { initialPage: ImagePage };
  * 상태는 서버(classifyImages)가 sweep 과 같은 판정으로 정해 보낸다. 여기서 다시 계산하지 않는다.
  * 지울 수 있는 것은 아무 글도 쓰지 않는 이미지뿐이다. 쓰는 이미지는 먼저 글에서 빼야 한다.
  */
-export default function AdminImagesView({ initialPage }: Props) {
+export default function AdminImagesView({ initialPage, initialQuery }: Props) {
     const toast = useToast();
     const confirm = useConfirm();
-    const [filter, setFilter] = useState<Filter>("all");
-    const [sort, setSort] = useState<Sort>("newest");
-    const [query, setQuery] = useState("");
-    const [postId, setPostId] = useState("");
-    const [imageFilters, setImageFilters] = useState({ from: "", to: "", format: "", size: "" });
-    const requestQuery = { filter, sort, q: query, post: postId, ...imageFilters };
-    const { page, pending, stale, loadingMore, error, loadMore, refresh, retry } = useAdminImages(initialPage, requestQuery);
+    // 쓰임·정렬·검색·조건은 주소에 둔다. 새로고침해도 보던 목록 그대로다(포스트 목록과 같은 규칙)
+    const [listState, update] = useListState("/admin/images", IMAGE_LIST_FIELDS);
+    const requestQuery = imageQueryOf(listState);
+    const { filter, sort, q: query, post: postId } = requestQuery;
+    const imageFilters = { from: listState.from, to: listState.to, format: listState.format, size: listState.size };
+    const setFilter = (status: Filter) => update({ status });
+    const { page, pending, stale, loadingMore, error, loadMore, refresh, retry } = useAdminImages(initialPage, requestQuery, initialQuery);
     const { images, posts, formats, counts, nextSweepAt } = page;
     const scrollRoot = useRef<HTMLDivElement>(null);
     const sentinel = useRef<HTMLDivElement>(null);
@@ -138,11 +140,6 @@ export default function AdminImagesView({ initialPage }: Props) {
     const chosenPosts = splitMulti(postId);
     const visible = images;
     const scopedLabel = chosenPosts.length || query.trim() || Object.values(imageFilters).some(Boolean) ? "지금 조건의 " : "";
-
-    const clearQuery = () => {
-        if (search.current) search.current.value = "";
-        setQuery("");
-    };
 
     const selected = images.find((image) => image.path === selectedPath) ?? selection;
     // 필터를 바꿔 고른 이미지가 목록에서 빠졌으면 그 한 장만 본다
@@ -273,7 +270,7 @@ export default function AdminImagesView({ initialPage }: Props) {
         ...(imageFilters.size ? [{ key: "size", name: "용량", value: IMAGE_SIZES.find((item) => item.value === imageFilters.size)!.label }] : []),
     ];
     // 초기화는 걸린 조건만 푼다. 정렬은 보는 방식이지 조건이 아니다(포스트·댓글과 같다)
-    const resetFilters = () => { setFilter("all"); setPostId(""); setImageFilters({ from: "", to: "", format: "", size: "" }); clearQuery(); };
+    const resetFilters = () => { if (search.current) search.current.value = ""; update({ status: "all", post: "", from: "", to: "", format: "", size: "", q: "" }); };
 
     return (
         <>
@@ -290,13 +287,13 @@ export default function AdminImagesView({ initialPage }: Props) {
                 sort={
                     <Dropdown className="sort-control" label="이미지 정렬" size="control" variant="ghost" value={sort} align="right"
                         options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }, { value: "size", label: "용량순" }]}
-                        onChange={(value) => setSort(value as Sort)} />
+                        onChange={(value) => update({ sort: value as Sort })} />
                 }
                 search={
-                    <input type="search" ref={search} defaultValue="" placeholder="경로 · 글 제목 검색" aria-label="이미지 검색"
+                    <input type="search" ref={search} defaultValue={query} placeholder="경로 · 글 제목 검색" aria-label="이미지 검색"
                         onCompositionStart={() => { composing.current = true; }}
-                        onCompositionEnd={(event) => { composing.current = false; setQuery(event.currentTarget.value); }}
-                        onChange={(event) => { if (!composing.current) setQuery(event.currentTarget.value); }} />
+                        onCompositionEnd={(event) => { composing.current = false; update({ q: event.currentTarget.value }); }}
+                        onChange={(event) => { if (!composing.current) update({ q: event.currentTarget.value }); }} />
                 }
                 fields={[
                     { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: [{ value: "", label: "전체" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))] },
@@ -306,7 +303,7 @@ export default function AdminImagesView({ initialPage }: Props) {
                 dateRange="업로드일"
                 dateBefore="format"
                 values={{ post: postId, ...imageFilters }}
-                onApply={({ post, from, to, format, size }) => { setPostId(post); setImageFilters({ from, to, format, size }); }}
+                onApply={({ post, from, to, format, size }) => update({ post, from, to, format, size })}
                 fieldCount={new Set(chips.filter((chip) => chip.key !== "usage").map((chip) => chip.key.split(":")[0])).size}
                 pending={pending}
                 searchActive={Boolean(query.trim())}
@@ -315,9 +312,9 @@ export default function AdminImagesView({ initialPage }: Props) {
                 chips={<FilterChips items={chips} onClear={resetFilters} canClear={chips.length > 0 || Boolean(query.trim()) || filter !== "all"}
                     onRemove={(key) => {
                         if (key === "usage") setFilter("all");
-                        else if (key.startsWith("post:")) setPostId((current) => withoutMulti(current, key.slice(5)));
-                        else if (key.startsWith("format:")) setImageFilters((current) => ({ ...current, format: withoutMulti(current.format, key.slice(7)) }));
-                        else setImageFilters((current) => ({ ...current, ...(key === "date" ? { from: "", to: "" } : { [key]: "" }) }));
+                        else if (key.startsWith("post:")) update({ post: withoutMulti(postId, key.slice(5)) });
+                        else if (key.startsWith("format:")) update({ format: withoutMulti(imageFilters.format, key.slice(7)) });
+                        else update(key === "date" ? { from: "", to: "" } : { [key]: "" });
                     }} />}
             />
 

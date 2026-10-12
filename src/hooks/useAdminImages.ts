@@ -5,9 +5,11 @@ import { fetchJson } from "@/lib/fetcher";
 import { DEFAULT_IMAGE_QUERY, imagePageUrl, type ImagePage, type ImageQuery } from "@/lib/admin-image-query";
 
 /** 조건 변경 요청을 취소하고, 이전 조건의 늦은 응답이 현재 목록에 섞이지 않게 한다. */
-export function useAdminImages(initialPage: ImagePage, query: ImageQuery) {
+export function useAdminImages(initialPage: ImagePage, query: ImageQuery, initialQuery: ImageQuery = DEFAULT_IMAGE_QUERY) {
     const key = JSON.stringify(query);
-    const [snapshot, setSnapshot] = useState({ key: JSON.stringify(DEFAULT_IMAGE_QUERY), page: initialPage });
+    // 서버가 처음 그린 목록의 조건. 주소에 조건이 있으면 그 조건으로 받아 온다(이미지 관리 page)
+    const initialKey = JSON.stringify(initialQuery);
+    const [snapshot, setSnapshot] = useState({ key: initialKey, page: initialPage });
     const [pending, setPending] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState("");
@@ -23,7 +25,7 @@ export function useAdminImages(initialPage: ImagePage, query: ImageQuery) {
         const current = ++generation.current;
         moreRequest.current?.abort();
         moreRequest.current = null;
-        const unchangedInitial = lastQuery.current === key && key === JSON.stringify(DEFAULT_IMAGE_QUERY)
+        const unchangedInitial = lastQuery.current === key && key === initialKey
             && revision === 0 && mountedPage.current === initialPage;
         lastQuery.current = key;
         if (unchangedInitial) return () => { moreRequest.current?.abort(); };
@@ -47,7 +49,7 @@ export function useAdminImages(initialPage: ImagePage, query: ImageQuery) {
         // 한글 조합은 입력창에서 처리하고, 여기서는 연속 검색 요청을 합친다.
         const timer = window.setTimeout(run, 200);
         return () => { clearTimeout(timer); controller.abort(); moreRequest.current?.abort(); };
-    }, [key, revision, initialPage]);
+    }, [key, revision, initialPage, initialKey]);
 
     const replacing = pending || snapshot.key !== key;
     const loadMore = useCallback(async () => {
