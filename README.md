@@ -752,6 +752,7 @@ $ yarn dev
 `vercel.json` 의 `ignoreCommand` 는 `backup/`·`output/`·`*.md` 만 바뀐 push 의 빌드를 취소합니다.
 배포마다 함수 번들이 저장되므로(Function Storage), 문서·백업 커밋까지 배포하면 저장소만 축납니다.
 그런 push 는 배포 목록에 `Canceled` 로 남습니다 — 고장이 아닙니다.
+직전 배포 커밋이 저장소에 없으면(강제 push 로 지워진 경우 등) 비교하지 않고 빌드합니다.
 
 
 `vercel.json`의 cron이 하루 한 번(`0 3 * * *`) 도는 동안 두 가지를 처리합니다.

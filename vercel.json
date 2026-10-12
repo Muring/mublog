@@ -3,7 +3,7 @@
     "regions": [
         "icn1"
     ],
-    "ignoreCommand": "git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- . ':!backup' ':!output' ':!*.md'",
+    "ignoreCommand": "if git cat-file -e \"$VERCEL_GIT_PREVIOUS_SHA^{commit}\" 2>/dev/null; then git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" \"$VERCEL_GIT_COMMIT_SHA\" -- . ':!backup' ':!output' ':!*.md'; else exit 1; fi",
     "crons": [
         {
             "path": "/api/cron/daily",
