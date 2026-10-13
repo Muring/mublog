@@ -4,7 +4,7 @@ import { useEffect, useOptimistic, useRef, useTransition, type ReactNode } from 
 import { useRouter } from "next/navigation";
 import styled from "@emotion/styled";
 import Dropdown from "@/components/ui/Dropdown";
-import { COMMENT_QUERY_MAX, commentListUrl, type CommentSort } from "@/lib/admin-navigation";
+import { COMMENT_QUERY_MAX, commentListUrl, type CommentListState, type CommentSort } from "@/lib/admin-navigation";
 import { adminDateLabel } from "@/lib/admin-dates";
 import FilterBar from "./FilterBar";
 import FilterChips from "./FilterChips";
@@ -12,8 +12,8 @@ import { splitMulti, withoutMulti } from "@/lib/multi-value";
 import { useImeInput } from "@/hooks/useImeInput";
 import { facetOptions, NEWEST_OLDEST } from "@/lib/admin-filters";
 
-type Status = "all" | "live" | "deleted";
-type Filter = { post?: string; author?: string; q: string; from: string; to: string; status: Status; sort: CommentSort };
+type Filter = Omit<CommentListState, "page" | "returnTo">;
+type Status = Filter["status"];
 type Props = Filter & {
     counts: Record<Status, number>;
     returnTo: string;
@@ -55,13 +55,13 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
     }
     const reset = () => {
         clearSearch();
-        go({ post: undefined, author: undefined, q: "", from: "", to: "", status: "all" });
+        go({ post: "", author: "", q: "", from: "", to: "", status: "all" });
     };
     const chips: { key: string; name: string; value: string; patch: Partial<Filter> }[] = [
         ...(shown.status !== "all" ? [{ key: "status", name: "상태", value: shown.status === "live" ? "게시 중" : "삭제됨", patch: { status: "all" as const } }] : []),
         // 여러 개를 골랐으면 값마다 칩을 하나씩 두어 하나씩 풀 수 있게 한다
-        ...splitMulti(shown.post).map((slug) => ({ key: `post:${slug}`, name: "글", value: options.posts.find((p) => p.slug === slug)?.title ?? slug, patch: { post: withoutMulti(shown.post, slug) || undefined } })),
-        ...splitMulti(shown.author).map((id) => ({ key: `author:${id}`, name: "작성자", value: options.authors.find((a) => a.id === id)?.username ?? id, patch: { author: withoutMulti(shown.author, id) || undefined } })),
+        ...splitMulti(shown.post).map((slug) => ({ key: `post:${slug}`, name: "글", value: options.posts.find((p) => p.slug === slug)?.title ?? slug, patch: { post: withoutMulti(shown.post, slug) } })),
+        ...splitMulti(shown.author).map((id) => ({ key: `author:${id}`, name: "작성자", value: options.authors.find((a) => a.id === id)?.username ?? id, patch: { author: withoutMulti(shown.author, id) } })),
         ...(shown.from || shown.to ? [{ key: "date", name: "작성일", value: adminDateLabel(shown.from, shown.to), patch: { from: "", to: "" } }] : []),
     ];
     return (
@@ -84,9 +84,9 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
                     { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: facetOptions(options.posts, (p) => p.slug, (p) => p.title) },
                     { key: "author", label: "작성자", search: "이름 검색", multiple: true, options: facetOptions(options.authors, (a) => a.id, (a) => a.username) },
                 ]}
-                values={{ post: shown.post ?? "", author: shown.author ?? "", from: shown.from, to: shown.to }}
+                values={{ post: shown.post, author: shown.author, from: shown.from, to: shown.to }}
                 dateRange
-                onApply={(next) => go({ post: next.post || undefined, author: next.author || undefined, from: next.from, to: next.to })}
+                onApply={(next) => go({ post: next.post, author: next.author, from: next.from, to: next.to })}
                 fieldCount={new Set(chips.filter((chip) => chip.key !== "status").map((chip) => chip.key.split(":")[0])).size}
                 summary={summary}
                 pending={isPending}

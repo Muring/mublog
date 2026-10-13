@@ -2,65 +2,115 @@ import { dateParam, dateRangeParams, withinAdminDates } from "./admin-dates";
 import { appendMultiParam, readMultiParam, splitMulti } from "./multi-value";
 import { IMAGE_FILTERS, IMAGE_SIZE_KEYS, IMAGE_SORTS, type ImageQuery } from "./admin-image-query";
 
+/*
+ * 관리 화면의 보기 상태(탭·필터·정렬·검색)는 화면 상태가 아니라 주소에 둔다. 새로고침·뒤로 가기·링크로 열어도
+ * 보던 화면 그대로다. 포스트·댓글·이미지·AI 관리가 화면마다 필드 정의(*_FIELDS)만 두고 같은 함수로 읽고 쓴다.
+ * - 기본값은 주소에서 뺀다. 다중 선택은 같은 이름을 반복한다(?post=a&post=b).
+ * - 화면 안에서 바꿀 때는 replaceListUrl 로 기록을 쌓지 않고 주소만 바꾼다. useSearchParams 가 바뀐 값을 다시 읽는다.
+ * - 모르는 값은 기본값으로 읽는다. 손으로 고친 주소나 옛 주소가 화면을 깨뜨리지 않게 한다.
+ */
+export type ListField = { fallback: string; multi?: boolean; date?: boolean; allowed?: readonly string[] };
+export type ListState<F extends Record<string, ListField>> = { [K in keyof F]: string };
+function accepts(field: ListField, value: string) {
+    return field.date ? dateParam(value) === value : !field.allowed || field.allowed.includes(value);
+}
+export function readListState<F extends Record<string, ListField>>(params: URLSearchParams, fields: F): ListState<F> {
+    const state = {} as ListState<F>;
+    for (const key of Object.keys(fields) as (keyof F & string)[]) {
+        const field = fields[key];
+        const value = field.multi ? readMultiParam(params, key) : params.get(key) ?? "";
+        state[key] = value && accepts(field, value) ? value : field.fallback;
+    }
+    return state;
+}
+/** 주소로 쓴다. 기본값과 읽을 때 버려질 값은 싣지 않는다 */
+export function listStateUrl<F extends Record<string, ListField>>(pathname: string, state: Partial<Record<keyof F, string>>, fields: F) {
+    const params = new URLSearchParams();
+    for (const key of Object.keys(fields) as (keyof F & string)[]) {
+        const value = state[key];
+        if (!value || value === fields[key].fallback || !accepts(fields[key], value)) continue;
+        if (fields[key].multi) appendMultiParam(params, key, value);
+        else params.set(key, value);
+    }
+    return `${pathname}${params.size ? `?${params}` : ""}`;
+}
+/** 기록을 쌓지 않고 주소만 바꾼다. 필터를 고칠 때마다 뒤로 가기 기록이 늘지 않게 한다 */
+export function replaceListUrl(url: string) {
+    window.history.replaceState(null, "", url);
+}
+
+/** 서버 페이지가 받는 searchParams(값이 하나면 문자열, 여럿이면 배열)를 URLSearchParams 로 */
+export function toSearchParams(record: Record<string, string | string[] | undefined>) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(record)) for (const item of [value ?? []].flat()) params.append(key, item);
+    return params;
+}
+
 export type PostStatusFilter = "all" | "PUBLISHED" | "DRAFT";
 export type PostSort = "newest" | "updated" | "views" | "comments";
 /**
+ * 포스트 목록(/admin). 검색·필터는 받아온 배열을 화면에서 거른다(filterAdminPosts).
  * tag·series 는 여러 개를 고를 수 있다(lib/multi-value 로 이은 문자열). 고른 것 중 하나와 정확히 같으면 남긴다.
- * 비어 있으면 거르지 않는다. 주소창에는 ?tag=a&tag=b 로 싣는다.
+ * 키 순서가 주소의 파라미터 순서다.
  */
+export const POST_LIST_FIELDS = {
+    from: { fallback: "", date: true },
+    to: { fallback: "", date: true },
+    hasComments: { fallback: "", allowed: ["yes", "no"] },
+    q: { fallback: "" },
+    tag: { fallback: "", multi: true },
+    series: { fallback: "", multi: true },
+    status: { fallback: "all", allowed: ["PUBLISHED", "DRAFT"] },
+    sort: { fallback: "newest", allowed: ["updated", "views", "comments"] },
+} satisfies Record<string, ListField>;
 export type PostListState = { q: string; status: PostStatusFilter; sort: PostSort; tag: string; series: string; from?: string; to?: string; hasComments?: "" | "yes" | "no" };
+/** 날짜는 앞뒤가 바뀌어 들어와도 순서를 맞춘다 */
 export function postListState(params: URLSearchParams): PostListState {
-    const rawStatus = params.get("status");
-    const rawSort = params.get("sort");
-    return {
-        ...dateRangeParams(params.get("from"), params.get("to")),
-        hasComments: params.get("hasComments") === "yes" ? "yes" : params.get("hasComments") === "no" ? "no" : "",
-        q: params.get("q") ?? "",
-        status: (rawStatus === "PUBLISHED" || rawStatus === "DRAFT" ? rawStatus : "all") as PostStatusFilter,
-        sort: (["updated", "views", "comments"].includes(rawSort ?? "") ? rawSort : "newest") as PostSort,
-        tag: readMultiParam(params, "tag"),
-        series: readMultiParam(params, "series"),
-    };
+    const state = readListState(params, POST_LIST_FIELDS);
+    return { ...state, ...dateRangeParams(state.from, state.to) } as PostListState;
 }
 export function postListUrl(state: PostListState) {
-    const params = new URLSearchParams();
-    const dates = dateRangeParams(state.from, state.to);
-    if (dates.from) params.set("from", dates.from);
-    if (dates.to) params.set("to", dates.to);
-    if (state.hasComments) params.set("hasComments", state.hasComments);
-    if (state.q) params.set("q", state.q);
-    appendMultiParam(params, "tag", state.tag);
-    appendMultiParam(params, "series", state.series);
-    if (state.status !== "all") params.set("status", state.status);
-    if (state.sort !== "newest") params.set("sort", state.sort);
-    return `/admin${params.size ? `?${params}` : ""}`;
+    return listStateUrl("/admin", { ...state, ...dateRangeParams(state.from, state.to) }, POST_LIST_FIELDS);
 }
 export function safeAdminReturn(value?: string | null) {
     if (!value || !/^\/admin(?:\?|$)/.test(value)) return "/admin";
     const url = new URL(value, "https://admin.local");
     return url.pathname === "/admin" ? postListUrl(postListState(url.searchParams)) : "/admin";
 }
+
 export type CommentSort = "newest" | "oldest";
 /** 댓글 본문 검색어 상한. URL 에 실려 다니고 ILIKE 로 가므로 짧게 묶는다 */
 export const COMMENT_QUERY_MAX = 100;
 export function commentQuery(value?: string | null) {
     return (value ?? "").trim().slice(0, COMMENT_QUERY_MAX);
 }
-export function commentListUrl({ post, author, q, from, to, status = "all", sort = "newest", page = 1, returnTo = "/admin" }: {
-    post?: string; author?: string; q?: string; from?: string; to?: string; status?: string; sort?: string; page?: number; returnTo?: string;
-}) {
-    const params = new URLSearchParams();
-    const dates = dateRangeParams(from, to);
-    appendMultiParam(params, "post", post);
-    appendMultiParam(params, "author", author);
-    if (commentQuery(q)) params.set("q", commentQuery(q));
-    if (dates.from) params.set("from", dates.from);
-    if (dates.to) params.set("to", dates.to);
-    if (status === "live" || status === "deleted") params.set("status", status);
-    if (sort === "oldest") params.set("sort", sort);
-    if (page > 1) params.set("page", String(page));
-    if (safeAdminReturn(returnTo) !== "/admin") params.set("returnTo", safeAdminReturn(returnTo));
-    return `/admin/comments${params.size ? `?${params}` : ""}`;
+/** 댓글 목록(/admin/comments). 서버가 거르고 쪽을 나눈다. 쪽 번호와 돌아갈 주소는 검사가 달라 따로 싣는다 */
+export const COMMENT_LIST_FIELDS = {
+    post: { fallback: "", multi: true },
+    author: { fallback: "", multi: true },
+    q: { fallback: "" },
+    from: { fallback: "", date: true },
+    to: { fallback: "", date: true },
+    status: { fallback: "all", allowed: ["live", "deleted"] },
+    sort: { fallback: "newest", allowed: ["oldest"] },
+} satisfies Record<string, ListField>;
+export type CommentListState = {
+    post: string; author: string; q: string; from: string; to: string;
+    status: "all" | "live" | "deleted"; sort: CommentSort; page: number; returnTo: string;
+};
+export function commentListState(params: URLSearchParams): CommentListState {
+    const state = readListState(params, COMMENT_LIST_FIELDS);
+    return {
+        ...state, ...dateRangeParams(state.from, state.to), q: commentQuery(state.q),
+        page: Number(params.get("page") ?? 1), returnTo: safeAdminReturn(params.get("returnTo")),
+    } as CommentListState;
+}
+export function commentListUrl({ page = 1, returnTo = "/admin", ...state }: Partial<Record<keyof typeof COMMENT_LIST_FIELDS, string>> & { page?: number; returnTo?: string }) {
+    const url = listStateUrl("/admin/comments", { ...state, ...dateRangeParams(state.from, state.to), q: commentQuery(state.q) }, COMMENT_LIST_FIELDS);
+    const extra = new URLSearchParams();
+    if (page > 1) extra.set("page", String(page));
+    if (safeAdminReturn(returnTo) !== "/admin") extra.set("returnTo", safeAdminReturn(returnTo));
+    return extra.size ? `${url}${url.includes("?") ? "&" : "?"}${extra}` : url;
 }
 export function commentPage(total: number, requested: number, size = 25) {
     const pages = Math.max(1, Math.ceil(total / size));
@@ -105,40 +155,6 @@ export function filterAdminPosts<T extends SortablePost>(posts: T[], state: Omit
             : Date.parse(b.publishedAt ?? b.createdAt) - Date.parse(a.publishedAt ?? a.createdAt);
         return difference || a.id.localeCompare(b.id);
     });
-}
-
-/*
- * 관리 화면의 보기 상태(탭·필터·정렬·검색)는 화면 상태가 아니라 주소에 둔다. 새로고침·뒤로 가기·링크로 열어도
- * 보던 화면 그대로다. 포스트(postListUrl)·댓글(commentListUrl)·이미지·AI 관리가 같은 규칙을 따른다.
- * - 기본값은 주소에서 뺀다. 다중 선택은 같은 이름을 반복한다(?post=a&post=b).
- * - 화면 안에서 바꿀 때는 replaceListUrl 로 기록을 쌓지 않고 주소만 바꾼다. useSearchParams 가 바뀐 값을 다시 읽는다.
- * - 모르는 값은 기본값으로 읽는다. 손으로 고친 주소나 옛 주소가 화면을 깨뜨리지 않게 한다.
- */
-export type ListField = { fallback: string; multi?: boolean; date?: boolean; allowed?: readonly string[] };
-export type ListState<F extends Record<string, ListField>> = { [K in keyof F]: string };
-export function readListState<F extends Record<string, ListField>>(params: URLSearchParams, fields: F): ListState<F> {
-    const state = {} as ListState<F>;
-    for (const key of Object.keys(fields) as (keyof F & string)[]) {
-        const field = fields[key];
-        const value = field.multi ? readMultiParam(params, key) : params.get(key) ?? "";
-        const valid = field.date ? dateParam(value) === value : !field.allowed || field.allowed.includes(value);
-        state[key] = value && valid ? value : field.fallback;
-    }
-    return state;
-}
-export function listStateUrl<F extends Record<string, ListField>>(pathname: string, state: ListState<F>, fields: F) {
-    const params = new URLSearchParams();
-    for (const key of Object.keys(fields) as (keyof F & string)[]) {
-        const value = state[key];
-        if (!value || value === fields[key].fallback) continue;
-        if (fields[key].multi) appendMultiParam(params, key, value);
-        else params.set(key, value);
-    }
-    return `${pathname}${params.size ? `?${params}` : ""}`;
-}
-/** 기록을 쌓지 않고 주소만 바꾼다. 필터를 고칠 때마다 뒤로 가기 기록이 늘지 않게 한다 */
-export function replaceListUrl(url: string) {
-    window.history.replaceState(null, "", url);
 }
 
 /*

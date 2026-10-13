@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { lineSegments } from "../src/lib/admin-chart";
-import { commentPage, commentListUrl, commentQuery, filterAdminPosts, pageWindow, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
+import { commentListState, commentPage, commentListUrl, commentQuery, filterAdminPosts, pageWindow, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
 import { dateRangeParams, kstDayRange } from "../src/lib/admin-dates";
 
 assert.equal(lineSegments([1, null, 2], 4).length, 2);
@@ -19,6 +19,10 @@ assert.equal(commentQuery("가".repeat(150)).length, 100);
 assert.deepEqual(dateRangeParams("2026-09-30", "2026-09-01"), { from: "2026-09-01", to: "2026-09-30" });
 assert.deepEqual(dateRangeParams("2026-02-30", "bad"), { from: "", to: "" });
 assert.equal(commentListUrl({ from: "2026-09-30", to: "2026-09-01" }), "/admin/comments?from=2026-09-01&to=2026-09-30");
+// 댓글 주소를 읽으면 서버가 쓰는 조건이 되고, 그걸 다시 쓰면 같은 주소다. 위험한 돌아갈 주소·모르는 값은 버린다
+const commentUrl = commentListUrl({ post: "a\u001fb", q: " 스팸 ", status: "deleted", sort: "oldest", page: 3, returnTo });
+assert.equal(commentListUrl(commentListState(new URL(commentUrl, "https://test.local").searchParams)), commentUrl);
+assert.deepEqual(commentListState(new URLSearchParams("status=bad&sort=bad&returnTo=https://evil.example&page=x")), { post: "", author: "", q: "", from: "", to: "", status: "all", sort: "newest", page: NaN, returnTo: "/admin" });
 // KST 하루: 9/28 00:00 KST = 9/27 15:00Z, 끝은 9/28 24:00 KST 미만
 assert.equal(kstDayRange("2026-09-28", "2026-09-28").gte?.toISOString(), "2026-09-27T15:00:00.000Z");
 assert.equal(kstDayRange("2026-09-28", "2026-09-28").lt?.toISOString(), "2026-09-28T15:00:00.000Z");

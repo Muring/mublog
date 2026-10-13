@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { filterAdminPosts, postListState, postListUrl, type PostListState } from "@/lib/admin-navigation";
+import { filterAdminPosts, postListState, postListUrl, replaceListUrl, type PostListState } from "@/lib/admin-navigation";
 import { PostTable, AdminListScroll } from "./Admin.styled";
 import PostTableRow from "./PostTableRow";
 import { joinMulti, splitMulti, withoutMulti } from "@/lib/multi-value";
@@ -38,8 +38,9 @@ export default function PostTableView({ posts }: { posts: Row[] }) {
     const params = useSearchParams();
     const state = postListState(new URLSearchParams(params));
     const returnTo = postListUrl(state);
+    // 지금 주소에서 다시 읽어 합친다. 한 번에 여러 번 바꿔도 앞의 변경을 덮어쓰지 않는다(useListState 와 같은 규칙)
     const update = (patch: Partial<PostListState>) => {
-        window.history.replaceState(null, "", postListUrl({ ...state, ...patch }));
+        replaceListUrl(postListUrl({ ...postListState(new URLSearchParams(window.location.search)), ...patch }));
     };
 
     // 표의 태그를 누르면 태그 필터에 더한다(같은 조건이라 "또는"). 이미 걸린 태그면 뺀다
