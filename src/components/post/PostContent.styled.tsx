@@ -106,10 +106,10 @@ export const Article = styled.article`
       font-size: 0.8rem;
       margin: 0;
     }
-    /* 조회수는 보조 정보라 날짜보다 한 단계 물러나게 한다 */
-    .desc.views {
-      opacity: 0.7;
-    }
+    /*
+     * 조회수는 날짜와 같은 색이다. opacity 로 한 단계 물렸더니 대비가 라이트 2.9:1·다크 3.9:1 로
+     * AA 아래였다(감사기는 color 만 봐서 잡지 못한다). 구분은 앞의 가운뎃점이 한다.
+     */
     .desc.views::before {
       content: "·";
       margin-right: 0.4rem;
