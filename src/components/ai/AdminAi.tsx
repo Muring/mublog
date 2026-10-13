@@ -2,6 +2,7 @@
 import { Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "@/lib/fetcher";
+import { strokeIcon } from "@/components/ui/icon";
 import type { AdminAiData } from "@/lib/ai-usage-data";
 import { publicYear, visibleWeeks, sumTotals, type UsageYear } from "@/lib/ai-usage";
 import { Button } from "@/components/admin/Admin.styled";
@@ -20,7 +21,7 @@ import manage from "./AiManagement.module.css";
 import { formatKst } from "@/lib/date";
 
 function RefreshIcon() {
-    return <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M6.1 6.1A8 8 0 0 1 19.7 10M4.3 14A8 8 0 0 0 17.9 17.9" /></svg>;
+    return <svg {...strokeIcon(16, 1.7)}><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M6.1 6.1A8 8 0 0 1 19.7 10M4.3 14A8 8 0 0 0 17.9 17.9" /></svg>;
 }
 
 const SKELETON_ROWS = Array.from({ length: 10 }, (_, i) => i);

@@ -2,7 +2,7 @@
 
 import styled from "@emotion/styled";
 import { buttonBase, buttonDanger } from "@/styles/button";
-import { surface } from "@/styles/surface";
+import { dialogSurface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
 import { scrim, overlayPanel } from "@/styles/motion";
 
@@ -26,8 +26,7 @@ export const ConfirmOverlay = styled.div`
 export const ConfirmBox = styled.div`
     width: min(24rem, 100%);
     padding: 1.25rem;
-    ${surface("0.75rem")}
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    ${dialogSurface}
     ${overlayPanel("pop")}
 
     h3 {

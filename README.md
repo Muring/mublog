@@ -557,7 +557,7 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 | 파일 | 조각 |
 |---|---|
 | `button.ts` | `buttonBase` / `buttonSubtle` / `buttonQuiet` / `buttonGhost` / `buttonPrimary` / `buttonDanger` |
-| `surface.ts` | `surface(radius)` (카드·입력창 면) / `hoverSurface` / `cardHoverLift` |
+| `surface.ts` | `surface(radius)` (카드·입력창 면) / `dialogSurface` (검색·확인창) / `hoverSurface` / `cardHoverLift` |
 | `text.ts` | `truncate` (한 줄 말줄임) / `clampLines(n)` |
 | `motion.ts` | `fadeSlide` |
 | `breakpoints.ts` | `mobile` (640px) |
@@ -610,7 +610,7 @@ src/
 │   ├── search/           # 헤더 검색 버튼·대화상자·강조
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
 │   ├── trackers/         # 화면에 아무것도 그리지 않고 부수효과만 내는 null 컴포넌트
-│   ├── ui/               # Skeleton · Toast · ConfirmDialog 같은 범용 조각
+│   ├── ui/               # Skeleton · Toast · ConfirmDialog · strokeIcon 같은 범용 조각
 │   └── Profile.tsx       # 루트에는 두 영역 이상이 함께 쓰는 것만 둔다
 ├── lib/
 │   ├── markdown/         # 마크다운 → HTML 파이프라인

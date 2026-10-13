@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import PostLikeCount from "@/components/likes/PostLikeCount";
 import Card from "./PostCard.styled";
+import { strokeIcon } from "@/components/ui/icon";
 import TagChips from "@/components/ui/TagChips";
 import type { PostSummary } from "@/types/post";
 import { formatCardDate } from "@/lib/date";
@@ -16,18 +17,7 @@ import { fetchPostViewCounts, queryKeys } from "@/lib/queries";
  * 그래서 태그도 제목도 잘리지 않는다.
  */
 
-/** 아이콘은 currentColor 라 테마를 그대로 따른다 (파일도 invert 필터도 필요 없다) */
-const iconProps = {
-    width: 13,
-    height: 13,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-};
+const iconProps = strokeIcon(13);
 
 const CalendarIcon = () => (
     <svg {...iconProps}>

@@ -39,3 +39,13 @@ export const cardHoverLift = css`
     transform: translateY(-4px) !important;
     box-shadow: 0px 6px 5px -2px var(--shadowcolor);
 `;
+
+/**
+ * 화면 한가운데 떠서 뒤를 가리는 창(검색·확인창)의 면.
+ *
+ * 막(scrim) 위에 뜨므로 카드 그림자보다 짙고 넓게 드리운다. 두 창이 같은 높이로 보여야 해서 한 벌로 둔다.
+ */
+export const dialogSurface = css`
+    ${surface("0.75rem")}
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+`;

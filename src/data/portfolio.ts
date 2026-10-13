@@ -228,3 +228,50 @@ export const portfolioProjects: PortfolioProject[] = [
         images: portfolioImages.ghiburi,
     },
 ];
+
+export type PortfolioSkill = {
+    title: string;
+    stack: string;
+    highlights: string[];
+    /** 적용 프로젝트. portfolioProjects 의 id 이고, 이름은 그쪽에서 가져온다 */
+    projects: string[];
+};
+
+export const portfolioSkills: PortfolioSkill[] = [
+    {
+        title: "React · Next.js",
+        stack: "React · Next.js · Prisma · Supabase · Zustand · PWA",
+        highlights: [
+            "App Router 기반 블로그를 설계·운영하며 DB, 인증, 캐시 무효화까지 직접 다뤘습니다.",
+            "서비스 화면을 구현하고 API를 연결했으며, PWA를 적용해 설치 가능한 웹앱을 만들었습니다.",
+        ],
+        projects: ["mublog", "vita"],
+    },
+    {
+        title: "Vue · Nuxt",
+        stack: "Vue 3 · Nuxt 3 · Pinia · Axios",
+        highlights: [
+            "계좌 개설·송금·퀴즈·지도 등 서비스 화면과 재사용 컴포넌트를 구현했습니다.",
+            "Axios 공통 설정과 API 연동, 비로그인 사용자의 페이지 접근 흐름을 구성했습니다.",
+        ],
+        projects: ["momo", "seas", "ghiburi"],
+    },
+    {
+        title: "UI · 인터랙션",
+        stack: "UI 디자인 · Sass · 캐릭터 애니메이션",
+        highlights: [
+            "서비스 페이지와 캐릭터·배경·아이콘·로고를 디자인했습니다.",
+            "캐릭터의 걷기·운동 애니메이션을 제작하고 서비스 화면에 적용했습니다.",
+        ],
+        projects: ["vita"],
+    },
+    {
+        title: "Salesforce",
+        stack: "LWC · Sales Cloud · Experience Cloud · Flow",
+        highlights: [
+            "LWC로 캐러셀·리드 입력 폼·주문·지도 컴포넌트를 구현했습니다.",
+            "영업 단계별 필드와 Path를 구성하고, Flow와 Validation Rule로 업무 흐름을 자동화했습니다.",
+        ],
+        projects: ["ohana"],
+    },
+];

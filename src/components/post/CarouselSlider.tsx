@@ -3,6 +3,7 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { PostSummary } from "@/types/post";
 import { byNewest } from "@/lib/date";
+import { strokeIcon } from "@/components/ui/icon";
 import Link from "next/link";
 import PostCard from "./PostCard";
 import Carousel, { CARD_GAP } from "./CarouselSlider.styled";
@@ -46,14 +47,8 @@ function wrapIndex(value: number, size: number) {
 function Chevron({ direction }: { direction: "left" | "right" }) {
   return (
     // currentColor 라서 테마 토큰을 그대로 따른다 (auto-dark 반전 불필요)
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d={direction === "left" ? "M15 5 8 12l7 7" : "M9 5l7 7-7 7"}
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg {...strokeIcon(20)}>
+      <path d={direction === "left" ? "M15 5 8 12l7 7" : "M9 5l7 7-7 7"} />
     </svg>
   );
 }

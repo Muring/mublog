@@ -1,4 +1,5 @@
 import type { SVGProps } from "react";
+import { strokeIcon } from "@/components/ui/icon";
 
 // 링크 앞에 붙는 작은 아이콘. 색은 currentColor 라 글자와 같이 호버 색을 따라간다.
 const base: SVGProps<SVGSVGElement> = {
@@ -19,15 +20,7 @@ export function GitHubIcon() {
 
 export function GlobeIcon() {
     return (
-        <svg
-            {...base}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
+        <svg {...strokeIcon(14)} focusable={false}>
             <circle cx="12" cy="12" r="9" />
             <path d="M3 12h18" />
             <path d="M12 3c2.5 2.7 4 5.8 4 9s-1.5 6.3-4 9c-2.5-2.7-4-5.8-4-9s1.5-6.3 4-9z" />
@@ -37,15 +30,7 @@ export function GlobeIcon() {
 
 export function VideoIcon() {
     return (
-        <svg
-            {...base}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
+        <svg {...strokeIcon(14)} focusable={false}>
             <rect x="3" y="5" width="18" height="14" rx="2" />
             <path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none" />
         </svg>

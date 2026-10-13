@@ -2,7 +2,7 @@
 
 import styled from "@emotion/styled";
 import { scrim, overlayPanel } from "@/styles/motion";
-import { surface, hoverSurface } from "@/styles/surface";
+import { dialogSurface, hoverSurface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
 
 /** 헤더의 검색 버튼. 아이콘 + "검색" 라벨. 오른쪽 로그인 영역과는 한 칸 띄운다. */
@@ -67,8 +67,7 @@ export const SearchPanel = styled.div`
     max-height: 76vh;
     display: flex;
     flex-direction: column;
-    ${surface("0.75rem")}
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    ${dialogSurface}
     overflow: hidden;
     ${overlayPanel("pop")}
 

@@ -9,17 +9,9 @@
  * 크기는 부모의 font-size 를 따르도록 em 으로 둔다.
  */
 
-const base = {
-    width: "1.15em",
-    height: "1.15em",
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 2,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-};
+import { strokeIcon } from "@/components/ui/icon";
+
+const base = strokeIcon("1.15em");
 
 /** 인라인 코드: 꺾쇠 한 쌍 */
 export const InlineCodeIcon = () => (

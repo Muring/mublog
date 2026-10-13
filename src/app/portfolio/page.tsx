@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
-import { portfolioProjects, PORTFOLIO_PATH } from "@/data/portfolio";
+import { portfolioProjects, portfolioSkills, PORTFOLIO_PATH } from "@/data/portfolio";
 import { baseOpenGraph } from "@/app/shared-metadata";
 import styles from "./portfolio.module.css";
 import ProjectGallery from "./ProjectGallery";
@@ -21,6 +21,8 @@ const navigationItems = [
     },
     { id: "contact", label: "연락처" },
 ];
+const projectNames = new Map(portfolioProjects.map(({ id, name }) => [id, name]));
+
 export const metadata: Metadata = {
     title,
     description,
@@ -74,57 +76,23 @@ export default function PortfolioPage() {
                     <h2 id="expertise-title">Skills</h2>
                 </div>
                 <div className={styles.skills}>
-                    <div>
-                        <h3>React · Next.js</h3>
-                        <p>React · Next.js · Prisma · Supabase · Zustand · PWA</p>
-                        <ul>
-                            <li>App Router 기반 블로그를 설계·운영하며 DB, 인증, 캐시 무효화까지 직접 다뤘습니다.</li>
-                            <li>서비스 화면을 구현하고 API를 연결했으며, PWA를 적용해 설치 가능한 웹앱을 만들었습니다.</li>
-                        </ul>
-                        <div className={styles.skillProjects}>
-                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#mublog">Mublog</a>
-                            <a href="#vita">Vita</a>
+                    {portfolioSkills.map((skill) => (
+                        <div key={skill.title}>
+                            <h3>{skill.title}</h3>
+                            <p>{skill.stack}</p>
+                            <ul>
+                                {skill.highlights.map((highlight) => (
+                                    <li key={highlight}>{highlight}</li>
+                                ))}
+                            </ul>
+                            <div className={styles.skillProjects}>
+                                <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
+                                {skill.projects.map((id) => (
+                                    <a key={id} href={`#${id}`}>{projectNames.get(id)}</a>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <h3>Vue · Nuxt</h3>
-                        <p>Vue 3 · Nuxt 3 · Pinia · Axios</p>
-                        <ul>
-                            <li>계좌 개설·송금·퀴즈·지도 등 서비스 화면과 재사용 컴포넌트를 구현했습니다.</li>
-                            <li>Axios 공통 설정과 API 연동, 비로그인 사용자의 페이지 접근 흐름을 구성했습니다.</li>
-                        </ul>
-                        <div className={styles.skillProjects}>
-                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#momo">MOMO Bank</a>
-                            <a href="#seas">SEAS</a>
-                            <a href="#ghiburi">집우리</a>
-                        </div>
-                    </div>
-                    <div>
-                        <h3>UI · 인터랙션</h3>
-                        <p>UI 디자인 · Sass · 캐릭터 애니메이션</p>
-                        <ul>
-                            <li>서비스 페이지와 캐릭터·배경·아이콘·로고를 디자인했습니다.</li>
-                            <li>캐릭터의 걷기·운동 애니메이션을 제작하고 서비스 화면에 적용했습니다.</li>
-                        </ul>
-                        <div className={styles.skillProjects}>
-                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#vita">Vita</a>
-                        </div>
-                    </div>
-                    <div>
-                        <h3>Salesforce</h3>
-                        <p>LWC · Sales Cloud · Experience Cloud · Flow</p>
-                        <ul>
-                            <li>LWC로 캐러셀·리드 입력 폼·주문·지도 컴포넌트를 구현했습니다.</li>
-                            <li>영업 단계별 필드와 Path를 구성하고, Flow와 Validation Rule로 업무 흐름을 자동화했습니다.</li>
-                        </ul>
-                        <div className={styles.skillProjects}>
-                            <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
-                            <a href="#ohana">Ohana Liquor</a>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </section>
 
