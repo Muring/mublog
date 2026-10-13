@@ -64,7 +64,7 @@ UA는 자가신고라 둘 다 클라이언트가 정한다. 집계에 손대면 
 
 **한글이 들어가는 검색·입력창은 조합 중에 상태를 갱신하지 않는다.** controlled `value` 로
 매 `onChange` 마다 URL·상태를 바꾸면 조합이 끊겨 `ㅂㅡㄹㄹㅗㄱㅡ` 처럼 자모가 풀린다.
-`onCompositionStart/End` 로 조합 여부를 들고, 조합이 끝났을 때만 반영한다(`PostTableToolbar`·`SearchDialog` 의 검색창이 예).
+`onCompositionStart/End` 로 조합 여부를 들고, 조합이 끝났을 때만 반영한다. 새 검색창은 `hooks/useImeInput` 을 쓴다.
 
 ### 태그 중첩
 

@@ -8,7 +8,7 @@ import { formatPostDate } from "@/lib/date";
 import { SearchOverlay, SearchPanel } from "./Search.styled";
 import PostLikeCount from "@/components/likes/PostLikeCount";
 import SearchIcon from "./SearchIcon";
-import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
+import { trapTab, useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 import Highlight from "./Highlight";
 
 const DEBOUNCE_MS = 250;
@@ -81,16 +81,7 @@ export default function SearchDialog({ onClose }: { onClose: () => void }) {
     function onKeyDown(event: KeyboardEvent) {
         if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
         if (event.key === "Tab") {
-            const items = dialogRef.current?.querySelectorAll<HTMLElement>('input, a[href], button:not(:disabled)');
-            const first = items?.[0];
-            const last = items?.[items.length - 1];
-            if (first && last && event.shiftKey && document.activeElement === first) {
-                event.preventDefault();
-                last.focus();
-            } else if (first && last && !event.shiftKey && document.activeElement === last) {
-                event.preventDefault();
-                first.focus();
-            }
+            trapTab(event, dialogRef.current);
             return;
         }
         if (event.target !== inputRef.current) return;

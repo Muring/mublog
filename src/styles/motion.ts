@@ -63,6 +63,21 @@ export const overlayBackdrop = css`
 `;
 
 /**
+ * 뒤를 가리는 막 전체. 화면을 덮고, 끌어도 뒤 페이지가 움직이지 않고, 흐려졌다 짙어진다.
+ *
+ * 색은 토큰을 쓰지 않는다. 두 테마 모두 검정이어야 하는데 --shadowcolor 는 다크에서 흰색 계열이라
+ * 여기 쓰면 화면이 뿌옇게 밝아진다. 다른 창 위에 겹쳐 뜨는 확인창만 한 단계 짙게(strong) 둔다.
+ * z-index·배치는 막마다 달라 각자 정한다.
+ */
+export const scrim = (strength: "normal" | "strong" = "normal") => css`
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, ${strength === "strong" ? 0.5 : 0.4});
+    touch-action: none;
+    ${overlayBackdrop}
+`;
+
+/**
  * 막 위의 창. 막(뿌리)의 data-closing 을 보고 함께 나간다.
  *   sheet  — 아래에 붙은 시트: 아래에서 올라오고 아래로 내려간다
  *   pop    — 가운데 창: 살짝 떠오르며 나타나고 가라앉으며 사라진다

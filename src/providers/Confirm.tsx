@@ -1,9 +1,9 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useRef, useState } from "react";
 import type { ReactNode, RefObject } from "react";
 import { ConfirmOverlay, ConfirmBox } from "@/components/ui/ConfirmDialog.styled";
-import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
+import { useDialogKeys, useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 
 type ConfirmOptions = {
     title: string;
@@ -63,6 +63,7 @@ export default function ConfirmProvider({ children }: { children: ReactNode }) {
  * 움직임·뒤 스크롤 잠금은 다른 창들과 같은 공용 동작(hooks/useOverlay)이다.
  */
 function ConfirmLayer({ pending, opener, onRemoved }: { pending: Pending; opener: RefObject<HTMLElement | null>; onRemoved: (id: number) => void }) {
+    const boxRef = useRef<HTMLDivElement>(null);
     const cancelRef = useRef<HTMLButtonElement>(null);
     const answered = useRef(false);
     const removed = useCallback(() => onRemoved(pending.id), [onRemoved, pending.id]);
@@ -80,42 +81,10 @@ function ConfirmLayer({ pending, opener, onRemoved }: { pending: Pending; opener
         [pending, opener, requestClose]
     );
 
-    useEffect(() => {
-        // 되돌릴 수 없는 동작이 기본값이 되면 안 되므로 취소에 포커스를 준다.
-        // Enter 를 무심코 눌렀을 때 일어나는 일이 "아무 일도 없음" 이어야 한다.
-        cancelRef.current?.focus();
-
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape") {
-                event.preventDefault();
-                close(false);
-                return;
-            }
-            // Tab 을 대화상자 안에 가둔다. 그러지 않으면 뒤에 가려진 페이지로 빠져나가
-            // 보이지 않는 곳에 포커스가 놓인다.
-            if (event.key !== "Tab") return;
-
-            const focusable = Array.from(
-                document.querySelectorAll<HTMLElement>("[data-confirm-dialog] button")
-            );
-            if (focusable.length === 0) return;
-
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-            const active = document.activeElement;
-
-            if (event.shiftKey && active === first) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && active === last) {
-                event.preventDefault();
-                first.focus();
-            }
-        };
-
-        document.addEventListener("keydown", onKeyDown);
-        return () => document.removeEventListener("keydown", onKeyDown);
-    }, [close]);
+    // 되돌릴 수 없는 동작이 기본값이 되면 안 되므로 취소에 포커스를 준다.
+    // Enter 를 무심코 눌렀을 때 일어나는 일이 "아무 일도 없음" 이어야 한다.
+    // 초점은 답하는 순간 close 가 돌려준다(창은 그 뒤에 가라앉는다).
+    useDialogKeys(boxRef, () => close(false), { initialFocus: cancelRef });
 
     return (
         <ConfirmOverlay
@@ -127,6 +96,7 @@ function ConfirmLayer({ pending, opener, onRemoved }: { pending: Pending; opener
             }}
         >
             <ConfirmBox
+                ref={boxRef}
                 data-confirm-dialog
                 role="alertdialog"
                 aria-modal="true"

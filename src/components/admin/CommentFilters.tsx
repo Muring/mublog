@@ -9,6 +9,7 @@ import { adminDateLabel } from "@/lib/admin-filters";
 import FilterBar from "./FilterBar";
 import FilterChips from "./FilterChips";
 import { splitMulti, withoutMulti } from "@/lib/multi-value";
+import { useImeInput } from "@/hooks/useImeInput";
 
 type Status = "all" | "live" | "deleted";
 type Filter = { post?: string; author?: string; q: string; from: string; to: string; status: Status; sort: CommentSort };
@@ -26,16 +27,16 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [shown, choose] = useOptimistic<Filter, Partial<Filter>>({ post, author, q, from, to, status, sort }, (current, patch) => ({ ...current, ...patch }));
-    const queryInput = useRef<HTMLInputElement>(null);
-    const composing = useRef(false);
     const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+    // 다듬은(trim) 검색어가 되돌아오므로 치는 도중의 입력창은 덮지 않는다
+    const { composing, inputRef, clear: clearSearch, inputProps: searchInput } = useImeInput(q, schedule, { syncWhileFocused: false });
     // 같은 프레임에 여러 조작이 들어와도 직전 선택을 잃지 않는다.
     const latest = useRef(shown);
     useEffect(() => { latest.current = shown; }, [shown]);
     // 조건을 바꿔도 뒤로 가기 기록을 쌓지 않는다. 뒤로 가기는 관리 화면을 떠난다(lib/admin-navigation, 다른 목록과 같은 규칙)
     const go = (patch: Partial<Filter>) => {
         clearTimeout(timer.current);
-        const next = { ...latest.current, q: composing.current ? latest.current.q : (queryInput.current?.value.trim() ?? latest.current.q), ...patch };
+        const next = { ...latest.current, q: composing.current ? latest.current.q : (inputRef.current?.value.trim() ?? latest.current.q), ...patch };
         latest.current = next;
         startTransition(() => {
             choose(next);
@@ -43,18 +44,16 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
             router.replace(url, { scroll: false });
         });
     };
-    useEffect(() => {
-        if (queryInput.current && document.activeElement !== queryInput.current && !composing.current) queryInput.current.value = q;
-    }, [q]);
     useEffect(() => () => clearTimeout(timer.current), []);
-    const schedule = () => {
+    // 입력창 훅이 먼저 불려 이 함수를 받으므로 끌어올려지는 선언으로 둔다
+    function schedule() {
         clearTimeout(timer.current);
         timer.current = setTimeout(() => {
-            if (!composing.current && queryInput.current?.value.trim() !== latest.current.q) go({});
+            if (!composing.current && inputRef.current?.value.trim() !== latest.current.q) go({});
         }, SEARCH_DELAY);
-    };
+    }
     const reset = () => {
-        if (queryInput.current) queryInput.current.value = "";
+        clearSearch();
         go({ post: undefined, author: undefined, q: "", from: "", to: "", status: "all" });
     };
     const chips: { key: string; name: string; value: string; patch: Partial<Filter> }[] = [
@@ -77,10 +76,7 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
                 sort={<Dropdown label="댓글 정렬" size="control" variant="ghost" value={shown.sort} align="right"
                     options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }]}
                     onChange={(value) => go({ sort: value as CommentSort })} />}
-                search={<input type="search" ref={queryInput} defaultValue={q} maxLength={COMMENT_QUERY_MAX}
-                    onCompositionStart={() => { composing.current = true; clearTimeout(timer.current); }}
-                    onCompositionEnd={() => { composing.current = false; schedule(); }}
-                    onChange={() => { if (!composing.current) schedule(); }}
+                search={<input type="search" {...searchInput} maxLength={COMMENT_QUERY_MAX}
                     onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) go({}); }}
                     placeholder="댓글 본문 검색" aria-label="댓글 본문 검색" />}
                 fields={[

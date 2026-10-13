@@ -7,6 +7,7 @@ import { splitMulti, withoutMulti } from "@/lib/multi-value";
 import { mobileQuery } from "@/styles/breakpoints";
 import { number } from "./AiControls";
 import manage from "./AiManagement.module.css";
+import { useImeInput } from "@/hooks/useImeInput";
 
 export type AiField = { key: string; label: string; options: DropdownOption[]; multiple?: boolean; search?: string };
 type Props = {
@@ -43,16 +44,12 @@ function subscribeMobile(onChange: () => void) {
 }
 
 export default function AiFilterBar({ loading, period, onPeriod, view, sort, onSort, q, onSearch, searchPlaceholder, fields, values, defaults = {}, onApply, onReset, summary }: Props) {
-    const input = useRef<HTMLInputElement>(null);
-    const composing = useRef(false);
+    const { inputProps: searchInput } = useImeInput(q, onSearch);
     /*
      * 좁은 화면은 컨트롤을 한 줄에 모은다(공용 FilterBar). 표 구성 전환은 그 줄에 둘 자리가 없어 필터 시트로 들어간다.
      */
     const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(mobileQuery).matches, () => false);
     const sheetFields = isMobile && view ? [{ key: "view", label: "표 구성", options: VIEW_OPTIONS }, ...fields] : fields;
-    useEffect(() => {
-        if (input.current && !composing.current) input.current.value = q;
-    }, [q]);
     /*
      * 좁은 화면에서 이 바는 헤더 아래에 붙고(AiManagement.module.css), 사용량 표 머리글은 그 아래에 붙는다.
      * 바 높이는 칩·검색 상태로 바뀌므로 바의 아래 끝을 --filter-bottom 으로 부모(workspace)에 알린다.
@@ -95,10 +92,7 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
             </>}
             sort={<Dropdown className="sort-control" label="정렬" size="control" variant="ghost" value={sort} align="right"
                 options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }]} onChange={(value) => onSort(value as "newest" | "oldest")} />}
-            search={searchPlaceholder && <input type="search" ref={input} defaultValue={q} readOnly={loading}
-                onCompositionStart={() => { composing.current = true; }}
-                onCompositionEnd={(event) => { composing.current = false; onSearch(event.currentTarget.value); }}
-                onChange={(event) => { if (!composing.current) onSearch(event.currentTarget.value); }}
+            search={searchPlaceholder && <input type="search" {...searchInput} readOnly={loading}
                 placeholder={searchPlaceholder} aria-label={searchPlaceholder.endsWith("검색") ? searchPlaceholder : `${searchPlaceholder} 검색`} />}
             fields={sheetFields as FilterField[]}
             values={isMobile && view ? { ...values, view: view.value } : values}

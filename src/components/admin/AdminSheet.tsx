@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, type ComponentType, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { SheetOverlay, SheetPanel } from "./AdminSheet.styled";
-import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
+import { useDialogKeys, useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 
 /**
  * 좁은 화면에서 아래에서 올라오는 시트. 이미지 상세와 관리 목록의 필터가 함께 쓴다.
@@ -102,40 +102,13 @@ export default function AdminSheet({ id, title, onClose, children, footer, Panel
         };
     }, []);
 
-    useEffect(() => {
-        const opener = document.activeElement as HTMLElement | null;
-        closeButton.current?.focus();
-        // 위에 다른 대화상자(확인창·이미지 뷰어)가 떠 있으면 키 입력은 그쪽 몫이다
-        const covered = () => Boolean(document.querySelector("[data-confirm-dialog], dialog[open]"));
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (covered() || event.defaultPrevented) return;
-            if (event.key === "Escape") {
-                event.preventDefault();
-                requestClose();
-                return;
-            }
-            // Tab 을 시트 안에 가둔다. 뒤에 가려진 그리드로 빠져나가면 보이지 않는 곳에 포커스가 놓인다
-            if (event.key !== "Tab" || !panel.current) return;
-            const focusable = Array.from(panel.current.querySelectorAll<HTMLElement>("a[href], button:not(:disabled), input:not(:disabled)"));
-            if (focusable.length === 0) return;
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-            if (event.shiftKey && document.activeElement === first) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
-                event.preventDefault();
-                first.focus();
-            }
-        };
-        document.addEventListener("keydown", onKeyDown);
-        return () => {
-            document.removeEventListener("keydown", onKeyDown);
-            // 이미지를 지워 시트가 닫혔으면 연 카드가 없을 수 있다
-            // 초점만 돌려준다. 스크롤을 잠근 채 위에 붙은 버튼으로 옮기면 페이지가 맨 위로 튀었다(FilterBar)
-            if (opener?.isConnected) opener.focus({ preventScroll: true });
-        };
-    }, [requestClose]);
+    // 위에 다른 대화상자(확인창·이미지 뷰어)가 떠 있으면 키 입력은 그쪽 몫이다.
+    // 닫힐 때 연 카드로 초점만 돌려준다. 스크롤을 잠근 채 위에 붙은 버튼으로 옮기면 페이지가 맨 위로 튀었다(FilterBar)
+    useDialogKeys(panel, requestClose, {
+        initialFocus: closeButton,
+        restoreFocus: true,
+        ignore: () => Boolean(document.querySelector("[data-confirm-dialog], dialog[open]")),
+    });
 
     return createPortal(
         <SheetOverlay

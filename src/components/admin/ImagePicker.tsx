@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Dropdown from "@/components/ui/Dropdown";
 import { fetchJson } from "@/lib/fetcher";
-import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
+import { useDialogKeys, useExitTransition, useScrollLock } from "@/hooks/useOverlay";
+import { useImeInput } from "@/hooks/useImeInput";
 import { useToast } from "@/providers/Toast";
 import type { LibraryImage, LibraryUser } from "@/lib/storage";
 import { Button, Skeleton } from "./Admin.styled";
@@ -65,17 +66,11 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
     const [filter, setFilter] = useState<Filter>("all");
     const [post, setPost] = useState("");
     const [sort, setSort] = useState<Sort>("newest");
-    const composing = useRef(false);
-    const searchRef = useRef<HTMLInputElement>(null);
-    // 이 화면을 연 버튼. 닫을 때 포커스를 돌려줘야 키보드 사용자가 자리를 잃지 않는다.
-    const openerRef = useRef<HTMLElement | null>(null);
+    // 한글은 조합이 끝났을 때만 거른다 — 조합 중에 상태를 바꾸면 자모가 풀린다(AGENTS §2)
+    const { inputRef: searchRef, inputProps: searchInput } = useImeInput(query, setQuery);
+    const boxRef = useRef<HTMLDivElement>(null);
     const { closing, requestClose, onAnimationEnd } = useExitTransition(onClose);
     useScrollLock();
-
-    useEffect(() => {
-        openerRef.current = document.activeElement as HTMLElement | null;
-        return () => openerRef.current?.focus();
-    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -97,44 +92,9 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
 
     const close = useCallback(() => requestClose(), [requestClose]);
 
-    useEffect(() => {
-        searchRef.current?.focus();
-
-        const onKeyDown = (event: KeyboardEvent) => {
-            // 글 필터 드롭다운이 펼쳐져 있으면 Escape 는 그걸 먼저 닫는다
-            if (event.defaultPrevented) return;
-            if (event.key === "Escape") {
-                event.preventDefault();
-                close();
-                return;
-            }
-            // Tab 을 이 안에 가둔다. 그러지 않으면 뒤에 가려진 에디터로 빠져나가
-            // 보이지 않는 곳에 포커스가 놓인다.
-            if (event.key !== "Tab") return;
-
-            const focusable = Array.from(
-                document.querySelectorAll<HTMLElement>(
-                    "[data-image-picker] button, [data-image-picker] input"
-                )
-            );
-            if (focusable.length === 0) return;
-
-            const first = focusable[0];
-            const last = focusable[focusable.length - 1];
-
-            if (event.shiftKey && document.activeElement === first) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
-                event.preventDefault();
-                first.focus();
-            }
-        };
-
-        document.addEventListener("keydown", onKeyDown);
-        return () => document.removeEventListener("keydown", onKeyDown);
-        // images 가 늦게 와서 카드가 생기면 목록도 다시 잡아야 한다
-    }, [close, images]);
+    // 글 필터 드롭다운이 펼쳐져 있으면 Escape 는 그걸 먼저 닫는다(defaultPrevented).
+    // 닫을 때 연 버튼으로 포커스를 돌려줘야 키보드 사용자가 자리를 잃지 않는다.
+    useDialogKeys(boxRef, close, { initialFocus: searchRef, restoreFocus: true });
 
     /** 이미지가 딸린 글. 제목순(숫자는 값으로) — 이미지 관리의 글 필터와 같다 */
     const posts = useMemo(() => {
@@ -185,7 +145,7 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
                 if (event.target === event.currentTarget) close();
             }}
         >
-            <PickerBox data-image-picker role="dialog" aria-modal="true" aria-labelledby="picker-title">
+            <PickerBox ref={boxRef} role="dialog" aria-modal="true" aria-labelledby="picker-title">
                 <div className="picker-head">
                     <h3 id="picker-title">이미지 선택</h3>
                     <div className="sources" role="group" aria-label="이미지 쓰임">
@@ -203,13 +163,8 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
                     </div>
                     <div className="picker-filters">
                         <input
-                            ref={searchRef}
+                            {...searchInput}
                             type="search"
-                            defaultValue=""
-                            // 한글은 조합이 끝났을 때만 거른다 — 조합 중에 상태를 바꾸면 자모가 풀린다(AGENTS §2)
-                            onCompositionStart={() => { composing.current = true; }}
-                            onCompositionEnd={(event) => { composing.current = false; setQuery(event.currentTarget.value); }}
-                            onChange={(event) => { if (!composing.current) setQuery(event.currentTarget.value); }}
                             placeholder="경로 · 글 제목 검색"
                             aria-label="이미지 검색"
                         />

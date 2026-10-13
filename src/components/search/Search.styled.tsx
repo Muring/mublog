@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { overlayBackdrop, overlayPanel } from "@/styles/motion";
+import { scrim, overlayPanel } from "@/styles/motion";
 import { surface, hoverSurface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
 
@@ -38,8 +38,9 @@ export const SearchTrigger = styled.button`
     }
 `;
 
-/* 뒤를 가리는 막. ConfirmOverlay 와 같은 이유로 토큰을 쓰지 않는다 */
+/* 뒤를 가리는 막(공용 scrim). 네이티브 dialog 라 기본 크기·여백을 걷어낸다 */
 export const SearchOverlay = styled.dialog`
+    ${scrim()}
     box-sizing: border-box;
     width: 100vw;
     height: 100dvh;
@@ -48,20 +49,13 @@ export const SearchOverlay = styled.dialog`
     margin: 0;
     border: 0;
     color: var(--foreground);
-    position: fixed;
-    inset: 0;
     z-index: 200;
     display: none;
     &[open] { display: flex; }
     align-items: flex-start;
     justify-content: center;
     padding: 12vh 1rem 1rem;
-    background-color: rgba(0, 0, 0, 0.5);
-
-    /* 막을 끌어도 뒤 페이지가 움직이지 않는다. 결과 목록은 제 안에서 굴린다 */
-    touch-action: none;
-    /* 막은 흐려졌다 짙어지고, 패널은 살짝 떠오른다. 닫을 때는 반대로(공용 움직임) */
-    ${overlayBackdrop}
+    /* 결과 목록은 제 안에서 굴린다 */
 
     ${mobile} {
         padding-top: 6vh;

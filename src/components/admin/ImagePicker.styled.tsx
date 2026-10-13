@@ -3,26 +3,17 @@
 import styled from "@emotion/styled";
 import { buttonSubtle } from "@/styles/button";
 import { surface } from "@/styles/surface";
-import { overlayBackdrop, overlayPanel } from "@/styles/motion";
+import { scrim, overlayPanel } from "@/styles/motion";
 import { mobile } from "@/styles/breakpoints";
 
 export const PickerOverlay = styled.div`
-  position: fixed;
-  inset: 0;
+  ${scrim()}
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  /*
-   * 토큰을 쓰지 않는 자리다. 뒤를 가리는 막이라 두 테마 모두 검정이어야 한다.
-   * --shadowcolor 는 다크에서 흰색 계열이라 여기 쓰면 화면이 뿌옇게 밝아진다.
-   * (헤더의 Overlay 와 같은 값)
-   */
-  background-color: rgba(0, 0, 0, 0.4);
-  /* 막을 끌어도 뒤 에디터가 움직이지 않는다. 목록은 .picker-body 가 제 안에서 굴린다 */
-  touch-action: none;
-  ${overlayBackdrop}
+  /* 목록은 .picker-body 가 제 안에서 굴린다 */
 `;
 
 export const PickerBox = styled.div`

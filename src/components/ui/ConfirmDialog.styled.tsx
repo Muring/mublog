@@ -4,7 +4,7 @@ import styled from "@emotion/styled";
 import { buttonBase, buttonDanger } from "@/styles/button";
 import { surface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
-import { overlayBackdrop, overlayPanel } from "@/styles/motion";
+import { scrim, overlayPanel } from "@/styles/motion";
 
 /**
  * 확인 대화상자.
@@ -14,21 +14,13 @@ import { overlayBackdrop, overlayPanel } from "@/styles/motion";
  */
 
 export const ConfirmOverlay = styled.div`
-    position: fixed;
-    inset: 0;
+    /* 시트 위에 겹쳐 뜨는 창이라 막을 한 단계 짙게 둔다 */
+    ${scrim("strong")}
     z-index: 200;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    /* Header 의 Overlay 와 같은 이유로 토큰을 쓰지 않는다.
-       뒤를 가리는 막이라 두 테마 모두 검정이어야 한다 */
-    background-color: rgba(0, 0, 0, 0.5);
-
-    /* 막을 끌어도 뒤 페이지가 움직이지 않는다 */
-    touch-action: none;
-    /* 막은 흐려졌다 짙어지고, 상자는 살짝 떠오른다. 닫을 때는 반대로(공용 움직임) */
-    ${overlayBackdrop}
 `;
 
 export const ConfirmBox = styled.div`

@@ -2,12 +2,11 @@
 
 import styled from "@emotion/styled";
 import { surface } from "@/styles/surface";
-import { overlayBackdrop, overlayPanel } from "@/styles/motion";
+import { scrim, overlayPanel } from "@/styles/motion";
 
 /** 좁은 화면의 하단 시트. 뒤를 가리는 막 + 아래에 붙은 패널 */
 export const SheetOverlay = styled.div`
-  position: fixed;
-  inset: 0;
+  ${scrim()}
   top: var(--sheet-viewport-top, 0px);
   bottom: auto;
   height: var(--sheet-viewport-height, 100dvh);
@@ -18,14 +17,8 @@ export const SheetOverlay = styled.div`
   z-index: 100;
   display: flex;
   align-items: flex-end;
-  /* 이미지 고르기 막과 같은 값. 두 테마 모두 검정이어야 한다 */
-  background-color: rgba(0, 0, 0, 0.4);
-  /* 막을 끌어도 뒤 페이지가 움직이지 않는다. 시트 안은 SheetPanel 이 세로 스크롤만 다시 허용한다 */
-  touch-action: none;
+  /* 시트 안은 SheetPanel 이 세로 스크롤만 다시 허용한다 */
   overscroll-behavior: contain;
-
-  /* 막은 흐려졌다 짙어지고 닫힐 때 다시 흐려진다(공용 움직임). 시트 자체는 SheetPanel */
-  ${overlayBackdrop}
 `;
 
 /**

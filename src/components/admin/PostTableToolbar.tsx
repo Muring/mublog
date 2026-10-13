@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useImeInput } from "@/hooks/useImeInput";
 import Dropdown from "@/components/ui/Dropdown";
 import type { PostListState, PostSort, PostStatusFilter } from "@/lib/admin-navigation";
 import { adminDateLabel } from "@/lib/admin-filters";
@@ -20,11 +20,7 @@ type Props = {
 
 /** 실제 목록과 로딩에서 같은 툴바 구조를 사용한다. */
 export default function PostTableToolbar({ state, counts, onChange, options = { tags: [], series: [] }, loading = false }: Props) {
-    const input = useRef<HTMLInputElement>(null);
-    const composing = useRef(false);
-    useEffect(() => {
-        if (input.current && !composing.current) input.current.value = state.q;
-    }, [state.q]);
+    const { inputProps: searchInput } = useImeInput(state.q, (q) => onChange({ q }));
 
     const chips = [
         ...(state.status !== "all" ? [{ key: "status", name: "상태", value: state.status === "PUBLISHED" ? "공개" : "초안" }] : []),
@@ -56,10 +52,7 @@ export default function PostTableToolbar({ state, counts, onChange, options = { 
                     onChange={(value) => onChange({ sort: value as PostSort })} />
             }
             search={
-                <input type="search" ref={input} defaultValue={state.q} readOnly={loading}
-                    onCompositionStart={() => { composing.current = true; }}
-                    onCompositionEnd={(event) => { composing.current = false; onChange({ q: event.currentTarget.value }); }}
-                    onChange={(event) => { if (!composing.current) onChange({ q: event.currentTarget.value }); }}
+                <input type="search" {...searchInput} readOnly={loading}
                     placeholder="제목 · 주소 · 태그 검색" aria-label="포스트 검색" />
             }
             fields={[

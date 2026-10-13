@@ -17,6 +17,7 @@ import { adminDateLabel, IMAGE_SIZES } from "@/lib/admin-filters";
 import { scrollListToTop, scrollsInside } from "@/lib/list-scroll";
 import { IMAGE_LIST_FIELDS, imageQueryOf } from "@/lib/admin-navigation";
 import { useListState } from "@/hooks/useListState";
+import { useImeInput } from "@/hooks/useImeInput";
 import FilterBar from "./FilterBar";
 import AdminSheet from "./AdminSheet";
 
@@ -97,8 +98,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
         currentQuery.current = queryKey;
         scrollListToTop(scrollRoot.current);
     }, [queryKey]);
-    const composing = useRef(false);
-    const search = useRef<HTMLInputElement>(null);
+    const { clear: clearSearch, inputProps: searchInput } = useImeInput(query, (q) => update({ q }));
     const [selection, setSelection] = useState<ManagedImage | null>(null);
     const selectedPath = selection?.path ?? null;
     const [deleting, setDeleting] = useState(false);
@@ -270,7 +270,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
         ...(imageFilters.size ? [{ key: "size", name: "용량", value: IMAGE_SIZES.find((item) => item.value === imageFilters.size)!.label }] : []),
     ];
     // 초기화는 걸린 조건만 푼다. 정렬은 보는 방식이지 조건이 아니다(포스트·댓글과 같다)
-    const resetFilters = () => { if (search.current) search.current.value = ""; update({ status: "all", post: "", from: "", to: "", format: "", size: "", q: "" }); };
+    const resetFilters = () => { clearSearch(); update({ status: "all", post: "", from: "", to: "", format: "", size: "", q: "" }); };
 
     return (
         <>
@@ -290,10 +290,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
                         onChange={(value) => update({ sort: value as Sort })} />
                 }
                 search={
-                    <input type="search" ref={search} defaultValue={query} placeholder="경로 · 글 제목 검색" aria-label="이미지 검색"
-                        onCompositionStart={() => { composing.current = true; }}
-                        onCompositionEnd={(event) => { composing.current = false; update({ q: event.currentTarget.value }); }}
-                        onChange={(event) => { if (!composing.current) update({ q: event.currentTarget.value }); }} />
+                    <input type="search" {...searchInput} placeholder="경로 · 글 제목 검색" aria-label="이미지 검색" />
                 }
                 fields={[
                     { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: [{ value: "", label: "전체" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))] },

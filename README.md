@@ -629,12 +629,14 @@ src/
 ├── hooks/
 │   ├── useRecentPosts.tsx     # 최근 본 글 (localStorage)
 │   ├── useOptimisticList.ts   # 목록의 낙관적 갱신 + 롤백
+│   ├── useOverlay.ts          # 창의 스크롤 잠금·닫힘 애니메이션·키보드(Tab 가두기·Escape)
+│   ├── useImeInput.ts         # 한글 조합이 끝났을 때만 반영하는 검색창
 │   └── useDebouncedEffect.ts  # 디바운스 + 늦게 온 응답 버리기
 ├── styles/
 │   ├── button.ts         # 버튼 공통 조각
 │   ├── surface.ts        # 면·호버·카드 들어올림
 │   ├── text.ts           # 말줄임·여러 줄 자르기
-│   ├── motion.ts         # 페이드·슬라이드 전환
+│   ├── motion.ts         # 페이드·슬라이드 전환, 뒤를 가리는 막(scrim)
 │   ├── breakpoints.ts    # 공용 미디어 기준선
 │   └── prism-notion-theme.css
 ├── types/                # post.ts / comment.ts
