@@ -178,21 +178,40 @@ export async function getAllPostsForAdmin() {
     }));
 }
 
+/** 에디터가 다루는 글. 빈 값은 null 이 아니라 입력칸 값("")이다 */
+export type EditablePost = {
+    id: string | null;
+    slug: string;
+    title: string;
+    description: string;
+    tags: string[];
+    thumbnail: string;
+    series: string;
+    /** 입력칸 값이라 문자열로 둔다. 저장할 때 숫자로 바꾼다. */
+    seriesOrder: string;
+    contentMd: string;
+    status: "DRAFT" | "PUBLISHED";
+    publishedAt: string | null;
+};
+
+export const NEW_POST: EditablePost = {
+    id: null, slug: "", title: "", description: "", tags: [], thumbnail: "",
+    series: "", seriesOrder: "", contentMd: "", status: "DRAFT", publishedAt: null,
+};
+
 /** 에디터에서 불러올 단건. 초안도 조회된다. */
-export async function getPostForEdit(id: string) {
-    const row = await prisma.post.findUnique({ where: { id } });
+export async function getPostForEdit(id: string): Promise<EditablePost | null> {
+    const row = await prisma.post.findUnique({
+        where: { id },
+        select: { id: true, slug: true, title: true, description: true, tags: true, thumbnail: true, series: true, seriesOrder: true, contentMd: true, status: true, publishedAt: true },
+    });
     if (!row) return null;
     return {
-        id: row.id,
-        slug: row.slug,
-        title: row.title,
-        description: row.description,
-        tags: row.tags,
-        thumbnail: row.thumbnail,
-        series: row.series,
-        seriesOrder: row.seriesOrder,
-        contentMd: row.contentMd,
-        status: row.status,
+        ...row,
+        description: row.description ?? "",
+        thumbnail: row.thumbnail ?? "",
+        series: row.series ?? "",
+        seriesOrder: row.seriesOrder?.toString() ?? "",
         publishedAt: row.publishedAt?.toISOString() ?? null,
     };
 }

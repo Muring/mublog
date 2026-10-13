@@ -6,7 +6,7 @@ import { renderMarkdown } from "@/lib/markdown/render";
 import { Button } from "./Admin.styled";
 import TagSelector from "./TagSelector";
 import Dropdown from "@/components/ui/Dropdown";
-import type { SeriesSummary } from "@/lib/posts";
+import type { EditablePost, SeriesSummary } from "@/lib/posts";
 import ImagePicker from "./ImagePicker";
 import {
     InlineCodeIcon,
@@ -31,21 +31,6 @@ import {
     PaneTab,
     PreviewArticle,
 } from "./PostEditor.styled";
-
-export type EditablePost = {
-    id: string | null;
-    slug: string;
-    title: string;
-    description: string;
-    tags: string[];
-    thumbnail: string;
-    /** 입력칸 값이라 문자열로 둔다. 저장할 때 숫자로 바꾼다. */
-    series: string;
-    seriesOrder: string;
-    contentMd: string;
-    status: "DRAFT" | "PUBLISHED";
-    publishedAt: string | null;
-};
 
 type Props = {
     initial: EditablePost;

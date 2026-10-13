@@ -31,6 +31,11 @@ async function readSlug(request: NextRequest): Promise<string | null> {
     }
 }
 
+/** 집계용 쿠키(오늘 방문·글 조회 시각). 스크립트가 읽지 않고 서버만 본다. 수명만 쿠키마다 다르다 */
+function counterCookie(maxAge: number) {
+    return { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge } as const;
+}
+
 /**
  * 방문 집계 비콘.
  *
@@ -119,22 +124,10 @@ export async function POST(request: NextRequest) {
 
         const response = NextResponse.json({ views, stats });
         if (slug && shouldCountView) {
-            response.cookies.set(postCookie!, String(now), {
-                httpOnly: true,
-                sameSite: "lax",
-                secure: process.env.NODE_ENV === "production",
-                path: "/",
-                maxAge: Math.ceil(POST_VIEW_WINDOW_MS / 1000),
-            });
+            response.cookies.set(postCookie!, String(now), counterCookie(Math.ceil(POST_VIEW_WINDOW_MS / 1000)));
         }
         if (isNewVisitorToday) {
-            response.cookies.set(VISIT_COOKIE, todayKey, {
-                httpOnly: true,
-                sameSite: "lax",
-                secure: process.env.NODE_ENV === "production",
-                path: "/",
-                maxAge: secondsUntilSeoulMidnight(),
-            });
+            response.cookies.set(VISIT_COOKIE, todayKey, counterCookie(secondsUntilSeoulMidnight()));
         }
         return response;
     } catch (error) {

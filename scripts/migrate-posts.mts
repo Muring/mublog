@@ -21,18 +21,13 @@ try {
 }
 
 const { prisma } = await import("../src/lib/prisma");
-const { renderMarkdown } = await import("../src/lib/markdown/render");
+const { renderedContent } = await import("../src/lib/post-write");
 
 const POSTS_DIR = "backup/posts";
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const onlyIndex = args.indexOf("--only");
 const only = onlyIndex !== -1 ? args[onlyIndex + 1] : null;
-
-/** 한국어 본문 기준 대략 분당 900자 */
-function estimateReadingTime(content: string): number {
-    return Math.max(1, Math.ceil(content.length / 900));
-}
 
 async function main() {
     const files = readdirSync(POSTS_DIR)
@@ -53,7 +48,6 @@ async function main() {
         if (!data.title) throw new Error(`${slug}: title 없음`);
         if (!data.date) throw new Error(`${slug}: date 없음`);
 
-        const contentHtml = await renderMarkdown(content);
         const fields = {
             title: data.title as string,
             description: (data.description as string) ?? null,
@@ -61,12 +55,11 @@ async function main() {
             thumbnail: (data.thumbnail as string) ?? null,
             series: (data.series as string) ?? null,
             seriesOrder: data.series && Number.isInteger(data.seriesOrder) ? (data.seriesOrder as number) : null,
-            contentMd: content,
-            contentHtml,
+            // 원문·HTML·읽는 시간을 에디터 저장과 같은 함수로 만든다
+            ...(await renderedContent(content)),
             // backup:posts 가 초안에만 붙이는 표시. 없으면 발행글이다.
             status: (data.status === "draft" ? "DRAFT" : "PUBLISHED") as "DRAFT" | "PUBLISHED",
             publishedAt: data.status === "draft" ? null : new Date(data.date),
-            readingTime: estimateReadingTime(content),
         };
 
         if (dryRun) {
@@ -75,7 +68,7 @@ async function main() {
                     `      title  ${fields.title}\n` +
                     `      date   ${fields.publishedAt?.toISOString().slice(0, 10) ?? "(초안)"}\n` +
                     `      tags   ${fields.tags.join(", ") || "-"}\n` +
-                    `      html   ${contentHtml.length.toLocaleString()} chars, ${fields.readingTime}분\n`
+                    `      html   ${fields.contentHtml.length.toLocaleString()} chars, ${fields.readingTime}분\n`
             );
             continue;
         }

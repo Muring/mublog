@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/providers/Toast";
 import { fetchJson, jsonRequest } from "@/lib/fetcher";
-import type { EditablePost } from "./PostEditor";
+import type { EditablePost } from "@/lib/posts";
 
 type Status = "DRAFT" | "PUBLISHED";
 type Saved = { id?: string; slug?: string; publishedAt?: string | null };

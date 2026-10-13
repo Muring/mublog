@@ -23,19 +23,7 @@ export default async function EditPostPage({ params }: Props) {
         <PostEditor
             knownTags={knownTags}
             knownSeries={knownSeries}
-            initial={{
-                id: post.id,
-                slug: post.slug,
-                title: post.title,
-                description: post.description ?? "",
-                tags: post.tags,
-                thumbnail: post.thumbnail ?? "",
-                series: post.series ?? "",
-                seriesOrder: post.seriesOrder?.toString() ?? "",
-                contentMd: post.contentMd,
-                status: post.status,
-                publishedAt: post.publishedAt,
-            }}
+            initial={post}
         />
     );
 }
