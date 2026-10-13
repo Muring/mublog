@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from "react";
 import type { ManagedImage } from "@/lib/storage";
 import { formatBytes, imageUsers } from "@/lib/admin-filters";
 import { Skeleton } from "./Admin.styled";
+import { SkeletonLine } from "@/components/ui/Skeleton.styled";
 import { ImageCard } from "./ImagePicker.styled";
 
 type Props = Omit<ComponentProps<typeof ImageCard>, "children"> & {
@@ -36,15 +37,13 @@ export default function ImageTile({ image, status, ...button }: Props) {
     );
 }
 
-const line = (width: string) => <Skeleton style={{ display: "inline-block", verticalAlign: "middle", width, maxWidth: "100%", height: "0.8em" }} />;
-
 /** 불러오는 동안 카드 자리를 지킨다. 그리드(.grid)는 부르는 쪽이 둔다 */
 export function ImageTileSkeletons({ count = 12 }: { count?: number }) {
     return Array.from({ length: count }, (_, i) => (
         <ImageCard key={i} as="span" aria-hidden>
             <Skeleton style={{ width: "100%", aspectRatio: "16 / 9", height: "auto" }} />
-            <span className="name">{line("80%")}</span>
-            <span className="meta">{line("50%")}</span>
+            <span className="name"><SkeletonLine style={{ width: "80%" }} /></span>
+            <span className="meta"><SkeletonLine style={{ width: "50%" }} /></span>
         </ImageCard>
     ));
 }

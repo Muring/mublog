@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "@emotion/styled";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { CommentList, CommentRow } from "@/components/comments/Comments.styled";
 import CommentBody from "@/components/comments/CommentBody";
-import { useConfirm } from "@/providers/Confirm";
-import { useToast } from "@/providers/Toast";
-import { fetchJson } from "@/lib/fetcher";
+import { useConfirmedDelete } from "./useConfirmedDelete";
 import { formatRelative } from "@/lib/date";
 import type { AdminComment } from "@/lib/comments";
 import { mobile } from "@/styles/breakpoints";
+import CommentAvatar from "@/components/comments/CommentAvatar";
 
 /**
  * 관리 화면의 댓글 목록.
@@ -37,11 +35,7 @@ export default function AdminCommentList({ comments, postFiltered = false }: { c
 const CLAMP_LINES = 5;
 
 function AdminCommentRow({ comment, postFiltered }: { comment: AdminComment; postFiltered: boolean }) {
-    const router = useRouter();
-    const toast = useToast();
-    const confirm = useConfirm();
-    const [isPending, startTransition] = useTransition();
-    const [isDeleting, setIsDeleting] = useState(false);
+    const { remove: removeComment, busy } = useConfirmedDelete();
     const [expanded, setExpanded] = useState(false);
     // 접혀서 실제로 잘린 본문만 "더 보기" 를 단다. 글자 수로 어림하면 넓은 화면에서 안 잘린 것에도 붙는다.
     const [overflows, setOverflows] = useState(false);
@@ -51,27 +45,12 @@ function AdminCommentRow({ comment, postFiltered }: { comment: AdminComment; pos
         if (el) setOverflows(el.scrollHeight > el.clientHeight + 1);
     }, [comment.body]);
 
-    async function remove() {
-        const ok = await confirm({
-            title: "이 댓글을 삭제할까요?",
-            description: "본문이 가려지고 되돌릴 수 없습니다. 답글은 남습니다.",
-            confirmLabel: "삭제",
-            danger: true,
-        });
-        if (!ok) return;
-        setIsDeleting(true);
-        try {
-            await fetchJson(`/api/comments/${comment.id}`, { method: "DELETE" });
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "삭제에 실패했습니다.");
-            setIsDeleting(false);
-            return;
-        }
-        toast.success("댓글을 삭제했습니다.");
-        startTransition(() => router.refresh());
-    }
-
-    const busy = isDeleting || isPending;
+    const remove = () => removeComment({
+        title: "이 댓글을 삭제할까요?",
+        description: "본문이 가려지고 되돌릴 수 없습니다. 답글은 남습니다.",
+        url: `/api/comments/${comment.id}`,
+        success: "댓글을 삭제했습니다.",
+    });
     const published = comment.post.status === "PUBLISHED";
     const postHref = published ? `/${comment.post.slug}#comment-${comment.id}` : `/admin/posts/${comment.post.id}`;
 
@@ -81,16 +60,7 @@ function AdminCommentRow({ comment, postFiltered }: { comment: AdminComment; pos
 
     return (
         <CommentRow className={rowClass}>
-            <div className="avatar-col">
-                {comment.author?.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img className="avatar" src={comment.author.avatarUrl} alt="" />
-                ) : (
-                    <div className="avatar avatar-fallback">
-                        {comment.author?.username.slice(0, 1).toUpperCase() ?? "?"}
-                    </div>
-                )}
-            </div>
+            <CommentAvatar author={comment.author} />
             <div className="content">
                 {/* 한 줄에 다 둔다: 누가 · 언제 · 어느 글 · 삭제. 본문 아래로 눈을 내리지 않아도 행을 판단할 수 있다 */}
                 <div className="meta">

@@ -12,7 +12,7 @@ import { CommentRow } from "@/components/comments/Comments.styled";
 import { ImageTileSkeletons } from "./ImageTile";
 import { DetailPanel, ImagesLayout } from "./AdminImages.styled";
 import FilterBar from "./FilterBar";
-import { SkeletonText } from "@/components/ui/Skeleton.styled";
+import { SkeletonLine, SkeletonText } from "@/components/ui/Skeleton.styled";
 import styles from "./Management.module.css";
 import { AdminWrapper, PostTable, AdminListScroll, ResultBar, Button, Skeleton } from "./Admin.styled";
 
@@ -37,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
 /** 글자 자리는 실제 행의 line-height·배지·버튼 상자가 잡고, 그 안에 로딩 막대만 넣는다. */
 function TextSkeleton({ width = "4ch" }: { width?: string }) {
-    return <Skeleton style={{ display: "inline-block", verticalAlign: "middle", width, maxWidth: "100%", height: "0.8em" }} />;
+    return <SkeletonLine style={{ width }} />;
 }
 
 /** 실제 표와 같은 머리글·행 구조·반응형 규칙을 사용한다. */

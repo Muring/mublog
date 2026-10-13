@@ -1,8 +1,16 @@
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/providers/Toast";
-import { useConfirm } from "@/providers/Confirm";
-import { fetchJson } from "@/lib/fetcher";
+import { useConfirmedDelete } from "./useConfirmedDelete";
+
+/** 확인창·토스트 문구는 목록의 행 삭제(PostTableRow)와 같다 */
+export function postDeleteRequest(id: string, title: string) {
+    const name = title.trim() || "제목 없는 글";
+    return {
+        title: `"${name}" 을(를) 삭제할까요?`,
+        description: "댓글도 함께 삭제되며 되돌릴 수 없습니다.",
+        url: `/api/admin/posts/${id}`,
+        success: `"${name}" 을(를) 삭제했습니다.`,
+    };
+}
 
 /**
  * 편집 화면에서 지금 고치던 글을 지운다.
@@ -13,34 +21,12 @@ import { fetchJson } from "@/lib/fetcher";
  */
 export function usePostDelete(postId: string | null, title: string) {
     const router = useRouter();
-    const toast = useToast();
-    const confirm = useConfirm();
-    const [isDeleting, setIsDeleting] = useState(false);
-
-    async function remove() {
-        if (!postId || isDeleting) return;
-        const name = title.trim() || "제목 없는 글";
-        const ok = await confirm({
-            title: `"${name}" 을(를) 삭제할까요?`,
-            description: "댓글도 함께 삭제되며 되돌릴 수 없습니다.",
-            confirmLabel: "삭제",
-            danger: true,
-        });
-        if (!ok) return;
-
-        setIsDeleting(true);
-        try {
-            await fetchJson(`/api/admin/posts/${postId}`, { method: "DELETE" });
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "삭제에 실패했습니다.");
-            setIsDeleting(false);
-            return;
-        }
-        // 이동이 끝날 때까지 isDeleting 을 유지해 버튼이 눌린 상태로 남는다.
-        toast.success(`"${name}" 을(를) 삭제했습니다.`);
+    const { remove, isDeleting } = useConfirmedDelete(() => {
         router.refresh();
         router.push("/admin");
-    }
-
-    return { remove, isDeleting };
+    });
+    return {
+        remove: () => { if (postId) void remove(postDeleteRequest(postId, title)); },
+        isDeleting,
+    };
 }

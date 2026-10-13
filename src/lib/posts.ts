@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma";
 import type { PostSummary, PostDetail } from "@/types/post";
 import { compareTags } from "@/lib/tags";
 
@@ -19,21 +20,8 @@ const SUMMARY_SELECT = {
     commentCount: true,
 } as const;
 
-type SummaryRow = {
-    id: string;
-    slug: string;
-    title: string;
-    description: string | null;
-    tags: string[];
-    thumbnail: string | null;
-    publishedAt: Date | null;
-    createdAt: Date;
-    readingTime: number;
-    series: string | null;
-    seriesOrder: number | null;
-    viewCount: number;
-    commentCount: number;
-};
+/** select 에서 행 타입을 끌어낸다. 컬럼을 더할 때 타입을 따로 고치지 않아도 된다 */
+type SummaryRow = Prisma.PostGetPayload<{ select: typeof SUMMARY_SELECT }>;
 
 // 캐시 경계를 넘는 값은 직렬화된다. Date 를 그대로 흘리면 client 컴포넌트까지
 // 새어들어가 hydration 불일치의 원인이 되므로 여기서 ISO 문자열로 고정한다.

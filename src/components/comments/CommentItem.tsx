@@ -8,6 +8,7 @@ import CommentForm from "./CommentForm";
 import { useConfirm } from "@/providers/Confirm";
 import type { CommentNode } from "@/types/comment";
 import { formatRelative } from "@/lib/date";
+import CommentAvatar from "./CommentAvatar";
 
 type Props = {
     slug: string;
@@ -77,16 +78,7 @@ export default function CommentItem({
 
     return (
         <CommentRow id={`comment-${comment.id}`} className={rowClass}>
-            <div className="avatar-col">
-                {comment.author?.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img className="avatar" src={comment.author.avatarUrl} alt="" />
-                ) : (
-                    <div className="avatar avatar-fallback">
-                        {comment.author?.username.slice(0, 1).toUpperCase() ?? "?"}
-                    </div>
-                )}
-            </div>
+            <CommentAvatar author={comment.author} />
 
             <div className="content">
                 <div className="meta">

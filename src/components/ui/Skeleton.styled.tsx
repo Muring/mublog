@@ -52,3 +52,11 @@ export const SkeletonText = styled(Skeleton)`
     vertical-align: middle;
     user-select: none;
 `;
+
+/** 글 한 줄 자리. 폭은 자리마다 달라 style 로 준다(<SkeletonLine style={{ width: "60%" }} />) */
+export const SkeletonLine = styled(Skeleton)`
+    display: inline-block;
+    vertical-align: middle;
+    max-width: 100%;
+    height: 0.8em;
+`;

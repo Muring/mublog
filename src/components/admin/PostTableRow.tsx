@@ -1,14 +1,11 @@
 "use client";
 import PostStatusBadge from "./PostStatusBadge";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import TagChips from "@/components/ui/TagChips";
-import { useToast } from "@/providers/Toast";
 import { formatCardDate } from "@/lib/date";
-import { fetchJson } from "@/lib/fetcher";
-import { useConfirm } from "@/providers/Confirm";
+import { useConfirmedDelete } from "./useConfirmedDelete";
+import { postDeleteRequest } from "./usePostDelete";
 
 import { commentListUrl } from "@/lib/admin-navigation";
 
@@ -32,36 +29,9 @@ type Props = {
 };
 
 export default function PostTableRow({ post, returnTo, onTagSelect, selectedTags }: Props) {
-    const router = useRouter();
-    const toast = useToast();
-    const confirm = useConfirm();
-    const [isPending, startTransition] = useTransition();
-    const [isDeleting, setIsDeleting] = useState(false);
-
-    async function remove() {
-        if (busy) return;
-        const ok = await confirm({
-            title: `"${post.title}" 을(를) 삭제할까요?`,
-            description: "댓글도 함께 삭제되며 되돌릴 수 없습니다.",
-            confirmLabel: "삭제",
-            danger: true,
-        });
-        if (!ok) return;
-
-        setIsDeleting(true);
-        try {
-            await fetchJson(`/api/admin/posts/${post.id}`, { method: "DELETE" });
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : "삭제에 실패했습니다.");
-            setIsDeleting(false);
-            return;
-        }
-        toast.success(`"${post.title}" 을(를) 삭제했습니다.`);
-        startTransition(() => router.refresh());
-    }
-
+    const { remove: removePost, isDeleting, busy } = useConfirmedDelete();
+    const remove = () => removePost(postDeleteRequest(post.id, post.title));
     const commentsHref = commentListUrl({ post: post.slug, returnTo });
-    const busy = isDeleting || isPending;
 
     return (
         <tr style={busy ? { opacity: 0.5 } : undefined}>

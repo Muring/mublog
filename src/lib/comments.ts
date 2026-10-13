@@ -47,12 +47,18 @@ function toNode(row: CommentRow): CommentNode {
     };
 }
 
-export async function getCommentsByPostSlug(slug: string): Promise<CommentNode[]> {
+/** 댓글은 발행된 글에만 달고 읽는다. 초안·없는 글은 404 */
+async function requirePublishedPost(slug: string) {
     const post = await prisma.post.findFirst({
         where: { slug, status: "PUBLISHED" },
         select: { id: true },
     });
     if (!post) throw new HttpError(404, "포스트를 찾을 수 없습니다.");
+    return post;
+}
+
+export async function getCommentsByPostSlug(slug: string): Promise<CommentNode[]> {
+    const post = await requirePublishedPost(slug);
 
     const rows = await prisma.comment.findMany({
         where: { postId: post.id },
@@ -184,11 +190,7 @@ export async function createComment(params: {
 }): Promise<CommentNode> {
     const { slug, authorId, body, parentId } = params;
 
-    const post = await prisma.post.findFirst({
-        where: { slug, status: "PUBLISHED" },
-        select: { id: true },
-    });
-    if (!post) throw new HttpError(404, "포스트를 찾을 수 없습니다.");
+    const post = await requirePublishedPost(slug);
 
     if (parentId) {
         const parent = await prisma.comment.findUnique({
