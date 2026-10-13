@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { HttpError, requireAdminApi } from "@/lib/auth";
 import { handleApiError, parseBody } from "@/lib/api";
-import { deleteUnusedImages, ImageDeleteRefused, listImageLibrary } from "@/lib/storage";
+import { classifyImages, deleteUnusedImages, ImageDeleteRefused } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
     try {
         await requireAdminApi();
-        return NextResponse.json({ images: await listImageLibrary() });
+        return NextResponse.json({ images: (await classifyImages()).images });
     } catch (error) {
         return handleApiError(error, "api/admin/images", "이미지 목록을 불러오지 못했습니다.");
     }

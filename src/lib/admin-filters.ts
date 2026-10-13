@@ -1,4 +1,5 @@
 import { IMAGE_SIZE_KEYS } from "./admin-image-query";
+import type { ImageUser, ManagedImage } from "./storage";
 
 /** 필터 선택지 맨 앞의 "전체". 빈 값은 거르지 않는다는 뜻이다 */
 export const ALL_OPTION = { value: "", label: "전체" };
@@ -11,6 +12,25 @@ export function facetOptions<T extends { count: number }>(items: readonly T[], v
 export const NEWEST_OLDEST = [{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }];
 /** 이미지 목록은 용량순이 더 있다 */
 export const IMAGE_SORT_OPTIONS = [...NEWEST_OLDEST, { value: "size", label: "용량순" }];
+
+/** 파일 크기. 1MB 미만은 KB(최소 1), 그 이상은 소수 한 자리 MB */
+export function formatBytes(size: number) {
+    if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))}KB`;
+    return `${(size / 1024 / 1024).toFixed(1)}MB`;
+}
+
+/** 이 이미지를 쓰는 글. 썸네일로도 본문에도 쓰는 글은 한 줄로 합치고 쓰임을 kinds 에 모은다 */
+export function imageUsers(image: Pick<ManagedImage, "usedAsThumbnail" | "usedInBody">) {
+    const users = new Map<string, { user: ImageUser; kinds: string[] }>();
+    for (const [list, kind] of [[image.usedAsThumbnail, "썸네일"], [image.usedInBody, "본문"]] as const) {
+        for (const user of list) {
+            const entry = users.get(user.id) ?? { user, kinds: [] };
+            entry.kinds.push(kind);
+            users.set(user.id, entry);
+        }
+    }
+    return [...users.values()];
+}
 
 export function imageFormat(path: string) {
     const name = path.split("/").pop() ?? "";

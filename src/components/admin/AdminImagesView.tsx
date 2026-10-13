@@ -9,11 +9,11 @@ import { fetchJson, jsonRequest } from "@/lib/fetcher";
 import { splitMulti, withoutMulti } from "@/lib/multi-value";
 import { useConfirm } from "@/providers/Confirm";
 import { useToast } from "@/providers/Toast";
-import type { ImageUser, ManagedImage } from "@/lib/storage";
+import type { ManagedImage } from "@/lib/storage";
 import { AdminListScroll, Button, ResultBar } from "./Admin.styled";
-import { ImageCard } from "./ImagePicker.styled";
+import ImageTile from "./ImageTile";
 import { DetailPanel, ImageSheetPanel, ImagesLayout, SHEET_MEDIA } from "./AdminImages.styled";
-import { ALL_OPTION, facetOptions, IMAGE_SIZES, IMAGE_SORT_OPTIONS } from "@/lib/admin-filters";
+import { ALL_OPTION, facetOptions, formatBytes, imageUsers, IMAGE_SIZES, IMAGE_SORT_OPTIONS } from "@/lib/admin-filters";
 import { adminDateLabel } from "@/lib/admin-dates";
 import { scrollListToTop, scrollsInside } from "@/lib/list-scroll";
 import { IMAGE_LIST_FIELDS, imageQueryOf } from "@/lib/admin-navigation";
@@ -37,29 +37,11 @@ const FILTERS: { key: Filter; label: string; match: (image: ManagedImage) => boo
 /** 한 번에 보낼 수 있는 경로 수. API 스키마의 상한과 같다 */
 const DELETE_BATCH = 100;
 
-function bytes(size: number) {
-    if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))}KB`;
-    return `${(size / 1024 / 1024).toFixed(1)}MB`;
-}
-
 /** 정리 시각. Hobby 의 cron 은 정시가 아니라 그 한 시간 안 어딘가에 돌아서 구간으로 적는다 */
 function sweepTime(iso: string) {
     const d = new Date(new Date(iso).getTime() + KST_OFFSET_MS);
     const hour = d.getUTCHours();
     return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${hour}~${(hour + 1) % 24}시 사이`;
-}
-
-/** 썸네일로도 본문에도 쓰는 글은 한 줄로 합친다 */
-function usersOf(image: ManagedImage) {
-    const users = new Map<string, { user: ImageUser; kinds: string[] }>();
-    for (const [list, kind] of [[image.usedAsThumbnail, "썸네일"], [image.usedInBody, "본문"]] as const) {
-        for (const user of list) {
-            const entry = users.get(user.id) ?? { user, kinds: [] };
-            entry.kinds.push(kind);
-            users.set(user.id, entry);
-        }
-    }
-    return [...users.values()];
 }
 
 type Props = { initialPage: ImagePage; initialQuery: ImageQuery };
@@ -152,7 +134,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
                 const result = await fetchJson<{ freedBytes: number }>("/api/admin/images", jsonRequest("DELETE", { paths }));
                 freed += result.freedBytes;
             }
-            toast.success(`${targets.length}개를 삭제했습니다. ${bytes(freed)} 확보.`);
+            toast.success(`${targets.length}개를 삭제했습니다. ${formatBytes(freed)} 확보.`);
             if (selected && targets.some(image => image.path === selected.path)) {
                 setSelection(null);
                 setSheetOpen(false);
@@ -177,7 +159,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
             if (currentQuery.current !== queryKey) return;
             if (!targets.length) { toast.success("삭제 예정 이미지가 없습니다."); refresh(); return; }
             await remove(targets, `${scopedLabel}삭제 예정 ${targets.length}개를 지금 삭제할까요?`,
-                `어떤 글도 쓰지 않고 올린 지 하루가 지난 이미지입니다(${bytes(targets.reduce((sum, image) => sum + image.size, 0))}). 두면 ${sweepTime(nextSweepAt)} 자동 정리에서 지워집니다. 되돌릴 수 없습니다.`);
+                `어떤 글도 쓰지 않고 올린 지 하루가 지난 이미지입니다(${formatBytes(targets.reduce((sum, image) => sum + image.size, 0))}). 두면 ${sweepTime(nextSweepAt)} 자동 정리에서 지워집니다. 되돌릴 수 없습니다.`);
         } catch (cause) { toast.error(cause instanceof Error ? cause.message : "삭제 대상을 불러오지 못했습니다."); }
         finally { setPreparingDelete(false); }
     };
@@ -211,7 +193,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
                 <dt>경로</dt>
                 <dd className="path">{selected.path}</dd>
                 <dt>크기</dt>
-                <dd>{bytes(selected.size)}</dd>
+                <dd>{formatBytes(selected.size)}</dd>
                 <dt>올린 시각</dt>
                 <dd>{formatKst(selected.createdAt)} (KST)</dd>
             </dl>
@@ -229,7 +211,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
                 <div>
                     <h3>쓰는 글</h3>
                     <ul className="users">
-                        {usersOf(selected).map(({ user, kinds }) => (
+                        {imageUsers(selected).map(({ user, kinds }) => (
                             <li key={user.id}>
                                 <Link href={`/admin/posts/${user.id}`}>
                                     <span className={`badge ${user.status === "DRAFT" ? "draft" : ""}`}>{user.status === "DRAFT" ? "초안" : "공개"}</span>
@@ -312,8 +294,8 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
             */}
             <ResultBar>
                 <p>
-                    총 용량 {bytes(page.totalBytes)}
-                    {page.count !== page.totalCount && ` · 지금 목록 ${bytes(page.bytes)}`}
+                    총 용량 {formatBytes(page.totalBytes)}
+                    {page.count !== page.totalCount && ` · 지금 목록 ${formatBytes(page.bytes)}`}
                     <span className="cleanup-note">다음 자동 정리 {sweepTime(nextSweepAt)} (KST). 미사용 이미지는 업로드 하루 후 정리됩니다.</span>
                 </p>
                 <Button type="button" className="danger" disabled={deleting || preparingDelete || pending || stale || Boolean(error) || page.scheduledCount === 0}
@@ -328,25 +310,12 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
                         <p className="empty">해당 조건의 이미지가 없습니다.</p>
                     ) : (
                         <div className="grid">
-                            {visible.map((image) => {
-                                const users = usersOf(image);
-                                return (
-                                    <ImageCard key={image.path} type="button" className={image.path === selectedPath ? "current" : ""}
-                                        aria-pressed={image.path === selectedPath} onClick={() => select(image.path)}>
-                                        {/* 목록 미리보기라 next/image 최적화를 태우지 않는다 */}
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={image.url} alt="" loading="lazy" />
-                                        <span className="name" title={image.path}>{image.name}</span>
-                                        <span className="meta">
-                                            {image.usedAsThumbnail.length > 0 && <span className="badge">썸네일</span>}
-                                            {image.usedInBody.length > 0 && <span className="badge">본문</span>}
-                                            {image.state === "grace" && <span className="badge grace">유예 중</span>}
-                                            {image.state === "scheduled" && <span className="badge unused">삭제 예정</span>}
-                                            <span>{users.map(({ user }) => user.slug).join(", ") || bytes(image.size)}</span>
-                                        </span>
-                                    </ImageCard>
-                                );
-                            })}
+                            {visible.map((image) => (
+                                <ImageTile key={image.path} image={image} className={image.path === selectedPath ? "current" : ""}
+                                    aria-pressed={image.path === selectedPath} onClick={() => select(image.path)}
+                                    status={image.state === "grace" ? <span className="badge grace">유예 중</span>
+                                        : image.state === "scheduled" && <span className="badge unused">삭제 예정</span>} />
+                            ))}
                         </div>
                     )}
                     <div ref={sentinel} className="load-more">

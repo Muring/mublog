@@ -9,7 +9,7 @@ import PostTableHead from "./PostTableHead";
 import PostTableToolbar from "./PostTableToolbar";
 import { CompactList } from "./AdminCommentList";
 import { CommentRow } from "@/components/comments/Comments.styled";
-import { ImageCard } from "./ImagePicker.styled";
+import { ImageTileSkeletons } from "./ImageTile";
 import { DetailPanel, ImagesLayout } from "./AdminImages.styled";
 import FilterBar from "./FilterBar";
 import { SkeletonText } from "@/components/ui/Skeleton.styled";
@@ -171,13 +171,7 @@ export function AdminImagesSkeleton() {
                 <ImagesLayout>
                     <AdminListScroll>
                         <div className="grid">
-                            {Array.from({ length: 12 }, (_, i) => (
-                                <ImageCard key={i} as="span">
-                                    <Skeleton style={{ width: "100%", aspectRatio: "16 / 9", height: "auto" }} />
-                                    <span className="name"><TextSkeleton width="80%" /></span>
-                                    <span className="meta"><TextSkeleton width="50%" /></span>
-                                </ImageCard>
-                            ))}
+                            <ImageTileSkeletons />
                         </div>
                     </AdminListScroll>
                     <DetailPanel className="inline-panel"><p className="placeholder"><SkeletonText>이미지를 선택하세요.</SkeletonText></p></DetailPanel>

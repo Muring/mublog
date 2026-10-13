@@ -2,6 +2,7 @@ import { fetchJson } from "@/lib/fetcher";
 import type { PostSummary } from "@/types/post";
 import type { SearchHit } from "@/lib/posts";
 import type { CommentNode } from "@/types/comment";
+import type { ManagedImage } from "@/lib/storage";
 
 /**
  * 클라이언트에서 쓰는 쿼리 키와 페처.
@@ -36,6 +37,7 @@ export const queryKeys = {
     postViewCounts: ["post-view-counts"] as const,
     comments: (slug: string) => ["comments", slug] as const,
     search: (q: string) => ["search", q] as const,
+    imageLibrary: ["admin", "image-library"] as const,
 };
 
 /** 현재 로그인 상태. 헤더와 댓글 영역이 함께 본다. */
@@ -93,4 +95,9 @@ export function fetchPostLikeCounts(): Promise<Record<string, number>> {
 
 export function postLikesUrl(slug: string) {
     return `/api/posts/${encodeURIComponent(slug)}/likes`;
+}
+
+/** 에디터의 이미지 고르기가 보는 전체 목록(관리자 전용). 관리 화면의 페이지 조회는 lib/admin-image-query 다 */
+export async function fetchImageLibrary(): Promise<ManagedImage[]> {
+    return (await fetchJson<{ images: ManagedImage[] }>("/api/admin/images")).images;
 }

@@ -1,15 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Dropdown from "@/components/ui/Dropdown";
-import { fetchJson } from "@/lib/fetcher";
+import { fetchImageLibrary, queryKeys } from "@/lib/queries";
 import { useDialogKeys, useExitTransition, useScrollLock } from "@/hooks/useOverlay";
 import { useImeInput } from "@/hooks/useImeInput";
 import { useToast } from "@/providers/Toast";
-import type { LibraryImage, LibraryUser } from "@/lib/storage";
+import type { ImageUser, ManagedImage } from "@/lib/storage";
 import { Button, Skeleton } from "./Admin.styled";
-import { PickerOverlay, PickerBox, SourceTab, ImageCard } from "./ImagePicker.styled";
-import { IMAGE_SORT_OPTIONS } from "@/lib/admin-filters";
+import { PickerOverlay, PickerBox, SourceTab } from "./ImagePicker.styled";
+import ImageTile, { ImageTileSkeletons } from "./ImageTile";
+import { imageUsers, IMAGE_SORT_OPTIONS } from "@/lib/admin-filters";
 
 /** 무엇으로 쓰이는지로 거른다. 고르러 온 사람에게 중요한 건 파일 위치가 아니라 쓰임이다. */
 type Filter = "all" | "thumbnail" | "body" | "unused";
@@ -22,23 +24,20 @@ const FILTERS: { key: Filter; label: string }[] = [
     { key: "unused", label: "미사용" },
 ];
 
+/** 목록을 못 받았을 때. 렌더마다 새 배열을 만들면 아래 useMemo 가 매번 다시 돈다 */
+const NO_IMAGES: ManagedImage[] = [];
+
 /** 글 필터에서 "지금 쓰는 글" 을 가리키는 값. slug 와 겹치지 않는다(slug 에는 : 가 없다) */
 const THIS_POST = ":this";
 
-const kb = (bytes: number) => (bytes / 1024).toFixed(0) + "KB";
-
 /** 이 이미지를 쓰는 글. 썸네일로도 본문에도 쓰는 글은 한 번만 센다. */
-const usersOf = (image: LibraryImage): LibraryUser[] => {
-    const bySlug = new Map<string, LibraryUser>();
-    for (const user of [...image.usedAsThumbnail, ...image.usedInBody]) bySlug.set(user.slug, user);
-    return [...bySlug.values()];
-};
+const usersOf = (image: ManagedImage) => imageUsers(image).map(({ user }) => user);
 
 /** 업로드 경로의 글 폴더. posts/<slug>/… · thumbnails/<slug>/… 가 아니면 null */
 const folderSlug = (path: string) => /^(?:posts|thumbnails)\/([^/]+)\//.exec(path)?.[1] ?? null;
 
 /** 그 글의 이미지: 지금 쓰는 것 + 그 글 폴더에 올렸지만 빠진 것(이미지 관리의 글 필터와 같은 기준) */
-const belongsTo = (image: LibraryImage, slug: string) =>
+const belongsTo = (image: ManagedImage, slug: string) =>
     usersOf(image).some((user) => user.slug === slug) || folderSlug(image.path) === slug;
 
 type Props = {
@@ -62,7 +61,9 @@ type Props = {
  */
 export default function ImagePicker({ current, slug, onSelect, onClose }: Props) {
     const toast = useToast();
-    const [images, setImages] = useState<LibraryImage[] | null>(null);
+    // 방금 올린 이미지가 빠지면 고르기 화면의 쓸모가 없다. 열 때마다 다시 받는다(그동안은 지난 목록을 보여준다)
+    const library = useQuery({ queryKey: queryKeys.imageLibrary, queryFn: fetchImageLibrary, staleTime: 0 });
+    const images = library.data ?? (library.isError ? NO_IMAGES : null);
     const [query, setQuery] = useState("");
     const [filter, setFilter] = useState<Filter>("all");
     const [post, setPost] = useState("");
@@ -74,22 +75,8 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
     useScrollLock();
 
     useEffect(() => {
-        let cancelled = false;
-        fetchJson<{ images: LibraryImage[] }>("/api/admin/images")
-            .then((data) => {
-                if (!cancelled) setImages(data.images);
-            })
-            .catch((error: unknown) => {
-                if (cancelled) return;
-                toast.error(
-                    error instanceof Error ? error.message : "이미지 목록을 불러오지 못했습니다."
-                );
-                setImages([]);
-            });
-        return () => {
-            cancelled = true;
-        };
-    }, [toast]);
+        if (library.error) toast.error(library.error.message || "이미지 목록을 불러오지 못했습니다.");
+    }, [library.error, toast]);
 
     const close = useCallback(() => requestClose(), [requestClose]);
 
@@ -100,7 +87,7 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
     /** 이미지가 딸린 글. 제목순(숫자는 값으로) — 이미지 관리의 글 필터와 같다 */
     const posts = useMemo(() => {
         if (!images) return [];
-        const bySlug = new Map<string, LibraryUser>();
+        const bySlug = new Map<string, ImageUser>();
         for (const image of images) for (const user of usersOf(image)) bySlug.set(user.slug, user);
         return [...bySlug.values()]
             .map((user) => ({ ...user, count: images.filter((image) => belongsTo(image, user.slug)).length }))
@@ -181,53 +168,24 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
                     {images === null ? (
                         // 이미지 관리 스켈레톤과 같은 카드 자리
                         <div className="grid" role="status" aria-label="이미지를 불러오는 중">
-                            {Array.from({ length: 12 }, (_, i) => (
-                                <ImageCard key={i} as="span" aria-hidden>
-                                    <Skeleton style={{ width: "100%", aspectRatio: "16 / 9", height: "auto" }} />
-                                    <span className="name"><Skeleton style={{ display: "inline-block", width: "80%", height: "0.8em" }} /></span>
-                                    <span className="meta"><Skeleton style={{ display: "inline-block", width: "50%", height: "0.8em" }} /></span>
-                                </ImageCard>
-                            ))}
+                            <ImageTileSkeletons />
                         </div>
                     ) : filtered.length === 0 ? (
                         <p className="empty">찾는 이미지가 없습니다.</p>
                     ) : (
                         <div className="grid">
                             {filtered.map((image) => (
-                                <ImageCard
+                                <ImageTile
                                     key={image.url}
-                                    type="button"
+                                    image={image}
                                     className={image.url === current ? "current" : ""}
                                     onClick={() => {
                                         onSelect(image.url);
                                         close();
                                     }}
-                                >
-                                    {/* 목록 미리보기라 next/image 최적화를 태우지 않는다 */}
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                    <img src={image.url} alt="" loading="lazy" />
-                                    <span className="name" title={image.path}>
-                                        {image.name}
-                                    </span>
-                                    <span className="meta">
-                                        {/*
-                                          썸네일·본문은 분류라 중립색을 쓴다. globals.css 의
-                                          상태색(ok/warn)은 "정상/주의" 라는 뜻을 이미 갖고 있어
-                                          분류에 돌려쓰면 안 된다. 손볼 거리인 "미사용" 만
-                                          상태색을 쓴다 — 그건 실제로 상태다.
-                                        */}
-                                        {image.usedAsThumbnail.length > 0 && (
-                                            <span className="badge">썸네일</span>
-                                        )}
-                                        {image.usedInBody.length > 0 && (
-                                            <span className="badge">본문</span>
-                                        )}
-                                        {usersOf(image).length === 0 && (
-                                            <span className="badge unused">미사용</span>
-                                        )}
-                                        <span>{usersOf(image).map((user) => user.slug).join(", ") || kb(image.size)}</span>
-                                    </span>
-                                </ImageCard>
+                                    // 고르는 사람에게는 손볼 거리인 "미사용" 만 상태로 보인다
+                                    status={usersOf(image).length === 0 && <span className="badge unused">미사용</span>}
+                                />
                             ))}
                         </div>
                     )}

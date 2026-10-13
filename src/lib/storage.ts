@@ -223,6 +223,11 @@ export type ManagedImage = {
  *
  * sweep 과 같은 참조 판정·같은 유예 시간을 쓴다. 여기서 "삭제 예정" 인 것이
  * 실제로 다음 정리에서 지워지는 것과 어긋나면 이 화면은 거짓말을 한다.
+ *
+ * 출처는 Storage 하나다. 저장소에 커밋된 public/thumbnails·public/images 를 같이 훑던 시절이 있었는데,
+ * 서버 코드가 public/ 을 fs 로 읽으면 Next 가 그 폴더를 통째로 함수 번들에 싣는다 — 그게 배포마다 쌓여
+ * Vercel Function Storage 를 먹었다. 글 이미지를 다시 public/ 에 두지 않는다
+ * (next.config 의 outputFileTracingExcludes 가 안전망).
  */
 export async function classifyImages(now = new Date()): Promise<{ images: ManagedImage[]; nextSweepAt: string }> {
     const [usage, objects] = await Promise.all([collectImageUsage(), listObjectMetadata()]);
@@ -253,49 +258,6 @@ export function describeImages(objects: StoredObject[], usage: Map<string, Image
         };
     });
 
-}
-
-/** 이미지 고르기 화면의 "이 이미지를 쓰는 글". 글 필터가 제목으로 고르게 한다 */
-export type LibraryUser = { slug: string; title: string };
-
-/** 이미지 고르기 화면에 뿌릴 한 장 */
-export type LibraryImage = {
-    /** 그대로 썸네일 칸에 넣을 수 있는 주소 */
-    url: string;
-    /** 버킷 안 경로. 글 폴더(posts/<slug>/…)로 "이 글" 을 가린다 */
-    path: string;
-    /** 화면에 보일 이름 */
-    name: string;
-    size: number;
-    createdAt: string;
-    /** 이 이미지를 대표 이미지로 쓰는 글 */
-    usedAsThumbnail: LibraryUser[];
-    /** 이 이미지를 본문에 끼워 넣은 글 */
-    usedInBody: LibraryUser[];
-};
-
-/**
- * 에디터에서 고를 수 있는 이미지 전부.
- *
- * 출처는 Storage 하나다. 저장소에 커밋된 public/thumbnails·public/images 를
- * 같이 훑던 시절이 있었는데, 서버 코드가 public/ 을 fs 로 읽으면 Next 가 그 폴더를
- * 통째로 함수 번들에 싣는다 — 그게 배포마다 쌓여 Vercel Function Storage 를 먹었다.
- * 글 이미지를 다시 public/ 에 두지 않는다 (next.config 의 outputFileTracingExcludes 가 안전망).
- *
- * 쓰임은 본문과 썸네일로 나눠 본다. 고르는 사람에게는 그게 파일 위치보다 중요하다.
- */
-export async function listImageLibrary(): Promise<LibraryImage[]> {
-    const { images } = await classifyImages();
-    const user = ({ slug, title }: ImageUser): LibraryUser => ({ slug, title });
-    return images.map(({ url, path, name, size, createdAt, usedAsThumbnail, usedInBody }) => ({
-        url,
-        path,
-        name,
-        size,
-        createdAt,
-        usedAsThumbnail: usedAsThumbnail.map(user),
-        usedInBody: usedInBody.map(user),
-    }));
 }
 
 /** 삭제를 거절한 이유. 라우트가 상태 코드로 바꾼다 */
