@@ -43,7 +43,7 @@ class HttpError extends Error { constructor(readonly status: number, message: st
 let removed = false;
 let count = 1;
 const { deleteComment: remove } = isolated<{ deleteComment: typeof deleteComment }>("src/lib/comments.ts", {
-    "@/lib/admin-navigation": {}, "@/lib/auth": { HttpError },
+    "@/lib/admin-navigation": {}, "@/lib/admin-dates": {}, "@/lib/auth": { HttpError },
     "@/lib/prisma": { prisma: {
         comment: { findUnique: async () => ({ authorId: "author", postId: "post", deletedAt: null, post: { slug: "post" } }) },
         $transaction: async (work: (tx: unknown) => Promise<void>) => work({

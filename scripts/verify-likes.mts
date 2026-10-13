@@ -77,10 +77,12 @@ assert.ok([...posts.values(), ...comments.values()].every(row => row.updatedAt =
 let authenticated = false;
 let writes = 0;
 let limited = false;
+// 헤더 값은 실제 lib/api 에서 읽는다. 목에 같은 문자열을 적으면 아래 검사가 자기 자신만 확인한다.
+const { PRIVATE_NO_STORE } = isolated<typeof import("../src/lib/api")>("src/lib/api.ts", { "next/server": { NextResponse }, "@/lib/auth": { HttpError } });
 const { changeLike: change } = isolated<{ changeLike: typeof changeLike }>("src/lib/like-api.ts", {
     "next/server": { NextResponse },
     "@/lib/auth": { HttpError, requireUserApi: async () => { if (!authenticated) throw new HttpError(401, "login"); return { id: "reader" }; } },
-    "@/lib/api": { handleApiError: (e: HttpError) => NextResponse.json({ error: e.message }, { status: e.status }) },
+    "@/lib/api": { PRIVATE_NO_STORE, handleApiError: (e: HttpError) => NextResponse.json({ error: e.message }, { status: e.status }) },
     "@/lib/rate-limit": { overLimit: () => limited },
     "@/lib/likes": { setLike: async () => { writes++; return { likeCount: 1, likedByMe: true, isMine: false }; } },
 });
