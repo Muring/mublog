@@ -6,6 +6,7 @@ import Dropdown from "@/components/ui/Dropdown";
 import ImageViewer from "@/components/ui/ImageViewer";
 import type { PortfolioProject } from "@/data/portfolio";
 import styles from "./portfolio.module.css";
+import { prefersReducedMotion } from "@/hooks/useMediaQuery";
 
 type GalleryProject = Pick<PortfolioProject, "id" | "name" | "images">;
 
@@ -24,10 +25,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                 selected.offsetLeft -
                 strip.clientWidth / 2 +
                 selected.clientWidth / 2,
-            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-                .matches
-                ? "instant"
-                : "smooth",
+            behavior: prefersReducedMotion() ? "instant" : "smooth",
         });
     }, [index]);
 

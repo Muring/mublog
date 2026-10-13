@@ -1,15 +1,16 @@
-/** 날짜 필터는 한국 시간의 시작일부터 종료일 전체까지 포함한다. */
-export function withinAdminDates(iso: string, from = "", to = "") {
-    const time = Date.parse(iso);
-    return (!from || time >= Date.parse(`${from}T00:00:00+09:00`)) &&
-        (!to || time < Date.parse(`${to}T00:00:00+09:00`) + 86_400_000);
+import { IMAGE_SIZE_KEYS } from "./admin-image-query";
+
+/** 필터 선택지 맨 앞의 "전체". 빈 값은 거르지 않는다는 뜻이다 */
+export const ALL_OPTION = { value: "", label: "전체" };
+
+/** 이름과 개수가 있는 항목(태그·시리즈·글·작성자)을 "전체" 뒤에 개수를 붙여 늘어놓는다 */
+export function facetOptions<T extends { count: number }>(items: readonly T[], value: (item: T) => string, label: (item: T) => string = value) {
+    return [ALL_OPTION, ...items.map((item) => ({ value: value(item), label: label(item), hint: String(item.count) }))];
 }
 
-export function adminDateLabel(from: string, to: string) {
-    const dot = (date: string) => date.replaceAll("-", ".");
-    if (from && to) return `${dot(from)} ~ ${dot(to)}`;
-    return from ? `${dot(from)} 이후` : `${dot(to)} 이전`;
-}
+export const NEWEST_OLDEST = [{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }];
+/** 이미지 목록은 용량순이 더 있다 */
+export const IMAGE_SORT_OPTIONS = [...NEWEST_OLDEST, { value: "size", label: "용량순" }];
 
 export function imageFormat(path: string) {
     const name = path.split("/").pop() ?? "";
@@ -17,11 +18,15 @@ export function imageFormat(path: string) {
     return extension === "jpg" ? "jpeg" : extension;
 }
 
+/** 구간을 늘리면 여기서 이름이 빠졌다고 타입이 알려 준다 */
+const SIZE_LABELS: Record<typeof IMAGE_SIZE_KEYS[number], string> = {
+    small: "100KB 미만",
+    medium: "100KB 이상 · 1MB 미만",
+    large: "1MB 이상",
+};
 export const IMAGE_SIZES = [
-    { value: "", label: "전체" },
-    { value: "small", label: "100KB 미만" },
-    { value: "medium", label: "100KB 이상 · 1MB 미만" },
-    { value: "large", label: "1MB 이상" },
+    ALL_OPTION,
+    ...IMAGE_SIZE_KEYS.map((value) => ({ value, label: SIZE_LABELS[value] })),
 ];
 export function matchesImageSize(bytes: number, size: string) {
     return size === "small" ? bytes < 100 * 1024

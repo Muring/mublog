@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { withinAdminDates, imageFormat, matchesImageSize } from "../src/lib/admin-filters";
+import { imageFormat, matchesImageSize } from "../src/lib/admin-filters";
+import { withinAdminDates } from "../src/lib/admin-dates";
 import { filterAdminPosts, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
 
 assert.equal(withinAdminDates("2026-09-28T14:59:59Z", "2026-09-29", "2026-09-29"), false);

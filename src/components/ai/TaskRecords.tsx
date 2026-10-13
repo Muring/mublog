@@ -13,11 +13,11 @@ import SourceRecord from "./SourceRecord";
 import ActivityDetails from "./ActivityDetails";
 import KnowledgeDecisions from "./KnowledgeDecisions";
 import { Checks, Fact, TagList } from "./RecordFacts";
+import { prefersReducedMotion } from "@/hooks/useMediaQuery";
 
 const STATUS: Record<string, [string, Tone]> = { completed: ["완료", "ok"], done: ["완료", "ok"], partial: ["부분 완료", "warn"], cancelled: ["취소", "neutral"], canceled: ["취소", "neutral"], in_progress: ["진행 중", "neutral"], blocked: ["막힘", "warn"], failed: ["실패", "danger"], abandoned: ["중단", "warn"], stopped: ["중단", "warn"] };
 export const taskStatus = (t: AiTask): [string, Tone] => t.conflict ? ["충돌", "warn"] : STATUS[t.status] ?? [t.status, "neutral"];
 const taskKey = (t: AiTask) => `${t.project}/${t.id}`;
-const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 /**
  * 작업 기록 상자 안에서만 스크롤한다. scrollIntoView 는 고정해 둔 페이지까지 끌어올려 필터·탭이 화면 밖으로 밀린다.
  * 좁은 화면은 상자가 펼쳐져 페이지가 스크롤하므로(lib/list-scroll) 페이지를 굴리되, 위에 붙은 필터 바 아래에 멈춘다.
@@ -33,7 +33,7 @@ function scrollInList(el: HTMLElement | null, onArrive?: () => void) {
     const max = inside ? box.scrollHeight - box.clientHeight : document.documentElement.scrollHeight - window.innerHeight;
     const offset = el.getBoundingClientRect().top - (inside ? box.getBoundingClientRect().top : coveredTop()) - margin;
     const top = Math.max(0, Math.min(max, current + offset));
-    if (reducedMotion() || Math.abs(current - top) < 2) { scroller.scrollTo({ top }); onArrive?.(); return () => {}; }
+    if (prefersReducedMotion() || Math.abs(current - top) < 2) { scroller.scrollTo({ top }); onArrive?.(); return () => {}; }
     let done = false;
     const arrive = () => { if (done) return; done = true; scroller.removeEventListener("scrollend", arrive); window.clearTimeout(timer); onArrive?.(); };
     const timer = window.setTimeout(arrive, 1200);
@@ -57,7 +57,7 @@ function Record({ task, handoffs, allTasks, onTask, initiallyOpen = false, focus
     useLayoutEffect(() => {
         const el = titleRef.current, from = before.current;
         before.current = null;
-        if (!el || !from || reducedMotion()) return;
+        if (!el || !from || prefersReducedMotion()) return;
         const to = el.getBoundingClientRect();
         // 펼칠 때는 아래로만 움직인다. 새 자리가 더 위(dy>0)면 위로 튀어 보이니 옮기지 않고 아래로 펼쳐지는 것만 보인다
         const dy = open ? Math.min(0, from.top - to.top) : from.top - to.top, grow = to.height - from.height;
@@ -68,7 +68,7 @@ function Record({ task, handoffs, allTasks, onTask, initiallyOpen = false, focus
     }, [open]);
     useEffect(() => {
         if (open || !shown) return;
-        const timer = window.setTimeout(() => setShown(false), reducedMotion() ? 0 : 220);
+        const timer = window.setTimeout(() => setShown(false), prefersReducedMotion() ? 0 : 220);
         return () => window.clearTimeout(timer);
     }, [open, shown]);
     const [flash, setFlash] = useState(false);
@@ -86,7 +86,7 @@ function Record({ task, handoffs, allTasks, onTask, initiallyOpen = false, focus
         // 요청은 도착한 뒤에 지운다. 먼저 지우면 이 효과가 정리되면서 도착 알림까지 취소된다
         // 행 상세가 펼쳐지는 움직임(220ms)이 끝나야 목록 높이가 다 잡힌다. 그 전에 재면 끝쪽 행은 덜 올라간 채 멈춘다
         let cancel = () => {};
-        const timer = window.setTimeout(() => { cancel = scrollInList(row.current, () => { setFlash(true); onFocused?.(); }); }, reducedMotion() ? 0 : 240);
+        const timer = window.setTimeout(() => { cancel = scrollInList(row.current, () => { setFlash(true); onFocused?.(); }); }, prefersReducedMotion() ? 0 : 240);
         return () => { window.clearTimeout(timer); cancel(); };
     }, [focused, onFocused]);
     useEffect(() => {

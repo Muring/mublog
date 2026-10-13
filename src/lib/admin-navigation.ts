@@ -1,6 +1,6 @@
-import { withinAdminDates } from "./admin-filters";
+import { dateParam, dateRangeParams, withinAdminDates } from "./admin-dates";
 import { appendMultiParam, readMultiParam, splitMulti } from "./multi-value";
-import type { ImageQuery } from "./admin-image-query";
+import { IMAGE_FILTERS, IMAGE_SIZE_KEYS, IMAGE_SORTS, type ImageQuery } from "./admin-image-query";
 
 export type PostStatusFilter = "all" | "PUBLISHED" | "DRAFT";
 export type PostSort = "newest" | "updated" | "views" | "comments";
@@ -13,7 +13,7 @@ export function postListState(params: URLSearchParams): PostListState {
     const rawStatus = params.get("status");
     const rawSort = params.get("sort");
     return {
-        ...commentDates(params.get("from"), params.get("to")),
+        ...dateRangeParams(params.get("from"), params.get("to")),
         hasComments: params.get("hasComments") === "yes" ? "yes" : params.get("hasComments") === "no" ? "no" : "",
         q: params.get("q") ?? "",
         status: (rawStatus === "PUBLISHED" || rawStatus === "DRAFT" ? rawStatus : "all") as PostStatusFilter,
@@ -24,7 +24,7 @@ export function postListState(params: URLSearchParams): PostListState {
 }
 export function postListUrl(state: PostListState) {
     const params = new URLSearchParams();
-    const dates = commentDates(state.from, state.to);
+    const dates = dateRangeParams(state.from, state.to);
     if (dates.from) params.set("from", dates.from);
     if (dates.to) params.set("to", dates.to);
     if (state.hasComments) params.set("hasComments", state.hasComments);
@@ -46,32 +46,11 @@ export const COMMENT_QUERY_MAX = 100;
 export function commentQuery(value?: string | null) {
     return (value ?? "").trim().slice(0, COMMENT_QUERY_MAX);
 }
-/** YYYY-MM-DD 로 실재하는 날짜만 받는다. 2026-02-30 처럼 Date 가 조용히 넘겨버리는 값도 걸러낸다 */
-export function commentDate(value?: string | null) {
-    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return "";
-    const date = new Date(`${value}T00:00:00Z`);
-    return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value ? value : "";
-}
-/** 작성일 범위(from ~ to). 거꾸로 넣었으면 뒤집어 준다 — 오류로 막기보다 뜻이 분명하다 */
-export function commentDates(from?: string | null, to?: string | null) {
-    const a = commentDate(from), b = commentDate(to);
-    return a && b && a > b ? { from: b, to: a } : { from: a, to: b };
-}
-/**
- * 작성일 범위를 DB 조건으로. 날짜는 **KST** 기준이다 — 서버(Vercel)는 UTC 라 그냥 자르면 아침 9시 전 댓글이 전날로 간다.
- * 종료일은 그날 전체를 포함하도록 다음 날 자정 "미만" 으로 잡는다.
- */
-export function commentDateRange(from: string, to: string) {
-    return {
-        ...(from ? { gte: new Date(`${from}T00:00:00+09:00`) } : {}),
-        ...(to ? { lt: new Date(new Date(`${to}T00:00:00+09:00`).getTime() + 86_400_000) } : {}),
-    };
-}
 export function commentListUrl({ post, author, q, from, to, status = "all", sort = "newest", page = 1, returnTo = "/admin" }: {
     post?: string; author?: string; q?: string; from?: string; to?: string; status?: string; sort?: string; page?: number; returnTo?: string;
 }) {
     const params = new URLSearchParams();
-    const dates = commentDates(from, to);
+    const dates = dateRangeParams(from, to);
     appendMultiParam(params, "post", post);
     appendMultiParam(params, "author", author);
     if (commentQuery(q)) params.set("q", commentQuery(q));
@@ -142,7 +121,7 @@ export function readListState<F extends Record<string, ListField>>(params: URLSe
     for (const key of Object.keys(fields) as (keyof F & string)[]) {
         const field = fields[key];
         const value = field.multi ? readMultiParam(params, key) : params.get(key) ?? "";
-        const valid = field.date ? commentDate(value) === value : !field.allowed || field.allowed.includes(value);
+        const valid = field.date ? dateParam(value) === value : !field.allowed || field.allowed.includes(value);
         state[key] = value && valid ? value : field.fallback;
     }
     return state;
@@ -176,18 +155,18 @@ export function rememberedListUrl(pathname: string): string | null {
 
 /** 이미지 관리(/admin/images). 주소의 status 는 화면의 쓰임 필터(ImageQuery.filter)다 — 포스트·댓글과 이름을 맞춘다 */
 export const IMAGE_LIST_FIELDS = {
-    status: { fallback: "all", allowed: ["all", "thumbnail", "body", "unused", "scheduled"] },
-    sort: { fallback: "newest", allowed: ["newest", "oldest", "size"] },
+    status: { fallback: "all", allowed: IMAGE_FILTERS },
+    sort: { fallback: "newest", allowed: IMAGE_SORTS },
     q: { fallback: "" },
     post: { fallback: "", multi: true },
     from: { fallback: "", date: true },
     to: { fallback: "", date: true },
     format: { fallback: "", multi: true },
-    size: { fallback: "", allowed: ["small", "medium", "large"] },
+    size: { fallback: "", allowed: IMAGE_SIZE_KEYS },
 } satisfies Record<string, ListField>;
 /** 주소의 이미지 목록 상태를 API 조회 조건으로. 키 순서를 DEFAULT_IMAGE_QUERY 와 맞춰야 같은 조건이 같은 문자열이 된다 */
 export function imageQueryOf(state: ListState<typeof IMAGE_LIST_FIELDS>): ImageQuery {
-    const { from, to } = commentDates(state.from, state.to);
+    const { from, to } = dateRangeParams(state.from, state.to);
     return {
         filter: state.status as ImageQuery["filter"], sort: state.sort as ImageQuery["sort"], q: state.q, post: state.post,
         from, to, format: state.format, size: state.size,

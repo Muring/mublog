@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { chartMorph } from "@/lib/chart-morph";
+import { REDUCED_MOTION_QUERY } from "@/hooks/useMediaQuery";
 
 /** React 상태를 프레임마다 갱신하지 않고 선의 좌표만 보간한다. */
 export default function AnimatedChartPath({ d }: { d: string }) {
@@ -10,7 +11,7 @@ export default function AnimatedChartPath({ d }: { d: string }) {
     useLayoutEffect(() => {
         const element = path.current;
         if (!element) return;
-        const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        const motion = window.matchMedia(REDUCED_MOTION_QUERY);
         let frame = 0;
         const draw = (value: string) => {
             current.current = value;

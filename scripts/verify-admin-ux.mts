@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { lineSegments } from "../src/lib/admin-chart";
-import { commentDateRange, commentDates, commentPage, commentListUrl, commentQuery, filterAdminPosts, pageWindow, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
+import { commentPage, commentListUrl, commentQuery, filterAdminPosts, pageWindow, postListState, postListUrl, safeAdminReturn } from "../src/lib/admin-navigation";
+import { dateRangeParams, kstDayRange } from "../src/lib/admin-dates";
 
 assert.equal(lineSegments([1, null, 2], 4).length, 2);
 for (const unsafe of ["https://evil.example/admin", "//evil.example", "/admin/posts/1", "/admin/../login", "/admin?returnTo=https://evil.example"]) assert.equal(safeAdminReturn(unsafe), "/admin");
@@ -15,13 +16,13 @@ assert.equal(commentListUrl({ q: "  ", sort: "newest" }), "/admin/comments");
 assert.equal(commentListUrl({ q: " 스팸 ", sort: "oldest", page: 2 }), `/admin/comments?q=${encodeURIComponent("스팸")}&sort=oldest&page=2`);
 assert.equal(commentListUrl({ sort: "bad" }), "/admin/comments");
 assert.equal(commentQuery("가".repeat(150)).length, 100);
-assert.deepEqual(commentDates("2026-09-30", "2026-09-01"), { from: "2026-09-01", to: "2026-09-30" });
-assert.deepEqual(commentDates("2026-02-30", "bad"), { from: "", to: "" });
+assert.deepEqual(dateRangeParams("2026-09-30", "2026-09-01"), { from: "2026-09-01", to: "2026-09-30" });
+assert.deepEqual(dateRangeParams("2026-02-30", "bad"), { from: "", to: "" });
 assert.equal(commentListUrl({ from: "2026-09-30", to: "2026-09-01" }), "/admin/comments?from=2026-09-01&to=2026-09-30");
 // KST 하루: 9/28 00:00 KST = 9/27 15:00Z, 끝은 9/28 24:00 KST 미만
-assert.equal(commentDateRange("2026-09-28", "2026-09-28").gte?.toISOString(), "2026-09-27T15:00:00.000Z");
-assert.equal(commentDateRange("2026-09-28", "2026-09-28").lt?.toISOString(), "2026-09-28T15:00:00.000Z");
-assert.deepEqual(commentDateRange("", ""), {});
+assert.equal(kstDayRange("2026-09-28", "2026-09-28").gte?.toISOString(), "2026-09-27T15:00:00.000Z");
+assert.equal(kstDayRange("2026-09-28", "2026-09-28").lt?.toISOString(), "2026-09-28T15:00:00.000Z");
+assert.deepEqual(kstDayRange("", ""), {});
 assert.deepEqual(pageWindow(1, 1), [1]);
 assert.deepEqual(pageWindow(1, 4), [1, 2, 3, 4]);
 assert.deepEqual(pageWindow(1, 10), [1, 2, 3, null, 10]);

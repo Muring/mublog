@@ -9,6 +9,7 @@ import { useToast } from "@/providers/Toast";
 import type { LibraryImage, LibraryUser } from "@/lib/storage";
 import { Button, Skeleton } from "./Admin.styled";
 import { PickerOverlay, PickerBox, SourceTab, ImageCard } from "./ImagePicker.styled";
+import { IMAGE_SORT_OPTIONS } from "@/lib/admin-filters";
 
 /** 무엇으로 쓰이는지로 거른다. 고르러 온 사람에게 중요한 건 파일 위치가 아니라 쓰임이다. */
 type Filter = "all" | "thumbnail" | "body" | "unused";
@@ -171,7 +172,7 @@ export default function ImagePicker({ current, slug, onSelect, onClose }: Props)
                         <Dropdown className="post-filter" label="글 필터" size="md" value={post} searchable="글 제목 검색"
                             options={postOptions} onChange={setPost} />
                         <Dropdown label="이미지 정렬" size="md" value={sort} align="right"
-                            options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }, { value: "size", label: "용량순" }]}
+                            options={IMAGE_SORT_OPTIONS}
                             onChange={(value) => setSort(value as Sort)} />
                     </div>
                 </div>

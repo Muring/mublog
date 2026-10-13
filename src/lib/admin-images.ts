@@ -1,19 +1,19 @@
 import { z } from "zod";
 import { prisma } from "./prisma";
 import { collectImageUsage, describeImages, nextSweepAt, GRACE_HOURS } from "./storage";
-import { commentDate } from "./admin-navigation";
-import { DEFAULT_IMAGE_QUERY, type ImagePage, type ImageQuery } from "./admin-image-query";
+import { dateParam } from "./admin-dates";
+import { DEFAULT_IMAGE_QUERY, IMAGE_FILTERS, IMAGE_SIZE_KEYS, IMAGE_SORTS, type ImagePage, type ImageQuery } from "./admin-image-query";
 
 export const IMAGE_PAGE_SIZE = 24;
 export class ImageQueryError extends Error {}
-const date = z.string().refine(value => !value || commentDate(value) === value);
+const date = z.string().refine(value => !value || dateParam(value) === value);
 const querySchema = z.object({
-    filter: z.enum(["all", "thumbnail", "body", "unused", "scheduled"]).default("all"),
-    sort: z.enum(["newest", "oldest", "size"]).default("newest"),
+    filter: z.enum(IMAGE_FILTERS).default("all"),
+    sort: z.enum(IMAGE_SORTS).default("newest"),
     // post·format 은 여러 개를 고를 수 있다. lib/multi-value 의 구분자(chr(31))로 이어 온다
     q: z.string().max(300).default(""), post: z.string().max(2000).default(""),
     from: date.default(""), to: date.default(""), format: z.string().max(200).default(""),
-    size: z.enum(["", "small", "medium", "large"]).default(""),
+    size: z.enum(["", ...IMAGE_SIZE_KEYS]).default(""),
 }).refine(value => !value.from || !value.to || value.from <= value.to);
 const cursorSchema = z.object({
     path: z.string().min(1).max(1024), size: z.number().nonnegative().finite(),

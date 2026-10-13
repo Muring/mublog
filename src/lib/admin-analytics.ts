@@ -1,4 +1,4 @@
-import { commentDate } from "./admin-navigation";
+import { dateParam } from "./admin-dates";
 import type { BucketKey } from "./admin-chart";
 
 export type AnalyticsRange = { from: string; to: string; previousFrom: string; previousTo: string; days: number; preset: string; bucket: BucketKey };
@@ -15,7 +15,7 @@ export const dayCount = (from: string, to: string) => Math.round((Date.parse(`${
 
 /** 폼과 API에서 같은 날짜 규칙을 적용한다. 잘못된 순서를 자동 교환하지 않는다. */
 export function analyticsDateError(from: string | null, to: string | null, today: string): string | null {
-    if (!commentDate(from) || !commentDate(to)) return "시작일과 종료일을 올바르게 입력해 주세요.";
+    if (!dateParam(from) || !dateParam(to)) return "시작일과 종료일을 올바르게 입력해 주세요.";
     if (from! < "1970-01-01" || to! < "1970-01-01") return "1970년 1월 1일 이후 날짜를 선택해 주세요.";
     if (from! > to!) return "종료일은 시작일보다 빠를 수 없습니다.";
     if (to! > today) return "오늘 이후 날짜는 선택할 수 없습니다.";

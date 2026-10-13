@@ -8,7 +8,7 @@ import { z } from "zod";
 loadEnvFile(".env");
 const { prisma } = await import("../src/lib/prisma");
 const storage = await import("../src/lib/storage");
-const navigation = await import("../src/lib/admin-navigation");
+const dates = await import("../src/lib/admin-dates");
 const shared = await import("../src/lib/admin-image-query");
 type Service = typeof import("../src/lib/admin-images");
 const rows = Array.from({ length: 800 }, (_, i) => ({
@@ -25,7 +25,7 @@ for (let i = 0; i < 400; i++) {
 }
 const imports: Record<string, unknown> = {
     zod: { z }, "./storage": { ...storage, collectImageUsage: async () => usage },
-    "./admin-navigation": navigation, "./admin-image-query": shared,
+    "./admin-dates": dates, "./admin-image-query": shared,
     "./prisma": { prisma: { $queryRawUnsafe: (sql: string, ...params: unknown[]) => {
         assert.match(sql, /FROM storage\.objects o/);
         const virtual = `FROM jsonb_to_recordset($${params.length + 1}::jsonb) AS o(bucket_id text, name text, metadata jsonb, created_at timestamptz)`;

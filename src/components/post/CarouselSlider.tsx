@@ -6,6 +6,7 @@ import { byNewest } from "@/lib/date";
 import Link from "next/link";
 import PostCard from "./PostCard";
 import Carousel, { CARD_GAP } from "./CarouselSlider.styled";
+import { REDUCED_MOTION_QUERY, useMediaQuery } from "@/hooks/useMediaQuery";
 
 interface CarouselSliderProps {
   posts: PostSummary[];
@@ -63,7 +64,7 @@ export default function CarouselSlider({ posts, tags, currentSlug, heading = "�
   const [visible, setVisible] = useState(MAX_VISIBLE);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
 
   const relatedPosts = useMemo(() => {
     // 현재글 제외된 최신글 (중복 제거용으로도 사용)
@@ -107,14 +108,6 @@ export default function CarouselSlider({ posts, tags, currentSlug, heading = "�
     const observer = new ResizeObserver(([entry]) => measure(entry.contentRect.width));
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReducedMotion(query.matches);
-    sync();
-    query.addEventListener("change", sync);
-    return () => query.removeEventListener("change", sync);
   }, []);
 
   const totalSlides = relatedPosts.length;

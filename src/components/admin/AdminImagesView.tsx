@@ -13,7 +13,8 @@ import type { ImageUser, ManagedImage } from "@/lib/storage";
 import { AdminListScroll, Button, ResultBar } from "./Admin.styled";
 import { ImageCard } from "./ImagePicker.styled";
 import { DetailPanel, ImageSheetPanel, ImagesLayout, SHEET_MEDIA } from "./AdminImages.styled";
-import { adminDateLabel, IMAGE_SIZES } from "@/lib/admin-filters";
+import { ALL_OPTION, facetOptions, IMAGE_SIZES, IMAGE_SORT_OPTIONS } from "@/lib/admin-filters";
+import { adminDateLabel } from "@/lib/admin-dates";
 import { scrollListToTop, scrollsInside } from "@/lib/list-scroll";
 import { IMAGE_LIST_FIELDS, imageQueryOf } from "@/lib/admin-navigation";
 import { useListState } from "@/hooks/useListState";
@@ -276,15 +277,15 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
                 }
                 sort={
                     <Dropdown className="sort-control" label="이미지 정렬" size="control" variant="ghost" value={sort} align="right"
-                        options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }, { value: "size", label: "용량순" }]}
+                        options={IMAGE_SORT_OPTIONS}
                         onChange={(value) => update({ sort: value as Sort })} />
                 }
                 search={
                     <input type="search" {...searchInput} placeholder="경로 · 글 제목 검색" aria-label="이미지 검색" />
                 }
                 fields={[
-                    { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: [{ value: "", label: "전체" }, ...posts.map((p) => ({ value: p.id, label: p.title, hint: String(p.count) }))] },
-                    { key: "format", label: "파일 형식", multiple: true, options: [{ value: "", label: "전체" }, ...formats.map((value) => ({ value, label: value.toUpperCase() }))] },
+                    { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: facetOptions(posts, (p) => p.id, (p) => p.title) },
+                    { key: "format", label: "파일 형식", multiple: true, options: [ALL_OPTION, ...formats.map((value) => ({ value, label: value.toUpperCase() }))] },
                     { key: "size", label: "용량", options: IMAGE_SIZES },
                 ]}
                 dateRange="업로드일"

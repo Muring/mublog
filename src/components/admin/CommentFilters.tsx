@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import styled from "@emotion/styled";
 import Dropdown from "@/components/ui/Dropdown";
 import { COMMENT_QUERY_MAX, commentListUrl, type CommentSort } from "@/lib/admin-navigation";
-import { adminDateLabel } from "@/lib/admin-filters";
+import { adminDateLabel } from "@/lib/admin-dates";
 import FilterBar from "./FilterBar";
 import FilterChips from "./FilterChips";
 import { splitMulti, withoutMulti } from "@/lib/multi-value";
 import { useImeInput } from "@/hooks/useImeInput";
+import { facetOptions, NEWEST_OLDEST } from "@/lib/admin-filters";
 
 type Status = "all" | "live" | "deleted";
 type Filter = { post?: string; author?: string; q: string; from: string; to: string; status: Status; sort: CommentSort };
@@ -74,14 +75,14 @@ export default function CommentFilters({ post, author, q, from, to, status, sort
                     ))}
                 </div>}
                 sort={<Dropdown label="댓글 정렬" size="control" variant="ghost" value={shown.sort} align="right"
-                    options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }]}
+                    options={NEWEST_OLDEST}
                     onChange={(value) => go({ sort: value as CommentSort })} />}
                 search={<input type="search" {...searchInput} maxLength={COMMENT_QUERY_MAX}
                     onKeyDown={(event) => { if (event.key === "Enter" && !event.nativeEvent.isComposing) go({}); }}
                     placeholder="댓글 본문 검색" aria-label="댓글 본문 검색" />}
                 fields={[
-                    { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.posts.map((p) => ({ value: p.slug, label: p.title, hint: String(p.count) }))] },
-                    { key: "author", label: "작성자", search: "이름 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.authors.map((a) => ({ value: a.id, label: a.username, hint: String(a.count) }))] },
+                    { key: "post", label: "글", search: "글 제목 검색", multiple: true, options: facetOptions(options.posts, (p) => p.slug, (p) => p.title) },
+                    { key: "author", label: "작성자", search: "이름 검색", multiple: true, options: facetOptions(options.authors, (a) => a.id, (a) => a.username) },
                 ]}
                 values={{ post: shown.post ?? "", author: shown.author ?? "", from: shown.from, to: shown.to }}
                 dateRange

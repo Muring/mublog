@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import FilterBar, { type FilterField } from "@/components/admin/FilterBar";
 import FilterChips, { type FilterChip } from "@/components/admin/FilterChips";
 import Dropdown, { type DropdownOption } from "@/components/ui/Dropdown";
@@ -8,6 +8,8 @@ import { mobileQuery } from "@/styles/breakpoints";
 import { number } from "./AiControls";
 import manage from "./AiManagement.module.css";
 import { useImeInput } from "@/hooks/useImeInput";
+import { ALL_OPTION, NEWEST_OLDEST } from "@/lib/admin-filters";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export type AiField = { key: string; label: string; options: DropdownOption[]; multiple?: boolean; search?: string };
 type Props = {
@@ -37,18 +39,13 @@ type Props = {
  */
 const VIEW_OPTIONS: DropdownOption[] = [{ value: "groups", label: "프로젝트별" }, { value: "weeks", label: "주별" }];
 
-function subscribeMobile(onChange: () => void) {
-    const media = window.matchMedia(mobileQuery);
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-}
 
 export default function AiFilterBar({ loading, period, onPeriod, view, sort, onSort, q, onSearch, searchPlaceholder, fields, values, defaults = {}, onApply, onReset, summary }: Props) {
     const { inputProps: searchInput } = useImeInput(q, onSearch);
     /*
      * 좁은 화면은 컨트롤을 한 줄에 모은다(공용 FilterBar). 표 구성 전환은 그 줄에 둘 자리가 없어 필터 시트로 들어간다.
      */
-    const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(mobileQuery).matches, () => false);
+    const isMobile = useMediaQuery(mobileQuery);
     const sheetFields = isMobile && view ? [{ key: "view", label: "표 구성", options: VIEW_OPTIONS }, ...fields] : fields;
     /*
      * 좁은 화면에서 이 바는 헤더 아래에 붙고(AiManagement.module.css), 사용량 표 머리글은 그 아래에 붙는다.
@@ -91,7 +88,7 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
                 </div>
             </>}
             sort={<Dropdown className="sort-control" label="정렬" size="control" variant="ghost" value={sort} align="right"
-                options={[{ value: "newest", label: "최신순" }, { value: "oldest", label: "오래된순" }]} onChange={(value) => onSort(value as "newest" | "oldest")} />}
+                options={NEWEST_OLDEST} onChange={(value) => onSort(value as "newest" | "oldest")} />}
             search={searchPlaceholder && <input type="search" {...searchInput} readOnly={loading}
                 placeholder={searchPlaceholder} aria-label={searchPlaceholder.endsWith("검색") ? searchPlaceholder : `${searchPlaceholder} 검색`} />}
             fields={sheetFields as FilterField[]}
@@ -117,5 +114,5 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
 export function countOptions(values: string[], label: (value: string) => string = (value) => value): DropdownOption[] {
     const counts = new Map<string, number>();
     for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);
-    return [{ value: "", label: "전체" }, ...[...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([value, n]) => ({ value, label: label(value), hint: number(n) }))];
+    return [ALL_OPTION, ...[...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([value, n]) => ({ value, label: label(value), hint: number(n) }))];
 }

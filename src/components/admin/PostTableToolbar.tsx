@@ -3,10 +3,11 @@
 import { useImeInput } from "@/hooks/useImeInput";
 import Dropdown from "@/components/ui/Dropdown";
 import type { PostListState, PostSort, PostStatusFilter } from "@/lib/admin-navigation";
-import { adminDateLabel } from "@/lib/admin-filters";
+import { adminDateLabel } from "@/lib/admin-dates";
 import FilterBar from "./FilterBar";
 import FilterChips from "./FilterChips";
 import { splitMulti, withoutMulti } from "@/lib/multi-value";
+import { ALL_OPTION, facetOptions } from "@/lib/admin-filters";
 
 type Option = { name: string; count: number };
 type Props = {
@@ -56,9 +57,9 @@ export default function PostTableToolbar({ state, counts, onChange, options = { 
                     placeholder="제목 · 주소 · 태그 검색" aria-label="포스트 검색" />
             }
             fields={[
-                { key: "tag", label: "태그", search: "태그 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.tags.map((t) => ({ value: t.name, label: t.name, hint: String(t.count) }))] },
-                ...(options.series.length > 0 ? [{ key: "series", label: "시리즈", search: "시리즈 검색", multiple: true, options: [{ value: "", label: "전체" }, ...options.series.map((s) => ({ value: s.name, label: s.name, hint: String(s.count) }))] }] : []),
-                { key: "hasComments", label: "댓글 유무", options: [{ value: "", label: "전체" }, { value: "yes", label: "댓글 있음" }, { value: "no", label: "댓글 없음" }] },
+                { key: "tag", label: "태그", search: "태그 검색", multiple: true, options: facetOptions(options.tags, (t) => t.name) },
+                ...(options.series.length > 0 ? [{ key: "series", label: "시리즈", search: "시리즈 검색", multiple: true, options: facetOptions(options.series, (s) => s.name) }] : []),
+                { key: "hasComments", label: "댓글 유무", options: [ALL_OPTION, { value: "yes", label: "댓글 있음" }, { value: "no", label: "댓글 없음" }] },
             ]}
             dateRange
             dateBefore="hasComments"

@@ -185,6 +185,7 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
 - **`lib/post-write.ts`** — 포스트 저장 라우트가 같이 쓰는 slug 중복 확인과 본문 렌더(HTML·읽는 시간). 공개 페이지가 읽는 `posts.ts` 에 마크다운 파이프라인이 실리지 않게 따로 둡니다
 - **`lib/stats.ts`** — 방문·조회 기록과 공개 방문 합계
 - **`lib/admin-analytics.ts` · `lib/admin-analytics-data.ts`** — 관리 통계 기간·집계 계산과 서버 조회
+- **`lib/admin-dates.ts`** — 관리 목록·통계의 날짜 조건(실재 날짜 검사, 범위 뒤집기, KST 하루 경계)
 - **`lib/auth.ts`** — 세션 조회와 권한 확인 (`requireAdmin` / `requireAdminApi`)
 - **`lib/api.ts`** — 라우트 헬퍼. `parseBody`가 zod로 본문을 검증하고 실패 시
   `HttpError(400)`을 던지면, `handleApiError`가 한 곳에서 응답으로 바꿉니다.
@@ -633,6 +634,7 @@ src/
 │   ├── useOptimisticList.ts   # 목록의 낙관적 갱신 + 롤백
 │   ├── useOverlay.ts          # 창의 스크롤 잠금·닫힘 애니메이션·키보드(Tab 가두기·Escape)
 │   ├── useImeInput.ts         # 한글 조합이 끝났을 때만 반영하는 검색창
+│   ├── useMediaQuery.ts       # 미디어 쿼리 상태·움직임 줄이기 확인
 │   └── useDebouncedEffect.ts  # 디바운스 + 늦게 온 응답 버리기
 ├── styles/
 │   ├── button.ts         # 버튼 공통 조각

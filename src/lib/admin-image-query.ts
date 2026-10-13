@@ -1,7 +1,12 @@
 import type { ManagedImage } from "./storage";
 
-export type ImageFilter = "all" | "thumbnail" | "body" | "unused" | "scheduled";
-export type ImageSort = "newest" | "oldest" | "size";
+/* 허용값은 여기 한 곳에 둔다. 주소 검사(IMAGE_LIST_FIELDS)와 API 검사(admin-images 의 스키마)가 같이 읽는다 */
+export const IMAGE_FILTERS = ["all", "thumbnail", "body", "unused", "scheduled"] as const;
+export const IMAGE_SORTS = ["newest", "oldest", "size"] as const;
+/** 용량 구간. 비어 있으면 거르지 않는다 */
+export const IMAGE_SIZE_KEYS = ["small", "medium", "large"] as const;
+export type ImageFilter = typeof IMAGE_FILTERS[number];
+export type ImageSort = typeof IMAGE_SORTS[number];
 export type ImageQuery = {
     filter: ImageFilter; sort: ImageSort; q: string; post: string;
     from: string; to: string; format: string; size: string;

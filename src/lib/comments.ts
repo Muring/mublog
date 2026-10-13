@@ -1,4 +1,5 @@
-import { commentDateRange, commentPage, type CommentSort } from "@/lib/admin-navigation";
+import { commentPage, type CommentSort } from "@/lib/admin-navigation";
+import { kstDayRange } from "@/lib/admin-dates";
 import { prisma } from "@/lib/prisma";
 import { HttpError } from "@/lib/auth";
 import type { CommentNode } from "@/types/comment";
@@ -90,7 +91,7 @@ export async function getCommentsForAdmin({ slugs = [], authorIds = [], q, from 
             ...(slugs.length ? { post: { slug: { in: slugs } } } : {}),
             ...(authorIds.length ? { authorId: { in: authorIds } } : {}),
             ...(q ? { body: { contains: q, mode: "insensitive" as const } } : {}),
-            ...(from || to ? { createdAt: commentDateRange(from, to) } : {}),
+            ...(from || to ? { createdAt: kstDayRange(from, to) } : {}),
         };
         // 트랜잭션은 커넥션 하나를 독점하므로 Promise.all 로 묶어도 직렬로 실행된다.
         // pg 는 한 클라이언트에 쿼리가 겹쳐 쌓이면 deprecation 경고를 내므로(pg@9 에서는 오류) 순서대로 기다린다.

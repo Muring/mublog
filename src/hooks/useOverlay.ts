@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type AnimationEvent, type RefObject } from "react";
 import { OVERLAY_EXIT_MS } from "@/styles/motion";
+import { prefersReducedMotion } from "./useMediaQuery";
 
 /*
  * 떴다 사라지는 창의 공용 동작. 움직임 자체는 styles/motion.ts 의 overlay* 가 맡는다.
@@ -57,7 +58,7 @@ export function useExitTransition(onClosed: () => void) {
 
     const requestClose = useCallback(() => {
         done.current = false;
-        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) finish();
+        if (prefersReducedMotion()) finish();
         else setClosing(true);
     }, [finish]);
 

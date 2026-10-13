@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { getCommentsForAdmin } from "@/lib/comments";
-import { commentDates, commentListUrl, commentQuery, safeAdminReturn } from "@/lib/admin-navigation";
+import { commentListUrl, commentQuery, safeAdminReturn } from "@/lib/admin-navigation";
+import { dateRangeParams } from "@/lib/admin-dates";
 import AdminCommentsView from "@/components/admin/AdminCommentsView";
 import { joinMulti } from "@/lib/multi-value";
 
@@ -16,7 +17,7 @@ export default async function AdminCommentsPage({ searchParams }: Props) {
     const status = params.status === "live" || params.status === "deleted" ? params.status : "all";
     const sort = params.sort === "oldest" ? "oldest" : "newest";
     const q = commentQuery(params.q) || undefined;
-    const { from, to } = commentDates(params.from, params.to);
+    const { from, to } = dateRangeParams(params.from, params.to);
     const requestedPage = Number(params.page ?? 1);
     const returnTo = safeAdminReturn(params.returnTo);
     // ?post=a&post=b 처럼 여러 개를 고를 수 있다. 하나면 문자열, 여럿이면 배열로 온다
