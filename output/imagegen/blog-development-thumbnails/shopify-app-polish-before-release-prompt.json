@@ -1,0 +1,9 @@
+{
+  "generator": "Built-in image_gen",
+  "file": "shopify-app-polish-before-release.png",
+  "title": "Shopify 앱 공개 전 다듬기",
+  "prompt": "Create one polished landscape 16:9 Korean developer blog thumbnail. Exact title to render clearly, without any changes: \"Shopify 앱 공개 전 다듬기\". Lay out the title in two balanced lines: line 1 \"Shopify 앱\", line 2 \"공개 전 다듬기\", in the central upper region with generous margins so all letters survive square social-card crops. Typography: crisp dark forest-green bold Korean sans-serif, large and readable at thumbnail size. Editorial flat geometric illustration with subtle paper texture and restrained soft shadows. Palette: warm ivory and pale sage background, forest green and muted teal interface shapes, a few soft amber accents. Below the title, a single simplified app window: a row of four uniform rounded shortcut cards with large faded outline icons, a small toggle switch turned on, and a tidy row of aligned input fields of equal height. Beside the window, a small floating language bubble pair showing only the letters \"가\" and \"A\", and a small polishing sparkle. Few large elements, elegant spacious composition, no realistic screenshot, no people, no brand logo, no random code, no extra lettering or pseudo-text other than the title and the two letters, no watermark. All important content within central 65% width and 75% height.",
+  "referenced_image_paths": [
+    "/home/muring/dev/mublog/output/imagegen/blog-development-thumbnails/shopify-product-operation-history.png"
+  ]
+}

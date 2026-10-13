@@ -1,0 +1,10 @@
+{
+  "generator": "Built-in image_gen",
+  "title": "MuRing-KB 개발기 4 (활용 편)",
+  "prompt": "Create ONE polished landscape 16:9 editorial blog thumbnail. Use the attached illustration only as the visual series reference: warm ivory paper/plaster texture, deep navy bold typography, restrained cobalt and teal tactile 3D objects, tiny orange accent, soft daylight and studio shadows. New episode topic is knowledge actually applied to work: on the RIGHT, an open compact knowledge-card file, a magnifying glass hovering over one selected card, and a short visible connector leading from that card to a work checklist with a teal checkmark and small evidence note. Clearly show finding knowledge followed by checking application. Keep objects few and large, coherent and spacious, not a busy flowchart. No charts or numerical metrics. On the LEFT place crisp, very large, heavy dark navy sans-serif Korean title. The exact complete title to include is 'MuRing-KB 개발기 4 (활용 편)'. Lay out as three lines: 'MuRing-KB', '개발기 4', '(활용 편)'. All characters including parentheses and episode number must be correct. Title takes roughly left half, clear at thumbnail size, generous margins; all essential title and shapes inset from borders. Avoid extra written words, logos, watermarks, people. This is a NEW episode cover, not editing the episode 3 text only.",
+  "referenced_image_paths": [
+    "/home/muring/dev/mublog/output/imagegen/blog-development-thumbnails/muring-kb-development-3-titled.png"
+  ],
+  "approved": true,
+  "thumbnail": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/muring-kb-development-4/illustration-78ed3799a1fe.jpg"
+}
