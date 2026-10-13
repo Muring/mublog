@@ -182,6 +182,7 @@ OS 설정을 보면 사용자가 고른 테마와 어긋난다 — 라이트를 
 |---|---|
 | 커밋 전 항상 | `yarn lint` · `yarn tsc --noEmit` |
 | 마크다운 손댔으면 | `yarn verify:render` (12가지 회귀 검사) |
+| `src/lib` 모듈의 import 를 바꿨으면 | `scripts/verify-*.mts` 를 **전부** 돌린다. 모듈을 vm 에 싣고 require 를 허용 목록으로 흉내 내서, 새 import 하나에 조용히 깨진다 |
 | DB 접속이 의심되면 | `yarn check:db` (비밀값은 출력하지 않는다) |
 | 글을 쓰거나 고친 뒤 | `yarn backup:posts` → 커밋. **무료 플랜에는 자동 백업이 없다** |
 
