@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 import { referencedImagePaths } from "../src/lib/image-references";
-import { slugSchema } from "../src/lib/validation";
+import { postInputSchema, postPatchSchema, slugSchema } from "../src/lib/validation";
 import type { useEditorUploads } from "../src/components/admin/useEditorUploads";
 import type { usePostSave } from "../src/components/admin/usePostSave";
 import type { deleteComment } from "../src/lib/comments";
@@ -105,3 +105,9 @@ blocked = false;
 await Promise.all([save.save("PUBLISHED"), save.save("PUBLISHED")]);
 assert.equal(saved, 1);
 console.log("PASS: image references, reserved slug, concurrent deletion, overlapping uploads, upload failure and save guards");
+
+// 부분 수정에서 보내지 않은 태그는 그대로 둔다(.partial() 이 .default([]) 를 남겨 지우던 문제). 새 글은 여전히 [] 로 채운다
+assert.equal(postPatchSchema.parse({ contentMd: "본문" }).tags, undefined);
+assert.deepEqual(postPatchSchema.parse({ tags: ["a"] }).tags, ["a"]);
+assert.deepEqual(postInputSchema.parse({ slug: "a", title: "t", contentMd: "", status: "DRAFT" }).tags, []);
+console.log("patch schema keeps omitted tags");
