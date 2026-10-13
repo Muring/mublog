@@ -3,8 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/auth";
 import { handleApiError, parseBody } from "@/lib/api";
 import { postInputSchema } from "@/lib/validation";
-import { renderMarkdown } from "@/lib/markdown/render";
-import { estimateReadingTime } from "@/lib/reading-time";
+import { isSlugTaken, renderedContent, SLUG_TAKEN_MESSAGE } from "@/lib/post-write";
 import { revalidatePost } from "@/lib/revalidate";
 
 export const dynamic = "force-dynamic";
@@ -15,9 +14,8 @@ export async function POST(request: NextRequest) {
         const profile = await requireAdminApi();
         const input = await parseBody(request, postInputSchema);
 
-        const existing = await prisma.post.findUnique({ where: { slug: input.slug } });
-        if (existing) {
-            return NextResponse.json({ error: "이미 사용 중인 slug 입니다." }, { status: 409 });
+        if (await isSlugTaken(input.slug)) {
+            return NextResponse.json({ error: SLUG_TAKEN_MESSAGE }, { status: 409 });
         }
 
         const post = await prisma.post.create({
@@ -29,14 +27,12 @@ export async function POST(request: NextRequest) {
                 thumbnail: input.thumbnail ?? null,
                 series: input.series || null,
                 seriesOrder: input.series ? (input.seriesOrder ?? null) : null,
-                contentMd: input.contentMd,
-                contentHtml: await renderMarkdown(input.contentMd),
+                ...(await renderedContent(input.contentMd)),
                 status: input.status,
                 publishedAt:
                     input.status === "PUBLISHED"
                         ? (input.publishedAt ? new Date(input.publishedAt) : new Date())
                         : (input.publishedAt ? new Date(input.publishedAt) : null),
-                readingTime: estimateReadingTime(input.contentMd),
                 authorId: profile.id,
             },
         });

@@ -6,6 +6,7 @@ import type { Handoff } from '@/lib/ai-activity';
 import { AiBadge } from './AiControls';
 import { Fact } from './RecordFacts';
 import manage from './AiManagement.module.css';
+import { formatKst } from '@/lib/date';
 const labels = { requested: '인계 요청', dispatch_accepted: '전송 도구 입력 수락', sent: '전달 확인', received: '수신 확인', started: '처리 시작', blocked: '보류', completed: '처리 완료', failed: '처리 실패', cancelled: '취소' };
 const reporters = { sender: '발신 측', recipient: '수신 측', transport: '전송 도구', user: '사용자' };
 export default function HandoffTimeline({ task, handoffs, allTasks, onTask }: { task: AiTask; handoffs: HandoffView[]; allTasks: AiTask[]; onTask: (task: AiTask) => void }) {
@@ -17,7 +18,6 @@ export default function HandoffTimeline({ task, handoffs, allTasks, onTask }: { 
         const target = matches.length > 0 && !matches.some(t => t.conflict) && new Set(matches.map(t => JSON.stringify(t))).size === 1 ? matches[0] : null;
         return <span className={manage.handoffEnd}>{e.project}{target ? <button type="button" className={manage.handoffLink} onClick={() => onTask(target)}>{e.taskId === null ? "연결된 기록 · " : ""}{taskTitle(target)}</button> : <span className={manage.dateBasis}>{e.taskId ? '연결 작업을 확인할 수 없음' : '연결 작업 미상'}</span>}</span>;
     }
-    const kst = (at: string) => new Date(Date.parse(at) + 9 * 3600_000).toISOString().slice(5, 16).replace('T', ' ');
     return <Fact label="프로젝트 간 인계">{records.map(h => {
         const received = h.events.some(e => e.kind === 'received');
         const terminal = h.events.some(e => ['completed', 'failed', 'cancelled'].includes(e.kind));
@@ -31,7 +31,7 @@ export default function HandoffTimeline({ task, handoffs, allTasks, onTask }: { 
             {h.headers.map((header, i) => <div key={i} className={manage.handoffHeader}><div className={manage.handoffRoute}>{endpoint(header.from, h.id)}<span className={manage.handoffTo}><span aria-label="전달 방향" className={manage.handoffArrow}>→</span>{endpoint(header.to, h.id)}</span></div><small>{header.request}</small></div>)}
             {h.conflict && <small className={manage.factSub}>서로 다른 기록을 모두 표시합니다. 최신 기록을 임의로 정답으로 선택하지 않았습니다.</small>}
             {[{ title: null, events: timed }, { title: '날짜만 확인되거나 시각 미상 · 발생 순서 미확정', events: other }].filter(g => g.events.length).map((g, gi) => <div key={gi}>{g.title && <small className={manage.factSub}>{g.title}</small>}<ol className={manage.handoffEvents}>{g.events.map((e, i) => <li key={`${e.id}-${i}`}>
-                <span className={manage.eventHead}><strong>{labels[e.kind]}</strong><span>{e.at ? kst(e.at) : e.occurredOn?.slice(5) ?? '시각 미상'} · {reporters[e.reportedBy]}</span></span>
+                <span className={manage.eventHead}><strong>{labels[e.kind]}</strong><span>{e.at ? formatKst(e.at, 'month-minute') : e.occurredOn?.slice(5) ?? '시각 미상'} · {reporters[e.reportedBy]}</span></span>
                 <span>{e.summary}</span>
                 {e.kind === 'dispatch_accepted' && <small>입력 수락만 확인됐으며 상대의 수신·착수는 별도 확인이 필요합니다.</small>}
                 {e.result && <small>결과 · {e.result.summary}{e.result.verification && ` / 검증 · ${e.result.verification}`}{e.result.artifacts.length > 0 && ` / 산출물 · ${e.result.artifacts.join(', ')}`}</small>}

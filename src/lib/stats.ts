@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { seoulDateKey } from "@/lib/date";
+import { KST_OFFSET_MS, seoulDateKey } from "@/lib/date";
 
 export const VISIT_COOKIE = "mublog_seen";
 /** 포스트별 중복 집계를 막는 쿠키 접두사 */
@@ -74,6 +74,15 @@ export async function recordVisit(dateKey: string): Promise<void> {
  * @updatedAt 은 클라이언트가 붙이는 값이라 raw SQL 에는 따라오지 않는다.
  * (관리 화면의 수정일 열이 이 사실에 기대고 있다)
  */
+/** 발행 글의 조회수. 없는 글이거나 초안이면 null */
+export async function getPostViews(slug: string): Promise<number | null> {
+    const post = await prisma.post.findFirst({
+        where: { slug, status: "PUBLISHED" },
+        select: { viewCount: true },
+    });
+    return post?.viewCount ?? null;
+}
+
 export async function recordPostView(slug: string, dateKey: string): Promise<void> {
     await prisma.$executeRaw`
         WITH p AS (
@@ -115,8 +124,6 @@ export async function getSiteStats(): Promise<SiteStats> {
 
 /** 다음 KST 자정까지 남은 초. 방문 쿠키의 수명으로 쓴다. */
 export function secondsUntilSeoulMidnight(now: Date = new Date()): number {
-    // KST 는 UTC+9 로 고정이라 서머타임을 고려할 필요가 없다
-    const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
     const kstNow = now.getTime() + KST_OFFSET_MS;
     const msIntoDay = kstNow % 86_400_000;
     return Math.ceil((86_400_000 - msIntoDay) / 1000);

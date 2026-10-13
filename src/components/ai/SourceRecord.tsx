@@ -4,12 +4,13 @@ import type { AiTask } from "@/lib/ai-task-records";
 import { AiBadge, number } from "./AiControls";
 import { CHECK_RESULTS, TagList } from "./RecordFacts";
 import manage from "./AiManagement.module.css";
+import { formatKst } from "@/lib/date";
 
 type Evidence = Activity["evidence"][number];
 const KINDS: Record<Evidence["kind"], string> = { user_statement: "사용자 발언", tool_result: "도구 결과", artifact: "산출물", comparison: "대조", session_record: "세션 기록" };
 // 작업일이 어디서 왔는지만 쉬운 말로 적는다. 대조 과정을 적은 원문 메모는 감사용이라 마우스를 올리면 보이게 둔다
 const BASIS = { user_confirmed: "사용자가 수행일로 확인·허용한 날짜", source_record: "원본 기록의 시각과 대조해 확인한 날짜", unknown: "근거 없음" } as const;
-const kst = (at: string | null | undefined) => at ? new Date(Date.parse(at) + 9 * 3600_000).toISOString().slice(0, 16).replace("T", " ") : null;
+const kst = (at: string | null | undefined) => at ? formatKst(at) : null;
 
 /** 근거 id 가 activity 의 어느 항목을 뒷받침하는지 모은다. 무엇의 근거인지 모르면 '작업 근거'로 뭉뚱그리지 않는다 */
 function evidenceUses(a: Activity) {

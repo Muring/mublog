@@ -9,6 +9,7 @@ import {
     VISIT_PER_IP_DAILY,
     VISIT_RATE_LIMIT,
     VISIT_RATE_WINDOW_MS,
+    getPostViews,
     getSiteStats,
     isBot,
     recordPostView,
@@ -18,24 +19,6 @@ import {
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-/**
- * 방문 집계 비콘.
- *
- * 렌더 경로 밖에서 클라이언트가 호출한다. 프록시(미들웨어)에서 처리하지 않는 이유:
- * Edge 런타임에서는 Prisma 가 Postgres 에 닿지 못하고, 캐시된 요청을 포함한
- * 모든 요청의 TTFB 에 DB 지연이 붙는다.
- *
- * 실패해도 조용히 넘어간다. 통계 때문에 사용자 경험이 나빠질 이유가 없다.
- */
-async function readPostViews(slug: string): Promise<number | null> {
-    const { prisma } = await import("@/lib/prisma");
-    const post = await prisma.post.findFirst({
-        where: { slug, status: "PUBLISHED" },
-        select: { viewCount: true },
-    });
-    return post?.viewCount ?? null;
-}
 
 /** 본문에서 slug 를 읽는다. 형식이 어긋나면 무시한다. */
 async function readSlug(request: NextRequest): Promise<string | null> {
@@ -48,6 +31,15 @@ async function readSlug(request: NextRequest): Promise<string | null> {
     }
 }
 
+/**
+ * 방문 집계 비콘.
+ *
+ * 렌더 경로 밖에서 클라이언트가 호출한다. 프록시(미들웨어)에서 처리하지 않는 이유:
+ * Edge 런타임에서는 Prisma 가 Postgres 에 닿지 못하고, 캐시된 요청을 포함한
+ * 모든 요청의 TTFB 에 DB 지연이 붙는다.
+ *
+ * 실패해도 조용히 넘어간다. 통계 때문에 사용자 경험이 나빠질 이유가 없다.
+ */
 export async function POST(request: NextRequest) {
     try {
         if (isBot(request.headers.get("user-agent"))) {
@@ -119,7 +111,7 @@ export async function POST(request: NextRequest) {
         // 갱신된 수치를 함께 돌려준다.
         // 페이지는 ISR 로 캐시돼 있어 빌드 시점 값이 박혀 있으므로,
         // 클라이언트가 이 값으로 화면을 맞춘다. 별도 요청이 필요 없다.
-        const views = slug ? await readPostViews(slug) : null;
+        const views = slug ? await getPostViews(slug) : null;
         const stats = {
             today: before.today + (isNewVisitorToday ? 1 : 0),
             total: before.total + (isNewVisitorToday ? 1 : 0),

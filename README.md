@@ -182,11 +182,13 @@ Route Handler  ──▶  lib/*.ts (도메인 로직)  ──▶  Prisma  ──
   `posts:list` / `post:<slug>` 태그를 답니다. 여기서 `Date`를 ISO 문자열로 바꿔
   클라이언트 컴포넌트까지 `Date` 객체가 새어 hydration이 어긋나는 것을 막습니다.
 - **`lib/comments.ts`** — 댓글 CRUD, 2단 깊이 강제, soft delete, 도배 방지
+- **`lib/post-write.ts`** — 포스트 저장 라우트가 같이 쓰는 slug 중복 확인과 본문 렌더(HTML·읽는 시간). 공개 페이지가 읽는 `posts.ts` 에 마크다운 파이프라인이 실리지 않게 따로 둡니다
 - **`lib/stats.ts`** — 방문·조회 기록과 공개 방문 합계
 - **`lib/admin-analytics.ts` · `lib/admin-analytics-data.ts`** — 관리 통계 기간·집계 계산과 서버 조회
 - **`lib/auth.ts`** — 세션 조회와 권한 확인 (`requireAdmin` / `requireAdminApi`)
 - **`lib/api.ts`** — 라우트 헬퍼. `parseBody`가 zod로 본문을 검증하고 실패 시
   `HttpError(400)`을 던지면, `handleApiError`가 한 곳에서 응답으로 바꿉니다.
+  `rejectWithoutCronSecret`(cron·스크립트 라우트 잠금)과 `PRIVATE_NO_STORE` 헤더도 여기 둡니다.
   요청을 **보내는** 쪽은 `lib/fetcher.ts`로 방향이 반대입니다.
 - **`lib/revalidate.ts`** — 포스트 변경 후 캐시 무효화
 - **`lib/queries.ts`** — 클라이언트 쿼리 키와 페처. 키를 컴포넌트마다 문자열로 적으면

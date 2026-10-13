@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPostViews } from "@/lib/stats";
 import { handleApiError } from "@/lib/api";
 
 // 조회수는 계속 바뀌므로 캐시하지 않는다.
@@ -11,11 +11,7 @@ type Params = { params: Promise<{ slug: string }> };
 export async function GET(_request: NextRequest, { params }: Params) {
     try {
         const { slug } = await params;
-        const post = await prisma.post.findFirst({
-            where: { slug, status: "PUBLISHED" },
-            select: { viewCount: true },
-        });
-        return NextResponse.json({ views: post?.viewCount ?? 0 });
+        return NextResponse.json({ views: (await getPostViews(slug)) ?? 0 });
     } catch (error) {
         return handleApiError(error, "api/posts/[slug]/views");
     }

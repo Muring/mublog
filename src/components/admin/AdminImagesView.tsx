@@ -23,6 +23,7 @@ import AdminSheet from "./AdminSheet";
 
 import { imagePageUrl, type ImageFilter as Filter, type ImageSort as Sort, type ImagePage, type ImageQuery } from "@/lib/admin-image-query";
 import { useAdminImages } from "@/hooks/useAdminImages";
+import { formatKst, KST_OFFSET_MS } from "@/lib/date";
 
 const FILTERS: { key: Filter; label: string; match: (image: ManagedImage) => boolean }[] = [
     { key: "all", label: "전체", match: () => true },
@@ -40,20 +41,9 @@ function bytes(size: number) {
     return `${(size / 1024 / 1024).toFixed(1)}MB`;
 }
 
-/**
- * 한국 시간으로 "2026-09-29 14:03".
- * Intl 은 서버(Node)와 브라우저의 ICU 가 문구를 조금씩 다르게 내서 하이드레이션이 갈릴 수 있다. 손으로 만든다.
- */
-function kst(iso: string, withTime = true) {
-    const d = new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000);
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const date = `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
-    return withTime ? `${date} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}` : date;
-}
-
 /** 정리 시각. Hobby 의 cron 은 정시가 아니라 그 한 시간 안 어딘가에 돌아서 구간으로 적는다 */
 function sweepTime(iso: string) {
-    const d = new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000);
+    const d = new Date(new Date(iso).getTime() + KST_OFFSET_MS);
     const hour = d.getUTCHours();
     return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${hour}~${(hour + 1) % 24}시 사이`;
 }
@@ -222,7 +212,7 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
                 <dt>크기</dt>
                 <dd>{bytes(selected.size)}</dd>
                 <dt>올린 시각</dt>
-                <dd>{kst(selected.createdAt)} (KST)</dd>
+                <dd>{formatKst(selected.createdAt)} (KST)</dd>
             </dl>
 
             <div className={`state ${selected.state}`} role="note">

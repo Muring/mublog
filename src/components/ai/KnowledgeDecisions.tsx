@@ -4,6 +4,7 @@ import { reviewHistory, type KnowledgeReview, type ReviewRow } from "@/lib/ai-kn
 import { AiBadge, type Tone } from "./AiControls";
 import { Fact, TagList } from "./RecordFacts";
 import manage from "./AiManagement.module.css";
+import { formatKst } from "@/lib/date";
 
 const DECISIONS: Record<KnowledgeDecision["decision"], [string, Tone]> = { applied: ["적용", "ok"], reference_only: ["참고만", "neutral"], not_applicable: ["해당 없음", "neutral"], deferred: ["보류", "warn"], unknown: ["판단 미상", "neutral"] };
 const CHECKS: Record<NonNullable<KnowledgeDecision["verification"]>["result"], [string, Tone]> = { pass: ["확인 통과", "ok"], fail: ["확인 실패", "danger"], not_run: ["확인 안 함", "warn"], unknown: ["확인 미상", "neutral"] };
@@ -22,7 +23,6 @@ const REVIEW: Record<ReviewRow["state"], [string, Tone, string]> = {
     task_conflict: ["작업 기록 충돌", "danger", "같은 작업의 기록이 서로 달라 대조하지 않았습니다."],
     uncollected: ["판단 미수집", "neutral", "이 작업에는 KB 판단 기록이 없어 대조할 대상이 없습니다."],
 };
-const kst = (at: string) => new Date(Date.parse(at) + 9 * 3600_000).toISOString().slice(0, 16).replace("T", " ");
 
 const STATUS = { completed: ["대조 완료", "neutral"], failed: ["대조 실패", "warn"], unavailable: ["대조 불가", "warn"] } as const;
 const SHOWN = 3;
@@ -32,7 +32,7 @@ function Attempt({ review, sameSource }: { review: KnowledgeReview; sameSource: 
     const [label, tone] = STATUS[review.status];
     return <li>
         <span className={manage.factTags}><AiBadge data-tone={tone}>{label}</AiBadge><AiBadge data-tone={sameSource ? "neutral" : "warn"}>{sameSource ? "지금 판단과 같은 원본" : "이전 원본의 대조"}</AiBadge></span>
-        <small>{kst(review.reviewedAt)} KST 당시 관측{review.result?.recordingRequested && " · 적용 이력 기록 요청 실행"}</small>
+        <small>{formatKst(review.reviewedAt)} KST 당시 관측{review.result?.recordingRequested && " · 적용 이력 기록 요청 실행"}</small>
         {review.result ? review.result.rows.length === 0 ? <small>대조할 판단이 없었습니다.</small>
             : <ul className={manage.checkList}>{review.result.rows.map((row, i) => {
                 const [name, rowTone, meaning] = REVIEW[row.state];

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sweepOrphanImages } from "@/lib/storage";
+import { rejectWithoutCronSecret } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -16,14 +17,11 @@ export const maxDuration = 60;
  *   2) 고아 이미지 정리 — 본문에서 지웠거나, 저장 없이 창을 닫았거나,
  *      포스트를 삭제해 참조를 잃은 파일을 걷어낸다
  *
- * Vercel 은 CRON_SECRET 환경변수가 있으면 그 값을 Authorization 헤더로 보낸다.
- * 이 라우트는 공개 URL 이라 검사를 빼면 누구나 호출할 수 있다.
+ * 이 라우트는 공개 URL 이라 CRON_SECRET 검사를 빼면 누구나 호출할 수 있다.
  */
 export async function GET(request: NextRequest) {
-    const secret = process.env.CRON_SECRET;
-    if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
-        return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const rejected = rejectWithoutCronSecret(request);
+    if (rejected) return rejected;
 
     const result: Record<string, unknown> = {};
 

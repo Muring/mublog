@@ -1,13 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdminApi } from "@/lib/auth";
 import { handleApiError } from "@/lib/api";
 import { slugSchema } from "@/lib/validation";
+import { createStorageClient, POST_IMAGE_BUCKET as BUCKET } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-const BUCKET = "post-images";
 // Vercel 라우트 핸들러의 요청 본문 상한이 4.5MB 라 그 아래로 잡는다
 const MAX_BYTES = 4 * 1024 * 1024;
 const ALLOWED = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "image/svg+xml"]);
@@ -91,13 +91,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "파일이 4MB 를 넘습니다." }, { status: 400 });
         }
 
-        const secretKey = process.env.SUPABASE_SECRET_KEY;
-        if (!secretKey) throw new Error("SUPABASE_SECRET_KEY 가 설정되지 않았습니다.");
-
-        // service role 로 접속한다. 버킷에는 insert 정책을 두지 않는다.
-        const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, secretKey, {
-            auth: { persistSession: false },
-        });
+        const supabase = createStorageClient();
 
         const extension = EXTENSIONS[file.type];
         const isThumbnail = formData.get("kind") === "thumbnail";

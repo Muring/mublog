@@ -8,6 +8,7 @@ import { sumTotals, visibleWeeks, type PublicYear, type PublicWeek } from "@/lib
 import styles from "./AiDashboard.module.css";
 
 import { AiScroll, AiSegments, number } from "./AiControls";
+import { formatKst } from "@/lib/date";
 export { AiSegments, number } from "./AiControls";
 export function UsageCards({ weeks, cacheObserved, rolling = false }: { weeks: PublicWeek[]; cacheObserved: boolean; rolling?: boolean }) {
     const totals = sumTotals(weeks.map(w => w.totals));
@@ -52,7 +53,7 @@ export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf
             <ToolComparison weeks={weeks} allWeeks={selected?.weeks} />
             {/* 표는 최신 주가 위. 비교 차트는 시간 흐름대로 위에서 아래로 둔다 */}
             <WeekTable weeks={[...weeks].reverse()} />
-            <p className={`${styles.note} ${styles.titleRow}`}>자료 기준: {selected?.observedUntil ? new Date(Date.parse(selected.observedUntil) + 9 * 3600_000).toISOString().slice(0, 19).replace("T", " ") + " KST" : "미상"}<Info label="자료 기준 설명">요청 로그에서 관측한 수치이며 생산성·청구 금액·구독 잔여량을 뜻하지 않습니다. 기록이 없는 주는 사용량 0과 구분합니다.</Info></p>
+            <p className={`${styles.note} ${styles.titleRow}`}>자료 기준: {selected?.observedUntil ? formatKst(selected.observedUntil, "second") + " KST" : "미상"}<Info label="자료 기준 설명">요청 로그에서 관측한 수치이며 생산성·청구 금액·구독 잔여량을 뜻하지 않습니다. 기록이 없는 주는 사용량 0과 구분합니다.</Info></p>
         </>}
     </section>;
 }

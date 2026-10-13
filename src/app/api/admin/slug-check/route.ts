@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/auth";
 import { handleApiError } from "@/lib/api";
 import { slugSchema } from "@/lib/validation";
+import { isSlugTaken, SLUG_TAKEN_MESSAGE } from "@/lib/post-write";
 
 export const dynamic = "force-dynamic";
 
@@ -23,15 +23,10 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        const existing = await prisma.post.findUnique({
-            where: { slug: parsed.data },
-            select: { id: true },
-        });
-
-        const taken = Boolean(existing) && existing?.id !== excludeId;
+        const taken = await isSlugTaken(parsed.data, excludeId);
         return NextResponse.json({
             available: !taken,
-            reason: taken ? "이미 사용 중인 slug 입니다." : null,
+            reason: taken ? SLUG_TAKEN_MESSAGE : null,
         });
     } catch (error) {
         return handleApiError(error, "api/admin/slug-check");

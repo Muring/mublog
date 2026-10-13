@@ -3,9 +3,10 @@ import type { PostStatus } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { referencedImagePaths } from "@/lib/image-references";
 
-const POST_IMAGE_BUCKET = "post-images";
+export const POST_IMAGE_BUCKET = "post-images";
 
-function createStorageClient() {
+/** service role 로 접속한다. 버킷에는 정책을 두지 않으므로 이 키로만 쓰고 지울 수 있다(서버 전용) */
+export function createStorageClient() {
     const secretKey = process.env.SUPABASE_SECRET_KEY;
     if (!secretKey) throw new Error("SUPABASE_SECRET_KEY 가 설정되지 않았습니다.");
 

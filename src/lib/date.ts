@@ -20,6 +20,25 @@ export function seoulDateKey(at: Date = new Date()): string {
     }).format(at);
 }
 
+/** KST 는 UTC+9 로 고정이다. 서머타임이 없어 오프셋을 더하기만 하면 된다 */
+export const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+const KST_FORMATS = {
+    day: [0, 10], //          2026-09-29
+    minute: [0, 16], //       2026-09-29 14:03
+    second: [0, 19], //       2026-09-29 14:03:27
+    "month-minute": [5, 16], // 09-29 14:03
+} as const;
+
+/**
+ * 한국 시간 표기. ISO 문자열을 오프셋만큼 밀어 잘라 쓴다.
+ * Intl 은 서버(Node)와 브라우저의 ICU 가 문구를 조금씩 다르게 내서 하이드레이션이 갈릴 수 있어 쓰지 않는다.
+ */
+export function formatKst(at: string | Date, format: keyof typeof KST_FORMATS = "minute"): string {
+    const [start, end] = KST_FORMATS[format];
+    return new Date(new Date(at).getTime() + KST_OFFSET_MS).toISOString().slice(start, end).replace("T", " ");
+}
+
 /** "방금·3분 전·2일 전", 일주일이 넘으면 날짜. 댓글이 쓴다. */
 export function formatRelative(iso: string): string {
     const diffMs = Date.now() - new Date(iso).getTime();

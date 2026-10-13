@@ -1,4 +1,5 @@
 import { type UsageYear } from "./ai-usage";
+import { formatKst } from "./date";
 
 export type AiTask = UsageYear["tasks"][number];
 /** 설명이 보완된 기록의 제목. 없으면 null 이고 화면은 작업 ID 를 대신 보여 준다 */
@@ -10,18 +11,17 @@ export const taskTitle = (task: AiTask) => describedTitle(task) ?? idTitle(task.
 export function taskDate(task: AiTask) {
     if (task.activity) {
         const t = task.activity.timing;
-        if (t.precision === "timestamp" && t.occurredAt) return { day: new Date(Date.parse(t.occurredAt) + 9 * 3600_000).toISOString().slice(0, 10), basis: "record" as const };
+        if (t.precision === "timestamp" && t.occurredAt) return { day: formatKst(t.occurredAt, "day"), basis: "record" as const };
         if (t.precision === "date" && t.occurredOn) return { day: t.occurredOn, basis: "record" as const };
         return t.labelDate ? { day: t.labelDate.date, basis: "name" as const } : null;
     }
-    if (task.presentation?.occurredAt) return { day: new Date(Date.parse(task.presentation.occurredAt) + 9 * 3600_000).toISOString().slice(0, 10), basis: "record" as const };
+    if (task.presentation?.occurredAt) return { day: formatKst(task.presentation.occurredAt, "day"), basis: "record" as const };
     const candidates = [...task.id.matchAll(/(?:^|[^0-9])(20[0-9]{2})-?(0[1-9]|1[0-2])-?([0-2][0-9]|3[01])(?=$|[^0-9])/g)].map(m => `${m[1]}-${m[2]}-${m[3]}`);
     const days = [...new Set(candidates)].filter(day => { const at = new Date(`${day}T00:00:00Z`); return Number.isFinite(at.getTime()) && at.toISOString().slice(0, 10) === day; });
     return days.length === 1 ? { day: days[0], basis: "name" as const } : null;
 }
 export function selectTaskPeriod(tasks: AiTask[], year: UsageYear, period: string, sort: "newest" | "oldest", today: Date) {
-    const kstDay = (value: string | Date) => new Date(new Date(value).getTime() + 9 * 3600_000).toISOString().slice(0, 10);
-    const nowDay = kstDay(today);
+    const nowDay = formatKst(today, "day");
     const knownDays = [...year.weeks.map(w => w.week), ...tasks.flatMap(t => { const d = taskDate(t); return d?.basis === "record" ? [d.day] : []; })].filter(d => d.startsWith(`${year.year}-`)).sort();
     const anchor = nowDay.startsWith(`${year.year}-`) ? nowDay : knownDays.at(-1) ?? `${year.year}-12-31`;
     const monday = new Date(`${anchor}T00:00:00Z`);

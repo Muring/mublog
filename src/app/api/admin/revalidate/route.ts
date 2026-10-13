@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { revalidateEverything } from "@/lib/revalidate";
+import { rejectWithoutCronSecret } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +14,8 @@ export const dynamic = "force-dynamic";
  * 잘못 열려도 캐시를 비우는 것뿐이라 데이터는 안전하지만, 반복 호출로 DB 를 두드릴 수 있어 막는다.
  */
 export async function POST(request: NextRequest) {
-    const secret = process.env.CRON_SECRET;
-    if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
-        return new NextResponse("Unauthorized", { status: 401 });
-    }
+    const rejected = rejectWithoutCronSecret(request);
+    if (rejected) return rejected;
     revalidateEverything();
     return NextResponse.json({ ok: true, at: new Date().toISOString() });
 }

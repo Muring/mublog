@@ -3,8 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdminApi } from "@/lib/auth";
 import { handleApiError, parseBody } from "@/lib/api";
 import { postPatchSchema } from "@/lib/validation";
-import { renderMarkdown } from "@/lib/markdown/render";
-import { estimateReadingTime } from "@/lib/reading-time";
+import { isSlugTaken, renderedContent, SLUG_TAKEN_MESSAGE } from "@/lib/post-write";
 import { revalidatePost } from "@/lib/revalidate";
 import type { Prisma } from "@/generated/prisma";
 
@@ -25,11 +24,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
         const input = await parseBody(request, postPatchSchema);
 
-        if (input.slug && input.slug !== existing.slug) {
-            const taken = await prisma.post.findUnique({ where: { slug: input.slug } });
-            if (taken) {
-                return NextResponse.json({ error: "이미 사용 중인 slug 입니다." }, { status: 409 });
-            }
+        if (input.slug && input.slug !== existing.slug && await isSlugTaken(input.slug, id)) {
+            return NextResponse.json({ error: SLUG_TAKEN_MESSAGE }, { status: 409 });
         }
 
         const data: Prisma.PostUpdateInput = {};
@@ -50,11 +46,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         if (input.publishedAt !== undefined) {
             data.publishedAt = input.publishedAt ? new Date(input.publishedAt) : null;
         }
-        if (input.contentMd !== undefined) {
-            data.contentMd = input.contentMd;
-            data.contentHtml = await renderMarkdown(input.contentMd);
-            data.readingTime = estimateReadingTime(input.contentMd);
-        }
+        if (input.contentMd !== undefined) Object.assign(data, await renderedContent(input.contentMd));
 
         // 초안을 처음 발행할 때 발행일이 비어 있으면 지금으로 채운다
         if (input.status === "PUBLISHED" && !existing.publishedAt && !input.publishedAt) {
