@@ -98,12 +98,16 @@
     .summary { gap:10px; }
     .summaryCard { gap:10px; grid-template-columns:minmax(0,1fr) minmax(0,1.7fr); }
     .value { font-size:24px; }
-    .dates input { min-height:40px; }
-    /* 모바일은 빠른 조회 없이 날짜 입력만 둔다(사용자 결정). 필터 줄에는 날짜 폼만 남고 그 줄이 그대로 붙는다 */
-    .shortcuts { display:none; }
+    .dates input, .shortcuts button { min-height:40px; }
+    /*
+     * 필터 줄은 날짜 두 칸 아래에 빠른 조회 세 버튼이 한 줄로 반씩·삼등분으로 꽉 찬다(예전 기간 적용 버튼 자리).
+     * 버튼 글자(7일 등)가 스스로 뜻을 말하므로 "빠른 조회" 라벨은 숨기고(그룹 이름은 aria-label), 그 줄이 그대로 붙는다
+     */
     .periodTop { padding:14px 14px 0; }
     .periodBottom { padding:0 14px 14px; }
-    .periodControls { display:block; padding:12px 14px; }
+    .periodControls { display:grid; grid-template-columns:minmax(0,1fr); justify-content:stretch; gap:8px; padding:12px 14px; }
+    .shortcuts { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+    .shortcuts > span { display:none; }
     .table th, .table td { padding:10px 6px; }
     /*
      * 카드 제목 · 집계 기준 · 선택(pills)이 한 줄에 들어가게 좁힌다. 두 줄로 떨어지면 카드마다 머리 높이가 갈린다.
