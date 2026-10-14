@@ -3,7 +3,7 @@
 .panel { margin:0; padding:20px; border:var(--border-width) solid var(--bordercolor); border-radius:12px; background:var(--cardbackground); min-width:0; }
 .panel h3 { margin:0; font-size:16px; }
 .toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
-.dates { display:grid; grid-template-columns:repeat(2,minmax(0,150px)) auto; align-items:end; gap:8px; min-width:0; }
+.dates { flex:0 1 auto; display:grid; grid-template-columns:repeat(2,minmax(0,150px)) auto; align-items:end; gap:8px; min-width:0; }
 .dates label { min-width:0; display:grid; gap:5px; font-size:12px; color:var(--desccolor); }
 .dates input { width:100%; box-sizing:border-box; min-width:0; max-width:100%; padding:8px; border:var(--border-width) solid var(--bordercolor); border-radius:6px; background:var(--background); color:var(--foreground); font:inherit; }
 .dates input:hover { border-color:var(--foreground); }
@@ -50,12 +50,32 @@
 .refreshStatus { color:var(--desccolor); font-size:12px; display:grid; gap:4px; }
 .refreshStatus:not(:empty) { margin-top:10px; }
 
-.shortcuts { display:flex; flex-wrap:wrap; align-items:center; gap:8px; min-width:0; }
-.shortcuts > span { color:var(--desccolor); font-size:12px; margin-right:4px; }
+/* 빠른 조회도 날짜 칸처럼 라벨이 위, 버튼이 아래다. 라벨 줄·버튼 줄이 날짜 입력과 같은 높이에 맞춰 한 줄로 읽힌다 */
+.shortcuts { flex-shrink:0; display:grid; grid-template-columns:repeat(3,auto); align-items:end; gap:5px 6px; min-width:0; }
+.shortcuts > span { grid-column:1 / -1; color:var(--desccolor); font-size:12px; }
+.shortcuts button { justify-content:center; white-space:nowrap; }
 
 .analyticsRoot { gap:clamp(16px,2vw,24px); container-type:inline-size; container-name:analytics; }
-.periodControls { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px 20px; margin-top:12px; }
 .toolbar > .note { margin:0; }
+/*
+ * 기간 카드는 위(제목) · 가운데(필터) · 아래(비교 설명) 세 조각이다. 세 조각이 붙어 한 장의 카드처럼 보이고,
+ * 가운데 필터 줄만 sticky 로 헤더(64px) 밑에 붙는다. 그 줄이 결과 끝까지 붙어 있으려면 부모가 결과까지 감싸야 하므로
+ * 조각들은 바깥 flex(그리드가 아니다 — 그리드 아이템은 제 칸 안에서만 붙는다)에 직접 올라가고, 결과와의 간격은 결과 쪽 여백으로 준다.
+ * 붙어 있는 동안(data-stuck)에는 카드 테두리를 감추고 헤더와 같은 바탕을 화면 좌우 끝까지 칠해(넘침은 html 의 overflow-x: clip 이 자른다)
+ * 헤더와 필터 사이로 뒤 화면이 비치지 않게 하고, 아래에 경계선 하나만 남긴다
+ */
+.dashboard.analyticsRoot { display:flex; flex-direction:column; gap:0; }
+.periodResults { margin-top:clamp(16px,2vw,24px); }
+.periodCard { display:contents; }
+.periodTop, .periodControls, .periodBottom { min-width:0; background:var(--cardbackground); border:var(--border-width) solid var(--bordercolor); }
+.periodTop { border-bottom:0; border-radius:12px 12px 0 0; padding:20px 20px 0; }
+/* 줄바꿈하지 않는다 — 좁아지면 날짜 칸이 줄어든다(빠른 조회가 다음 줄로 떨어지면 두 묶음의 라벨 줄이 어긋난다) */
+.periodControls { position:sticky; top:64px; z-index:10; display:flex; align-items:flex-end; justify-content:space-between; gap:20px; border-top:0; border-bottom:0; padding:12px 20px; }
+.periodBottom { border-top:0; border-radius:0 0 12px 12px; padding:0 20px 20px; }
+.periodBottom > .comparison:first-child { margin-top:0; }
+.periodBottom > .note:first-child { margin-top:0; }
+.periodControls[data-stuck] { background:transparent; border-color:transparent; }
+.periodControls[data-stuck]::before { content:""; position:absolute; z-index:-1; inset:0 -100vmax; background:var(--background); border-bottom:var(--border-width) solid var(--bordercolor); }
 .summaryCard { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); align-items:center; gap:16px; }
 .summaryMain, .summaryAside { min-width:0; }
 .summaryMain h3 { margin-bottom:6px; }
@@ -69,9 +89,7 @@
 /* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
 @media (max-width: 640px) {
     .summary, .charts, .secondary { grid-template-columns:minmax(0,1fr); }
-    .periodControls { display:grid; grid-template-columns:minmax(0,1fr); }
     .dates { grid-template-columns:repeat(2,minmax(0,1fr)) auto; }
-    .shortcuts { justify-content:flex-end; }
 }
 /* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
 @media (max-width: 640px) {
@@ -82,11 +100,27 @@
     .value { font-size:24px; }
     .dates { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .dates > button { grid-column:1 / -1; justify-content:center; }
-    .dates input, .dates > button, .shortcuts button { min-height:40px; }
-    .shortcuts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-    .shortcuts > span { grid-column:1 / -1; }
-    .shortcuts button { justify-content:center; padding:8px 4px; font-size:12px; }
+    .dates input, .dates > button { min-height:40px; }
+    /* 모바일은 빠른 조회 없이 날짜 입력만 둔다(사용자 결정). 필터 줄에는 날짜 폼만 남고 그 줄이 그대로 붙는다 */
+    .shortcuts { display:none; }
+    .periodTop { padding:14px 14px 0; }
+    .periodBottom { padding:0 14px 14px; }
+    .periodControls { display:block; padding:12px 14px; }
     .table th, .table td { padding:10px 6px; }
+    /*
+     * 카드 제목 · 집계 기준 · 선택(pills)이 한 줄에 들어가게 좁힌다. 두 줄로 떨어지면 카드마다 머리 높이가 갈린다.
+     * 집계 기준은 ⓘ 만 남기고(이름은 aria-label 이 읽는다), 간격과 pills 좌우 여백을 줄인다
+     */
+    .helpLabel { display:none; }
+    .helpRoot > .toolbar { gap:8px; }
+    .helpRoot .helpHeading { column-gap:4px; }
+    .helpRoot > .toolbar > [role="group"] button { padding-inline:.4rem; }
+}
+/* 375px 보다 좁으면 정렬 버튼 끝의 "순" 까지 숨겨야 320px 에서도 한 줄에 든다 */
+@media (max-width: 374px) {
+    .sortSuffix { display:none; }
+    .helpRoot > .toolbar { gap:6px; }
+    .helpRoot > .toolbar > [role="group"] button { padding-inline:.3rem; }
 
 }
 

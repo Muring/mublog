@@ -56,7 +56,7 @@ export default function AnalyticsHelp({ title, children, controls }: { title: st
                         if (event.detail !== 0 && pointerType.current === "touch") setOpen(value => !value);
                         else show();
                     }}>
-                    집계 기준 <span aria-hidden="true">ⓘ</span>
+                    <span className={styles.helpLabel}>집계 기준 </span><span aria-hidden="true">ⓘ</span>
                 </button>
             </div>
             {controls}

@@ -21,6 +21,16 @@ export default function AdminAnalytics({ today }: { today: string }) {
     const urlError = params.get("period") === "custom" ? analyticsDateError(params.get("from"), params.get("to"), today) : null;
     const fromInput = useRef<HTMLInputElement>(null);
     const toInput = useRef<HTMLInputElement>(null);
+    // 필터 줄은 스크롤하면 헤더 밑에 붙는다(sticky). 붙어 있는 동안만 data-stuck 을 달아 바탕을 바꾼다 —
+    // 붙는 자리(top 64px)보다 1px 위를 관찰 경계로 잡으면, 붙어 있는 동안만 그 줄의 윗변이 잘려 보인다
+    const controls = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const observer = new IntersectionObserver(entries => {
+            for (const entry of entries) entry.target.toggleAttribute("data-stuck", entry.intersectionRatio < 1 && entry.boundingClientRect.top < 65);
+        }, { rootMargin: "-65px 0px 0px 0px", threshold: 1 });
+        if (controls.current) observer.observe(controls.current);
+        return () => observer.disconnect();
+    }, []);
     useEffect(() => {
         if (fromInput.current) { fromInput.current.value = range.from; fromInput.current.max = range.to; }
         if (toInput.current) { toInput.current.value = range.to; toInput.current.min = range.from; }
@@ -65,12 +75,16 @@ export default function AdminAnalytics({ today }: { today: string }) {
     const displayedData = query.data && { ...query.data, range: { ...query.data.range, bucket: range.bucket } };
     const comparisonRange = query.isPlaceholderData && displayedData ? displayedData.range : range;
     return <div className={`${styles.dashboard} ${styles.analyticsRoot}`}>
-        <section className={styles.panel} aria-label="통계 기간">
-            <div className={styles.toolbar}>
+        {/*
+          * 한 장의 카드(제목 · 필터 · 비교 설명)를 위·가운데·아래 세 조각으로 나눠 그린다. 필터 줄이 카드 밖(결과 끝)까지 붙어 있으려면
+          * sticky 요소의 부모가 결과까지 감싸는 상자여야 해서, section 은 display: contents 로 풀어 조각들을 바깥 flex 에 직접 올린다
+          */}
+        <section className={styles.periodCard} aria-label="통계 기간">
+            <div className={`${styles.toolbar} ${styles.periodTop}`}>
                 <h3>조회 기간</h3>
                 <span className={styles.note} role="status">{range.from} ~ {range.to} · KST</span>
             </div>
-            <div className={styles.periodControls}>
+            <div ref={controls} className={styles.periodControls}>
                 <form className={styles.dates} onSubmit={submitDates} onChange={updateDates} noValidate>
                     <label>시작일<input ref={fromInput} name="from" type="date" required min="1970-01-01" max={range.to} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.from} /></label>
                     <label>종료일<input ref={toInput} name="to" type="date" required min={range.from} max={today} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.to} /></label>
@@ -78,19 +92,21 @@ export default function AdminAnalytics({ today }: { today: string }) {
                 </form>
                 <div className={styles.shortcuts} role="group" aria-label="기간 빠른 조회">
                     <span>빠른 조회</span>
-                    {[7, 30, 90].map(days => <Button key={days} type="button" onClick={() => navigate({ ...range, preset: String(days) })}>최근 {days}일</Button>)}
+                    {[7, 30, 90].map(days => <Button key={days} type="button" onClick={() => navigate({ ...range, preset: String(days) })} aria-label={`최근 ${days}일`}>{days}일</Button>)}
                 </div>
             </div>
-            {(dateError || urlError) && <p id="analytics-date-error" className={styles.note} role="alert">{dateError || urlError}</p>}
-            {!urlError && <div className={styles.comparison} aria-label="증감 비교 기준">
-                <span><strong>{query.isPlaceholderData ? "현재 표시 결과의 비교 대상" : "비교 대상"} · 선택 기간 바로 앞 {comparisonRange.days}일</strong> {comparisonRange.previousFrom} ~ {comparisonRange.previousTo}</span>
-                <span>모든 증감은 선택한 {comparisonRange.days}일 합계에서 위 기간의 합계를 뺀 값입니다.{comparisonRange.to === today && " 오늘은 집계 중입니다."}</span>
-            </div>}
-            <div className={styles.refreshStatus} role="status">
-                {pending && displayedData && !urlError && <><Skeleton aria-hidden style={{ width: "100%", height: 3 }} /><span>조회 중 · 현재 표시는 {displayedData.range.from} ~ {displayedData.range.to} 결과</span></>}
+            <div className={styles.periodBottom}>
+                {(dateError || urlError) && <p id="analytics-date-error" className={styles.note} role="alert">{dateError || urlError}</p>}
+                {!urlError && <div className={styles.comparison} aria-label="증감 비교 기준">
+                    <span><strong>{query.isPlaceholderData ? "현재 표시 결과의 비교 대상" : "비교 대상"} · 선택 기간 바로 앞 {comparisonRange.days}일</strong> {comparisonRange.previousFrom} ~ {comparisonRange.previousTo}</span>
+                    <span>모든 증감은 선택한 {comparisonRange.days}일 합계에서 위 기간의 합계를 뺀 값입니다.{comparisonRange.to === today && " 오늘은 집계 중입니다."}</span>
+                </div>}
+                <div className={styles.refreshStatus} role="status">
+                    {pending && displayedData && !urlError && <><Skeleton aria-hidden style={{ width: "100%", height: 3 }} /><span>조회 중 · 현재 표시는 {displayedData.range.from} ~ {displayedData.range.to} 결과</span></>}
+                </div>
             </div>
         </section>
-        <div className={styles.dashboard} aria-busy={pending && !urlError} aria-label="통계 결과">
+        <div className={`${styles.dashboard} ${styles.periodResults}`} aria-busy={pending && !urlError} aria-label="통계 결과">
             {urlError ? null : query.isError ? <section className={styles.panel} role="alert">
                 <h3>통계를 불러오지 못했습니다.</h3><p className={styles.note}>{query.error.message}</p>
                 <Button type="button" onClick={() => void query.refetch()}>다시 시도</Button>
