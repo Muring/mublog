@@ -1,0 +1,7 @@
+{
+  "generator": "Built-in image_gen",
+  "title": "Shopify 테마 학습기",
+  "file": "shopify-theme-practice.png",
+  "reference": "shopify-app-polish-before-release.png",
+  "prompt": "Create one finished landscape 16:9 editorial blog thumbnail for the Korean article with exact title 'Shopify 테마 학습기'. Use the provided image only as a STYLE reference: calm warm ivory paper grain, deep forest green, sage, restrained ochre accents and clean flat editorial shapes. New distinct composition about learning Shopify theme architecture and editable sections: a browser window with a slim editor sidebar showing a slider and toggle, a content region with three modular banner cards, and a small mobile screen with the same cards stacked vertically. A few understated connecting lines suggest code becoming editable interface. Large high-contrast title split into two centered lines 'Shopify 테마' / '학습기' in upper central safe area, exact Korean spelling; no additional text, no logos or watermark. Keep title and key illustration inside central 65 percent with wide edge margins for blog cards and square center crops. Readable at small thumbnail size, simple uncluttered composition, no developer character."
+}
