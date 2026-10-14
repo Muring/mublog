@@ -57,21 +57,24 @@ export default function AdminAnalytics({ today }: { today: string }) {
         // 기간을 바꿔도 뒤로 가기 기록을 쌓지 않는다(다른 관리 목록과 같은 규칙)
         if (`${window.location.pathname}${window.location.search}` !== url) replaceListUrl(url);
     };
-    const submitDates = (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const fields = new FormData(event.currentTarget);
-        const from = String(fields.get("from")), to = String(fields.get("to"));
-        const error = analyticsDateError(from, to, today);
-        setDateError(error);
-        if (error) { toInput.current?.focus(); return; }
-        navigate({ ...range, preset: "custom", from, to });
-    };
-    const updateDates = () => {
+    /*
+     * 날짜를 고르면 적용 버튼 없이 바로 그 기간을 조회한다. 키보드로 연·일을 칠 때는 칸마다 값이 바뀌어
+     * (예: 일 "1" → "15") 중간 날짜마다 요청이 나가므로, 올바른 날짜가 잠깐(400ms) 그대로일 때만 조회한다.
+     * Enter 는 기다리지 않고 바로 조회한다
+     */
+    const applyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    useEffect(() => () => { if (applyTimer.current) clearTimeout(applyTimer.current); }, []);
+    const applyDates = (delay: number) => {
+        if (applyTimer.current) clearTimeout(applyTimer.current);
         const from = fromInput.current?.value ?? "", to = toInput.current?.value ?? "";
         if (fromInput.current) fromInput.current.max = to || today;
         if (toInput.current) toInput.current.min = from || "1970-01-01";
-        setDateError(analyticsDateError(from, to, today));
+        const error = analyticsDateError(from, to, today);
+        setDateError(error);
+        if (error || (from === range.from && to === range.to)) return;
+        applyTimer.current = setTimeout(() => navigate({ ...range, preset: "custom", from, to }), delay);
     };
+    const submitDates = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); applyDates(0); };
     const displayedData = query.data && { ...query.data, range: { ...query.data.range, bucket: range.bucket } };
     const comparisonRange = query.isPlaceholderData && displayedData ? displayedData.range : range;
     return <div className={`${styles.dashboard} ${styles.analyticsRoot}`}>
@@ -85,10 +88,9 @@ export default function AdminAnalytics({ today }: { today: string }) {
                 <span className={styles.note} role="status">{range.from} ~ {range.to} · KST</span>
             </div>
             <div ref={controls} className={styles.periodControls}>
-                <form className={styles.dates} onSubmit={submitDates} onChange={updateDates} noValidate>
+                <form className={styles.dates} onSubmit={submitDates} onChange={() => applyDates(400)} noValidate>
                     <label>시작일<input ref={fromInput} name="from" type="date" required min="1970-01-01" max={range.to} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.from} /></label>
                     <label>종료일<input ref={toInput} name="to" type="date" required min={range.from} max={today} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.to} /></label>
-                    <Button type="submit">기간 적용</Button>
                 </form>
                 <div className={styles.shortcuts} role="group" aria-label="기간 빠른 조회">
                     <span>빠른 조회</span>

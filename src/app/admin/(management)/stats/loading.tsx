@@ -8,7 +8,7 @@ export default function AnalyticsLoading() {
         {/* 실제 기간 카드와 같은 세 조각(위 · 필터 · 아래) */}
         <section className={styles.periodCard} aria-hidden>
             <div className={styles.periodTop}><Skeleton style={{ width: "250px", maxWidth: "100%", height: "30px" }} /></div>
-            <div className={styles.periodControls}><Skeleton style={{ width: "350px", maxWidth: "100%", height: "55px" }} /><Skeleton style={{ width: "300px", maxWidth: "100%", height: "36px" }} /></div>
+            <div className={styles.periodControls}><Skeleton style={{ width: "308px", maxWidth: "100%", height: "55px" }} /><Skeleton style={{ width: "300px", maxWidth: "100%", height: "36px" }} /></div>
             <div className={styles.periodBottom}><div className={styles.comparison}><Skeleton style={{ width: "100%", height: "40px" }} /></div></div>
         </section>
         <div className={styles.periodResults}><AnalyticsSkeleton /></div>

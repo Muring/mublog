@@ -3,7 +3,7 @@
 .panel { margin:0; padding:20px; border:var(--border-width) solid var(--bordercolor); border-radius:12px; background:var(--cardbackground); min-width:0; }
 .panel h3 { margin:0; font-size:16px; }
 .toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
-.dates { flex:0 1 auto; display:grid; grid-template-columns:repeat(2,minmax(0,150px)) auto; align-items:end; gap:8px; min-width:0; }
+.dates { flex:0 1 auto; display:grid; grid-template-columns:repeat(2,minmax(0,150px)); align-items:end; gap:8px; min-width:0; }
 .dates label { min-width:0; display:grid; gap:5px; font-size:12px; color:var(--desccolor); }
 .dates input { width:100%; box-sizing:border-box; min-width:0; max-width:100%; padding:8px; border:var(--border-width) solid var(--bordercolor); border-radius:6px; background:var(--background); color:var(--foreground); font:inherit; }
 .dates input:hover { border-color:var(--foreground); }
@@ -89,7 +89,7 @@
 /* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
 @media (max-width: 640px) {
     .summary, .charts, .secondary { grid-template-columns:minmax(0,1fr); }
-    .dates { grid-template-columns:repeat(2,minmax(0,1fr)) auto; }
+    .dates { grid-template-columns:repeat(2,minmax(0,1fr)); }
 }
 /* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
 @media (max-width: 640px) {
@@ -98,9 +98,7 @@
     .summary { gap:10px; }
     .summaryCard { gap:10px; grid-template-columns:minmax(0,1fr) minmax(0,1.7fr); }
     .value { font-size:24px; }
-    .dates { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .dates > button { grid-column:1 / -1; justify-content:center; }
-    .dates input, .dates > button { min-height:40px; }
+    .dates input { min-height:40px; }
     /* 모바일은 빠른 조회 없이 날짜 입력만 둔다(사용자 결정). 필터 줄에는 날짜 폼만 남고 그 줄이 그대로 붙는다 */
     .shortcuts { display:none; }
     .periodTop { padding:14px 14px 0; }
