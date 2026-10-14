@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { analyticsRank, changeLabel, metricSummary, rankPosts, tagPerformance, topPostShare, weekdayAverages, type AnalyticsData, type AnalyticsRank } from "@/lib/admin-analytics";
+import { analyticsRank, changeLabel, metricSummary, rankPosts, tagPerformance, topPostShare, TOP_POSTS, weekdayAverages, type AnalyticsData, type AnalyticsRank } from "@/lib/admin-analytics";
 import type { BucketKey } from "@/lib/admin-chart";
 import { replaceListUrl } from "@/lib/admin-navigation";
 import { Pills } from "./VisitorChart.styled";
-import PostStatusBadge from "./PostStatusBadge";
 import AnalyticsHelp from "./AnalyticsHelp";
 import AnalyticsChart from "./AnalyticsChart";
+import TagChips from "@/components/ui/TagChips";
 import styles from "./Analytics.module.css";
 
 const number = (value: number | null, unit = "") => value === null ? "기록 없음" : `${value.toLocaleString("ko-KR", { maximumFractionDigits: 1 })}${unit}`;
@@ -26,6 +26,8 @@ export default function AnalyticsResults({ data, onBucketChange }: { data: Analy
     const canCompare = viewsSummary.previous !== null;
     const ranked = rankPosts(posts, sort === "growth" && !canCompare ? "views" : sort);
     const top = topPostShare(posts);
+    // 비중의 분모는 상위 10개가 아니라 기간에 조회된 글 전체다 — 표 위 "상위 N개가 전체의 X%" 와 같은 기준
+    const totalViews = posts.reduce((n, p) => n + p.views, 0);
     const tags = tagPerformance(posts);
     const visitWeek = weekdayAverages(visits, visitsSince, range, today);
     const viewWeek = weekdayAverages(views, viewsSince, range, today);
@@ -55,21 +57,24 @@ export default function AnalyticsResults({ data, onBucketChange }: { data: Analy
         </section>
         <section className={styles.panel}>
             <AnalyticsHelp title="글별 성과" controls={<Pills role="group" aria-label="글별 성과 정렬">
-                {([['views', '조회수순'], ['growth', '증가량순'], ['days', '조회 일수순']] as const).map(([key, label]) => <button key={key} type="button" disabled={key === "growth" && !canCompare} aria-pressed={(sort === "growth" && !canCompare ? "views" : sort) === key} onClick={() => setSort(key)}>{label}</button>)}
+                {/* 아주 좁은 화면에서는 끝의 "순" 을 숨겨 제목과 한 줄에 둔다(화면 읽기 도구는 늘 "조회수순" 으로 읽는다) */}
+                {([['views', '조회수'], ['growth', '증가량'], ['days', '조회 일수']] as const).map(([key, label]) => <button key={key} type="button" disabled={key === "growth" && !canCompare} aria-pressed={(sort === "growth" && !canCompare ? "views" : sort) === key} aria-label={`${label}순`} onClick={() => setSort(key)}>{label}<span className={styles.sortSuffix}>순</span></button>)}
             </Pills>}><dl>
                 <div><dt>조회수</dt><dd>선택 기간에 발생한 조회의 합계입니다.</dd></div>
                 <div><dt>증감</dt><dd>선택 기간 합계 − 바로 앞 {range.days}일 합계<span className={styles.helpDetail}>비교 기간: {range.previousFrom} ~ {range.previousTo}</span></dd></div>
+                <div><dt>비중</dt><dd>해당 글 조회수 ÷ 선택 기간 전체 글 조회수 × 100</dd></div>
                 <div><dt>조회 일수</dt><dd>조회가 한 번 이상 발생한 날짜 수입니다.</dd></div>
+                <div><dt>목록</dt><dd>고른 정렬 기준으로 상위 {TOP_POSTS}개까지 보여 줍니다.</dd></div>
                 <div><dt>집계 대상</dt><dd>현재 남아 있는 글입니다. 초안으로 전환한 글도 포함합니다.</dd></div>
             </dl></AnalyticsHelp>
             <p className={styles.note}>{top.share === null ? "비중을 계산할 조회가 없습니다." : `조회 상위 ${top.count}개 글이 전체 조회의 ${number(top.share, "%")}를 차지합니다.`} {!canCompare && `직전 ${range.days}일의 기록이 부족해 증감을 비교할 수 없습니다.`}</p>
             {canCompare && <p className={`${styles.note} ${styles.mobileComparison}`}>증감은 직전 {range.days}일 대비</p>}
             {ranked.length === 0 ? <p className={styles.empty}>{sort === "growth" && canCompare ? "조회가 증가한 글이 없습니다." : "선택 기간에 조회된 글이 없습니다."}</p> : <div className={styles.tableScroll}><table className={`${styles.table} ${styles.performanceTable}`} role="table">
-                <caption className={styles.srOnly}>선택 기간 글별 성과 상위 10개 · 증감은 직전 {range.days}일 대비</caption>
+                <caption className={styles.srOnly}>선택 기간 글별 성과 상위 {TOP_POSTS}개 · 증감은 직전 {range.days}일 대비</caption>
                 <thead role="rowgroup"><tr role="row"><th scope="col" role="columnheader">글</th><th scope="col" role="columnheader">조회수</th><th scope="col" role="columnheader">조회 일수</th></tr></thead>
                 <tbody role="rowgroup">{ranked.map(post => <tr key={post.id} role="row">
-                    <td role="cell" className={styles.postTitle}><div className={styles.postHeading}><Link href={`/admin/posts/${post.id}`}>{post.title}</Link><PostStatusBadge status={post.status} /></div></td>
-                    <td role="cell"><span className={styles.mobileLabel}>조회수</span><strong>{number(post.views, "회")}</strong>{canCompare && <span className={styles.status}><span className={styles.comparisonLabel}>직전 {range.days}일 대비 </span>{changeLabel(post.views, post.previous, "회")}</span>}</td>
+                    <td role="cell" className={styles.postTitle}><Link href={`/admin/posts/${post.id}`}>{post.title}</Link>{post.tags.length > 0 && <div className={styles.postTags}><TagChips tags={post.tags} visibleCount={3} /></div>}</td>
+                    <td role="cell"><span className={styles.mobileLabel}>조회수</span><strong>{number(post.views, "회")}</strong>{totalViews > 0 && <span className={styles.share}>{number(post.views / totalViews * 100, "%")}</span>}{canCompare && <span className={styles.status}><span className={styles.comparisonLabel}>직전 {range.days}일 대비 </span>{changeLabel(post.views, post.previous, "회")}</span>}</td>
                     <td role="cell"><span className={styles.mobileLabel}>조회 일수</span>{post.activeDays}일</td>
                 </tr>)}</tbody>
             </table></div>}

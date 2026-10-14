@@ -28,7 +28,7 @@ export default function AnalyticsSkeleton() {
             <div className={styles.toolbar}><h3><SkeletonText>글별 성과</SkeletonText></h3><Line width="230px" height="30px" /></div>
             <div className={styles.note}><Line width="70%" /></div>
             <div className={styles.tableScroll}><table className={`${styles.table} ${styles.performanceTable}`}><thead><tr>{["글", "조회수", "조회 일수"].map(title => <th key={title}><SkeletonText>{title}</SkeletonText></th>)}</tr></thead>
-                <tbody>{Array.from({ length: 5 }, (_, i) => <tr key={i}><td><div className={styles.postHeading}><Line width={i % 2 ? "60%" : "70%"} /><Line width="3ch" height="18px" /></div></td>{[0, 1].map(j => <td key={j}><Line /></td>)}</tr>)}</tbody>
+                <tbody>{Array.from({ length: 5 }, (_, i) => <tr key={i}><td><Line width={i % 2 ? "60%" : "70%"} /><div className={styles.postTags}><Line width="9rem" height="1.1rem" /></div></td>{[0, 1].map(j => <td key={j}><Line /></td>)}</tr>)}</tbody>
             </table></div>
         </section>
         <div className={styles.secondary} aria-hidden>

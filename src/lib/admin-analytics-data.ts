@@ -16,7 +16,7 @@ export async function getAdminAnalytics(range: AnalyticsRange, today: string): P
              WHERE date BETWEEN ${range.previousFrom}::date AND ${range.to}::date OR date = ${today}::date
              GROUP BY date ORDER BY date`,
         prisma.$queryRaw<PostPerformance[]>`
-            SELECT p.id, p.slug, p.title, p.status::text AS status, p.tags,
+            SELECT p.id, p.slug, p.title, p.tags,
                    COALESCE(SUM(v.views) FILTER (WHERE v.date BETWEEN ${range.from}::date AND ${range.to}::date), 0)::int AS views,
                    COALESCE(SUM(v.views) FILTER (WHERE v.date BETWEEN ${range.previousFrom}::date AND ${range.previousTo}::date), 0)::int AS previous,
                    COUNT(*) FILTER (WHERE v.date BETWEEN ${range.from}::date AND ${range.to}::date AND v.views > 0)::int AS "activeDays"

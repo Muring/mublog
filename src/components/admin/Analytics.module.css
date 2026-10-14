@@ -109,25 +109,30 @@
 .performanceTable th:last-child { width:16%; white-space:normal; }
 .performanceTable .status { line-height:1.6; }
 .mobileLabel { display:none; }
-/* 표에서는 제목 옆, 모바일 카드에서는 오른쪽 끝에 상태를 배치한다. */
-.postHeading { display:flex; align-items:center; justify-content:flex-start; gap:10px; min-width:0; }
-.postHeading a { min-width:0; overflow-wrap:anywhere; }
-.postHeading > span { flex-shrink:0; }
+.postTitle a { overflow-wrap:anywhere; }
+/* 제목 아래 태그 — 짧은 제목이어도 제목 칸이 비어 보이지 않는다 */
+.postTags { margin-top:6px; }
+.share { margin-left:6px; font-size:12px; color:var(--desccolor); font-variant-numeric:tabular-nums; }
 .mobileComparison { display:none; }
 /* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
 @media (max-width: 640px) {
     .performanceTable, .performanceTable tbody { display:block; }
     .performanceTable thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
-    .performanceTable tr { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 8px; padding:10px 0; border-bottom:var(--border-width) solid var(--bordercolor); }
+    /* 카드 안을 2행 2열로 나눈다: 제목 | 조회수, 태그 | 조회 일수. 제목 칸은 display:contents 로 풀어 제목과 태그가 각자 행을 차지하고,
+       오른쪽 두 값은 라벨 열 폭을 맞춰 같은 세로선에서 시작한다. 증감은 값 아래 줄로 내려 오른쪽 칸이 제목 칸을 밀어내지 않게 한다 */
+    .performanceTable tr { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 16px; padding:10px 0; border-bottom:var(--border-width) solid var(--bordercolor); }
     .performanceTable td { display:block; min-width:0; padding:0; border:0; text-align:left; }
-    .performanceTable td:first-child { grid-column:1 / -1; min-width:0; }
-    .performanceTable td:nth-child(2) { display:flex; align-items:baseline; flex-wrap:wrap; gap:3px 5px; }
-    .performanceTable td:last-child { display:flex; align-items:baseline; justify-content:flex-end; gap:4px; white-space:nowrap; }
+    .performanceTable td:first-child { display:contents; }
+    .performanceTable .postTitle a { grid-column:1; grid-row:1; min-width:0; align-self:center; }
+    .performanceTable .postTags { grid-column:1; grid-row:2; margin:0; align-self:center; min-width:0; }
+    .performanceTable td:nth-child(2) { grid-row:1; align-self:center; }
+    .performanceTable td:last-child { grid-row:2; align-self:center; }
+    .performanceTable td:nth-child(2), .performanceTable td:last-child { grid-column:2; display:grid; grid-template-columns:4.5rem auto auto; justify-content:start; align-items:baseline; column-gap:6px; white-space:nowrap; }
+    .performanceTable td:nth-child(2) .status { grid-column:2 / -1; margin-top:2px; }
     .performanceTable .postTitle a { font-weight:700; line-height:1.6; }
     .performanceTable .status { display:inline; margin:0; }
+    .performanceTable .share { margin-left:0; }
     .mobileLabel { display:inline; color:var(--desccolor); font-size:11px; }
     .comparisonLabel { display:none; }
     .mobileComparison { display:block; }
-    .postHeading { display:block; position:relative; width:100%; box-sizing:border-box; min-height:24px; padding-right:54px; }
-    .postHeading > span:last-child { position:absolute; top:0; right:0; }
 }

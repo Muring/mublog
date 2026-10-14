@@ -3,7 +3,7 @@ import type { BucketKey } from "./admin-chart";
 
 export type AnalyticsRange = { from: string; to: string; previousFrom: string; previousTo: string; days: number; preset: string; bucket: BucketKey };
 export type MetricPoint = { date: string; value: number };
-export type PostPerformance = { id: string; slug: string; title: string; status: string; tags: string[]; views: number; previous: number; activeDays: number };
+export type PostPerformance = { id: string; slug: string; title: string; tags: string[]; views: number; previous: number; activeDays: number };
 export type AnalyticsData = {
     range: AnalyticsRange; today: string;
     visits: MetricPoint[]; views: MetricPoint[];
@@ -118,10 +118,12 @@ export function weekdayAverages(points: MetricPoint[], since: string | null, ran
     }
     return rows.map(row => ({ ...row, average: row.days ? row.sum / row.days : null }));
 }
+/** 글별 성과 표에 보이는 글 수. 표 위 "조회 상위 N개" 문장도 같은 N 을 쓴다 — 둘이 갈리면 읽는 사람이 헷갈린다 */
+export const TOP_POSTS = 10;
 export function rankPosts(posts: PostPerformance[], sort: "views" | "growth" | "days") {
     return posts.filter(p => p.views > 0 && (sort !== "growth" || p.views > p.previous)).sort((a, b) =>
         (sort === "growth" ? (b.views - b.previous) - (a.views - a.previous) : sort === "days" ? b.activeDays - a.activeDays : b.views - a.views)
-        || b.views - a.views || a.title.localeCompare(b.title, "ko") || a.id.localeCompare(b.id)).slice(0, 10);
+        || b.views - a.views || a.title.localeCompare(b.title, "ko") || a.id.localeCompare(b.id)).slice(0, TOP_POSTS);
 }
 export function tagPerformance(posts: PostPerformance[]) {
     const tags = new Map<string, number>();
@@ -131,7 +133,7 @@ export function tagPerformance(posts: PostPerformance[]) {
         .sort((a, b) => b.views - a.views || a.tag.localeCompare(b.tag, "ko"));
 }
 export function topPostShare(posts: PostPerformance[]) {
-    const top = rankPosts(posts, "views").slice(0, 5);
+    const top = rankPosts(posts, "views");
     const total = posts.reduce((n, p) => n + p.views, 0);
     return { count: top.length, share: total ? top.reduce((n, p) => n + p.views, 0) / total * 100 : null };
 }

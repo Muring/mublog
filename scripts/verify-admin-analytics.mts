@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { chartMorph } from "../src/lib/chart-morph";
-import { analyticsDateError, analyticsRange, analyticsUrl, analyticsDataKey, analyticsDataUrl, changeLabel, metricSummary, rangeBuckets, weekdayAverages, rankPosts, tagPerformance, topPostShare, type PostPerformance } from "../src/lib/admin-analytics";
+import { analyticsDateError, analyticsRange, analyticsUrl, analyticsDataKey, analyticsDataUrl, changeLabel, metricSummary, rangeBuckets, weekdayAverages, rankPosts, tagPerformance, topPostShare, TOP_POSTS, type PostPerformance } from "../src/lib/admin-analytics";
 
 const range = analyticsRange(new URLSearchParams("period=custom&from=2024-02-27&to=2024-03-04"), "2024-03-04");
 assert.equal(range.days, 7);
@@ -53,8 +53,8 @@ assert.equal(weekdayAverages([], null, range, "2024-03-04").every(p => p.average
 const twoMondays = weekdayAverages([{ date: "2024-03-04", value: 6 }], "2024-03-04", { from: "2024-03-04", to: "2024-03-11" }, "2024-03-12");
 assert.deepEqual([twoMondays[0].average, twoMondays[0].days], [3, 2]);
 
-const makePost = (id: string, views: number, previous: number, activeDays: number, tags: string[]): PostPerformance => ({ id, title: id, slug: id, status: "PUBLISHED", views, previous, activeDays, tags });
-const posts = [makePost("a", 20, 25, 5, ["react", "web"]), makePost("b", 10, 0, 8, ["react"]), makePost("c", 0, 0, 0, []), { ...makePost("d", 5, 0, 8, []), status: "DRAFT" }];
+const makePost = (id: string, views: number, previous: number, activeDays: number, tags: string[]): PostPerformance => ({ id, title: id, slug: id, views, previous, activeDays, tags });
+const posts = [makePost("a", 20, 25, 5, ["react", "web"]), makePost("b", 10, 0, 8, ["react"]), makePost("c", 0, 0, 0, []), makePost("d", 5, 0, 8, [])];
 assert.deepEqual(rankPosts(posts, "views").map(p => p.id), ["a", "b", "d"]);
 assert.deepEqual(rankPosts(posts, "growth").map(p => p.id), ["b", "d"]);
 assert.deepEqual(rankPosts(posts, "days").map(p => p.id), ["b", "d", "a"]);
@@ -62,8 +62,10 @@ assert.equal(posts[0].id, "a"); // no mutation during ranking
 assert.deepEqual(tagPerformance(posts), [{ tag: "react", views: 30, share: 60 }, { tag: "web", views: 20, share: 40 }]);
 assert.deepEqual(topPostShare(posts), { count: 3, share: 100 });
 assert.deepEqual(topPostShare([]), { count: 0, share: null });
-const six = Array.from({ length: 6 }, (_, i) => makePost(String(i), i + 1, 0, 1, []));
-assert.equal(topPostShare(six).share, 20 / 21 * 100);
+// 표(상위 TOP_POSTS 개)와 같은 개수로 비중을 낸다: 1~11회 글 11개면 1회짜리 하나만 빠진다
+const eleven = Array.from({ length: 11 }, (_, i) => makePost(String(i), i + 1, 0, 1, []));
+assert.equal(rankPosts(eleven, "views").length, TOP_POSTS);
+assert.deepEqual(topPostShare(eleven), { count: TOP_POSTS, share: 65 / 66 * 100 });
 assert.deepEqual(rankPosts([makePost("b", 1, 0, 1, []), makePost("a", 1, 0, 1, [])], "views").map(p => p.id), ["a", "b"]);
 
 const defaultRange = analyticsRange(new URLSearchParams(), "2026-01-01");
