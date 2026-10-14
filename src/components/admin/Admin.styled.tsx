@@ -25,14 +25,8 @@ export const AdminWrapper = styled.div`
   /* 헤더가 position: fixed / height 64px 이므로 그만큼 비워준다 */
   padding: 6rem 1rem 3rem;
 
-  .admin-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-  }
+  /* 공통 머리줄(AdminHeading) 아래 여백. 예전 탭 줄의 margin-bottom 과 같다 */
+  .admin-heading { margin-bottom: 20px; }
 
   /*
    * auto-fit 은 폭에 따라 3열 같은 어중간한 배치를 만든다.
@@ -46,7 +40,7 @@ export const AdminWrapper = styled.div`
   }
 
   ${mobile} {
-    .admin-head a { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; }
+    .admin-heading a:has(> .primary) { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; }
     .stat-row {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -82,14 +76,6 @@ export const AdminWrapper = styled.div`
   }
 
   /* 댓글 관리 머리의 보조 줄과 요약 */
-  .admin-head .sub {
-    margin-top: 0.3rem;
-    font-size: 0.8rem;
-    color: var(--desccolor);
-    a {
-      color: var(--linkcolor);
-    }
-  }
   .summary {
     font-size: 0.85rem;
     color: var(--desccolor);

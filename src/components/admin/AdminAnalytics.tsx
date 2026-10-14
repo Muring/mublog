@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { analyticsDateError, analyticsDataKey, analyticsDataUrl, analyticsRange, analyticsRank, analyticsUrl, type AnalyticsData, type AnalyticsRange } from "@/lib/admin-analytics";
 import { fetchJson } from "@/lib/fetcher";
@@ -11,6 +11,7 @@ import AnalyticsResults from "./AnalyticsResults";
 import { Skeleton } from "@/components/ui/Skeleton.styled";
 import AnalyticsSkeleton from "./AnalyticsSkeleton";
 import styles from "./Analytics.module.css";
+import { useAdminRefresh } from "./RefreshButton";
 
 /** 기간 선택기는 데이터 로딩·실패와 무관하게 같은 DOM을 유지한다. */
 export default function AdminAnalytics({ today }: { today: string }) {
@@ -34,6 +35,9 @@ export default function AdminAnalytics({ today }: { today: string }) {
         placeholderData: keepPreviousData,
     });
     const pending = query.isPending || query.isFetching;
+    // 통계는 화면이 받아 온다. 머리줄 새로고침이 지금 기간의 집계를 다시 받게 한다
+    const { refetch } = query;
+    useAdminRefresh(useCallback(() => void refetch(), [refetch]), query.isFetching);
     const navigate = (next: AnalyticsRange) => {
         setDateError(null);
         const url = analyticsUrl(next, safeAdminReturn(params.get("returnTo")), analyticsRank(params.get("rank")));

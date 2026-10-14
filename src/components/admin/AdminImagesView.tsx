@@ -24,6 +24,7 @@ import AdminSheet from "./AdminSheet";
 
 import { imagePageUrl, type ImageFilter as Filter, type ImageSort as Sort, type ImagePage, type ImageQuery } from "@/lib/admin-image-query";
 import { useAdminImages } from "@/hooks/useAdminImages";
+import { useAdminRefresh } from "./RefreshButton";
 import { formatKst, KST_OFFSET_MS } from "@/lib/date";
 
 const FILTERS: { key: Filter; label: string; match: (image: ManagedImage) => boolean }[] = [
@@ -62,6 +63,8 @@ export default function AdminImagesView({ initialPage, initialQuery }: Props) {
     const imageFilters = { from: listState.from, to: listState.to, format: listState.format, size: listState.size };
     const setFilter = (status: Filter) => update({ status });
     const { page, pending, stale, loadingMore, error, loadMore, refresh, retry } = useAdminImages(initialPage, requestQuery, initialQuery);
+    // 목록을 화면이 들고 있어 router.refresh 로는 바뀌지 않는다. 머리줄 새로고침이 이 목록을 다시 받게 한다
+    useAdminRefresh(refresh, pending);
     const { images, posts, formats, counts, nextSweepAt } = page;
     const scrollRoot = useRef<HTMLDivElement>(null);
     const sentinel = useRef<HTMLDivElement>(null);

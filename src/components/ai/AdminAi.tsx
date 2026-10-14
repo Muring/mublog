@@ -2,10 +2,10 @@
 import { Fragment } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "@/lib/fetcher";
-import { strokeIcon } from "@/components/ui/icon";
 import type { AdminAiData } from "@/lib/ai-usage-data";
 import { publicYear, visibleWeeks, sumTotals, type UsageYear } from "@/lib/ai-usage";
-import { Button } from "@/components/admin/Admin.styled";
+import RefreshButton from "@/components/admin/RefreshButton";
+import AdminHeading, { AdminTabs } from "@/components/admin/AdminHeading";
 import { Skeleton, SkeletonText } from "@/components/ui/Skeleton.styled";
 import { NarrowHead, NarrowNumbers, number, UsageCards, WeekTable } from "./AiUsageView";
 import AiFilterBar, { countOptions } from "./AiFilterBar";
@@ -19,10 +19,6 @@ import { useListState } from "@/hooks/useListState";
 import styles from "./AiDashboard.module.css";
 import manage from "./AiManagement.module.css";
 import { formatKst } from "@/lib/date";
-
-function RefreshIcon() {
-    return <svg {...strokeIcon(16, 1.7)}><path d="M20 7v5h-5" /><path d="M4 17v-5h5" /><path d="M6.1 6.1A8 8 0 0 1 19.7 10M4.3 14A8 8 0 0 0 17.9 17.9" /></svg>;
-}
 
 const SKELETON_ROWS = Array.from({ length: 10 }, (_, i) => i);
 /** 불러오는 동안 실제 카드·표·패널과 같은 상자를 깔아 둔다. 글자 자리는 막대로만 보인다 */
@@ -85,11 +81,10 @@ export default function AdminAi({ asOf }: { asOf: string }) {
     const count = tab === "quality" ? `작업 ${number(taskGroups.total)}건` : tab === "status" ? `${number(weeks.length)}주` : view === "weeks" ? `${number(shownWeeks.length)}주` : `${number(filtered.length)}행`;
     const resetFilters = () => { setQ(""); setYear(""); if (tab === "quality") setTaskFilters(NO_TASK_FILTERS); else setFilters(NO_GROUP_FILTERS); };
     return <section className={`${styles.workspace} ${manage.workspace}`} aria-label="AI 관리" data-ai-workspace>
-        {/* 블로그 관리와 같은 밑줄 탭. 넓으면 제목과 한 줄, 좁으면 탭만 아래 줄을 꽉 채운다 */}
-        <header className={manage.heading}><h1>AI 관리</h1>
-            <div className={manage.tabs} role="tablist" aria-label="AI 관리 항목">{AI_TABS.map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={tab === value} onClick={() => update({ tab: value, q: "" })}>{label}</button>)}</div>
-            <Button className={manage.refresh} onClick={() => query.refetch()} disabled={query.isFetching} aria-label={query.isFetching ? "새로고침 중" : "새로고침"} title="새로고침" aria-busy={query.isFetching}><RefreshIcon /></Button>
-        </header>
+        {/* 블로그 관리와 같은 머리줄. 넓으면 제목·탭·버튼이 한 줄, 좁으면 탭만 아래 줄을 꽉 채운다 */}
+        <AdminHeading title="AI 관리"
+            tabs={<AdminTabs label="AI 관리 항목" tabs={AI_TABS.map(([value, label]) => ({ key: value, label, current: tab === value, onSelect: () => update({ tab: value, q: "" }) }))} />}
+            actions={<RefreshButton onClick={() => void query.refetch()} busy={query.isFetching} />} />
         {query.isError && <p className={styles.warning} role="alert">{query.error.message} · 기존 데이터가 있으면 유지합니다.</p>}
         {(data || query.isPending) && <AiFilterBar key={tab} loading={!data} period={period} onPeriod={setPeriod} view={tab === "usage" ? { value: view, onChange: setView } : undefined}
             sort={sort} onSort={setSort} q={q} onSearch={setQ}

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import AdminNavigation from "./AdminNavigation";
+import { AdminRefreshButton, AdminRefreshProvider } from "./RefreshButton";
+import AdminHeading, { AdminTabsPlaceholder } from "./AdminHeading";
 import Dropdown from "@/components/ui/Dropdown";
 import TagChips from "@/components/ui/TagChips";
 import PostTableHead from "./PostTableHead";
@@ -20,18 +22,22 @@ import { AdminWrapper, PostTable, AdminListScroll, ResultBar, Button, Skeleton }
 export function AdminShell({ children }: { children: React.ReactNode }) {
     // 제목은 모든 탭에 공통이다. 어느 탭인지는 바로 아래 탭 줄이 말한다 — 탭마다 "○○ 관리" 를 붙이면 좁은 폭에서 줄이 꺾인다
     return (
+        <AdminRefreshProvider>
         <AdminWrapper>
-            <div className="admin-head">
-                <h2>블로그 관리</h2>
-                <Link href="/admin/posts/new">
-                    <Button as="span" className="primary">
-                        새 글 쓰기
-                    </Button>
-                </Link>
-            </div>
-            <Suspense fallback={<div style={{ height: 45 }} />}><AdminNavigation /></Suspense>
+            {/* 다른 사람이 단 댓글처럼 이 화면 밖에서 바뀐 것은 목록이 스스로 알 수 없다. 새로고침 버튼은 F5 없이 지금 탭만 다시 받는다 */}
+            <AdminHeading className="admin-heading" title="블로그 관리"
+                tabs={<Suspense fallback={<AdminTabsPlaceholder />}><AdminNavigation /></Suspense>}
+                actions={<>
+                    <AdminRefreshButton />
+                    <Link href="/admin/posts/new">
+                        <Button as="span" className="primary">
+                            새 글 쓰기
+                        </Button>
+                    </Link>
+                </>} />
             {children}
         </AdminWrapper>
+        </AdminRefreshProvider>
     );
 }
 

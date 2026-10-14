@@ -1,10 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useSyncExternalStore } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { commentListUrl, postListState, postListUrl, rememberedListUrl, rememberListUrl, safeAdminReturn } from "@/lib/admin-navigation";
-import styles from "./Management.module.css";
+import { AdminTabs } from "./AdminHeading";
 
 const TAB_PATHS = { posts: "/admin", comments: "/admin/comments", images: "/admin/images", stats: "/admin/stats" } as const;
 type Tab = keyof typeof TAB_PATHS;
@@ -16,7 +15,6 @@ export default function AdminNavigation() {
     const pathname = usePathname();
     const params = useSearchParams();
     const tab: Tab = pathname === "/admin/comments" ? "comments" : pathname === "/admin/images" ? "images" : pathname === "/admin/stats" ? "stats" : "posts";
-    const current = (name: Tab) => (tab === name ? "page" : undefined);
     // 지금 탭의 주소(조건 포함)를 기억해 두었다가, 다른 탭에서 이 탭으로 돌아올 때 그 주소로 연다
     const here = `${pathname}${params.size ? `?${params}` : ""}`;
     useEffect(() => { rememberListUrl(TAB_PATHS[tab], here); }, [tab, here]);
@@ -26,11 +24,11 @@ export default function AdminNavigation() {
     const withReturn = (path: string) => (returnTo === "/admin" ? path : `${path}?${new URLSearchParams({ returnTo })}`);
     const href = (name: Tab, fallback: string) => (tab === name ? here : memory[name] ?? fallback);
     return (
-        <nav className={styles.navigation} aria-label="콘텐츠 관리">
-            <Link href={href("posts", returnTo)} aria-current={current("posts")}>포스트</Link>
-            <Link href={href("comments", commentListUrl({ returnTo }))} aria-current={current("comments")}>댓글</Link>
-            <Link href={href("images", withReturn("/admin/images"))} aria-current={current("images")}>이미지</Link>
-            <Link href={href("stats", withReturn("/admin/stats"))} aria-current={current("stats")}>통계</Link>
-        </nav>
+        <AdminTabs label="콘텐츠 관리" tabs={[
+            { key: "posts", label: "포스트", href: href("posts", returnTo), current: tab === "posts" },
+            { key: "comments", label: "댓글", href: href("comments", commentListUrl({ returnTo })), current: tab === "comments" },
+            { key: "images", label: "이미지", href: href("images", withReturn("/admin/images")), current: tab === "images" },
+            { key: "stats", label: "통계", href: href("stats", withReturn("/admin/stats")), current: tab === "stats" },
+        ]} />
     );
 }
