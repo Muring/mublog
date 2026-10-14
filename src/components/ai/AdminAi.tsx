@@ -138,12 +138,29 @@ const COLLECTION_PROBLEMS: Record<string, [string, string]> = {
 };
 const collectionLabel = (code: string) => COLLECTION_PROBLEMS[code]?.[0] ?? code;
 
+// 진행 중인 주는 아직 다 관측될 수 없으니 "부분 관측" 을 겹쳐 적지 않는다
+const WEEK_SCOPES = [["partial", "부분 관측"], ["running", "진행 중"], ["missing", "미관측"]] as const;
+type WeekScope = (typeof WEEK_SCOPES)[number];
+const weekScope = (w: UsageYear["weeks"][number]): WeekScope | undefined => !w.observed ? WEEK_SCOPES[2] : !w.ended ? WEEK_SCOPES[1] : w.partial ? WEEK_SCOPES[0] : undefined;
+/**
+ * 세 아이콘은 같은 형식이다: 색을 채운 원(face) 위에 바탕색 기호(mark)를 파낸다. 부분 관측은 앰버 원에 반원(◐의 왼쪽),
+ * 진행 중은 파란 원에 시곗바늘, 미관측은 회색 원에 빼기. 색은 CSS(.scopeMark)가 data-scope 로 정한다
+ */
+function ScopeIcon({ scope }: { scope: WeekScope[0] }) {
+    return <svg className={manage.scopeMark} data-scope={scope} viewBox="0 0 24 24" aria-hidden="true">
+        <circle data-part="face" cx="12" cy="12" r="10" />
+        {scope === "partial" ? <path data-part="markFill" d="M12 5.5a6.5 6.5 0 0 0 0 13z" />
+            : <path data-part="mark" d={scope === "running" ? "M12 7.5V12l3 2" : "M8 12h8"} />}
+    </svg>;
+}
 function Diagnostics({ year, weeks }: { year: UsageYear; weeks: UsageYear["weeks"] }) {
+    // 관측 범위는 날짜 옆 아이콘으로만 표시한다. 문구를 칸에 넣으면 첫 열이 넓어지거나 날짜가 가운데에서 밀리고,
+    // 주를 나열하면 주가 늘수록 끝없이 길어진다. 설명 줄에는 아이콘의 뜻만 둔다
     return <div className={manage.quality}>
         <section className={manage.qualityPanel} aria-labelledby="quality-diagnostics">
-            <header><h3 id="quality-diagnostics">반복·잘림 살펴보기</h3><p className={styles.note}>큰 출력과 잘림이 많은 주는 조회 범위를, 반복 호출이 많은 주는 재확인 과정을 살펴보세요. 횟수만으로 낭비나 품질을 판단하지 않습니다.</p><p className={manage.scope}>선택 연도·기간의 주별 집계 · 작업 검색·필터와 무관 · 횟수는 건, 미분류 사용량은 토큰</p></header>
+            <header><h3 id="quality-diagnostics">반복·잘림 살펴보기</h3><p className={styles.note}>큰 출력과 잘림이 많은 주는 조회 범위를, 반복 호출이 많은 주는 재확인 과정을 살펴보세요. 횟수만으로 낭비나 품질을 판단하지 않습니다.</p><p className={manage.scope}>선택 연도·기간의 주별 집계 · 작업 검색·필터와 무관 · 횟수는 건, 미분류 사용량은 토큰</p><p className={`${manage.scope} ${manage.scopeLegend}`}>{WEEK_SCOPES.map(([key, label]) => <span key={key}><ScopeIcon scope={key} />{label}</span>)}</p></header>
             <details className={manage.metricGuide}><summary>지표 뜻과 읽는 법</summary><dl>{DIAGNOSTIC_HELP.map(([label, help]) => <div key={label}><dt>{label}</dt><dd>{help}</dd></div>)}</dl></details>
-            <AiScroll className={manage.qualityTable} tabIndex={0} aria-label="주별 진단 스크롤"><table className={manage.diagTable}><thead><tr><th>주</th>{DIAGNOSTICS.map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td data-label="주" data-center><span className={manage.weekCell}><span />{w.week}<span className={manage.weekScope}>{w.observed && [w.partial && "부분 관측", !w.ended && "진행 중"].filter(Boolean).join(" · ")}</span></span></td>{[w.diagnostics.large_outputs, w.diagnostics.truncations, w.diagnostics.repeated_calls, w.diagnostics.kb_searches, w.diagnostics.kb_selections, w.diagnostics.kb_applications, w.states.unclassified?.total ?? 0].map((n, i) => <td data-number data-label={DIAGNOSTICS[i]} key={i}>{w.observed ? number(n) : "—"}</td>)}</tr>)}</tbody></table>{!weeks.length && <p className={manage.empty}>선택 기간의 주별 진단 기록이 없습니다.</p>}</AiScroll>
+            <AiScroll className={`${manage.qualityTable} ${manage.diagScroll}`} tabIndex={0} aria-label="주별 진단 스크롤"><table className={manage.diagTable}><thead><tr><th>주</th>{DIAGNOSTICS.map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td data-label="주" data-center>{(() => { const scope = weekScope(w); return scope ? <span className={manage.weekMarked} title={scope[1]}>{w.week}<ScopeIcon scope={scope[0]} /><span className={styles.srOnly}> {scope[1]}</span></span> : w.week; })()}</td>{[w.diagnostics.large_outputs, w.diagnostics.truncations, w.diagnostics.repeated_calls, w.diagnostics.kb_searches, w.diagnostics.kb_selections, w.diagnostics.kb_applications, w.states.unclassified?.total ?? 0].map((n, i) => <td data-number data-label={DIAGNOSTICS[i]} key={i}>{w.observed ? number(n) : "—"}</td>)}</tr>)}</tbody></table>{!weeks.length && <p className={manage.empty}>선택 기간의 주별 진단 기록이 없습니다.</p>}</AiScroll>
         </section>
         <section className={manage.qualityPanel} aria-labelledby="quality-devices">
             <header><h3 id="quality-devices" className={manage.titleWithInfo}>자료 누락 확인<Info label="수집 상태 읽는 법">관측 시작·종료는 수집 자료에 포함된 시각입니다. 그 사이 모든 기록이 수집됐다는 보장은 아닙니다. 식별 불확실은 응답 식별에 대체 값을 쓴 기록 수, 작업 충돌은 서로 다른 결과가 기록된 작업 수, 연결 모호는 여러 작업에 연결된 응답 수입니다.</Info></h3><p className={styles.note}>기기별 관측 종료가 기대한 시점까지 도달했는지 확인하세요. 보고된 문제가 없어도 자료가 완전하다는 뜻은 아닙니다.</p><p className={manage.scope}>{year.year}년 수집 자료 · 기간·작업 검색·필터와 무관</p></header>

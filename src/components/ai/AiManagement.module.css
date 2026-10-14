@@ -115,10 +115,8 @@
  .quality .diagTable tbody tr:last-child { border-bottom: var(--border-width) solid var(--bordercolor); }
  .quality .diagTable td { display: flex; flex-direction: column; gap: .1rem; padding: 0; font-variant-numeric: tabular-nums; }
  .quality .diagTable td::before { font-size: .7rem; line-height: 1.3; }
- /* 카드 첫 줄: 주(왼쪽)와 관측 범위(오른쪽) */
+ /* 카드 첫 줄은 주만 굵게 한 줄 전체에 둔다 */
  .quality .diagTable td:first-child { grid-column: 1 / -1; font-weight: 700; }
- .quality .diagTable .weekCell { display: flex; justify-content: space-between; }
- .quality .diagTable .weekCell > span:first-child { display: none; }
  .quality .diagTable td:first-child::before { content: none; }
  .quality .diagTable td:last-child { grid-column: span 2; }
  }
@@ -140,13 +138,38 @@
 .collectionSummary strong { color: var(--foreground); font-variant-numeric: tabular-nums; }
 .problemList { display: grid; gap: .65rem; margin: 0; padding-left: 1.25rem; font-size: .8rem; line-height: 1.6; overflow-wrap: anywhere; }
 .problemList span { display: block; color: var(--desccolor); }
-/*
- * 관측 범위는 날짜 오른쪽 같은 줄에 둔다. 아래 줄로 내리면 그 행만 높아지고, 그냥 이어 붙이면 가운데 정렬된 날짜가
- * 행마다 밀린다. 양옆을 같은 폭(1fr)으로 잡아 날짜는 늘 열 가운데에 있다.
- */
-.weekCell { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: baseline; gap: .5rem; }
-.weekScope { justify-self: start; font-size: .7rem; font-weight: 400; color: var(--desccolor); }
 .diagTable td { vertical-align: middle; }
+/*
+ * 관측 범위는 날짜 오른쪽 아이콘으로 표시한다. 아이콘은 폭을 차지하지 않으므로(absolute), 표시가 있든 없든 날짜는 열 가운데에
+ * 있고 열 폭도 같다. 옆 칸(숫자, 오른쪽 정렬)의 빈 왼쪽 여백에 걸친다.
+ * 부분 관측은 앰버 원에 반원(14px 에서 고리는 빈 원처럼 보여 반원만 판다), 진행 중은 파란 원 시계, 미관측은 회색 원 빼기다(모두 채운 원에 바탕색 기호를 파낸다)
+ */
+/* 좁은 화면 카드에서는 칸이 flex 라 늘어나지 않게 글자 폭으로 둔다. 그래야 아이콘이 날짜 바로 옆에 온다 */
+.weekMarked { position: relative; align-self: flex-start; }
+/* 글자 상자 가운데는 숫자 획의 가운데보다 0.5px 위라(NanumSquareNeo 13.6px 실측) 그만큼 내린다 */
+.weekMarked .scopeMark { position: absolute; left: 100%; top: 50%; margin: calc(.5px - .45rem) 0 0 .4rem; }
+.scopeMark { display: block; flex: none; width: .9rem; height: .9rem; }
+.scopeMark [data-part="mark"] { fill: none; stroke: var(--cardbackground); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.scopeMark [data-part="markFill"] { fill: var(--cardbackground); }
+.scopeMark[data-scope="partial"] [data-part="face"] { fill: var(--warnicon); }
+.scopeMark[data-scope="running"] [data-part="face"] { fill: var(--progresscolor); }
+.scopeMark[data-scope="missing"] [data-part="face"] { fill: var(--desccolor); }
+.scopeLegend { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .75rem; }
+.scopeLegend > span { display: inline-flex; align-items: center; gap: .35rem; }
+/*
+ * 주 열은 날짜 폭(width: 1%)만 갖고, 남는 폭은 숫자 열 일곱이 같은 몫으로 나눈다. 가운데 정렬된 날짜가 열을 꽉 채워
+ * 날짜 왼쪽 여백과 마지막 숫자 오른쪽 여백이 같아진다. 열이 넓으면 가운데 정렬 때문에 왼쪽만 크게 벌어진다.
+ */
+.diagTable th:first-child { width: 1%; }
+.diagTable th:not(:first-child) { width: 14%; }
+/*
+ * 기간을 '연도 전체'로 두면 행이 최대 53개다. 표 상자 안에서만 스크롤하고 머리글을 붙여 두어
+ * 아래 '자료 누락 확인' 패널이 행 수만큼 밀려 내려가지 않게 한다. 좁은 화면은 카드로 바뀌어 페이지가 스크롤한다
+ */
+@media (min-width: 761px) {
+ .diagScroll { max-height: 26rem; overflow-y: auto; }
+ .diagScroll thead th { position: sticky; top: 0; z-index: 1; }
+}
 .deviceTable td:first-child { white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 760px) {
  .qualityPanel { gap: .65rem; padding: .75rem; }
