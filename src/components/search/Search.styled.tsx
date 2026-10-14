@@ -10,7 +10,10 @@ export const SearchTrigger = styled.button`
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    height: 2.25rem;
+    /* 헤더 왼쪽 메뉴·아이콘 링크(3rem 정사각형)와 높이를 맞추고, 아이콘만 남는 좁은 화면에서도 그보다 좁아지지 않는다 */
+    height: 3rem;
+    min-width: 3rem;
+    justify-content: center;
     padding: 0 0.75rem;
     margin-right: 1rem;
     border: 0;

@@ -20,7 +20,11 @@ export const FooterWrapper = styled.footer`
     display: flex;
     justify-content: space-evenly;
     align-items: center;
-    min-width: 25rem;
+    /* 고정 min-width(25rem)면 432px 보다 좁은 화면에서 푸터가 화면 밖으로 밀려 나가 모바일 브라우저가 페이지 전체를 축소해 보였다 */
+    width: min(25rem, 100%);
+
+    /* 아이콘 셋(각 96px)도 그 폭 안에서 같이 줄어든다 */
+    img { min-width: 0; max-width: 30%; height: auto; }
   }
 
   .links {
