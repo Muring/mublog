@@ -51,6 +51,30 @@ assert.deepEqual(none, { knowledgeDecisionsPresent: false, knowledgeDecisions: n
 assert.ok(ok({ ...noneBase, status: 'completed', result: { schemaVersion: 1, visibility: 'private', rows: [{ project, task: taskId, document: null, state: 'uncollected' }], recordingRequested: false, inferredApplications: 0 }, error: null }));
 assert.equal(ok({ ...noneBase, status: 'completed', result: { schemaVersion: 1, visibility: 'private', rows: [], recordingRequested: false, inferredApplications: 0 }, error: null }), false, 'absent decisions are uncollected');
 
+// 빈 판단 + 기존 knowledge 는 새 uncollected 와 과거 빈 결과를 모두 수신한다.
+const uncollected = { project, task: taskId, document: null, state: 'uncollected' };
+const legacyKnowledge = [{ document: doc.document, usage: 'reference' as const, note: null }];
+const withSource = (s: typeof source, rows: object[]) => ({ ...completed(rows), source: s, sourceDigest: sourceDigest(project, taskId, s) });
+for (const knowledge of [null, [], legacyKnowledge]) {
+    for (const present of [false, true]) {
+        const s: typeof source = { ...none, knowledgeDecisionsPresent: present, knowledge };
+        assert.ok(ok(withSource(s, [uncollected])), 'missing/null decisions still allow uncollected');
+        assert.equal(ok(withSource(s, [])), false, 'missing/null decisions still require uncollected');
+    }
+    const s: typeof source = { ...none, knowledgeDecisionsPresent: true, knowledgeDecisions: [], knowledge };
+    assert.equal(ok(withSource(s, [uncollected])), Boolean(knowledge?.length), 'empty decisions need nonempty knowledge for uncollected');
+    assert.ok(ok(withSource(s, [])), 'historical empty rows remain valid');
+}
+const gapSource = { ...none, knowledgeDecisionsPresent: true, knowledgeDecisions: [], knowledge: legacyKnowledge };
+const gapReview = withSource(gapSource, [uncollected]);
+assert.deepEqual(knowledgeReviewSchema.parse(gapReview), gapReview, 'source, digest and result are preserved');
+assert.deepEqual(currentSource({ ...activity, knowledgeDecisions: [], knowledge: legacyKnowledge, evidence: [] }), gapSource, 'currentSource preserves explicit empty decisions');
+assert.equal(ok(withSource(gapSource, [uncollected, uncollected])), false, 'uncollected is a single task row');
+assert.equal(ok(withSource(gapSource, [uncollected, row('matched')])), false, 'task and document rows cannot mix');
+assert.equal(ok(withSource(gapSource, [{ ...uncollected, document: doc.document }])), false, 'uncollected cannot be a document row');
+assert.equal(ok(completed([uncollected])), false, 'nonempty decisions reject task uncollected');
+assert.equal(ok(completed([uncollected, row('matched')])), false, 'nonempty decisions reject mixed task uncollected');
+
 // 이력: 최신 순, 모든 시도를 보존. 판단이 바뀌면 이전 원본의 대조로 표시하고 상태는 그대로 둔다
 const older = knowledgeReviewSchema.parse(completed([row('matched')]));
 const newer = knowledgeReviewSchema.parse({ ...base, id: 'c'.repeat(32), reviewedAt: '2026-10-02T14:00:00+09:00', status: 'failed', result: null, error: 'KB knowledge-review failed' });

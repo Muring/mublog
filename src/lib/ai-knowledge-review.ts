@@ -75,7 +75,8 @@ function reviewIssues(r: z.infer<typeof knowledgeReviewSchema>): string[] {
         if (row.project !== r.project || row.task !== r.taskId) fail("Row identity differs from the review");
         if (row.document === null) {
             if (!["uncollected", "task_conflict"].includes(row.state) || row.decision || row.reason || row.searchLink || row.detail || row.applicationEvent) fail("Task-level row is uncollected or task_conflict only");
-            if (row.state === "uncollected" && s.knowledgeDecisions !== null) fail("Uncollected requires absent or null decisions");
+            const uncollectedAllowed = s.knowledgeDecisions === null || (s.knowledgeDecisions.length === 0 && (s.knowledge?.length ?? 0) > 0);
+            if (row.state === "uncollected" && !uncollectedAllowed) fail("Uncollected requires absent/null decisions or empty decisions with source knowledge");
             return;
         }
         const d = decisions.get(row.document);
