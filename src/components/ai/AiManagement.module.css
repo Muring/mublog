@@ -6,7 +6,7 @@
 .filterBar > div { margin-bottom: 0; }
 .periodControls { display: flex; flex-wrap: wrap; gap: 8px; }
 .empty { margin: 0; padding: 2.5rem 1rem; text-align: center; color: var(--desccolor); font-size: .85rem; }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .shell { padding: 4.5rem .75rem max(.75rem, env(safe-area-inset-bottom)); }
  .workspace { gap: .75rem; }
  .quality table, .quality tbody, .quality tr, .quality td { display: block; width: auto; }
@@ -39,7 +39,7 @@
 .summaryCards { flex-shrink: 0; min-width: 0; }
 .summaryCards > div > div { padding: .55rem .75rem; border-radius: 10px; }
 .workspace .summaryCards strong { margin-top: .2rem; font-size: clamp(.85rem, 1.5vw, 1.15rem); }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .summaryCards > div { gap: .4rem; }
  .summaryCards > div > div { padding: .45rem .6rem; }
  .workspace .summaryCards strong { font-size: .95rem; }
@@ -81,7 +81,7 @@
 .qualityTable td { border-bottom: var(--border-width) solid var(--bordercolor); vertical-align: top; }
 .qualityTable tbody tr:last-child td { border-bottom: 0; }
 .badges { display: flex; flex-wrap: wrap; gap: .25rem; }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .qualityPanel { padding: .75rem; }
  .qualityTable td { padding: .35rem 0; border: 0; white-space: normal; }
  .qualityTable tbody tr:last-child { border-bottom: 0; }
@@ -140,20 +140,22 @@
  */
 .diagTable th:first-child { width: 1%; }
 .diagTable th:not(:first-child) { width: 14%; }
+/* 좁은 PC 폭(641px~)에서는 머리글(반복 호출 · 미분류 토큰 등)이 두 줄로 접혀 표가 상자 안에 든다. 넓으면 한 줄 그대로다 */
+.diagTable thead th { white-space: normal; }
 /*
  * 기간을 '연도 전체'로 두면 행이 최대 53개다. 표 상자 안에서만 스크롤하고 머리글을 붙여 두어
  * 아래 '자료 누락 확인' 패널이 행 수만큼 밀려 내려가지 않게 한다. 좁은 화면은 카드로 바뀌어 페이지가 스크롤한다
  */
-@media (min-width: 761px) {
+@media (min-width: 641px) {
  .diagScroll { max-height: 26rem; overflow-y: auto; }
  .diagScroll thead th { position: sticky; top: 0; z-index: 1; }
 }
 .deviceTable td:first-child { white-space: normal; overflow-wrap: anywhere; }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .qualityPanel { gap: .65rem; padding: .75rem; }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .quality .deviceTable td[data-meta] { align-items: center; }
 }
 
@@ -187,7 +189,7 @@
 .rawRecord { font-size: .8rem; line-height: 1.7; }
 .rawRecord dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .3rem .75rem; }
 .rawRecord dd { margin: 0; }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .recordTable, .recordTable tbody { display: block; }
  .recordTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
  .recordTable tr:not(.recordDetail) { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem .75rem; padding: .75rem .5rem; margin-bottom: .75rem; border: var(--border-width) solid var(--bordercolor); border-radius: 12px; background: var(--cardbackground); }
@@ -207,15 +209,16 @@
 
 .dateBasis { display: block; margin-top: .3rem; color: var(--desccolor); font-size: .72rem; }
 .recordProject { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .8rem; line-height: 1.6; color: var(--desccolor); }
-@media (min-width: 761px) and (max-width: 1100px) {
- .recordTable th:first-child { width: 36%; }
+/* 좁은 PC 폭. 작업 상태 칸은 "부분 완료" 배지(65px)와 칸 여백이 들어갈 만큼(15%) 잡는다 — 641px 에서 11% 면 배지가 칸 밖으로 6px 밀려 가로 스크롤이 생겼다 */
+@media (min-width: 641px) and (max-width: 1100px) {
+ .recordTable th:first-child { width: 32%; }
  .recordTable th:nth-child(2) { width: 21%; }
  .recordTable th:nth-child(3) { width: 15%; }
  .recordTable th:nth-child(4) { width: 17%; }
- .recordTable th:nth-child(5) { width: 11%; }
+ .recordTable th:nth-child(5) { width: 15%; }
  .recordTable td { padding-inline: .4rem; }
 }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .recordTable td:nth-child(2) { flex-basis: 100%; padding-left: 1.4rem; }
  .recordTable td:nth-child(3) { margin-left: 1.4rem; }
  .recordTable td:nth-child(4) { margin-right: auto; }
@@ -227,14 +230,14 @@
 .linkedTask > div > button { padding: .35rem .7rem; border: var(--border-width) solid var(--bordercolor); border-radius: 6px; color: var(--foreground); background: var(--background); }
 .linkedTask > div > button:hover { color: var(--hoverfontcolor); background: var(--hovercolor); }
 
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .recordTable tr:not(.recordDetail):hover { background: var(--cardbackground); border-color: var(--desccolor); }
  .recordTable tr[data-open] { margin-bottom: 0; border-radius: 12px 12px 0 0; }
  .recordDetail { border: var(--border-width) solid var(--bordercolor); border-top: 0; border-radius: 0 0 12px 12px; margin-bottom: .75rem; }
 }
 
 /* 좁은 화면의 작업 기록은 행마다 카드라 바깥 상자 테두리를 걷는다. 겹치면 테두리가 두 겹으로 보인다 */
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .records { border: 0; border-radius: 0; }
 }
 
@@ -247,13 +250,13 @@
 .decisionFacts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .35rem .9rem; margin: .5rem 0 0; font-size: .85rem; line-height: 1.7; }
 .decisionFacts dt { color: var(--desccolor); }
 .decisionFacts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .decisionFacts { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
  .decisionFacts dd + dt { margin-top: .4rem; }
 }
 
 /* 작업 기록 표의 양 끝 칸 안쪽 여백을 사용량 표와 같은 1rem 으로 맞춘다. 스크롤바는 그 바깥 제 자리에 있다 */
-@media (min-width: 761px) {
+@media (min-width: 641px) {
  .recordTable th:first-child, .recordTable td:first-child { padding-left: 1rem; }
  .recordTable th:last-child, .recordTable td:last-child { padding-right: 1rem; }
 }
@@ -351,7 +354,7 @@
 .handoffLink:is(:hover, :focus-visible) { color: var(--linkhovercolor); }
 .handoffLink:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 4px; border-radius: 3px; }
 
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  /* 카드 안에 다시 상자를 두지 않는다. 펼친 상세는 카드 안쪽 여백 하나만 쓴다 */
  .recordDetail { padding: 0; }
  .recordTable .recordDetail > td { padding: 0; border-radius: 0 0 12px 12px; overflow: hidden; }
@@ -377,7 +380,7 @@
 .linkedTask strong small { display: block; margin-top: .1rem; color: var(--desccolor); font-size: .74rem; font-weight: 400; }
 
 /* 좁은 화면의 작업 기록은 머리글을 숨긴 카드 목록이라, 스크롤바 자리 위에 칠하던 머리글 띠와 트랙 여백을 걷는다 */
-@media (max-width: 760px) {
+@media (max-width: 640px) {
  .workspace .records { background: none; }
  .workspace .records::-webkit-scrollbar-track { margin-top: 0; }
  .recordTable tbody tr { scroll-margin-top: .5rem; }
