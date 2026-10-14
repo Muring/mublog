@@ -19,7 +19,7 @@ export default function PrivacyPage() {
     return (
         <PrivacyWrapper>
             <h1>개인정보 처리방침</h1>
-            <p className="updated">최종 수정: 2026년 9월 3일</p>
+            <p className="updated">최종 수정: 2026년 10월 14일</p>
 
             <p className="lead">
                 개인이 운영하는 기술 블로그입니다. 광고도, 외부 분석 도구도 붙이지 않았습니다.
@@ -57,8 +57,8 @@ export default function PrivacyPage() {
                 브라우저 정보(User-Agent)는 검색 엔진 로봇을 걸러내는 데 한 번 읽고 버립니다.
             </p>
 
-            <h2>4. 쿠키</h2>
-            <p>세 가지를 씁니다. 광고나 추적을 위한 쿠키는 없습니다.</p>
+            <h2>4. 쿠키와 브라우저 저장소</h2>
+            <p>쿠키는 세 가지를 씁니다. 광고나 추적을 위한 쿠키는 없습니다.</p>
             <div className="table-scroll">
                 <table>
                     <thead>
@@ -98,6 +98,44 @@ export default function PrivacyPage() {
                 마지막 하나는 로그인 기능 자체에 필요합니다. 그래서 따로 동의를 묻는 배너를
                 두지 않았습니다.
             </p>
+            <p>
+                쿠키와 별개로, 화면 설정을 기억하려고 브라우저 저장소에 아래 값을 둡니다.
+                이 값들은 브라우저 안에만 있고 서버로 보내지 않습니다.
+            </p>
+            <div className="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>하는 일</th>
+                            <th>남는 기간</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <code>theme</code>
+                            </td>
+                            <td>고른 화면 테마(라이트·다크·시스템)를 기억</td>
+                            <td>브라우저 데이터를 지울 때까지</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>recentPosts</code>
+                            </td>
+                            <td>사이드 메뉴의 &ldquo;최근 본 글&rdquo; (글 주소 최대 5개)</td>
+                            <td>브라우저 데이터를 지울 때까지</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <code>admin-list-url:…</code>
+                            </td>
+                            <td>관리 화면에서 탭마다 마지막으로 보던 목록 조건 (관리자만)</td>
+                            <td>브라우저 탭을 닫을 때까지</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <h2>5. 어디에 저장되나</h2>
             <p>
