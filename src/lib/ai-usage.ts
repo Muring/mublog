@@ -36,6 +36,13 @@ export function publicYear(year: UsageYear): PublicYear {
     return { year: year.year, observedUntil: year.devices.map(d => d.until).filter((v): v is string => !!v).sort().at(-1) ?? null, attention: year.quality.problems.length > 0, cacheObserved: (year.fieldObservations.cache_read ?? 0) > 0 && year.fieldObservations.cache_read === sumTotals(year.weeks.map(w => w.totals)).responses,
         weeks: year.weeks.map(w => ({ week: w.week, ended: w.ended, observed: w.observed, partial: w.partial, totals: w.totals, tools: ["Codex", "Claude"].map(tool => ({ tool, totals: sumTotals(w.groups.filter(g => g.tool === tool).map(g => g.totals)) })) })) };
 }
+/** 주 키(월요일)를 "10.12–10.18" 처럼 그 주의 기간으로 읽는다. 키 날짜만 두면 기록된 날짜로 오해한다 */
+export function weekRange(week: string): string {
+    const end = new Date(week + "T00:00:00Z");
+    end.setUTCDate(end.getUTCDate() + 6);
+    const md = (iso: string) => iso.slice(5, 10).replace("-", ".");
+    return `${md(week)}–${md(end.toISOString())}`;
+}
 export function visibleWeeks<T extends { week: string }>(weeks: T[], period: string, today = new Date()): T[] {
     if (period === "year") return weeks;
     const n = [4, 8, 12].includes(Number(period)) ? Number(period) : 8;

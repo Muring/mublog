@@ -4,7 +4,7 @@ import Dropdown from "@/components/ui/Dropdown";
 import Info from "./Info";
 import RollingNumber from "./RollingNumber";
 import ToolComparison from "./ToolComparison";
-import { sumTotals, visibleWeeks, type PublicYear, type PublicWeek } from "@/lib/ai-usage";
+import { sumTotals, visibleWeeks, weekRange, type PublicYear, type PublicWeek } from "@/lib/ai-usage";
 import styles from "./AiDashboard.module.css";
 
 import { AiScroll, AiSegments, number } from "./AiControls";
@@ -26,7 +26,7 @@ export function NarrowHead({ labels }: { labels: string[] }) {
 export function NarrowNumbers({ values }: { values: string[] }) {
     return <td data-number className={styles.narrowCol}><span className={styles.numStack}>{values.map((value, i) => <span key={i}>{value}</span>)}</span></td>;
 }
-const WEEK_COLUMNS = ["주 시작", "관측", "전체 토큰", "캐시 제외 입력", "캐시 읽기", "출력"];
+const WEEK_COLUMNS = ["주", "관측", "전체 토큰", "캐시 제외 입력", "캐시 읽기", "출력"];
 export function WeekTable({ weeks, compact = false }: { weeks: PublicWeek[]; compact?: boolean }) {
     const caption = "월요일 시작 · KST · 캐시는 입력에 포함";
     // 좁은 관리 화면은 관측을 주 아래로, 전체 토큰 뒤의 세 수치를 한 칸으로 모은다. 공개 표(compact 아님)는 그대로다
@@ -35,7 +35,7 @@ export function WeekTable({ weeks, compact = false }: { weeks: PublicWeek[]; com
     return <>{compact && <p className={`${styles.note} ${styles.tableNote}`}>{caption}</p>}<AiScroll className={`${styles.tableScroll} ${compact ? "" : styles.publicTable}`} tabIndex={0} aria-label="주별 사용량 표 스크롤"><table><caption className={compact ? styles.srOnly : undefined}>{caption}</caption><thead><tr>{WEEK_COLUMNS.map((h, i) => <th key={h} scope="col" className={wide(i)}>{h}</th>)}{compact && <NarrowHead labels={WEEK_COLUMNS.slice(3)} />}</tr></thead><tbody>{weeks.map(w => {
         const state = !w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : "관측됨";
         const values = [w.totals.total, w.totals.non_cache_read_input, w.totals.cache_read, w.totals.output].map(v => w.observed ? number(v) : "—");
-        return <tr key={w.week}><td data-center>{w.week}{compact && <span className={styles.cellSub}>{state}</span>}</td><td data-center className={wide(1)}>{state}</td>{values.map((v, i) => <td data-number key={i} className={wide(i + 2)}>{v}</td>)}{compact && <NarrowNumbers values={values.slice(1)} />}</tr>;
+        return <tr key={w.week}><td data-center>{weekRange(w.week)}{compact && <span className={styles.cellSub}>{state}</span>}</td><td data-center className={wide(1)}>{state}</td>{values.map((v, i) => <td data-number key={i} className={wide(i + 2)}>{v}</td>)}{compact && <NarrowNumbers values={values.slice(1)} />}</tr>;
     })}</tbody></table>{!weeks.length && <p className={styles.note}>선택 기간의 기록이 없습니다.</p>}</AiScroll></>;
 }
 export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf: string }) {

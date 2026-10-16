@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { niceCeil } from "@/lib/admin-chart";
-import { sumTotals, type PublicWeek } from "@/lib/ai-usage";
+import { sumTotals, weekRange, type PublicWeek } from "@/lib/ai-usage";
 import Info from "./Info";
 import ParagraphText from "./ParagraphText";
 import RollingNumber from "./RollingNumber";
@@ -46,7 +46,7 @@ export default function ToolComparison({ weeks, allWeeks = weeks }: { weeks: Pub
             <div className={styles.chartScale} aria-hidden="true"><span>0</span><span>{shortNumber(ceiling / 2)}</span><span>{shortNumber(ceiling)} 토큰</span></div>
             <ol className={styles.comparisonWeeks} aria-label={`주별 ${selected.label}`}>
                 {allRows.map(w => <li key={w.week} className={styles.comparisonRow} data-visible={visible.has(w.week)} aria-hidden={!visible.has(w.week)} inert={!visible.has(w.week)}><div className={styles.comparisonClip}><div className={styles.comparisonWeek}>
-                    <div className={styles.weekHeading}><time dateTime={w.week}>{w.week.slice(5).replace("-", ".")} 주</time><span className={styles.note}>{!w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : ""}</span></div>
+                    <div className={styles.weekHeading}><time dateTime={w.week}>{weekRange(w.week)}</time><span className={styles.note}>{!w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : ""}</span></div>
                     {w.observed ? <div className={styles.weekBars}>{tools.map((tool, index) => <div key={tool} className={styles.barRow} data-tool={tool} aria-label={`${w.week} ${tool}: ${number(w.values[index])} ${selected.label}`}>
                         <span className={styles.barLabel}>{tool}</span>
                         <span className={styles.barTrack} aria-hidden="true"><span className={styles.barFill} style={{ width: `${Math.min(100, w.values[index] / ceiling * 100)}%` }} /></span>
