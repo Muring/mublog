@@ -10,7 +10,7 @@ export default function Profile() {
             <Image src="/icons/mublog.svg" className="auto-dark" alt="hamburger icon" width={72} height={72} />
             <div className="text-container">
                 <h4>무링의 개발 블로그</h4>
-                <p>Frontend Developer</p>
+                <p>FDE를 향하는 개발자</p>
             </div>
         </ProfileWrapper>
     );
