@@ -27,15 +27,15 @@ export function NarrowNumbers({ values }: { values: string[] }) {
     return <td data-number className={styles.narrowCol}><span className={styles.numStack}>{values.map((value, i) => <span key={i}>{value}</span>)}</span></td>;
 }
 const WEEK_COLUMNS = ["주", "관측", "전체 토큰", "캐시 제외 입력", "캐시 읽기", "출력"];
-export function WeekTable({ weeks, compact = false }: { weeks: PublicWeek[]; compact?: boolean }) {
+export function WeekTable({ weeks, compact = false, capped = false }: { weeks: PublicWeek[]; compact?: boolean; capped?: boolean }) {
     const caption = "월요일 시작 · KST · 캐시는 입력에 포함";
-    // 좁은 관리 화면은 관측을 주 아래로, 전체 토큰 뒤의 세 수치를 한 칸으로 모은다. 공개 표(compact 아님)는 그대로다
-    const wide = (i: number) => compact && (i === 1 || i > 2) ? styles.wideCol : undefined;
+    // 좁을 때는 관측을 주 아래로, 전체 토큰 뒤의 세 수치를 한 칸으로 모은다(관리 화면은 640px, 공개 표는 상자 폭 기준)
+    const wide = (i: number) => i === 1 || i > 2 ? styles.wideCol : undefined;
     // 관리 화면(compact)은 머리글이 늘 상자 맨 위에 와야 스크롤바 자리의 머리글 띠와 맞는다. 설명은 표 위로 꺼내고 표 안에는 낭독용으로만 둔다
-    return <>{compact && <p className={`${styles.note} ${styles.tableNote}`}>{caption}</p>}<AiScroll className={`${styles.tableScroll} ${compact ? "" : styles.publicTable}`} tabIndex={0} aria-label="주별 사용량 표 스크롤"><table><caption className={compact ? styles.srOnly : undefined}>{caption}</caption><thead><tr>{WEEK_COLUMNS.map((h, i) => <th key={h} scope="col" className={wide(i)}>{h}</th>)}{compact && <NarrowHead labels={WEEK_COLUMNS.slice(3)} />}</tr></thead><tbody>{weeks.map(w => {
+    return <>{compact && <p className={`${styles.note} ${styles.tableNote}`}>{caption}</p>}<AiScroll className={`${styles.tableScroll} ${compact ? "" : styles.publicTable}`} data-capped={capped || undefined} tabIndex={0} aria-label="주별 사용량 표 스크롤"><table><caption className={compact ? styles.srOnly : undefined}>{caption}</caption><thead><tr>{WEEK_COLUMNS.map((h, i) => <th key={h} scope="col" className={wide(i)}>{h}</th>)}<NarrowHead labels={WEEK_COLUMNS.slice(3)} /></tr></thead><tbody>{weeks.map(w => {
         const state = !w.observed ? "기록 없음" : !w.ended ? "집계 중" : w.partial ? "부분 관측" : "관측됨";
         const values = [w.totals.total, w.totals.non_cache_read_input, w.totals.cache_read, w.totals.output].map(v => w.observed ? number(v) : "—");
-        return <tr key={w.week}><td data-center>{weekRange(w.week)}{compact && <span className={styles.cellSub}>{state}</span>}</td><td data-center className={wide(1)}>{state}</td>{values.map((v, i) => <td data-number key={i} className={wide(i + 2)}>{v}</td>)}{compact && <NarrowNumbers values={values.slice(1)} />}</tr>;
+        return <tr key={w.week}><td data-center>{weekRange(w.week)}<span className={styles.cellSub}>{state}</span></td><td data-center className={wide(1)}>{state}</td>{values.map((v, i) => <td data-number key={i} className={wide(i + 2)}>{v}</td>)}<NarrowNumbers values={values.slice(1)} /></tr>;
     })}</tbody></table>{!weeks.length && <p className={styles.note}>선택 기간의 기록이 없습니다.</p>}</AiScroll></>;
 }
 export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf: string }) {
@@ -52,7 +52,8 @@ export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf
             <UsageCards weeks={weeks} cacheObserved={selected?.cacheObserved ?? false} rolling />
             <ToolComparison weeks={weeks} allWeeks={selected?.weeks} />
             {/* 표는 최신 주가 위. 비교 차트는 시간 흐름대로 위에서 아래로 둔다 */}
-            <WeekTable weeks={[...weeks].reverse()} />
+            {/* 12주 분량까지는 표를 다 펼치고, 그보다 길 때만 높이를 잡아 안에서 스크롤한다 */}
+            <WeekTable weeks={[...weeks].reverse()} capped={weeks.length > 12} />
             <p className={`${styles.note} ${styles.titleRow}`}>자료 기준: {selected?.observedUntil ? formatKst(selected.observedUntil, "second") + " KST" : "미상"}<Info label="자료 기준 설명">요청 로그에서 관측한 수치이며 생산성·청구 금액·구독 잔여량을 뜻하지 않습니다. 기록이 없는 주는 사용량 0과 구분합니다.</Info></p>
         </>}
     </section>;
