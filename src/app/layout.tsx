@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { preload } from "react-dom";
 import "./globals.css";
 import "@/styles/prism-notion-theme.css";
 import Header from "@/components/layout/Header";
@@ -43,11 +44,22 @@ export const metadata: Metadata = {
     verification: { google: "kGbNBEYanSm9iwXFVrOXhA9qzO1cntycveob4pv2iJQ" },
 };
 
+/*
+ * 본문 글꼴은 CSS 를 읽은 뒤에야 필요하다는 걸 브라우저가 알아서, 대체 글꼴로 먼저 그려진 글이
+ * 도착 순간 한 번 밀린다. 거의 모든 화면이 쓰는 세 굵기만 HTML 머리에서 바로 받게 한다.
+ * Light·Heavy 는 소개·포트폴리오에서만 쓰여 미리 받지 않는다.
+ */
+const PRELOADED_FONTS = ["Regular", "Bold", "ExtraBold"];
+
 export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    for (const weight of PRELOADED_FONTS) {
+        preload(`/fonts/NanumSquareNeo-${weight}.woff2`, { as: "font", type: "font/woff2", crossOrigin: "" });
+    }
+
     return (
         // 본문이 한국어다. en 이면 한국어 질의에 대한 타겟팅이 어긋난다
         <html lang="ko" suppressHydrationWarning>

@@ -583,9 +583,9 @@ prisma/
 ├── schema.prisma         # Post / Comment / Profile / DailyStat / PostDailyView
 └── migrations/           # RLS·트리거 포함 마이그레이션
 
-scripts/                  # 일회성·운영 스크립트 (tsx 로 실행)
+scripts/                  # 일회성·운영 스크립트 (tsx 로 실행, 글꼴 서브셋만 uv 로 실행하는 Python)
 backup/posts/             # DB 내보내기 백업 (앱은 읽지 않음)
-assets/fonts/             # og 카드용 TTF (public/fonts 의 woff2 는 satori 가 못 읽는다)
+assets/fonts/             # og 카드용 TTF, 브라우저용 woff2 원본 (public/fonts 에는 줄인 woff2 를 둔다)
 public/                   # CDN 이 주는 정적 파일. 포트폴리오 스크린샷·글꼴·아이콘·기본 SVG (글 이미지는 Storage)
 
 src/
@@ -748,6 +748,7 @@ $ yarn dev
 | `yarn verify:audit-fixes` | 감사에서 고친 지점 회귀 검사 (DB·Storage 접속 없음) |
 | `yarn audit:render`     | 전체 포스트 렌더링 점검                         |
 | `yarn sweep:images`     | 참조 없는 이미지 정리 (기본 dry-run)            |
+| `yarn subset:fonts`     | `assets/fonts` 원본 woff2 를 한글 2,350자로 줄여 `public/fonts` 에 쓰기 (`uv` 필요) |
 | `yarn revalidate`       | 배포본 캐시 전부 지우기. DB 를 스크립트로 직접 고친 뒤 (`draft:post`·`migrate:posts` 는 스스로 부름) |
 
 > 💾 Supabase 무료 플랜에는 자동 백업이 없습니다.
