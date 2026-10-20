@@ -56,10 +56,9 @@
  .filterBar :global(.bar-status) :global(.status-filters) button { flex: 1 1 0; min-width: 0; padding-inline: 4px; }
 }
 
-/* Admin tables share the blog's list-table header: a tinted band with body-coloured text, so it never reads as a first row. */
-.workspace table th { background: var(--codefontbgcolor); color: var(--foreground); font-size: .75rem; font-weight: 800; letter-spacing: .03em; box-shadow: inset 0 1px 0 var(--bordercolor), inset 0 -2px 0 var(--bordercolor); border-bottom: 0; }
-/* Headers are centred like the blog list tables; number cells stay right-aligned. */
-.workspace table th { text-align: center; }
+/* Admin tables share the blog's list-table header: a tinted band with body-coloured, centred text, so it never reads as a first row. */
+.workspace table th { background: var(--codefontbgcolor); color: var(--foreground); font-size: .75rem; font-weight: 800; letter-spacing: .03em; box-shadow: inset 0 1px 0 var(--bordercolor), inset 0 -2px 0 var(--bordercolor); border-bottom: 0; text-align: center; }
+/* Number cells stay right-aligned. */
 .workspace table td[data-number] { text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Quality tab: one card per table, like the analytics panels. */
@@ -189,18 +188,15 @@
 .recordToggle span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.5; }
 .recordChevron { flex-shrink: 0; transition: transform 150ms; }
 .recordToggle:hover { color: var(--linkhovercolor); }
-.recordToggle:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 4px; border-radius: 3px; }
+.recordToggle:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 4px; border-radius: 3px; }
 .recordSummary { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: .1rem 0 0 1.4rem; color: var(--desccolor); font-size: .8rem; line-height: 1.65; }
-.recordSections { display: grid; gap: 1.5rem; overflow-wrap: anywhere; }
+.recordSections { display: grid; gap: 1rem; overflow-wrap: anywhere; }
 .recordSections h4 { margin: 0 0 .4rem; font-size: .85rem; }
 .recordSections p { margin: .25rem 0 0; font-size: .875rem; line-height: 1.8; }
-.recordChecks { display: grid; gap: .6rem; list-style: none; margin: 0; padding: 0; }
-.recordChecks > li { padding: .75rem 0; border-bottom: var(--border-width) solid var(--bordercolor); }
-.recordChecks > li > div { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; }
 .recordReason, .rawRecord { color: var(--desccolor); }
 .rawRecord { font-size: .8rem; line-height: 1.7; }
-.rawRecord dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .3rem .75rem; }
-.rawRecord dd { margin: 0; }
+.rawRecord dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .3rem .75rem; margin: .2rem 0 0; }
+.rawRecord dd { margin: 0; color: var(--foreground); overflow-wrap: anywhere; }
 @media (max-width: 640px) {
  .recordTable, .recordTable tbody { display: block; }
  .recordTable thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
@@ -257,16 +253,6 @@
 .workspace .statusScroll { padding-inline: 0; }
 .statusScroll .quality { scrollbar-gutter: auto; }
 
-/* KB 판단 한 건: 문서 경로는 길어도 줄바꿈되고, 사실은 이름·값 두 열로 읽는다 */
-.decisionDocument { overflow-wrap: anywhere; }
-.decisionFacts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .35rem .9rem; margin: .5rem 0 0; font-size: .85rem; line-height: 1.7; }
-.decisionFacts dt { color: var(--desccolor); }
-.decisionFacts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
-@media (max-width: 640px) {
- .decisionFacts { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
- .decisionFacts dd + dt { margin-top: .4rem; }
-}
-
 /* 작업 기록 표의 양 끝 칸 안쪽 여백을 사용량 표와 같은 1rem 으로 맞춘다. 스크롤바는 그 바깥 제 자리에 있다 */
 @media (min-width: 641px) {
  .recordTable th:first-child, .recordTable td:first-child { padding-left: 1rem; }
@@ -290,14 +276,11 @@
 }
 .recordSections details[open] > summary::before, .metricGuide[open] > summary::before { transform: rotate(45deg); }
 .recordSections details > summary:hover, .metricGuide > summary:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
-.recordSections details > summary:focus-visible, .metricGuide > summary:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
-/* 원본 기록은 상세의 맨 끝, 구분선 아래에 둔다. 펼친 내용은 보조 글자색 */
-.recordSections > .rawRecord { padding-top: .6rem; border-top: var(--border-width) solid var(--bordercolor); }
+/* 원본 기록은 상세의 맨 끝에 둔다 */
 .rawRecord[open] > summary { margin-bottom: .5rem; }
 @media (prefers-reduced-motion: reduce) {
  .recordSections details > summary, .recordSections details > summary::before, .metricGuide > summary, .metricGuide > summary::before { transition: none; }
 }
-.rawRecord dd { color: var(--foreground); overflow-wrap: anywhere; }
 
 /*
  * 작업 상세: 한 줄 요약 → 이름·값 줄(가는 구분선으로 나눔) → 맨 끝 원본·근거 하나.
@@ -311,7 +294,6 @@
 @starting-style { .detailBody { grid-template-rows: 0fr; opacity: 0; } }
 .recordDetail[data-closing] .detailBody { grid-template-rows: 0fr; opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .detailBody { transition: none; } }
-.recordSections { gap: 1rem; }
 .recordSections p.recordLead { margin: 0; font-size: .95rem; line-height: 1.75; color: var(--foreground); }
 .recordSections p.recordReason { margin: 0; font-size: .82rem; }
 .facts { display: grid; grid-template-columns: 7rem minmax(0, 1fr); margin: 0; font-size: .86rem; line-height: 1.7; border-top: var(--border-width) solid var(--bordercolor); }
@@ -358,8 +340,6 @@
 .eventHead { display: flex !important; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; }
 .eventHead > span { color: var(--desccolor); font-size: .74rem; }
 .handoff details { margin-top: .6rem; }
-.recordSections > .rawRecord { padding-top: 0; border-top: 0; }
-.rawRecord dl { margin: .2rem 0 0; }
 
 /* 포트폴리오와 같은 공용 링크 모양(styles/link.module.css). 버튼이라 기본 모양만 걷고 글자색 전환을 더한다 */
 .handoffLink { composes: animated from "../../styles/link.module.css"; display: inline; padding: 0 0 1px; border-top: 0; border-inline: 0; background: none; color: var(--foreground); font: inherit; font-size: .84rem; font-weight: 600; text-align: left; cursor: pointer; transition: color 150ms ease; }

@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { fadeSlide, scrim } from "@/styles/motion";
 import { truncate } from "@/styles/text";
 import { mobile } from "@/styles/breakpoints";
+import { headerControl } from "@/styles/button";
 
 export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
     background-color: var(--background);
@@ -117,10 +118,10 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
         border-radius: 0.5rem;
         width: 3rem;
         height: 3rem;
+        transition: background-color 0.1s ease-in-out;
 
         &:hover {
             background-color: var(--hovercolor);
-            transition: 0.1s ease-in-out;
         }
         /* 호버 면은 다크에서도 밝은 회색이라, 반전돼 흰색이 된 아이콘을 도로 어둡게 돌린다 */
         html.dark &:hover .auto-dark {
@@ -144,25 +145,14 @@ export const Overlay = styled.div`
 `;
 
 export const ButtonWrapper = styled.div`
+    /* 인라인 아이콘(닫기)이 currentColor 로 따라온다 */
     .menu-button {
-        background: none;
-        border: none;
-        cursor: pointer;
+        ${headerControl}
+        /* 블록 안에 홀로 서므로 inline-flex 의 글자 줄 여백이 생기지 않게 블록으로 둔다 */
         display: flex;
-        justify-content: center;
-        align-items: center;
         width: 3rem;
-        height: 3rem;
-        border-radius: 0.5rem;
-        /* 인라인 아이콘이 currentColor 로 따라온다 */
-        color: var(--foreground);
+        padding: 0;
 
-        &:hover {
-            background-color: var(--hovercolor);
-            /* --hovercolor 는 양 테마 모두 밝은 회색이라 글자색도 같이 뒤집어야 한다 */
-            color: var(--hoverfontcolor);
-            transition: 0.1s ease-in-out;
-        }
         html.dark &:hover .auto-dark {
             filter: invert(0) brightness(1) !important;
         }

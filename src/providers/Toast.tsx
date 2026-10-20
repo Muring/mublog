@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useMemo, useRef, useState } fro
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ToastViewport, ToastItem } from "@/components/ui/Toast.styled";
+import CloseIcon from "@/components/ui/CloseIcon";
 
 type ToastKind = "success" | "error" | "info";
 type ToastAction = { label: string; href: string };
@@ -111,7 +112,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
                             aria-label="알림 닫기"
                             onClick={() => dismiss(toast.id)}
                         >
-                            ✕
+                            <CloseIcon size={14} strokeWidth={2} />
                         </button>
                     </ToastItem>
                 ))}

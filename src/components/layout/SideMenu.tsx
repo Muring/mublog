@@ -3,7 +3,7 @@
 
 import { ButtonWrapper, Overlay } from "./Header.styled";
 import { MenuWrapper } from "./SideMenu.styled";
-import { strokeIcon } from "@/components/ui/icon";
+import CloseIcon from "@/components/ui/CloseIcon";
 import Image from "next/image";
 import Link from "next/link";
 import SideList from "./SideList";
@@ -34,9 +34,7 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
                 메뉴를 닫을 유일한 버튼이라 로딩에 기대지 않고 인라인으로 둔다.
                 currentColor 라서 invert 필터(auto-dark) 없이 테마를 따른다.
               */}
-              <svg {...strokeIcon(22)}>
-                <path d="M6 6l12 12M18 6L6 18" />
-              </svg>
+              <CloseIcon size={22} strokeWidth={2} />
             </button>
           </ButtonWrapper>
         </div>

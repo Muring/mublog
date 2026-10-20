@@ -7,7 +7,6 @@
 .dates label { min-width:0; display:grid; gap:5px; font-size:12px; color:var(--desccolor); }
 .dates input { width:100%; box-sizing:border-box; min-width:0; max-width:100%; padding:8px; border:var(--border-width) solid var(--bordercolor); border-radius:6px; background:var(--background); color:var(--foreground); font:inherit; }
 .dates input:hover { border-color:var(--foreground); }
-.dates input:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:2px; }
 .note { margin:8px 0 0; color:var(--desccolor); font-size:12px; line-height:1.7; overflow-wrap:anywhere; }
 .summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
 .value { display:block; font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; margin:0; overflow-wrap:anywhere; }
@@ -18,7 +17,7 @@
 .chart [data-single="true"] :global(.singleValue) { position:absolute; left:var(--marker-x, 50%); top:var(--y); transform:translate(-50%,calc(-100% - 12px)); font-size:12px; font-weight:700; white-space:nowrap; color:var(--foreground); }
 .chart .empty { min-height:calc(var(--plot-h) + 2.4rem); }
 .empty { display:grid; place-content:center; min-height:180px; color:var(--desccolor); font-size:14px; text-align:center; }
-.tableScroll { overflow-x:auto; margin-top:16px; }
+.tableScroll { overflow-x:auto; margin-top:16px; min-width:0; max-width:100%; }
 .table { width:100%; border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
 .table th, .table td { padding:12px 8px; border-bottom:var(--border-width) solid var(--bordercolor); text-align:right; }
 .table th { color:var(--desccolor); font-size:12px; white-space:nowrap; }
@@ -26,7 +25,6 @@
 .table td:first-child { min-width:140px; overflow-wrap:anywhere; }
 .table a { color:var(--foreground); text-decoration:none; }
 .table a:hover { color:var(--linkhovercolor); text-decoration:underline; }
-.table a:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:2px; }
 .status { display:block; margin-top:4px; font-size:11px; color:var(--desccolor); }
 .secondary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
 .tags { display:grid; gap:14px; margin:20px 0 0; padding:0; list-style:none; }
@@ -83,8 +81,6 @@
 .summaryAside strong { color:var(--foreground); }
 .comparison { display:flex; flex-wrap:wrap; gap:4px 20px; margin-top:12px; color:var(--desccolor); font-size:12px; line-height:1.7; min-width:0; overflow-wrap:anywhere; }
 .comparison > span:last-child { flex-basis:100%; }
-.tableScroll { min-width:0; max-width:100%; }
-.tableScroll:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:2px; }
 .toolbar > [role="group"] { min-width:0; max-width:100%; flex-wrap:wrap; }
 /* 모바일 기준선 — styles/breakpoints.ts 의 mobile 과 같은 값 */
 @media (max-width: 640px) {
@@ -130,7 +126,6 @@
 .helpHeading { display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
 .helpButton { display:inline-flex; align-items:center; gap:4px; padding:3px 5px; border:var(--border-width) solid transparent; border-radius:4px; background:transparent; color:var(--desccolor); font:inherit; font-size:12px; font-weight:400; line-height:1.5; white-space:nowrap; cursor:pointer; }
 .helpButton:hover, .helpButton:focus-visible { color:var(--foreground); }
-.helpButton:focus-visible { outline:2px solid var(--linkhovercolor); outline-offset:2px; }
 .helpBody { position:absolute; z-index:20; top:calc(100% + 8px); left:0; width:min(360px,100%); box-sizing:border-box; padding:12px 14px; border:var(--border-width) solid var(--bordercolor); border-radius:8px; background:var(--cardbackground); box-shadow:0 4px 16px var(--shadowcolor); font-size:12px; font-weight:400; line-height:1.7; color:var(--foreground); overflow-wrap:anywhere; }
 .helpBody p { margin:0; }
 .helpBody dl { display:grid; gap:10px; margin:0; }

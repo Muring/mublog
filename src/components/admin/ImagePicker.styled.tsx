@@ -1,10 +1,20 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { buttonSubtle } from "@/styles/button";
+import { css } from "@emotion/react";
+import { buttonPrimary, buttonSubtle } from "@/styles/button";
 import { surface } from "@/styles/surface";
 import { scrim, overlayPanel } from "@/styles/motion";
 import { mobile } from "@/styles/breakpoints";
+import { emptyNote } from "@/styles/text";
+import { textField } from "@/styles/field";
+
+/** 이미지 카드 격자. 이미지 관리 화면(AdminImages)과 고르기 모달이 같은 카드 폭을 쓴다 */
+export const imageGrid = css`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.75rem;
+`;
 
 export const PickerOverlay = styled.div`
   ${scrim()}
@@ -69,9 +79,7 @@ export const PickerBox = styled.div`
     box-sizing: border-box;
     height: 36px;
     padding: 0 0.65rem;
-    ${surface("0.5rem")}
-    color: var(--foreground);
-    font-family: inherit;
+    ${textField("0.5rem")}
     font-size: 0.85rem;
   }
 
@@ -93,16 +101,12 @@ export const PickerBox = styled.div`
    * 하이드레이션 전에 0 이라 납작하게 그려진다.
    */
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: 0.75rem;
+    ${imageGrid}
   }
 
   .empty {
+    ${emptyNote}
     padding: 3rem 0;
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--desccolor);
   }
 
   .picker-foot {
@@ -125,14 +129,7 @@ export const SourceTab = styled.button`
   white-space: nowrap;
 
   &.active {
-    background-color: var(--foreground);
-    color: var(--background);
-    border-color: var(--foreground);
-    &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--foreground) 92%, var(--background));
-      color: var(--background);
-      border-color: var(--foreground);
-    }
+    ${buttonPrimary}
   }
 `;
 

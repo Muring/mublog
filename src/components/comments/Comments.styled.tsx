@@ -1,9 +1,11 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { buttonQuiet } from "@/styles/button";
+import { buttonBase, buttonPrimary, buttonQuiet } from "@/styles/button";
 import { surface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
+import { emptyNote } from "@/styles/text";
+import { textField } from "@/styles/field";
 
 /*
  * 스레드 기하 구조.
@@ -76,9 +78,7 @@ export const CommentsWrapper = styled.section`
         align-items: center;
         justify-content: center;
         min-height: 6rem;
-        font-size: 0.85rem;
-        color: var(--desccolor);
-        text-align: center;
+        ${emptyNote}
     }
 `;
 
@@ -304,15 +304,9 @@ export const CommentFormWrapper = styled.form`
         min-height: 5.5rem;
         resize: vertical;
         padding: 0.8rem;
-        ${surface("0.75rem")}
-        color: var(--foreground);
-        font-family: inherit;
+        ${textField("0.75rem")}
         font-size: 0.9rem;
         line-height: 1.75;
-
-        &::placeholder {
-            color: var(--desccolor);
-        }
     }
 
     .form-footer {
@@ -341,11 +335,9 @@ export const CommentFormWrapper = styled.form`
         padding: 0.45rem 1rem;
         font-size: 0.8rem;
 
-        /* 댓글 등록은 전경/배경을 뒤집어 한 눈에 주 동작임을 드러낸다 */
+        /* 댓글 등록은 선택 색으로 채워 한 눈에 주 동작임을 드러낸다 */
         &.primary {
-            background-color: var(--foreground);
-            color: var(--background);
-            border-color: var(--foreground);
+            ${buttonPrimary}
         }
     }
 
@@ -376,16 +368,9 @@ export const SignInPrompt = styled.div`
     }
 
     a {
+        ${buttonBase}
+        ${buttonPrimary}
         padding: 0.45rem 1rem;
-        border: var(--border-width) solid var(--foreground);
-        border-radius: 0.5rem;
-        background-color: var(--foreground);
-        color: var(--background);
         font-size: 0.8rem;
-        font-weight: 700;
-
-        &:hover {
-            opacity: 0.85;
-        }
     }
 `;

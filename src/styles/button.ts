@@ -1,4 +1,5 @@
 import { css } from "@emotion/react";
+import { hoverSurface } from "@/styles/surface";
 
 /**
  * 버튼 공통 스타일.
@@ -112,11 +113,47 @@ export const buttonQuiet = css`
     }
 `;
 
-/** 주요 동작. 전경/배경을 뒤집어 한 화면에 하나만 둔다. */
+/**
+ * 헤더의 글자·아이콘 버튼(메뉴·검색·계정). 왼쪽 아이콘 링크(3rem 정사각형)와 높이·모서리·호버를 맞춘다.
+ *
+ * 세 곳이 같은 블록을 각자 들고 있었고, 전환을 :hover 안에만 둬서 들어갈 때만 부드럽고
+ * 나올 때는 뚝 끊겼다. 전환은 기본 상태에 둔다. 폭·안쪽 여백은 자리마다 달라 쓰는 쪽이 정한다.
+ */
+export const headerControl = css`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 3rem;
+    min-width: 3rem;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 0.5rem;
+    background: none;
+    color: var(--foreground);
+    font: inherit;
+    cursor: pointer;
+    transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
+
+    &:hover {
+        ${hoverSurface}
+    }
+`;
+
+/**
+ * 주요 동작. 선택 색(--activecolor)으로 채워 한 화면에 하나만 둔다.
+ * 고른 상태(탭·칩)도 같은 색을 쓴다 — --foreground 반전과 섞이면 다크에서 두 가지 흰색이 나란히 보인다.
+ * 호버는 면을 한 톤 누그러뜨린다. 여기서 정하지 않으면 깔린 기본 버튼의 호버(밝은 회색 면)가 이긴다.
+ */
 export const buttonPrimary = css`
     background-color: var(--activecolor);
     color: var(--activefontcolor);
     border-color: var(--activecolor);
+
+    &:hover:not(:disabled) {
+        background-color: color-mix(in srgb, var(--activecolor) 85%, var(--activefontcolor));
+        color: var(--activefontcolor);
+        border-color: var(--activecolor);
+    }
 `;
 
 /** 되돌릴 수 없는 동작. hover 에서 색을 잃지 않고 오히려 또렷해진다. */

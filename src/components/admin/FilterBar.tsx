@@ -6,6 +6,7 @@ import { Button } from "./Admin.styled";
 import { FilterBarRoot, FilterFormRoot, FilterPopover } from "./FilterBar.styled";
 import AdminSheet from "./AdminSheet";
 import { mobileQuery } from "@/styles/breakpoints";
+import CloseIcon from "@/components/ui/CloseIcon";
 
 /** multiple 이면 값은 lib/multi-value 로 이은 문자열이다. 같은 조건 안에서는 "또는" 으로 거른다 */
 export type FilterField = { key: string; label: string; search?: string; options: DropdownOption[]; multiple?: boolean };
@@ -82,7 +83,7 @@ export default function FilterBar({ status, sort, search, fields, values, dateRa
                         {/* 입력창이 초점을 잃으면 접히므로, 누르는 순간 초점을 옮기지 않고 직접 내려놓는다 */}
                         <button type="button" className="search-close" aria-label="검색 닫기" tabIndex={-1}
                             onPointerDown={(event) => event.preventDefault()} onClick={() => searchBox.current?.querySelector("input")?.blur()}>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+                            <CloseIcon />
                         </button>
                     </div>}
                     <div className="bar-anchor" ref={anchor}>
@@ -126,7 +127,7 @@ function Popover({ id, onClose, onDismiss, trigger, children }: { id: string; on
         }} onBlur={(event) => {
             if (event.relatedTarget && event.relatedTarget !== trigger.current && !event.currentTarget.contains(event.relatedTarget as Node)) onDismiss();
         }}>
-            <div className="filter-heading"><h2>필터</h2><Button type="button" onClick={onClose} aria-label="필터 닫기" className="filter-close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></Button></div>
+            <div className="filter-heading"><h2>필터</h2><Button type="button" onClick={onClose} aria-label="필터 닫기" className="filter-close"><CloseIcon /></Button></div>
             {children}
         </FilterPopover>
     );

@@ -31,3 +31,10 @@ export const clampLines = (lines: number) => css`
     word-break: keep-all;
     overflow-wrap: break-word;
 `;
+
+/** 목록이 비었거나 아직 불러오는 중일 때 그 자리에 놓는 안내 한 줄. 여백·높이는 자리마다 달라 쓰는 쪽이 정한다. */
+export const emptyNote = css`
+    color: var(--desccolor);
+    font-size: 0.85rem;
+    text-align: center;
+`;

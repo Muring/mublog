@@ -1,6 +1,6 @@
 .page { max-width: 1000px; margin: auto; padding: 7rem 1.25rem 4rem; }
 .hero { margin-bottom: 2.5rem; }
-.hero h1 { font-size: clamp(2rem, 5vw, 3.6rem); margin: .5rem 0 1rem; letter-spacing: -.05em; }
+.hero h1 { font-size: clamp(2rem, 5vw, 3.6rem); margin: .5rem 0 1rem; letter-spacing: -.05em; line-height: 1.28; text-wrap: balance; word-break: keep-all; }
 .eyebrow, .note { color: var(--desccolor); font-size: .85rem; line-height: 1.7; }
 .prose { line-height: 1.85; }
 .prose, .note, .warning, .emptyState { word-break: keep-all; overflow-wrap: anywhere; }
@@ -28,10 +28,9 @@
 .tableScroll th:first-child, .tableScroll td:first-child { width: 1%; padding-left: 1rem; }
 .tableScroll th:last-child, .tableScroll td:last-child { padding-right: 1rem; }
 /* 공개 표는 필터로 행 수가 바뀌지 않아 스크롤바 자리를 미리 비울 이유가 없다. 비워 두면 스크롤이 없을 때 오른쪽 10px 이 비고 행 선이 끊긴다 */
-.publicTable { scrollbar-gutter: auto; }
+.publicTable { scrollbar-gutter: auto; container-type: inline-size; }
 .publicTable[data-capped] { max-height: 24rem; }
 /* 공개 표는 페이지 폭이 아니라 상자 폭으로 판단한다. 여섯 칸이 다 들어가지 않으면 관리 화면처럼 수치를 한 칸에 쌓아 가로 스크롤을 없앤다 */
-.publicTable { container-type: inline-size; }
 @container (max-width: 700px) {
  .publicTable .wideCol { display: none; }
  .publicTable .narrowCol { display: table-cell; }
@@ -40,24 +39,14 @@
  .publicTable th .numStack { font-size: .68rem; line-height: 1.3; }
  .publicTable :is(th, td) { padding-inline: .75rem; }
 }
-.timeline { list-style: none; padding: 0; display: grid; gap: 1rem; }
-.timeline h3 { margin: .5rem 0; }
 /* The shared post slider is centred at 900px with arrow gutters; here it spans the section and drops the gutters unless it has arrows. */
 .section .relatedSlider { max-width: none; margin: 0; padding-bottom: .5rem; }
 .section .relatedSlider:not([data-looping="true"]) { padding-inline: 0; }
-.link { color: var(--linkcolor); text-decoration: underline; text-underline-offset: 4px; }
-.link:hover { color: var(--linkhovercolor); }
 .warning { color: var(--warncolor); background: var(--warnbg); padding: .75rem; border-radius: 8px; }
 .workspace { flex: 1; display: flex; flex-direction: column; gap: .75rem; min-height: 0; min-width: 0; }
 .workspace .grid { margin: 0; }
 .workspace .tableScroll, .contentScroll { flex: 1; }
 .contentScroll { overflow: auto; min-height: 0; padding: .25rem; }
-.form { display: grid; gap: .75rem; max-width: 760px; }
-.form label { display: grid; gap: .4rem; font-size: .85rem; }
-.form input, .form textarea { background: var(--cardbackground); color: var(--foreground); border: var(--border-width) solid var(--bordercolor); border-radius: 8px; padding: .65rem; font: inherit; width: 100%; box-sizing: border-box; }
-.form textarea { min-height: 140px; resize: vertical; }
-.form input:focus-visible, .form textarea:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 2px; }
-.form input:hover, .form textarea:hover { border-color: var(--foreground); }
 .status { margin: 0; font-size: .85rem; }
 @media (max-width: 640px) {
  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
@@ -70,11 +59,9 @@
 
 .contentScroll summary { cursor: pointer; padding: .6rem; border-radius: 8px; }
 .contentScroll summary:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
-.contentScroll summary:focus-visible { outline: 2px solid var(--linkcolor); }
 
 /* Public narrative spacing is separate from the compact admin workspace. */
 .page .hero { margin-bottom: 3rem; max-width: 850px; }
-.hero h1 { line-height: 1.28; text-wrap: balance; word-break: keep-all; }
 .highlight { color: var(--linkhovercolor); }
 .page .hero .prose { max-width: none; color: var(--desccolor); }
 .page .section { display: flex; flex-direction: column; gap: 1.5rem; margin: 3.5rem 0 0; }
@@ -126,7 +113,7 @@
 .chartGuide > .note { margin: 0; }
 .chartToolbar { flex-shrink: 0; }
 .chartToolbar button { display: inline-grid; place-items: center; }
-.lineChart { margin: 0; --plot-h: 220px; min-width: 0; }
+.lineChart { margin: 0; --plot-h: 220px; min-width: 0; --chart-ease: cubic-bezier(.33, 1, .68, 1); }
 .lineChart [data-tool] { --series: var(--tool-color); }
 .lineChart g[data-bridge] :global(.line) { stroke-dasharray: 4 4; }
 .gapLegend { display: flex; align-items: center; gap: .5rem; margin: 0; font-size: .75rem; color: var(--desccolor); }
@@ -135,7 +122,6 @@
 .lineChart :global(.dot)[data-show="true"] { opacity: 1; }
 .lineChart :global(.gridline) span { white-space: nowrap; }
 /* 선(AnimatedChartPath)은 360ms 동안 1-(1-t)^3 으로 보간한다. 점·칸도 같은 곡선이어야 점이 선보다 앞서지 않는다 */
-.lineChart { --chart-ease: cubic-bezier(.33, 1, .68, 1); }
 .lineChart :global(.series) > div { transition: left 360ms var(--chart-ease), width 360ms var(--chart-ease), transform 360ms var(--chart-ease); }
 .lineChart :global(.dot) { transition: top 360ms var(--chart-ease); }
 /* 막대: 구간 칸 가운데에 두 도구를 나란히 세운다. 끝만 둥글게, 막대 사이는 2px 띄운다 */
@@ -151,9 +137,8 @@
 @media (prefers-reduced-motion: reduce) {
  .lineChart :global(.series) > div, .lineChart :global(.dot), .lineAxis span, .barGroup > span { transition: none; }
 }
-.tableScroll:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 3px; }
+.tableScroll:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 3px; }
 @media (max-width: 640px) {
- .page { padding-left: 1.25rem; padding-right: 1.25rem; }
  .page .section { margin-top: 2.75rem; gap: 1.25rem; }
  .page .card { padding: 1rem; }
  .process { gap: .75rem; }
@@ -166,16 +151,15 @@
 /* Secondary explanations: an (i) button whose tooltip opens beside it, or below its title row or card when the viewport is narrow. */
 .card, .titleRow { position: relative; }
 .titleRow { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
-.sectionHeading > .titleRow { align-self: stretch; }
 /* 제목이 두 줄로 넘어가도 ⓘ 가 혼자 한 줄을 차지하지 않고 마지막 글자 뒤에 붙는다 */
-.sectionHeading > .titleRow { display: block; }
+.sectionHeading > .titleRow { align-self: stretch; display: block; }
 .sectionHeading > .titleRow > :is(h2, h3) { display: inline; }
 .sectionHeading > .titleRow > .info { vertical-align: middle; margin-left: .35rem; }
 .info { display: inline-flex; }
 .infoButton { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--desccolor); cursor: help; transition: background-color 150ms, color 150ms; }
 .infoButton svg { width: 1rem; height: 1rem; }
 .infoButton:hover { background: var(--hovercolor); color: var(--hoverfontcolor); }
-.infoButton:focus-visible { outline: 2px solid var(--linkcolor); outline-offset: 1px; }
+.infoButton:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 1px; }
 .infoTip { position: absolute; left: 0; top: calc(100% + .4rem); z-index: 5; width: max-content; max-width: min(24rem, 100%); box-sizing: border-box; padding: .7rem .85rem; border: var(--border-width) solid var(--bordercolor); border-radius: 10px; background: var(--cardbackground); box-shadow: 0 6px 20px var(--shadowcolor); color: var(--foreground); font-size: .8rem; font-weight: normal; line-height: 1.65; letter-spacing: normal; text-align: left; white-space: normal; word-break: keep-all; overflow-wrap: anywhere; opacity: 0; visibility: hidden; transform: translateY(-2px); transition: opacity 150ms, transform 150ms, visibility 150ms; pointer-events: none; }
 .infoTip[data-side] { transform: translateX(-2px); }
 .info:hover .infoTip, .info:focus-within .infoTip { opacity: 1; visibility: visible; transform: none; }

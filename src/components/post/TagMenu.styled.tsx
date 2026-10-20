@@ -21,11 +21,11 @@ export const TagWrapper = styled.div`
     font-size: 0.9rem;
     font-weight: 600;
     margin: 0.2rem 0;
+    transition: background-color 0.1s ease-in-out, color 0.1s ease-in-out;
   }
 
   a:hover {
     ${hoverSurface}
-    transition: 0.1s ease-in-out;
   }
 
   .active {
