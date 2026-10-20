@@ -60,3 +60,6 @@ yarn-error.log*
 
 # 썸네일 PNG 원본은 커밋하지 않는다(업로드는 Supabase Storage, 용량만 늘어남). 이미 추적 중인 파일은 유지
 output/imagegen/**/*.png
+
+# yarn draft:post 에 넘기는 등록용 임시 원고. 등록 뒤 원본은 DB, 보관은 backup/posts 다
+output/drafts/
