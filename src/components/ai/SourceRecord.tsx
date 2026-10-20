@@ -3,7 +3,6 @@ import type { Activity } from "@/lib/ai-activity";
 import type { AiTask } from "@/lib/ai-task-records";
 import { AiBadge, number } from "./AiControls";
 import { CHECK_RESULTS, TagList } from "./RecordFacts";
-import manage from "./AiManagement.module.css";
 import { formatKst } from "@/lib/date";
 
 type Evidence = Activity["evidence"][number];
@@ -41,20 +40,20 @@ export default function SourceRecord({ task }: { task: AiTask }) {
     const workEvidence = a?.evidence.filter(e => !dateOnly(e)) ?? [];
     const day = a ? a.timing.occurredOn ?? kst(a.timing.occurredAt) : kst(p?.occurredAt);
     const rework = task.rework === null ? "기록 없음" : task.rework === false || task.rework === 0 ? "없음" : task.rework === true ? "있음" : `${task.rework}회`;
-    return <details className={manage.rawRecord}><summary>원본 기록과 근거</summary>
+    return <details className="aim-rawRecord"><summary>원본 기록과 근거</summary>
         <dl>
             <dt>작업일 · KST</dt><dd>{day ?? "확인되지 않음"}
                 {a && a.timing.precision !== "unknown" && <small title={timingNote ?? undefined}>{BASIS[a.timing.basis]}</small>}
             </dd>
-            <dt>내부 ID</dt><dd><code className={manage.factCode}>{task.id}</code></dd>
+            <dt>내부 ID</dt><dd><code className="aim-factCode">{task.id}</code></dd>
             <dt>연결 토큰</dt><dd>{task.totals.responses ? number(task.totals.total) : "연결 없음"}</dd>
             <dt>재작업</dt><dd>{rework}</dd>
             {task.verification.length > 0 && <><dt>원본 검사</dt><dd><TagList items={task.verification.map(v => ({ badge: <AiBadge data-tone={CHECK_RESULTS[v.result][1]}>{CHECK_RESULTS[v.result][0]}</AiBadge>, body: v.name }))} /></dd></>}
-            {workEvidence.length > 0 && <><dt>작업 근거</dt><dd><ul className={manage.factList}>{workEvidence.map(e => {
+            {workEvidence.length > 0 && <><dt>작업 근거</dt><dd><ul className="aim-factList">{workEvidence.map(e => {
                 const used = [...(uses.get(e.id) ?? [])];
-                return <li key={e.id}>{e.note ?? KINDS[e.kind]}<small>{used.length ? `${used.join("·")}의 근거` : "연결된 항목 없음"} · {KINDS[e.kind]} · <code className={manage.factCode}>{e.reference}</code></small></li>;
+                return <li key={e.id}>{e.note ?? KINDS[e.kind]}<small>{used.length ? `${used.join("·")}의 근거` : "연결된 항목 없음"} · {KINDS[e.kind]} · <code className="aim-factCode">{e.reference}</code></small></li>;
             })}</ul></dd></>}
-            {!!p?.evidence.length && <><dt>설명 출처</dt><dd><ul className={manage.factList}>{[...new Set(p.evidence)].map(e => <li key={e}>{e}</li>)}</ul></dd></>}
+            {!!p?.evidence.length && <><dt>설명 출처</dt><dd><ul className="aim-factList">{[...new Set(p.evidence)].map(e => <li key={e}>{e}</li>)}</ul></dd></>}
         </dl>
     </details>;
 }

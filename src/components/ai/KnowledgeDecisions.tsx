@@ -3,7 +3,6 @@ import type { Activity, KnowledgeDecision } from "@/lib/ai-activity";
 import { reviewHistory, type KnowledgeReview, type ReviewRow } from "@/lib/ai-knowledge-review";
 import { AiBadge, type Tone } from "./AiControls";
 import { Fact, TagList } from "./RecordFacts";
-import manage from "./AiManagement.module.css";
 import { formatKst } from "@/lib/date";
 
 const DECISIONS: Record<KnowledgeDecision["decision"], [string, Tone]> = { applied: ["적용", "ok"], reference_only: ["참고만", "neutral"], not_applicable: ["해당 없음", "neutral"], deferred: ["보류", "warn"], unknown: ["판단 미상", "neutral"] };
@@ -31,12 +30,12 @@ const SHOWN = 3;
 function Attempt({ review, sameSource }: { review: KnowledgeReview; sameSource: boolean }) {
     const [label, tone] = STATUS[review.status];
     return <li>
-        <span className={manage.factTags}><AiBadge data-tone={tone}>{label}</AiBadge><AiBadge data-tone={sameSource ? "neutral" : "warn"}>{sameSource ? "지금 판단과 같은 원본" : "이전 원본의 대조"}</AiBadge></span>
+        <span className="aim-factTags"><AiBadge data-tone={tone}>{label}</AiBadge><AiBadge data-tone={sameSource ? "neutral" : "warn"}>{sameSource ? "지금 판단과 같은 원본" : "이전 원본의 대조"}</AiBadge></span>
         <small>{formatKst(review.reviewedAt)} KST 당시 관측{review.result?.recordingRequested && " · 적용 이력 기록 요청 실행"}</small>
         {review.result ? review.result.rows.length === 0 ? <small>대조할 판단이 없었습니다.</small>
-            : <ul className={manage.checkList}>{review.result.rows.map((row, i) => {
+            : <ul className="aim-checkList">{review.result.rows.map((row, i) => {
                 const [name, rowTone, meaning] = REVIEW[row.state];
-                return <li key={i}><AiBadge data-tone={rowTone}>{name}</AiBadge><span>{row.document ? <code className={manage.factCode}>{row.document}</code> : "작업 전체"}<small>{meaning}{row.detail && ` · ${row.detail}`}</small></span></li>;
+                return <li key={i}><AiBadge data-tone={rowTone}>{name}</AiBadge><span>{row.document ? <code className="aim-factCode">{row.document}</code> : "작업 전체"}<small>{meaning}{row.detail && ` · ${row.detail}`}</small></span></li>;
             })}</ul>
             : <small>{review.error} · 이력 일치 여부는 미상입니다.</small>}
     </li>;
@@ -55,23 +54,23 @@ export default function KnowledgeDecisions({ activity: a, reviews, project, task
     if (decisions === undefined && !undecided.length && !history.length) return null;
     const hasApplied = decisions?.some(d => d.decision === "applied");
     return <Fact label="KB 판단">
-        {decisions == null ? (decisions === null || !undecided.length) && <span className={manage.factEmpty}>{decisions === null ? "판단 기록 미상" : "판단 기록 미수집"}</span>
-            : !decisions.length ? <span className={manage.factEmpty}>확인한 판단 대상 없음</span>
+        {decisions == null ? (decisions === null || !undecided.length) && <span className="aim-factEmpty">{decisions === null ? "판단 기록 미상" : "판단 기록 미수집"}</span>
+            : !decisions.length ? <span className="aim-factEmpty">확인한 판단 대상 없음</span>
                 : <TagList items={decisions.map(d => {
                     const [label, tone] = DECISIONS[d.decision];
                     return { badge: <AiBadge data-tone={tone}>{label}</AiBadge>, body: <>
-                        <code className={manage.factCode}>{d.document}</code>
+                        <code className="aim-factCode">{d.document}</code>
                         <small>{d.selection === "search" ? <span title={d.searchRefs.join(", ")}>KB 검색 {d.searchRefs.length}건에서 선택</span> : "직접 읽음"} · {d.reason}</small>
                         {d.plannedUse && <small>{d.decision === "applied" ? "적용한 곳" : "쓰려던 곳"} · {d.plannedUse}</small>}
                         <small>{d.verification ? <>검증 · {CHECKS[d.verification.result][0]} · {d.verification.method}{d.verification.note && ` · ${d.verification.note}`}</> : "검증 기록 없음"}</small>
                     </> };
                 })} />}
-        {undecided.length > 0 && <small className={decisions === undefined ? undefined : manage.factSub}>판단 기록 없이 적용으로만 남은 문서 · {undecided.map(k => k.document).join(", ")}</small>}
-        {history.length === 0 ? hasApplied && <small className={manage.factSub}>KB 적용 이력 대조 결과가 아직 없습니다(knowledge-review 실행 전).</small>
-            : <div className={manage.reviewHistory}>
-                <small className={manage.reviewTitle}>KB 적용 이력 대조 {history.length}회 · 최신 순 · 각 결과는 그 시각의 관측입니다</small>
-                <ul className={manage.reviewList}>{history.slice(0, SHOWN).map(({ review, sameSource }) => <Attempt key={review.id} review={review} sameSource={sameSource} />)}</ul>
-                {history.length > SHOWN && <details><summary>이전 시도 {history.length - SHOWN}회</summary><ul className={manage.reviewList}>{history.slice(SHOWN).map(({ review, sameSource }) => <Attempt key={review.id} review={review} sameSource={sameSource} />)}</ul></details>}
+        {undecided.length > 0 && <small className={decisions === undefined ? undefined : "aim-factSub"}>판단 기록 없이 적용으로만 남은 문서 · {undecided.map(k => k.document).join(", ")}</small>}
+        {history.length === 0 ? hasApplied && <small className="aim-factSub">KB 적용 이력 대조 결과가 아직 없습니다(knowledge-review 실행 전).</small>
+            : <div className="aim-reviewHistory">
+                <small className="aim-reviewTitle">KB 적용 이력 대조 {history.length}회 · 최신 순 · 각 결과는 그 시각의 관측입니다</small>
+                <ul className="aim-reviewList">{history.slice(0, SHOWN).map(({ review, sameSource }) => <Attempt key={review.id} review={review} sameSource={sameSource} />)}</ul>
+                {history.length > SHOWN && <details><summary>이전 시도 {history.length - SHOWN}회</summary><ul className="aim-reviewList">{history.slice(SHOWN).map(({ review, sameSource }) => <Attempt key={review.id} review={review} sameSource={sameSource} />)}</ul></details>}
             </div>}
     </Fact>;
 }

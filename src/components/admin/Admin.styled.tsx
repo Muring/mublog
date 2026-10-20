@@ -397,3 +397,45 @@ export const ResultBar = styled.div`
   .cleanup-note { display: block; font-size: 12px; margin-top: 2px; }
   > button { margin-left: auto; }
 `;
+
+/**
+ * 쪽 이동(댓글 관리와 그 로딩 골격). 번호는 폭을 맞춰 한 자리·두 자리가 들쭉날쭉하지 않게 둔다.
+ * 호버는 테두리 자리에 링을 그린다(buttonQuiet 와 같은 표현). 현재 쪽은 선택 색으로 채우고 호버를 두지 않는다 — 누를 수 없다.
+ */
+export const Pagination = styled.nav`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 24px;
+
+  a, span {
+    min-width: 2.5em;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: var(--border-width) solid var(--bordercolor);
+    border-radius: 8px;
+    background: var(--background);
+    color: var(--foreground);
+    text-decoration: none;
+    text-align: center;
+    font: inherit;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  a {
+    outline: 1px solid transparent;
+    outline-offset: calc(-1 * var(--border-width));
+    transition: outline-color 150ms ease, border-color 150ms ease, background-color .15s, color .15s;
+  }
+  a:hover { border-color: transparent; outline-color: var(--foreground); background: var(--control-hover-bg); color: var(--foreground); }
+  a:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+  [aria-disabled="true"] { color: var(--desccolor); }
+  [aria-current="page"] { background: var(--activecolor); border-color: var(--activecolor); color: var(--activefontcolor); font-weight: 800; }
+  .gap { border-color: transparent; background: none; color: var(--desccolor); min-width: auto; padding: 8px 2px; }
+
+  ${mobile} {
+    a, span:not(.gap) { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+  }
+`;

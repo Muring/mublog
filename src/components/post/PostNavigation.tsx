@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import TableOfContents, { type NavigationItem } from "@/components/navigation/TableOfContents";
-import styles from "./PostNavigation.module.css";
+import { PostNavigationDock } from "./PostNavigation.styled";
 
 export default function PostNavigation({ html }: { html: string }) {
     const [items, setItems] = useState<NavigationItem[]>([]);
@@ -41,8 +41,8 @@ export default function PostNavigation({ html }: { html: string }) {
     if (!items.length) return null;
 
     return (
-        <div className={styles.postNavigation}>
+        <PostNavigationDock>
             <TableOfContents items={items} topId="post-top" label="본문 목차" />
-        </div>
+        </PostNavigationDock>
     );
 }

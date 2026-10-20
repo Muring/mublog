@@ -5,7 +5,6 @@ import { describedTitle, taskDate, taskTitle } from "@/lib/ai-task-records";
 import { AiBadge, AiRecordTable, type Tone } from "./AiControls";
 import { AdminListScroll } from "@/components/admin/Admin.styled";
 import { coveredTop, scrollsInside } from "@/lib/list-scroll";
-import manage from "./AiManagement.module.css";
 
 import { mergeHandoffs, type HandoffView } from "@/lib/ai-handoffs";
 import HandoffTimeline from "./HandoffTimeline";
@@ -114,24 +113,24 @@ function Record({ task, handoffs, allTasks, onTask, initiallyOpen = false, focus
     const uniqueId = useId();
     const id = `task-${uniqueId}`;
     return <><tr ref={row} data-open={open || undefined} data-flash={flash || undefined} onClick={() => { if (!window.getSelection()?.toString()) toggle(); }}>
-        <td data-label="작업"><button className={manage.recordToggle} type="button" aria-expanded={open} aria-controls={open ? id : undefined} onClick={e => { e.stopPropagation(); toggle(); }}><svg className={manage.recordChevron} aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ transform: open ? "rotate(90deg)" : undefined }}><path d="m9 6 6 6-6 6" /></svg><span ref={titleRef} title={describedTitle(task) ? taskTitle(task) : `${taskTitle(task)} · ${task.id}`}>{taskTitle(task)}</span></button>{rowSummary && <p className={manage.recordSummary} aria-hidden={open || undefined} title={rowSummary}>{rowSummary}</p>}</td>
-        <td data-label="프로젝트"><span className={manage.recordProject} title={task.project}>{task.project === "unmapped" ? "미분류" : task.project}</span></td>
-        <td data-label="확인한 결과" data-center><AiBadge data-tone={result[1]}>{result[0]}</AiBadge>{failures > 0 && unverified > 0 && <span className={manage.dateBasis}>미확인 {unverified}건</span>}</td>
-        <td data-label="작업일" data-center>{date ? <>{date.day}{date.basis === "name" && <span className={manage.dateBasis}>기록명 기준</span>}</> : "날짜 미상"}</td>
+        <td data-label="작업"><button className="aim-recordToggle" type="button" aria-expanded={open} aria-controls={open ? id : undefined} onClick={e => { e.stopPropagation(); toggle(); }}><svg className="aim-recordChevron" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" style={{ transform: open ? "rotate(90deg)" : undefined }}><path d="m9 6 6 6-6 6" /></svg><span ref={titleRef} title={describedTitle(task) ? taskTitle(task) : `${taskTitle(task)} · ${task.id}`}>{taskTitle(task)}</span></button>{rowSummary && <p className="aim-recordSummary" aria-hidden={open || undefined} title={rowSummary}>{rowSummary}</p>}</td>
+        <td data-label="프로젝트"><span className="aim-recordProject" title={task.project}>{task.project === "unmapped" ? "미분류" : task.project}</span></td>
+        <td data-label="확인한 결과" data-center><AiBadge data-tone={result[1]}>{result[0]}</AiBadge>{failures > 0 && unverified > 0 && <span className="aim-dateBasis">미확인 {unverified}건</span>}</td>
+        <td data-label="작업일" data-center>{date ? <>{date.day}{date.basis === "name" && <span className="aim-dateBasis">기록명 기준</span>}</> : "날짜 미상"}</td>
         <td data-label="상태" data-center><AiBadge data-tone={tone}>{label}</AiBadge></td>
-    </tr>{shown && <tr className={manage.recordDetail} data-closing={!open || undefined}><td colSpan={5} id={id}>
+    </tr>{shown && <tr className="aim-recordDetail" data-closing={!open || undefined}><td colSpan={5} id={id}>
         {/* 높이 0 에서 내용 높이로 펼쳐지고, 닫을 때는 거꾸로 접힌다(styles: .detailBody) */}
-        <div className={manage.detailBody}><div><div className={manage.recordSections}>
+        <div className="aim-detailBody"><div><div className="aim-recordSections">
             {/* 맨 위 한 줄로 무엇을 했는지, 그 아래 이름·값 줄로 세부. 근거와 원본은 맨 끝 한 곳에 접어 둔다 */}
-            {lead && <p className={bare ? manage.recordReason : manage.recordLead}>{lead}{leadFromOutcome && firstOutcome?.artifact && <small><code className={manage.factCode}>{firstOutcome.artifact}</code></small>}</p>}
-            {task.conflict && <p className={manage.recordReason}>같은 작업의 기록이 서로 달라 완료 상태를 확정할 수 없습니다.</p>}
-            <dl className={manage.facts}>
+            {lead && <p className={bare ? "aim-recordReason" : "aim-recordLead"}>{lead}{leadFromOutcome && firstOutcome?.artifact && <small><code className="aim-factCode">{firstOutcome.artifact}</code></small>}</p>}
+            {task.conflict && <p className="aim-recordReason">같은 작업의 기록이 서로 달라 완료 상태를 확정할 수 없습니다.</p>}
+            <dl className="aim-facts">
                 {task.activity && <ActivityDetails activity={task.activity} showPurpose={Boolean(purpose) && purpose !== lead && purpose !== taskTitle(task)} skipFirstOutcome={leadFromOutcome} reviews={task.knowledgeReviews} project={task.project} taskId={task.id} />}
                 {!task.activity && !!task.knowledgeReviews?.length && <KnowledgeDecisions activity={undefined} reviews={task.knowledgeReviews} project={task.project} taskId={task.id} />}
                 {bare && <Fact label="검증"><Checks checks={task.verification} /></Fact>}
                 {p && !task.activity?.verification && <Fact label="검증"><Checks checks={p.checks.map(c => ({ name: c.title, result: c.result, detail: [c.method, c.result !== "pass" ? `${c.reason || "이유 기록 없음"}${c.result === "fail" ? " · 현재 해결 여부는 이 기록만으로 확정하지 않습니다." : ""}` : null] }))} /></Fact>}
                 {p && task.activity?.followUps == null && <Fact label="남은 일"><TagList items={p.followUps.map(f => ({ badge: <AiBadge data-tone="neutral">{f.status === "delegated" ? "다른 세션에 전달" : f.status === "pending" ? "대기" : "진행 여부 미상"}</AiBadge>, body: <>{f.title}{f.note && <small>{f.note}</small>}</> }))} empty="기록된 남은 일 없음" /></Fact>}
-                {!!p?.knowledge.length && task.activity?.knowledge == null && <Fact label="KB 근거"><TagList items={p.knowledge.map(k => ({ badge: <AiBadge data-tone="neutral">{k.usage === "applied" ? "적용 기록" : "참고 문서"}</AiBadge>, body: <><code className={manage.factCode}>{k.document}</code>{k.note && <small>{k.note}</small>}</> }))} /></Fact>}
+                {!!p?.knowledge.length && task.activity?.knowledge == null && <Fact label="KB 근거"><TagList items={p.knowledge.map(k => ({ badge: <AiBadge data-tone="neutral">{k.usage === "applied" ? "적용 기록" : "참고 문서"}</AiBadge>, body: <><code className="aim-factCode">{k.document}</code>{k.note && <small>{k.note}</small>}</> }))} /></Fact>}
                 <HandoffTimeline task={task} handoffs={handoffs} allTasks={allTasks} onTask={onTask} />
             </dl>
             <SourceRecord task={task} />
@@ -156,8 +155,8 @@ export default function TaskRecords({ dated, undated, allTasks }: { dated: AiTas
         linkedRef.current?.focus({ preventScroll: true });
         return scrollInList(linkedRef.current);
     }, [linked]);
-    return <><AdminListScroll className={manage.records} tabIndex={0} aria-label="작업 기록 스크롤" data-record-scroll>
-        {linked && <section ref={linkedRef} className={manage.linkedTask} aria-label="연결 작업 상세" tabIndex={-1}><div><strong>연결 작업 · {linked.project}<small>지금 조건에 걸러진 작업이라 표 위에 따로 보여 줍니다</small></strong><button type="button" onClick={() => setLinked(null)}>닫기</button></div><AiRecordTable className={manage.recordTable}><tbody><Record key={taskKey(linked)} task={linked} handoffs={handoffs} allTasks={allTasks} onTask={openTask} initiallyOpen /></tbody></AiRecordTable></section>}
-        {!rows.length ? <p className={manage.empty}>조건에 맞는 기록이 없습니다.</p> : <AiRecordTable className={manage.recordTable}><thead><tr><th>한 일</th><th>프로젝트</th><th>확인 결과</th><th>날짜 · KST</th><th>작업 상태</th></tr></thead><tbody>{rows.map(t => <Record key={taskKey(t)} task={t} handoffs={handoffs} allTasks={allTasks} onTask={openTask} focused={focus === taskKey(t)} onFocused={clearFocus} />)}</tbody></AiRecordTable>}
+    return <><AdminListScroll className="aim-records" tabIndex={0} aria-label="작업 기록 스크롤" data-record-scroll>
+        {linked && <section ref={linkedRef} className="aim-linkedTask" aria-label="연결 작업 상세" tabIndex={-1}><div><strong>연결 작업 · {linked.project}<small>지금 조건에 걸러진 작업이라 표 위에 따로 보여 줍니다</small></strong><button type="button" onClick={() => setLinked(null)}>닫기</button></div><AiRecordTable className="aim-recordTable"><tbody><Record key={taskKey(linked)} task={linked} handoffs={handoffs} allTasks={allTasks} onTask={openTask} initiallyOpen /></tbody></AiRecordTable></section>}
+        {!rows.length ? <p className="aim-empty">조건에 맞는 기록이 없습니다.</p> : <AiRecordTable className="aim-recordTable"><thead><tr><th>한 일</th><th>프로젝트</th><th>확인 결과</th><th>날짜 · KST</th><th>작업 상태</th></tr></thead><tbody>{rows.map(t => <Record key={taskKey(t)} task={t} handoffs={handoffs} allTasks={allTasks} onTask={openTask} focused={focus === taskKey(t)} onFocused={clearFocus} />)}</tbody></AiRecordTable>}
     </AdminListScroll></>;
 }
