@@ -57,7 +57,8 @@ export default function PostGrid({ posts, tags, selectedTag }: Props) {
         {visiblePosts.map((post, index) => (
           <li key={post.id}>
             <Link href={`/${post.slug}`}>
-              <PostCard post={post} style={{ animationDelay: `${index * 0.05}s` }} />
+              {/* 첫 카드 썸네일이 홈의 LCP 다. 지연 로딩이면 요청이 2초 가까이 늦게 시작된다 */}
+              <PostCard post={post} preload={index === 0} style={{ animationDelay: `${index * 0.05}s` }} />
             </Link>
           </li>
         ))}

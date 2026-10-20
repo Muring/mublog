@@ -41,9 +41,12 @@ const CommentIcon = () => (
 
 export default function PostCard({
     post,
+    preload = false,
     style,
 }: {
     post: PostSummary;
+    /** 첫 화면의 가장 큰 이미지일 때만 켠다. 여러 장에 켜면 서로 대역폭을 다툰다 */
+    preload?: boolean;
     style?: React.CSSProperties;
 }) {
     /*
@@ -72,6 +75,7 @@ export default function PostCard({
                     width={400}
                     height={200}
                     quality={75}
+                    preload={preload}
                 />
             </Card.ImageWrapper>
 
