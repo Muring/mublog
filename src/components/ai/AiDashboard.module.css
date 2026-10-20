@@ -89,7 +89,9 @@
 .process h2 { font-size: .95rem; margin: 0 0 .65rem; }
 .process p { margin: 0; }
 .page .card { padding: 1.25rem; }
-.page .card strong { font-size: clamp(1rem, 1.5vw, 1.25rem); margin-top: .6rem; }
+/* 숫자 크기는 화면 폭이 아니라 카드 폭을 따른다. 10자리 토큰 수가 4열 카드 밖으로 넘치지 않게 한다 */
+.page .grid > .card { container-type: inline-size; }
+.page .card strong { font-size: clamp(.75rem, 12cqi, 1.25rem); margin-top: .6rem; }
 .page .timeline { margin: 0; }
 .emptyState { padding: 1.5rem; border: var(--border-width) dashed var(--bordercolor); border-radius: 12px; color: var(--desccolor); font-size: .9rem; line-height: 1.8; }
 .comparison { display: flex; flex-direction: column; gap: 1.25rem; }
@@ -105,10 +107,29 @@
  * 주·월 꺾은선(관리 통계의 Plot·Column 을 두 선으로 쓴다). 상자 높이가 기간과 무관하게 일정해 안쪽 스크롤이 없다.
  */
 .comparisonControls { display: flex; flex-wrap: wrap; gap: .5rem; }
+/* 주·월은 한 글자라 여백만으로는 31px 로 작아 보인다. 옆 버튼과 어울리게 최소 폭을 준다 */
+.comparisonControls > [aria-label="묶는 단위"] button { min-width: 2.5rem; }
+/*
+ * 좁은 화면에서는 여백을 화면 폭 단계별로 깎지 않고 줄 폭을 나눠 쓴다. 버튼은 최소 여백(5~6px)에서 출발해
+ * 남는 자리를 고르게 채우므로, 공간이 있으면 넓어지고 모자랄 때만 좁아진다(340px 에서도 한 줄).
+ */
+@media (max-width: 640px) {
+ .toolbar > [aria-label="조회 기간"], .comparisonControls > [aria-label="비교할 토큰 종류"] { flex: 1 1 auto; min-width: 0; }
+ .toolbar > [aria-label="조회 기간"] button { flex: 1 1 auto; padding-inline: 6px; }
+ .comparisonControls { gap: .4rem; align-self: stretch; }
+ .comparisonControls > [aria-label="비교할 토큰 종류"] button { flex: 1 1 auto; padding-inline: 5px; }
+ .comparisonControls > [aria-label="묶는 단위"] button { min-width: clamp(2rem, 9vw, 2.5rem); }
+}
+/* 위(합계 줄 구분선 → 안내)와 아래(범례 → 맨 위 눈금 글자)의 간격을 같은 20px 로 맞춘다 */
+.chartBar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.625rem; }
+.chartGuide { flex: 1; min-width: 0; display: grid; gap: .3rem; }
+.chartGuide > .note { margin: 0; }
+.chartToolbar { flex-shrink: 0; }
+.chartToolbar button { display: inline-grid; place-items: center; }
 .lineChart { margin: 0; --plot-h: 220px; min-width: 0; }
 .lineChart [data-tool] { --series: var(--tool-color); }
 .lineChart g[data-bridge] :global(.line) { stroke-dasharray: 4 4; }
-.gapLegend { display: flex; align-items: center; gap: .5rem; margin: .75rem 0 0; font-size: .75rem; color: var(--desccolor); }
+.gapLegend { display: flex; align-items: center; gap: .5rem; margin: 0; font-size: .75rem; color: var(--desccolor); }
 .gapLegend i { width: 1.25rem; height: 0; border-top: 2px dashed var(--desccolor); }
 .lineChart g[data-tool] :global(.line) { stroke: var(--tool-color); }
 .lineChart :global(.dot)[data-show="true"] { opacity: 1; }
@@ -117,7 +138,6 @@
 .lineChart { --chart-ease: cubic-bezier(.33, 1, .68, 1); }
 .lineChart :global(.series) > div { transition: left 360ms var(--chart-ease), width 360ms var(--chart-ease), transform 360ms var(--chart-ease); }
 .lineChart :global(.dot) { transition: top 360ms var(--chart-ease); }
-.lineChart > .note { margin-top: .75rem; }
 /* 막대: 구간 칸 가운데에 두 도구를 나란히 세운다. 끝만 둥글게, 막대 사이는 2px 띄운다 */
 .barGroup { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; gap: 2px; pointer-events: none; }
 .barGroup > span { width: min(18px, 30%); min-height: 0; border-radius: 4px 4px 0 0; background: var(--tool-color); transition: height 360ms cubic-bezier(.22, 1, .36, 1); }
@@ -140,7 +160,6 @@
  .sectionHeading h2 { font-size: 1.5rem; }
  .toolTotals { gap: .75rem; }
  .toolTotals strong { white-space: normal; overflow-wrap: anywhere; }
- .toolTotals small { display: block; margin-top: .25rem; }
  .emptyState { padding: 1.25rem; }
 }
 
@@ -148,6 +167,10 @@
 .card, .titleRow { position: relative; }
 .titleRow { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem; }
 .sectionHeading > .titleRow { align-self: stretch; }
+/* 제목이 두 줄로 넘어가도 ⓘ 가 혼자 한 줄을 차지하지 않고 마지막 글자 뒤에 붙는다 */
+.sectionHeading > .titleRow { display: block; }
+.sectionHeading > .titleRow > :is(h2, h3) { display: inline; }
+.sectionHeading > .titleRow > .info { vertical-align: middle; margin-left: .35rem; }
 .info { display: inline-flex; }
 .infoButton { display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--desccolor); cursor: help; transition: background-color 150ms, color 150ms; }
 .infoButton svg { width: 1rem; height: 1rem; }

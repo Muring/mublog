@@ -6,6 +6,7 @@ import { sumTotals, weekRange, type PublicWeek } from "@/lib/ai-usage";
 import { Plot, Axis } from "@/components/admin/VisitorChart.styled";
 import { Column } from "@/components/admin/TagViewsChart.styled";
 import AnimatedChartPath from "@/components/admin/AnimatedChartPath";
+import { strokeIcon } from "@/components/ui/icon";
 import Info from "./Info";
 import ParagraphText from "./ParagraphText";
 import RollingNumber from "./RollingNumber";
@@ -20,7 +21,11 @@ const metrics = [
 ] as const;
 const units = [["week", "주"], ["month", "월"]] as const;
 type Unit = (typeof units)[number][0];
-const shapes = [["line", "꺾은선"], ["bar", "막대"]] as const;
+const icon = strokeIcon("1.15em");
+const shapes = [
+    ["line", "꺾은선", <svg key="line" {...icon}><polyline points="3 17 9 11 13 14 21 6" /></svg>],
+    ["bar", "막대", <svg key="bar" {...icon}><line x1="6" y1="20" x2="6" y2="12" /><line x1="12" y1="20" x2="12" y2="5" /><line x1="18" y1="20" x2="18" y2="9" /></svg>],
+] as const;
 type Shape = (typeof shapes)[number][0];
 
 type Point = { key: string; label: string; axis: string; values: (number | null)[]; ongoing: boolean; partial: boolean; clipped: boolean };
@@ -99,9 +104,9 @@ export default function ToolComparison({ weeks, allWeeks = weeks }: { weeks: Pub
         <div className={styles.sectionHeading}>
             <div className={styles.titleRow}><h3 id="tool-comparison-title">Codex와 Claude, {unit === "week" ? "주별로" : "월별로"} 비교하기</h3><Info><span className={styles.paragraph}>같은 기간의 사용량을 같은 눈금으로 나란히 봅니다. 월요일 시작 · KST.</span><span className={styles.paragraph}>월 단위는 주를 시작 월요일이 속한 달에 묶습니다.</span><span className={styles.paragraph}>숫자는 관측한 토큰 수이며, 도구의 성능이나 작업 효율 순위를 뜻하지 않습니다.</span></Info></div>
             <div className={styles.comparisonControls}>
+                {/* 데이터를 바꾸는 선택만 제목 아래 한 줄에 둔다. 보는 방식(꺾은선·막대)은 차트 위 아이콘 토글로 뺐다 */}
                 <AiSegments aria-label="비교할 토큰 종류">{metrics.map(m => <button key={m.key} aria-pressed={metric === m.key} onClick={() => setMetric(m.key)}>{m.label}</button>)}</AiSegments>
                 <AiSegments aria-label="묶는 단위">{units.map(([value, label]) => <button key={value} aria-pressed={unit === value} onClick={() => setUnit(value)}>{label}</button>)}</AiSegments>
-                <AiSegments aria-label="그래프 모양">{shapes.map(([value, label]) => <button key={value} aria-pressed={shape === value} onClick={() => setShape(value)}>{label}</button>)}</AiSegments>
             </div>
         </div>
         <p className={styles.note}><ParagraphText>{selected.description}</ParagraphText></p>
@@ -109,6 +114,14 @@ export default function ToolComparison({ weeks, allWeeks = weeks }: { weeks: Pub
             {tools.map((tool, index) => <div key={tool} data-tool={tool}><span className={styles.toolName}><i aria-hidden="true" />{tool}</span><strong><RollingNumber value={known.length ? number(totals[index]) : "—"} /><small> 토큰</small></strong></div>)}
         </div>
         <figure className={styles.lineChart} data-shape={shape} aria-label={`${unit === "week" ? "주별" : "월별"} ${selected.label} 추이`}>
+            {/* 보는 방법 안내·점선 범례와 꺾은선·막대 토글을 차트 바로 위에 모은다 */}
+            <div className={styles.chartBar}>
+                <div className={styles.chartGuide}>
+                    <p className={styles.note}>{!known.length ? "" : bar ? "막대에 올리거나 방향키로 구간을 옮기면 값을 봅니다. 기록이 없는 구간은 비워 둡니다." : single ? "한 구간의 기록만 있어 추세선은 표시하지 않습니다." : "점에 올리거나 방향키로 구간을 옮기면 값을 봅니다."}</p>
+                    {!bar && bridged && <p className={styles.gapLegend}><i aria-hidden="true" />기록이 없는 주를 건너 이은 구간</p>}
+                </div>
+                <div className={styles.chartToolbar}><AiSegments aria-label="그래프 모양">{shapes.map(([value, label, svg]) => <button key={value} aria-pressed={shape === value} aria-label={label} title={label} onClick={() => setShape(value)}>{svg}</button>)}</AiSegments></div>
+            </div>
             {!known.length ? <p className={styles.emptyState}>선택 기간의 기록이 없습니다.</p> : <>
                 <Plot>
                     {[ceiling, ceiling / 2, 0].map(tick => <div key={tick} className="gridline" data-base={tick === 0} style={{ bottom: `calc(var(--plot-h) * ${tick / ceiling})` }} aria-hidden><span>{shortNumber(tick)}</span></div>)}
@@ -135,8 +148,6 @@ export default function ToolComparison({ weeks, allWeeks = weeks }: { weeks: Pub
                 </Plot>
                 <Axis className={styles.lineAxis} data-dense={n > 6 || undefined}>{points.map((p, i) => <span key={p.key} data-show={n <= 12 || i === 0 || i === n - 1 || i % Math.ceil((n - 1) / 6) === 0} data-minor={i % 2 === 1 && i !== n - 1 || undefined} data-edge={points.length === 1 ? undefined : i === 0 ? "first" : i === points.length - 1 ? "last" : undefined} style={{ "--x": `${xAt(i)}%` } as CSSProperties}>{p.axis}</span>)}</Axis>
             </>}
-            {!bar && bridged && <p className={styles.gapLegend}><i aria-hidden="true" />기록이 없는 주를 건너 이은 구간</p>}
-            {known.length > 0 && <p className={styles.note}>{bar ? "막대에 올리거나 방향키로 구간을 옮기면 값을 봅니다. 기록이 없는 구간은 비워 둡니다." : single ? "한 구간의 기록만 있어 추세선은 표시하지 않습니다." : "점에 올리거나 방향키로 구간을 옮기면 값을 봅니다."}</p>}
         </figure>
     </section>;
 }

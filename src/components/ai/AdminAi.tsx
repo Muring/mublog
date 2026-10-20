@@ -111,7 +111,12 @@ export default function AdminAi({ asOf }: { asOf: string }) {
         </>}
     </section>;
 }
-const observedTime = (value: string | null) => value ? formatKst(value) + " KST" : "미상";
+/* 표가 좁아지면 날짜와 시각 사이에서만 줄을 바꾼다(AiManagement.module.css 의 .deviceTable) */
+const observedTime = (value: string | null) => {
+    if (!value) return "미상";
+    const [day, time] = formatKst(value).split(" ");
+    return <span><span>{day}</span> <span>{time} KST</span></span>;
+};
 const TASK_TYPES: Record<string, string> = { feature: "기능", fix: "수정", bugfix: "수정", docs: "문서", documentation: "문서", refactor: "리팩터링", test: "테스트", tests: "테스트", chore: "관리", research: "조사", validation: "검증", verification: "검증", review: "검토", maintenance: "유지보수", design: "디자인" };
 const taskType = (t: UsageYear["tasks"][number]) => t.type ? TASK_TYPES[t.type] ?? t.type : "미상";
 const DIAGNOSTICS = ["큰 출력", "잘림", "반복 호출", "KB 검색", "KB 선택", "KB 적용", "미분류 토큰"];

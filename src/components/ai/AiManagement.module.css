@@ -140,8 +140,11 @@
  */
 .diagTable th:first-child { width: 1%; }
 .diagTable th:not(:first-child) { width: 14%; }
-/* 좁은 PC 폭(641px~)에서는 머리글(반복 호출 · 미분류 토큰 등)이 두 줄로 접혀 표가 상자 안에 든다. 넓으면 한 줄 그대로다 */
-.diagTable thead th { white-space: normal; }
+/*
+ * 좁은 PC 폭(641px~)에서는 머리글(반복 호출 · 미분류 토큰 등)이 두 줄로 접혀 표가 상자 안에 든다. 넓으면 한 줄 그대로다.
+ * 접을 때는 띄어쓰기에서만 접는다(keep-all). 기본값은 한글 글자 사이 어디서나 끊어 '반복 호 / 출' 이 된다
+ */
+.diagTable thead th { white-space: normal; word-break: keep-all; }
 /*
  * 기간을 '연도 전체'로 두면 행이 최대 53개다. 표 상자 안에서만 스크롤하고 머리글을 붙여 두어
  * 아래 '자료 누락 확인' 패널이 행 수만큼 밀려 내려가지 않게 한다. 좁은 화면은 카드로 바뀌어 페이지가 스크롤한다
@@ -150,8 +153,17 @@
  .diagScroll { max-height: 26rem; overflow-y: auto; }
  .diagScroll thead th { position: sticky; top: 0; z-index: 1; }
 }
-.deviceTable td:first-child { white-space: normal; overflow-wrap: anywhere; }
+/*
+ * 기기 이름은 한 줄로 둔다. 아무 데서나 끊을 수 있게 두면 자동 표 배치가 이 열을 가장 먼저 줄여서
+ * 날짜 열에 자리가 남는데도 이름만 두 줄이 되고 행 높이가 어긋난다. 자리가 모자라면 관측 시각이 날짜·시각 두 줄로 접힌다
+ */
+.deviceTable td:first-child { white-space: nowrap; }
+.deviceTable td[data-label^="관측"] { white-space: normal; }
+.deviceTable td[data-label^="관측"] > span > span { white-space: nowrap; }
+/* 한 칸이 두 줄이 되면 한 줄짜리 칸은 그 가운데에 맞춘다 */
+.qualityTable .deviceTable td { vertical-align: middle; }
 @media (max-width: 640px) {
+ .deviceTable td:first-child { white-space: normal; overflow-wrap: anywhere; }
  .qualityPanel { gap: .65rem; padding: .75rem; }
 }
 

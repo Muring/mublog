@@ -46,7 +46,7 @@ export default function AiUsageView({ years, asOf }: { years: PublicYear[]; asOf
     const stale = selected?.observedUntil && Date.parse(asOf) - Date.parse(selected.observedUntil) > 48 * 3600_000;
     return <section aria-labelledby="ai-usage-title" className={styles.section}>
         <div className={styles.sectionHeading}><div className={styles.titleRow}><h2 id="ai-usage-title">실제 사용 현황</h2><Info>사용량을 기록하고, 필요한 맥락과 함께 살펴봅니다.</Info></div></div>
-        <div className={styles.toolbar}><Dropdown label="조회 연도" value={year} options={years.map(y => ({ value: String(y.year), label: `${y.year}년` }))} onChange={setYear} /><AiSegments aria-label="조회 기간">{[["4", "4주"], ["8", "8주"], ["12", "12주"], ["year", "연도 전체"]].map(([value, label]) => <button key={value} aria-pressed={period === value} onClick={() => setPeriod(value)}>{label}</button>)}</AiSegments></div>
+        <div className={styles.toolbar}><Dropdown label="조회 연도" size="control" value={year} options={years.map(y => ({ value: String(y.year), label: `${y.year}년` }))} onChange={setYear} /><AiSegments aria-label="조회 기간">{[["4", "4주"], ["8", "8주"], ["12", "12주"], ["year", "연도 전체"]].map(([value, label]) => <button key={value} aria-pressed={period === value} onClick={() => setPeriod(value)}>{label}</button>)}</AiSegments></div>
         {!years.length ? <p className={styles.note}>아직 공개 집계가 연결되지 않았습니다. 데이터가 도착하면 여기에 표시합니다.</p> : <>
             {(stale || selected?.attention) && <p className={styles.warning}>일부 자료가 늦게 도착했거나 수집 상태를 확인 중입니다. 현재 표시된 관측 범위로 해석해 주세요.</p>}
             <UsageCards weeks={weeks} cacheObserved={selected?.cacheObserved ?? false} rolling />
