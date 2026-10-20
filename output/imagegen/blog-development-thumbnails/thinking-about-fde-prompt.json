@@ -1,0 +1,10 @@
+{
+  "generator": "Built-in image_gen",
+  "file": "thinking-about-fde.png",
+  "title": "FDE라는 방향을 생각하다",
+  "prompt": "Use case: illustration-story.\nCreate one finished landscape 16:9 editorial thumbnail for a Korean developer's reflective blog post. Title text exactly: \"FDE라는 방향을 생각하다\". Place it centered in two lines: \"FDE라는 방향을\" and \"생각하다\", bold clean Korean sans serif, deep navy, large enough to read on a small blog card. Keep all text within the middle 52% width and middle 75% height so a center square crop preserves it, generous margins.\nThe topic is a Salesforce and frontend developer reflecting on moving toward forward deployed engineering: connecting real business workflows, software implementation and usable AI. Visual metaphor below the title: three simple connected stepping stones or modules along a gently rising path, carrying a small workflow card icon, browser/code window icon, and a restrained glowing node network icon. The path connects naturally into one coherent composition, not a crowded infographic.\nStyle: refined flat geometric editorial illustration, subtle paper grain, muted teal and warm ochre accents, warm light cream background, dark navy outlines. Quiet thoughtful professional tone. Avoid corporate logos, brand names, robots, people, stock-photo realism, charts, tiny labels, additional words, watermarks, arrows everywhere. Few large readable shapes and generous negative space. Make the title the main focal point. This is a standalone post, not part of a numbered series.",
+  "referenceImages": [],
+  "status": "approved-and-uploaded",
+  "thumbnail": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/thinking-about-fde/illustration-b1f7cf614a57.jpg",
+  "sha256": "b1f7cf614a57af9f3cb1c2296aabb422d5871f9c425701749d8c809ccb0b7892"
+}
