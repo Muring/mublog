@@ -33,23 +33,23 @@ const Wrapper = styled.div`
  * 납작하게 그려진다. --card 안의 100% 는 Track 의 폭(=Wrapper 폭)을 가리키고,
  * Slide 의 flex-basis 와 Track 의 transform 이 같은 기준을 쓰므로
  * 첫 페인트부터 세 장이 정확히 들어맞는다.
+ *
+ * 장수(--visible)와 위치(--index)는 컴포넌트가 style 로 넣는다. Emotion 보간으로 넣으면
+ * 처음 보는 위치마다 새 CSS 규칙이 문서에 추가돼 페이지 전체 스타일을 다시 계산했고,
+ * 자동 넘김(3초)이 그때마다 클래스를 갈아 끼웠다.
  */
-const Track = styled.div<{
-  visible: number;
-  currentIndex: number;
-  isTransitioning: boolean;
-}>`
+const Track = styled.div`
   --gap: ${CARD_GAP}px;
-  --visible: ${(props) => props.visible};
   --card: calc((100% - var(--gap) * (var(--visible) - 1)) / var(--visible));
 
   display: flex;
   gap: var(--gap);
   padding-top: 0.5rem;
-  transform: translateX(
-    calc(-1 * ${(props) => props.currentIndex} * (var(--card) + var(--gap)))
-  );
-  transition: ${({ isTransitioning }) => (isTransitioning ? "transform 0.5s ease-in-out" : "none")};
+  transform: translateX(calc(-1 * var(--index) * (var(--card) + var(--gap))));
+
+  &[data-transitioning="true"] {
+    transition: transform 0.5s ease-in-out;
+  }
 `;
 
 const Slide = styled.div`

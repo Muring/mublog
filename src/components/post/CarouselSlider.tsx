@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { PostSummary } from "@/types/post";
 import { byNewest } from "@/lib/date";
 import { strokeIcon } from "@/components/ui/icon";
@@ -91,7 +91,13 @@ export default function CarouselSlider({ posts, tags, currentSlug, heading = "�
    */
   const [currentIndex, setCurrentIndex] = useState(() => (relatedPosts.length > MAX_VISIBLE ? MAX_VISIBLE : 0));
 
-  useLayoutEffect(() => {
+  /*
+   * 폭은 ResizeObserver 가 처음 붙을 때 주는 값으로 잰다. 마운트 중에 clientWidth 를 읽으면
+   * hydration 직후라 더러워진 긴 글 페이지 전체를 그 자리에서 강제로 배치해, 모바일에서
+   * 0.5초 넘는 긴 작업이 생겼다. 서버 HTML 이 이미 MAX_VISIBLE 장으로 그려져 있으므로
+   * 한 프레임 늦게 맞춰도 보이는 차이는 없다.
+   */
+  useEffect(() => {
     const el = wrapperRef.current;
     if (!el) return;
 
@@ -99,7 +105,6 @@ export default function CarouselSlider({ posts, tags, currentSlug, heading = "�
       if (width > 0) setVisible(visibleCountFor(width));
     };
 
-    measure(el.clientWidth);
     const observer = new ResizeObserver(([entry]) => measure(entry.contentRect.width));
     observer.observe(el);
     return () => observer.disconnect();
@@ -173,6 +178,30 @@ export default function CarouselSlider({ posts, tags, currentSlug, heading = "�
     return () => clearTimeout(id);
   }, [currentIndex, slides.length, totalSlides, visible, isLooping]);
 
+  /*
+   * 넘길 때는 Track 의 위치만 바뀐다. 카드까지 다시 그리지 않도록 슬라이드 목록을 묶어 둔다.
+   * 키는 순번이 아니라 역할(앞 복제·진짜·뒤 복제)과 글로 정한다 — 순번을 쓰면 보일 장수가
+   * 바뀌어 복제본 수가 달라질 때 진짜 카드까지 전부 새로 만들어졌다.
+   */
+  const slideNodes = useMemo(
+    () =>
+      slides.map((post, index) => {
+        // 앞뒤 복제본은 읽히거나 탭 순서에 잡히면 안 된다
+        const isHead = isLooping && index < visible;
+        const isTail = isLooping && index >= visible + totalSlides;
+        const isClone = isHead || isTail;
+        const key = isHead ? `head-${post.id}` : isTail ? `tail-${post.id}` : post.id;
+        return (
+          <Carousel.Slide key={key} aria-hidden={isClone || undefined}>
+            <Link href={`/${post.slug}`} tabIndex={isClone ? -1 : undefined}>
+              <PostCard post={post} style={{ animationDelay: `${index * 0.05}s` }} />
+            </Link>
+          </Carousel.Slide>
+        );
+      }),
+    [slides, visible, isLooping, totalSlides],
+  );
+
   if (totalSlides === 0) return null;
 
   return (
@@ -199,21 +228,10 @@ export default function CarouselSlider({ posts, tags, currentSlug, heading = "�
 
       <Carousel.Wrapper ref={wrapperRef}>
         <Carousel.Track
-          visible={visible}
-          currentIndex={currentIndex}
-          isTransitioning={isTransitioning && !reducedMotion}
+          data-transitioning={isTransitioning && !reducedMotion}
+          style={{ "--visible": visible, "--index": currentIndex } as CSSProperties}
         >
-          {slides.map((post, index) => {
-            // 앞뒤 복제본은 읽히거나 탭 순서에 잡히면 안 된다
-            const isClone = isLooping && (index < visible || index >= visible + totalSlides);
-            return (
-              <Carousel.Slide key={`${post.id}-${index}`} aria-hidden={isClone || undefined}>
-                <Link href={`/${post.slug}`} tabIndex={isClone ? -1 : undefined}>
-                  <PostCard post={post} style={{ animationDelay: `${index * 0.05}s` }} />
-                </Link>
-              </Carousel.Slide>
-            );
-          })}
+          {slideNodes}
         </Carousel.Track>
       </Carousel.Wrapper>
 
