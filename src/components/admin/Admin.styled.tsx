@@ -6,7 +6,7 @@ import { buttonQuiet, buttonSubtle, buttonDanger, buttonPrimary, buttonGhost } f
 import { thinScrollbar } from "@/styles/scrollbar";
 import { surface } from "@/styles/surface";
 import { listTableBase } from "@/styles/list-table";
-import { truncate } from "@/styles/text";
+import { emptyNote, truncate } from "@/styles/text";
 import { mobile } from "@/styles/breakpoints";
 
 // 홈 헤더와 방문자 수도 같은 것을 쓰게 되어 ui/ 로 옮겼다. 기존 import 경로는 유지한다.
@@ -28,66 +28,8 @@ export const AdminWrapper = styled.div`
   /* 공통 머리줄(AdminHeading) 아래 여백. 예전 탭 줄의 margin-bottom 과 같다 */
   .admin-heading { margin-bottom: 20px; }
 
-  /*
-   * auto-fit 은 폭에 따라 3열 같은 어중간한 배치를 만든다.
-   * 네 수치는 한 세트라 4열 아니면 2x2 둘 중 하나여야 한다.
-   */
-  .stat-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1.25rem;
-  }
-
   ${mobile} {
     .admin-heading a:has(> .primary) { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; }
-    .stat-row {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  .stat {
-    ${surface("12px")}
-    padding: 1rem;
-
-    .label {
-      font-size: 0.75rem;
-      color: var(--desccolor);
-    }
-    .value {
-      font-size: 1.5rem;
-      font-weight: 800;
-    }
-  }
-  /* 누르면 넘어가는 카드(댓글). 모양은 같고 테두리만 반응한다 — buttonQuiet 의 호버와 같은 표현 */
-  a.stat {
-    display: block;
-    color: inherit;
-    text-decoration: none;
-    outline: 1px solid transparent;
-    outline-offset: calc(-1 * var(--border-width));
-    transition: outline-color 150ms ease, border-color 150ms ease;
-    &:hover {
-      border-color: transparent;
-      outline-color: var(--foreground);
-    }
-    /* 기본 링을 투명으로 덮었으니 키보드 초점은 따로 살린다 */
-    &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
-  }
-
-  /* 댓글 관리 머리의 보조 줄과 요약 */
-  .summary {
-    font-size: 0.85rem;
-    color: var(--desccolor);
-    strong {
-      color: var(--foreground);
-    }
-  }
-  .summary + .empty {
-    padding: 2.5rem 0;
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--desccolor);
   }
 `;
 
@@ -155,9 +97,6 @@ export const PostTable = styled.table`
      */
     &:focus-visible {
       color: var(--linkhovercolor);
-      outline: 2px solid var(--linkhovercolor);
-      outline-offset: 2px;
-      border-radius: 3px;
     }
   }
 
@@ -207,7 +146,8 @@ export const PostTable = styled.table`
   .row-delete { color: var(--desccolor); }
   .row-delete:hover:not(:disabled) { background: var(--dangercolor); color: var(--dangerfontcolor); }
   .row-delete:disabled { cursor: wait; }
-  .row-edit:focus-visible, .row-delete:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+  /* 호버 링(outline-color)이 초점 링의 색을 덮지 않게 뒤에서 다시 정한다. 삭제 버튼은 링이 없어 전역 초점 링을 그대로 쓴다 */
+  .row-edit:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   .action-buttons {
     display: flex;
     gap: 0.4rem;
@@ -376,12 +316,6 @@ export const Button = styled.button`
 
   &.primary {
     ${buttonPrimary}
-    &:hover:not(:disabled) {
-      background-color: color-mix(in srgb, var(--activecolor) 85%, var(--activefontcolor));
-      color: var(--activefontcolor);
-      border-color: var(--activecolor);
-    }
-    &:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   }
   &.danger {
     ${buttonDanger}
@@ -440,10 +374,8 @@ export const AdminListScroll = styled.div`
   }
 
   .empty {
+    ${emptyNote}
     padding: 2.5rem 0;
-    text-align: center;
-    font-size: 0.85rem;
-    color: var(--desccolor);
   }
 `;
 
@@ -464,4 +396,46 @@ export const ResultBar = styled.div`
   > p { margin: 0; min-width: 0; }
   .cleanup-note { display: block; font-size: 12px; margin-top: 2px; }
   > button { margin-left: auto; }
+`;
+
+/**
+ * 쪽 이동(댓글 관리와 그 로딩 골격). 번호는 폭을 맞춰 한 자리·두 자리가 들쭉날쭉하지 않게 둔다.
+ * 호버는 테두리 자리에 링을 그린다(buttonQuiet 와 같은 표현). 현재 쪽은 선택 색으로 채우고 호버를 두지 않는다 — 누를 수 없다.
+ */
+export const Pagination = styled.nav`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 24px;
+
+  a, span {
+    min-width: 2.5em;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: var(--border-width) solid var(--bordercolor);
+    border-radius: 8px;
+    background: var(--background);
+    color: var(--foreground);
+    text-decoration: none;
+    text-align: center;
+    font: inherit;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  a {
+    outline: 1px solid transparent;
+    outline-offset: calc(-1 * var(--border-width));
+    transition: outline-color 150ms ease, border-color 150ms ease, background-color .15s, color .15s;
+  }
+  a:hover { border-color: transparent; outline-color: var(--foreground); background: var(--control-hover-bg); color: var(--foreground); }
+  a:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
+  [aria-disabled="true"] { color: var(--desccolor); }
+  [aria-current="page"] { background: var(--activecolor); border-color: var(--activecolor); color: var(--activefontcolor); font-weight: 800; }
+  .gap { border-color: transparent; background: none; color: var(--desccolor); min-width: auto; padding: 8px 2px; }
+
+  ${mobile} {
+    a, span:not(.gap) { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+  }
 `;

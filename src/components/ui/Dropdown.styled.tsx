@@ -3,6 +3,7 @@
 import styled from "@emotion/styled";
 import { buttonGhost } from "@/styles/button";
 import { surface } from "@/styles/surface";
+import { textField } from "@/styles/field";
 import { thinScrollbar } from "@/styles/scrollbar";
 
 export const DropdownRoot = styled.div`
@@ -122,10 +123,8 @@ export const DropdownPanel = styled.div<{ $align: "left" | "right" }>`
         height: 34px;
         margin-bottom: 4px;
         padding: 0 10px;
-        border: var(--border-width) solid var(--bordercolor);
-        border-radius: 6px;
+        ${textField("6px")}
         background: var(--background);
-        color: var(--foreground);
         font: inherit;
         font-size: 13px;
     }
@@ -177,7 +176,7 @@ export const DropdownList = styled.ul<{ $align: "left" | "right"; $inPanel?: boo
     }
     li.empty { color: var(--desccolor); cursor: default; }
     li[data-focused="true"], li:not(.empty):hover {
-        background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
+        background-color: var(--control-hover-bg);
         color: var(--foreground);
     }
     li[aria-selected="true"] {
@@ -186,7 +185,7 @@ export const DropdownList = styled.ul<{ $align: "left" | "right"; $inPanel?: boo
         font-weight: 700;
     }
     li[aria-selected="true"]:hover {
-        background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
+        background-color: var(--control-hover-bg);
     }
     li[aria-selected="true"]::after {
         content: "";
@@ -215,7 +214,7 @@ export const DropdownList = styled.ul<{ $align: "left" | "right"; $inPanel?: boo
             border-radius: 3px;
             transform: translateY(-50%);
         }
-        li[aria-selected="true"]::before { background: var(--foreground); border-color: var(--foreground); }
-        li[aria-selected="true"]::after { right: auto; left: calc(0.75rem + 5px); width: 4px; height: 8px; border-color: var(--cardbackground); }
+        li[aria-selected="true"]::before { background: var(--activecolor); border-color: var(--activecolor); }
+        li[aria-selected="true"]::after { right: auto; left: calc(0.75rem + 5px); width: 4px; height: 8px; border-color: var(--activefontcolor); }
     }
 `;

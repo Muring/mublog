@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import { segmented } from "@/styles/segmented";
 import { buttonSubtle } from "@/styles/button";
 import { mobile } from "@/styles/breakpoints";
+import { textField } from "@/styles/field";
 
 export const FilterBarRoot = styled.div`
     display: flex;
@@ -31,12 +32,10 @@ export const FilterBarRoot = styled.div`
         box-sizing: border-box;
         width: 100%; min-width: 0; height: 40px;
         padding: 0 12px 0 38px;
-        border: var(--border-width) solid var(--bordercolor);
-        border-radius: 8px;
-        background: var(--background); color: var(--foreground);
+        ${textField("8px")}
+        background: var(--background);
         font: inherit; font-size: 14px;
     }
-    .bar-search > input::placeholder { color: var(--desccolor); }
     /* 좁은 화면에서 펼친 검색을 접는 버튼. 넓은 화면은 검색창이 늘 펼쳐져 있어 쓰지 않는다 */
     .search-close {
         position: absolute; top: 0; right: 0; display: none; align-items: center; justify-content: center;
@@ -45,16 +44,18 @@ export const FilterBarRoot = styled.div`
     }
     .search-close:hover { background: var(--control-hover-bg); color: var(--foreground); }
     .search-close svg { width: 18px; height: 18px; }
-    .bar-search > input:hover { border-color: var(--foreground); }
-    .bar-search > input:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
     .bar-anchor { position: relative; flex-shrink: 0; }
+    /* 필터 버튼은 테두리로, 정렬 버튼은 공용 ghost 스타일로 구분한다. 호버는 테두리 자리에 링을 그린다(buttonQuiet 와 같은 표현) */
     .bar-toggle {
         ${buttonSubtle}
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-        height: 40px; padding: 0 12px; border-radius: 8px;
+        box-sizing: border-box; height: 40px; padding: 0 12px; border-radius: 8px;
         background: var(--background); color: var(--foreground); font-size: 14px;
+        outline: var(--border-width) solid transparent;
+        outline-offset: calc(-1 * var(--border-width));
+        transition: border-color 150ms ease, outline-color 150ms ease,
+            background-color 150ms ease, color 150ms ease;
     }
-    .bar-toggle:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
     .bar-toggle > svg { width: 18px; height: 18px; }
     .bar-toggle > svg circle { fill: var(--background); }
     .bar-toggle:hover > svg circle { fill: var(--control-hover-bg); }
@@ -63,21 +64,6 @@ export const FilterBarRoot = styled.div`
     .bar-results { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
     .bar-summary { margin: 0; min-width: 0; color: var(--desccolor); font-size: 13px; line-height: 1.5; }
     .bar-sort { position: relative; flex-shrink: 0; }
-    /* 필터 버튼은 테두리로, 정렬 버튼은 공용 ghost 스타일로 구분한다. */
-    .bar-toggle {
-        box-sizing: border-box;
-        height: 40px;
-        border: var(--border-width) solid var(--bordercolor);
-        border-radius: 8px;
-        background: var(--background);
-        color: var(--foreground);
-        font-size: 14px;
-        font-weight: 700;
-        outline: var(--border-width) solid transparent;
-        outline-offset: calc(-1 * var(--border-width));
-        transition: border-color 150ms ease, outline-color 150ms ease,
-            background-color 150ms ease, color 150ms ease;
-    }
     .bar-toggle:hover:not(:disabled) {
         border-color: transparent;
         outline-color: var(--foreground);
@@ -211,12 +197,11 @@ export const FilterFormRoot = styled.form`
     .date-inputs label { display: grid; gap: 6px; min-width: 0; color: var(--desccolor); font-size: 12px; }
     input[type="date"] {
         width: 100%; min-width: 0; box-sizing: border-box; height: 40px;
-        padding: 0 8px; border: var(--border-width) solid var(--bordercolor); border-radius: 8px;
-        background: var(--background); color: var(--foreground); font: inherit; font-size: 14px; color-scheme: light;
+        padding: 0 8px;
+        ${textField("8px")}
+        background: var(--background); font: inherit; font-size: 14px; color-scheme: light;
     }
     html.dark & input[type="date"] { color-scheme: dark; }
-    input[type="date"]:hover { border-color: var(--foreground); }
-    input[type="date"]:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
     input[aria-invalid="true"] { border-color: var(--dangercolor); }
     .field-error { margin: 8px 0 0; font-size: 13px; color: var(--dangercolor); }
     .filter-actions { flex-shrink: 0; display: flex; gap: 8px; padding: 12px 16px; border-top: var(--border-width) solid var(--bordercolor); }

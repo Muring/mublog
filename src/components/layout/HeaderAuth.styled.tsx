@@ -1,10 +1,10 @@
 "use client";
 
 import styled from "@emotion/styled";
-import { buttonQuiet } from "@/styles/button";
+import { buttonQuiet, headerControl } from "@/styles/button";
 import { truncate } from "@/styles/text";
 import { mobile } from "@/styles/breakpoints";
-import { surface } from "@/styles/surface";
+import { hoverSurface, surface } from "@/styles/surface";
 
 /**
  * 헤더 우측 로그인 영역.
@@ -60,31 +60,16 @@ export const AuthWrapper = styled.div`
      */
     position: relative;
 
+    /* 검색 버튼처럼 왼쪽 메뉴 버튼(3rem 정사각형)보다 작아지지 않는다. 펼친 동안은 호버 면을 유지한다 */
     .account-trigger {
-        display: inline-flex;
-        align-items: center;
+        ${headerControl}
         gap: 0.4rem;
         max-width: 10rem;
-        /* 검색 버튼처럼 왼쪽 메뉴 버튼(3rem 정사각형)보다 작아지지 않는다 */
-        height: 3rem;
-        min-width: 3rem;
-        justify-content: center;
-        box-sizing: border-box;
         padding: 0 0.75rem;
-        border: 0;
-        border-radius: 0.5rem;
-        background: none;
-        color: var(--foreground);
-        font: inherit;
-        cursor: pointer;
     }
-    /* --hovercolor 는 다크에서도 밝은 회색이라 글자도 함께 --hoverfontcolor 로 돌린다(AGENTS §3) */
-    .account-trigger:hover, .account-trigger[aria-expanded="true"] {
-        background-color: var(--hovercolor);
-        color: var(--hoverfontcolor);
-        transition: 0.1s ease-in-out;
+    .account-trigger[aria-expanded="true"] {
+        ${hoverSurface}
     }
-    .account-trigger:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
     .avatar-empty { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; color: var(--desccolor); }
 
     .account-menu {
@@ -120,7 +105,7 @@ export const AuthWrapper = styled.div`
         cursor: pointer;
     }
     && .account-item:hover, && .account-item:focus-visible {
-        background-color: color-mix(in srgb, var(--foreground) 8%, var(--cardbackground));
+        background-color: var(--control-hover-bg);
         color: var(--foreground);
         outline: none;
     }

@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import { css } from "@emotion/react";
 import { surface } from "@/styles/surface";
 import { SheetPanel } from "./AdminSheet.styled";
+import { imageGrid } from "./ImagePicker.styled";
 import { mobileQuery } from "@/styles/breakpoints";
 
 /**
@@ -24,20 +25,18 @@ export const ImagesLayout = styled.div`
   align-items: start;
 
   > * { min-width: 0; }
-  .grid { transition: opacity 150ms ease; }
   &[aria-busy="true"] .grid { opacity: .45; pointer-events: none; }
   .load-more { display: grid; justify-items: center; gap: 8px; padding: 16px 0; }
   .load-more:empty { padding: 0; }
   .load-more p { color: var(--dangercolor); font-size: 13px; }
-  @media (prefers-reduced-motion: reduce) { .grid { transition: none; } }
 
   /* 카드 폭은 이미지 고르기 모달과 같게 둔다 */
   .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: 0.75rem;
+    ${imageGrid}
     padding: 2px;
+    transition: opacity 150ms ease;
   }
+  @media (prefers-reduced-motion: reduce) { .grid { transition: none; } }
 
   @media ${SHEET_MEDIA} {
     grid-template-columns: minmax(0, 1fr);
@@ -138,7 +137,6 @@ export const detailContent = css`
   /* 제목과 보조 글자도 어두운 호버 면에서 읽히게 유지한다. */
   .users a:hover { background-color: var(--control-hover-bg); color: var(--foreground); }
   .users a:hover .kind { color: var(--foreground); }
-  .users a:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   .users .title {
     flex: 1;
     min-width: 0;

@@ -15,8 +15,7 @@ import { ImageTileSkeletons } from "./ImageTile";
 import { DetailPanel, ImagesLayout } from "./AdminImages.styled";
 import FilterBar from "./FilterBar";
 import { SkeletonLine, SkeletonText } from "@/components/ui/Skeleton.styled";
-import styles from "./Management.module.css";
-import { AdminWrapper, PostTable, AdminListScroll, ResultBar, Button, Skeleton } from "./Admin.styled";
+import { AdminWrapper, PostTable, AdminListScroll, ResultBar, Button, Skeleton, Pagination } from "./Admin.styled";
 
 /** 관리 탭 사이에서 유지되는 공통 프레임. 페이지 로딩은 children 내부만 교체한다. */
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -150,9 +149,9 @@ export function AdminCommentsSkeleton() {
                         ))}
                     </CompactList>
                 </AdminListScroll>
-                <div className={styles.pagination}>
+                <Pagination as="div">
                     <span><TextSkeleton width="2em" /></span><span><TextSkeleton width="3em" /></span><span><TextSkeleton width="2em" /></span>
-                </div>
+                </Pagination>
             </div>
         </div>
     );

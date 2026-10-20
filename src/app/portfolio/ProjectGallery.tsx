@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import Dropdown from "@/components/ui/Dropdown";
 import ImageViewer from "@/components/ui/ImageViewer";
 import type { PortfolioProject } from "@/data/portfolio";
-import styles from "./portfolio.module.css";
 import { prefersReducedMotion } from "@/hooks/useMediaQuery";
 
 type GalleryProject = Pick<PortfolioProject, "id" | "name" | "images">;
@@ -38,7 +37,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
     }
 
     const navigation = () => (
-        <div className={styles.viewerNavigation}>
+        <div className="pf-viewerNavigation">
             <button
                 type="button"
                 aria-label={`${project.name} 이전 화면`}
@@ -64,26 +63,26 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
 
     return (
         <div
-            className={styles.galleryViewer}
+            className="pf-galleryViewer"
             id={`gallery-${project.id}`}
             role="region"
             aria-label={`${project.name} 화면 갤러리`}
         >
             <figure>
                 <button
-                    className={styles.mainImage}
+                    className="pf-mainImage"
                     onClick={open}
                     type="button"
                     aria-label={`${image.caption} 전체 화면으로 보기`}
                 >
                     <span
-                        className={styles.imageTrack}
+                        className="pf-imageTrack"
                         style={{ transform: `translateX(-${index * 100}%)` }}
                     >
                         {project.images.map((item, i) => (
                             <span
                                 key={item.file}
-                                className={styles.imageSlide}
+                                className="pf-imageSlide"
                                 aria-hidden={i !== index}
                             >
                                 <Image
@@ -97,7 +96,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
                         ))}
                     </span>
                 </button>
-                <figcaption className={styles.viewerCaption}>
+                <figcaption className="pf-viewerCaption">
                     <div>
                         <p>{image.caption}</p>
                         <button type="button" onClick={open}>
@@ -118,7 +117,7 @@ function GalleryViewer({ project }: { project: GalleryProject }) {
             </figure>
             {project.images.length > 1 && (
                 <div
-                    className={styles.thumbnailStrip}
+                    className="pf-thumbnailStrip"
                     ref={thumbnails}
                     role="group"
                     aria-label={`${project.name} 화면 선택`}
@@ -176,10 +175,10 @@ export default function ProjectGallery({
             : project.images.filter((image) => image.group === group);
     return (
         <section
-            className={styles.gallerySection}
+            className="pf-gallerySection"
             aria-label={`${project.name} 서비스 화면`}
         >
-            <div className={styles.galleryHeading}>
+            <div className="pf-galleryHeading">
                 <span>
                     서비스 화면 <strong>{project.images.length}</strong>
                 </span>

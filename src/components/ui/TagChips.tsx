@@ -68,7 +68,6 @@ const Tags = styled.div<{ $alignEnd: boolean }>`
   }
 
   .more:hover, .more:focus-visible { background-color: var(--control-hover-bg); color: var(--foreground); }
-  .more:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
   /* 펼친 목록 안의 태그 버튼에 초점이 가도 목록이 닫히지 않게 focus-within 도 본다 */
   .more:hover .popover, .more:focus-visible .popover, .more:focus-within .popover {
     display: block;
@@ -86,10 +85,9 @@ const Tags = styled.div<{ $alignEnd: boolean }>`
     transition: box-shadow 150ms, background-color 150ms, color 150ms;
   }
   button.chip:hover { box-shadow: inset 0 0 0 var(--border-width) var(--foreground); color: var(--foreground); }
-  button.chip:focus-visible { outline: 2px solid var(--linkhovercolor); outline-offset: 2px; }
-  button.chip[aria-pressed="true"] { background-color: var(--foreground); color: var(--background); }
   .popover button.chip { display: inline-block; margin: 0.1rem 0.15rem; background-color: var(--codefontbgcolor); color: var(--foreground); }
-  .popover button.chip[aria-pressed="true"] { background-color: var(--activecolor); color: var(--activefontcolor); }
+  /* 걸린 태그는 줄에 있든 펼친 목록에 있든 같은 선택 색이다 */
+  button.chip[aria-pressed="true"], .popover button.chip[aria-pressed="true"] { background-color: var(--activecolor); color: var(--activefontcolor); }
   @media (prefers-reduced-motion: reduce) { button.chip { transition: none; } }
 `;
 

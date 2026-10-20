@@ -7,10 +7,10 @@ import { analyticsDateError, analyticsDataKey, analyticsDataUrl, analyticsRange,
 import { fetchJson } from "@/lib/fetcher";
 import { replaceListUrl, safeAdminReturn } from "@/lib/admin-navigation";
 import { Button } from "./Admin.styled";
+import { AnalyticsRoot } from "./Analytics.styled";
 import AnalyticsResults from "./AnalyticsResults";
 import { Skeleton } from "@/components/ui/Skeleton.styled";
 import AnalyticsSkeleton from "./AnalyticsSkeleton";
-import styles from "./Analytics.module.css";
 import { useAdminRefresh } from "./RefreshButton";
 
 /** 기간 선택기는 데이터 로딩·실패와 무관하게 같은 DOM을 유지한다. */
@@ -77,45 +77,45 @@ export default function AdminAnalytics({ today }: { today: string }) {
     const submitDates = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); applyDates(0); };
     const displayedData = query.data && { ...query.data, range: { ...query.data.range, bucket: range.bucket } };
     const comparisonRange = query.isPlaceholderData && displayedData ? displayedData.range : range;
-    return <div className={`${styles.dashboard} ${styles.analyticsRoot}`}>
+    return <AnalyticsRoot className="an-dashboard an-analyticsRoot">
         {/*
           * 한 장의 카드(제목 · 필터 · 비교 설명)를 위·가운데·아래 세 조각으로 나눠 그린다. 필터 줄이 카드 밖(결과 끝)까지 붙어 있으려면
           * sticky 요소의 부모가 결과까지 감싸는 상자여야 해서, section 은 display: contents 로 풀어 조각들을 바깥 flex 에 직접 올린다
           */}
-        <section className={styles.periodCard} aria-label="통계 기간">
-            <div className={`${styles.toolbar} ${styles.periodTop}`}>
+        <section className="an-periodCard" aria-label="통계 기간">
+            <div className="an-toolbar an-periodTop">
                 <h3>조회 기간</h3>
-                <span className={styles.note} role="status">{range.from} ~ {range.to} · KST</span>
+                <span className="an-note" role="status">{range.from} ~ {range.to} · KST</span>
             </div>
-            <div ref={controls} className={styles.periodControls}>
-                <form className={styles.dates} onSubmit={submitDates} onChange={() => applyDates(400)} noValidate>
+            <div ref={controls} className="an-periodControls">
+                <form className="an-dates" onSubmit={submitDates} onChange={() => applyDates(400)} noValidate>
                     <label>시작일<input ref={fromInput} name="from" type="date" required min="1970-01-01" max={range.to} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.from} /></label>
                     <label>종료일<input ref={toInput} name="to" type="date" required min={range.from} max={today} aria-invalid={Boolean(dateError || urlError)} aria-describedby={dateError || urlError ? "analytics-date-error" : undefined} defaultValue={range.to} /></label>
                 </form>
-                <div className={styles.shortcuts} role="group" aria-label="기간 빠른 조회">
+                <div className="an-shortcuts" role="group" aria-label="기간 빠른 조회">
                     <span>빠른 조회</span>
                     {[7, 30, 90].map(days => <Button key={days} type="button" onClick={() => navigate({ ...range, preset: String(days) })} aria-label={`최근 ${days}일`}>{days}일</Button>)}
                 </div>
             </div>
-            <div className={styles.periodBottom}>
-                {(dateError || urlError) && <p id="analytics-date-error" className={styles.note} role="alert">{dateError || urlError}</p>}
-                {!urlError && <div className={styles.comparison} aria-label="증감 비교 기준">
+            <div className="an-periodBottom">
+                {(dateError || urlError) && <p id="analytics-date-error" className="an-note" role="alert">{dateError || urlError}</p>}
+                {!urlError && <div className="an-comparison" aria-label="증감 비교 기준">
                     <span><strong>{query.isPlaceholderData ? "현재 표시 결과의 비교 대상" : "비교 대상"} · 선택 기간 바로 앞 {comparisonRange.days}일</strong> {comparisonRange.previousFrom} ~ {comparisonRange.previousTo}</span>
                     <span>모든 증감은 선택한 {comparisonRange.days}일 합계에서 위 기간의 합계를 뺀 값입니다.{comparisonRange.to === today && " 오늘은 집계 중입니다."}</span>
                 </div>}
-                <div className={styles.refreshStatus} role="status">
+                <div className="an-refreshStatus" role="status">
                     {pending && displayedData && !urlError && <><Skeleton aria-hidden style={{ width: "100%", height: 3 }} /><span>조회 중 · 현재 표시는 {displayedData.range.from} ~ {displayedData.range.to} 결과</span></>}
                 </div>
             </div>
         </section>
-        <div className={`${styles.dashboard} ${styles.periodResults}`} aria-busy={pending && !urlError} aria-label="통계 결과">
-            {urlError ? null : query.isError ? <section className={styles.panel} role="alert">
-                <h3>통계를 불러오지 못했습니다.</h3><p className={styles.note}>{query.error.message}</p>
+        <div className="an-dashboard an-periodResults" aria-busy={pending && !urlError} aria-label="통계 결과">
+            {urlError ? null : query.isError ? <section className="an-panel" role="alert">
+                <h3>통계를 불러오지 못했습니다.</h3><p className="an-note">{query.error.message}</p>
                 <Button type="button" onClick={() => void query.refetch()}>다시 시도</Button>
             </section> : <>
                 {displayedData ? <AnalyticsResults data={displayedData} onBucketChange={bucket => navigate({ ...range, bucket })} /> : <AnalyticsSkeleton />}
             </>}
 
         </div>
-    </div>;
+    </AnalyticsRoot>;
 }

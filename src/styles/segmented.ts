@@ -50,10 +50,6 @@ export const segmented = css`
     button[aria-selected="true"]:hover {
         background: var(--background);
     }
-    button:focus-visible {
-        outline: 2px solid var(--linkhovercolor);
-        outline-offset: 2px;
-    }
 `;
 
 export const pills = css`
@@ -88,10 +84,6 @@ export const pills = css`
             &:hover {
                 background-color: color-mix(in srgb, var(--activecolor) 85%, var(--activefontcolor));
             }
-        }
-        &:focus-visible {
-            outline: 2px solid var(--linkhovercolor);
-            outline-offset: 2px;
         }
     }
 `;

@@ -16,20 +16,18 @@ import { selectTaskPeriod } from "@/lib/ai-task-records";
 import { splitMulti } from "@/lib/multi-value";
 import { AI_TABS, AI_VIEW_FIELDS, type AiTab } from "@/lib/admin-navigation";
 import { useListState } from "@/hooks/useListState";
-import styles from "./AiDashboard.module.css";
-import manage from "./AiManagement.module.css";
 import { formatKst } from "@/lib/date";
 
 const SKELETON_ROWS = Array.from({ length: 10 }, (_, i) => i);
 /** 불러오는 동안 실제 카드·표·패널과 같은 상자를 깔아 둔다. 글자 자리는 막대로만 보인다 */
 function LoadingBody({ tab }: { tab: string }) {
     const bar = (width: string) => <Skeleton style={{ display: "inline-block", width, maxWidth: "100%", height: ".8em", verticalAlign: "middle" }} />;
-    if (tab === "quality") return <div className={`${styles.contentScroll} ${manage.records}`} role="status" aria-label="작업 기록을 불러오는 중"><div className={manage.loadingRows} aria-hidden="true">{SKELETON_ROWS.map(row => <div key={row} className={manage.loadingRecord}><SkeletonText>작업 제목과 결과를 불러오는 중입니다</SkeletonText><p>{bar("80%")}</p><span>{bar("8em")}{bar("5em")}{bar("3em")}</span></div>)}</div></div>;
+    if (tab === "quality") return <div className="ai-contentScroll aim-records" role="status" aria-label="작업 기록을 불러오는 중"><div className="aim-loadingRows" aria-hidden="true">{SKELETON_ROWS.map(row => <div key={row} className="aim-loadingRecord"><SkeletonText>작업 제목과 결과를 불러오는 중입니다</SkeletonText><p>{bar("80%")}</p><span>{bar("8em")}{bar("5em")}{bar("3em")}</span></div>)}</div></div>;
     const columns = [["주", "6.5em", "center"], ["프로젝트", "8em"], ["도구", "3.5em", "center"], ["모델", "9em"], ["추론", "4em", "center"], ["캐시 제외 입력", "6em", "number"], ["출력", "5em", "number"], ["응답", "3em", "number"]];
-    return <div className={manage.loadingUsage} role="status" aria-label="사용량을 불러오는 중">
-        <div className={manage.summaryCards} aria-hidden="true"><div className={styles.grid}>{["전체 토큰", "캐시 제외 입력", "출력", "캐시 읽기 비율"].map(label => <div className={styles.card} key={label}><span className={styles.note}><SkeletonText>{label}</SkeletonText></span><strong><SkeletonText>3,238,083,469</SkeletonText></strong></div>)}</div></div>
-        <div className={styles.tableScroll} aria-hidden="true"><table><thead><tr>{columns.map(([label], i) => <th key={label} className={i !== 1 ? styles.wideCol : undefined}><SkeletonText>{label}</SkeletonText></th>)}<NarrowHead labels={GROUP_NUMBERS} /></tr></thead>
-            <tbody>{SKELETON_ROWS.map(row => <tr key={row}>{columns.map(([label, width, align], i) => <td key={label} className={i !== 1 ? styles.wideCol : undefined} data-center={align === "center" || undefined} data-number={align === "number" || undefined}>{bar(width)}</td>)}<td data-number className={styles.narrowCol}>{bar("6em")}</td></tr>)}</tbody></table></div>
+    return <div className="aim-loadingUsage" role="status" aria-label="사용량을 불러오는 중">
+        <div className="aim-summaryCards" aria-hidden="true"><div className="ai-grid">{["전체 토큰", "캐시 제외 입력", "출력", "캐시 읽기 비율"].map(label => <div className="ai-card" key={label}><span className="ai-note"><SkeletonText>{label}</SkeletonText></span><strong><SkeletonText>3,238,083,469</SkeletonText></strong></div>)}</div></div>
+        <div className="ai-tableScroll" aria-hidden="true"><table><thead><tr>{columns.map(([label], i) => <th key={label} className={i !== 1 ? "ai-wideCol" : undefined}><SkeletonText>{label}</SkeletonText></th>)}<NarrowHead labels={GROUP_NUMBERS} /></tr></thead>
+            <tbody>{SKELETON_ROWS.map(row => <tr key={row}>{columns.map(([label, width, align], i) => <td key={label} className={i !== 1 ? "ai-wideCol" : undefined} data-center={align === "center" || undefined} data-number={align === "number" || undefined}>{bar(width)}</td>)}<td data-number className="ai-narrowCol">{bar("6em")}</td></tr>)}</tbody></table></div>
     </div>;
 }
 
@@ -80,12 +78,12 @@ export default function AdminAi({ asOf }: { asOf: string }) {
     const received = snapshot ? `수신 ${new Date(snapshot.receivedAt).toLocaleString("ko-KR", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false })}${data && Date.parse(data.checkedAt ?? asOf) - Date.parse(snapshot.receivedAt) > 48 * 3600_000 ? " · 갱신 지연" : ""}` : "아직 수신 없음";
     const count = tab === "quality" ? `작업 ${number(taskGroups.total)}건` : tab === "status" ? `${number(weeks.length)}주` : view === "weeks" ? `${number(shownWeeks.length)}주` : `${number(filtered.length)}행`;
     const resetFilters = () => { setQ(""); setYear(""); if (tab === "quality") setTaskFilters(NO_TASK_FILTERS); else setFilters(NO_GROUP_FILTERS); };
-    return <section className={`${styles.workspace} ${manage.workspace}`} aria-label="AI 관리" data-ai-workspace>
+    return <section className="ai-workspace aim-workspace" aria-label="AI 관리" data-ai-workspace>
         {/* 블로그 관리와 같은 머리줄. 넓으면 제목·탭·버튼이 한 줄, 좁으면 탭만 아래 줄을 꽉 채운다 */}
         <AdminHeading title="AI 관리"
             tabs={<AdminTabs label="AI 관리 항목" tabs={AI_TABS.map(([value, label]) => ({ key: value, label, current: tab === value, onSelect: () => update({ tab: value, q: "" }) }))} />}
             actions={<RefreshButton onClick={() => void query.refetch()} busy={query.isFetching} />} />
-        {query.isError && <p className={styles.warning} role="alert">{query.error.message} · 기존 데이터가 있으면 유지합니다.</p>}
+        {query.isError && <p className="ai-warning" role="alert">{query.error.message} · 기존 데이터가 있으면 유지합니다.</p>}
         {(data || query.isPending) && <AiFilterBar key={tab} loading={!data} period={period} onPeriod={setPeriod} view={tab === "usage" ? { value: view, onChange: setView } : undefined}
             sort={sort} onSort={setSort} q={q} onSearch={setQ}
             searchPlaceholder={tab === "status" ? undefined : "내용 검색"}
@@ -97,21 +95,21 @@ export default function AdminAi({ asOf }: { asOf: string }) {
             values={{ year: year || latestYear, ...(tab === "quality" ? taskFilters : filters) }} defaults={{ year: latestYear }}
             onApply={({ year: nextYear, ...rest }) => { setYear(nextYear === latestYear ? "" : nextYear); if (tab === "quality") setTaskFilters({ ...NO_TASK_FILTERS, ...rest }); else setFilters({ ...NO_GROUP_FILTERS, ...rest }); }}
             onReset={resetFilters}
-            summary={data ? <span className={manage.summaryLine}>{count} · {received}<Info label="집계 읽는 법">작업과 세션 연결이 아직 부족해 효율 비교는 보류합니다.{tab === "status" && " 이 탭은 연도·기간만 따르고, 다른 탭의 검색·필터와는 무관합니다."}{tab === "quality" && " 행을 누르면 상세가 펼쳐집니다. ‘기록명 기준’ 날짜와 날짜 미상 기록은 기간·날짜 정렬에서 빼고 표 아래에 둡니다."}</Info></span> : "불러오는 중"} />}
+            summary={data ? <span className="aim-summaryLine">{count} · {received}<Info label="집계 읽는 법">작업과 세션 연결이 아직 부족해 효율 비교는 보류합니다.{tab === "status" && " 이 탭은 연도·기간만 따르고, 다른 탭의 검색·필터와는 무관합니다."}{tab === "quality" && " 행을 누르면 상세가 펼쳐집니다. ‘기록명 기준’ 날짜와 날짜 미상 기록은 기간·날짜 정렬에서 빼고 표 아래에 둡니다."}</Info></span> : "불러오는 중"} />}
         {!data ? query.isPending ? <LoadingBody tab={tab} /> : <p role="status">데이터 연결을 확인해 주세요.</p> : <>
             {tab === "usage" ? <>
-                <div className={manage.summaryCards}><UsageCards weeks={shownWeeks} cacheObserved={privateYear ? publicYear(privateYear).cacheObserved : false} /></div>
+                <div className="aim-summaryCards"><UsageCards weeks={shownWeeks} cacheObserved={privateYear ? publicYear(privateYear).cacheObserved : false} /></div>
                 {view === "weeks" ? <WeekTable weeks={byWeek(shownWeeks)} compact /> :
-                    <AiScroll className={styles.tableScroll} tabIndex={0} aria-label="프로젝트별 집계 스크롤"><table><thead><tr>{GROUP_COLUMNS.map((x, i) => <th key={x} className={i !== 1 ? styles.wideCol : undefined}>{x}</th>)}<NarrowHead labels={GROUP_NUMBERS} /></tr></thead><tbody>{byWeek(filtered).map((g, i, rows) => {
+                    <AiScroll className="ai-tableScroll" tabIndex={0} aria-label="프로젝트별 집계 스크롤"><table><thead><tr>{GROUP_COLUMNS.map((x, i) => <th key={x} className={i !== 1 ? "ai-wideCol" : undefined}>{x}</th>)}<NarrowHead labels={GROUP_NUMBERS} /></tr></thead><tbody>{byWeek(filtered).map((g, i, rows) => {
                         const numbers = [g.totals.non_cache_read_input, g.totals.output, g.totals.responses];
                         // 좁은 화면은 주 열 대신 주가 바뀔 때마다 구분 줄을 둔다. 같은 날짜가 행마다 되풀이되며 폭을 먹지 않게 한다
-                        return <Fragment key={i}>{g.week !== rows[i - 1]?.week && <tr className={styles.weekRow}><td colSpan={GROUP_COLUMNS.length + 1}>{weekRange(g.week)}</td></tr>}<tr><td data-center className={styles.wideCol}>{weekRange(g.week)}</td><td>{projectLabel(g.project)}<span className={styles.cellSub}>{g.tool} · {g.model} · {effortLabel(g.effort)}</span></td><td data-center className={styles.wideCol}>{g.tool}</td><td className={styles.wideCol}>{g.model}</td><td data-center className={styles.wideCol}>{effortLabel(g.effort)}</td>{numbers.map((n, j) => <td key={j} data-number className={styles.wideCol}>{number(n)}</td>)}<NarrowNumbers values={numbers.map(number)} /></tr></Fragment>;
-                    })}</tbody></table>{!filtered.length && <p className={manage.empty}>선택 조건의 기록이 없습니다.</p>}</AiScroll>}
-            </> : tab === "status" ? privateYear ? <AiScroll className={`${styles.contentScroll} ${manage.statusScroll}`} tabIndex={0} aria-label="수집 상태 스크롤"><Diagnostics year={privateYear} weeks={byWeek(weeks)} /></AiScroll> : <p>수집 데이터가 아직 없습니다.</p> : privateYear ? <TaskRecords dated={taskGroups.dated} undated={taskGroups.undated} allTasks={data?.snapshots.flatMap(s => s.data.tasks) ?? []} /> : <p>수집 데이터가 아직 없습니다.</p>}
+                        return <Fragment key={i}>{g.week !== rows[i - 1]?.week && <tr className="ai-weekRow"><td colSpan={GROUP_COLUMNS.length + 1}>{weekRange(g.week)}</td></tr>}<tr><td data-center className="ai-wideCol">{weekRange(g.week)}</td><td>{projectLabel(g.project)}<span className="ai-cellSub">{g.tool} · {g.model} · {effortLabel(g.effort)}</span></td><td data-center className="ai-wideCol">{g.tool}</td><td className="ai-wideCol">{g.model}</td><td data-center className="ai-wideCol">{effortLabel(g.effort)}</td>{numbers.map((n, j) => <td key={j} data-number className="ai-wideCol">{number(n)}</td>)}<NarrowNumbers values={numbers.map(number)} /></tr></Fragment>;
+                    })}</tbody></table>{!filtered.length && <p className="aim-empty">선택 조건의 기록이 없습니다.</p>}</AiScroll>}
+            </> : tab === "status" ? privateYear ? <AiScroll className="ai-contentScroll aim-statusScroll" tabIndex={0} aria-label="수집 상태 스크롤"><Diagnostics year={privateYear} weeks={byWeek(weeks)} /></AiScroll> : <p>수집 데이터가 아직 없습니다.</p> : privateYear ? <TaskRecords dated={taskGroups.dated} undated={taskGroups.undated} allTasks={data?.snapshots.flatMap(s => s.data.tasks) ?? []} /> : <p>수집 데이터가 아직 없습니다.</p>}
         </>}
     </section>;
 }
-/* 표가 좁아지면 날짜와 시각 사이에서만 줄을 바꾼다(AiManagement.module.css 의 .deviceTable) */
+/* 표가 좁아지면 날짜와 시각 사이에서만 줄을 바꾼다(Ai.styled 의 .aim-deviceTable) */
 const observedTime = (value: string | null) => {
     if (!value) return "미상";
     const [day, time] = formatKst(value).split(" ");
@@ -147,7 +145,7 @@ const weekScope = (w: UsageYear["weeks"][number]): WeekScope | undefined => !w.o
  * 진행 중은 파란 원에 시곗바늘, 미관측은 회색 원에 빼기. 색은 CSS(.scopeMark)가 data-scope 로 정한다
  */
 function ScopeIcon({ scope }: { scope: WeekScope[0] }) {
-    return <svg className={manage.scopeMark} data-scope={scope} viewBox="0 0 24 24" aria-hidden="true">
+    return <svg className="aim-scopeMark" data-scope={scope} viewBox="0 0 24 24" aria-hidden="true">
         <circle data-part="face" cx="12" cy="12" r="10" />
         {scope === "partial" ? <path data-part="markFill" d="M12 5.5a6.5 6.5 0 0 0 0 13z" />
             : <path data-part="mark" d={scope === "running" ? "M12 7.5V12l3 2" : "M8 12h8"} />}
@@ -156,20 +154,20 @@ function ScopeIcon({ scope }: { scope: WeekScope[0] }) {
 function Diagnostics({ year, weeks }: { year: UsageYear; weeks: UsageYear["weeks"] }) {
     // 관측 범위는 날짜 옆 아이콘으로만 표시한다. 문구를 칸에 넣으면 첫 열이 넓어지거나 날짜가 가운데에서 밀리고,
     // 주를 나열하면 주가 늘수록 끝없이 길어진다. 설명 줄에는 아이콘의 뜻만 둔다
-    return <div className={manage.quality}>
-        <section className={manage.qualityPanel} aria-labelledby="quality-diagnostics">
-            <header><h3 id="quality-diagnostics">반복·잘림 살펴보기</h3><p className={styles.note}>큰 출력과 잘림이 많은 주는 조회 범위를, 반복 호출이 많은 주는 재확인 과정을 살펴보세요. 횟수만으로 낭비나 품질을 판단하지 않습니다.</p><p className={manage.scope}>선택 연도·기간의 주별 집계 · 작업 검색·필터와 무관 · 횟수는 건, 미분류 사용량은 토큰</p><p className={`${manage.scope} ${manage.scopeLegend}`}>{WEEK_SCOPES.map(([key, label]) => <span key={key}><ScopeIcon scope={key} />{label}</span>)}</p></header>
-            <details className={manage.metricGuide}><summary>지표 뜻과 읽는 법</summary><dl>{DIAGNOSTIC_HELP.map(([label, help]) => <div key={label}><dt>{label}</dt><dd>{help}</dd></div>)}</dl></details>
-            <AiScroll className={`${manage.qualityTable} ${manage.diagScroll}`} tabIndex={0} aria-label="주별 진단 스크롤"><table className={manage.diagTable}><thead><tr><th>주</th>{DIAGNOSTICS.map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td data-label="주" data-center>{(() => { const scope = weekScope(w); return scope ? <span className={manage.weekMarked} title={scope[1]}>{weekRange(w.week)}<ScopeIcon scope={scope[0]} /><span className={styles.srOnly}> {scope[1]}</span></span> : weekRange(w.week); })()}</td>{[w.diagnostics.large_outputs, w.diagnostics.truncations, w.diagnostics.repeated_calls, w.diagnostics.kb_searches, w.diagnostics.kb_selections, w.diagnostics.kb_applications, w.states.unclassified?.total ?? 0].map((n, i) => <td data-number data-label={DIAGNOSTICS[i]} key={i}>{w.observed ? number(n) : "—"}</td>)}</tr>)}</tbody></table>{!weeks.length && <p className={manage.empty}>선택 기간의 주별 진단 기록이 없습니다.</p>}</AiScroll>
+    return <div className="aim-quality">
+        <section className="aim-qualityPanel" aria-labelledby="quality-diagnostics">
+            <header><h3 id="quality-diagnostics">반복·잘림 살펴보기</h3><p className="ai-note">큰 출력과 잘림이 많은 주는 조회 범위를, 반복 호출이 많은 주는 재확인 과정을 살펴보세요. 횟수만으로 낭비나 품질을 판단하지 않습니다.</p><p className="aim-scope">선택 연도·기간의 주별 집계 · 작업 검색·필터와 무관 · 횟수는 건, 미분류 사용량은 토큰</p><p className="aim-scope aim-scopeLegend">{WEEK_SCOPES.map(([key, label]) => <span key={key}><ScopeIcon scope={key} />{label}</span>)}</p></header>
+            <details className="aim-metricGuide"><summary>지표 뜻과 읽는 법</summary><dl>{DIAGNOSTIC_HELP.map(([label, help]) => <div key={label}><dt>{label}</dt><dd>{help}</dd></div>)}</dl></details>
+            <AiScroll className="aim-qualityTable aim-diagScroll" tabIndex={0} aria-label="주별 진단 스크롤"><table className="aim-diagTable"><thead><tr><th>주</th>{DIAGNOSTICS.map(x => <th key={x}>{x}</th>)}</tr></thead><tbody>{weeks.map(w => <tr key={w.week}><td data-label="주" data-center>{(() => { const scope = weekScope(w); return scope ? <span className="aim-weekMarked" title={scope[1]}>{weekRange(w.week)}<ScopeIcon scope={scope[0]} /><span className="ai-srOnly"> {scope[1]}</span></span> : weekRange(w.week); })()}</td>{[w.diagnostics.large_outputs, w.diagnostics.truncations, w.diagnostics.repeated_calls, w.diagnostics.kb_searches, w.diagnostics.kb_selections, w.diagnostics.kb_applications, w.states.unclassified?.total ?? 0].map((n, i) => <td data-number data-label={DIAGNOSTICS[i]} key={i}>{w.observed ? number(n) : "—"}</td>)}</tr>)}</tbody></table>{!weeks.length && <p className="aim-empty">선택 기간의 주별 진단 기록이 없습니다.</p>}</AiScroll>
         </section>
-        <section className={manage.qualityPanel} aria-labelledby="quality-devices">
-            <header><h3 id="quality-devices" className={manage.titleWithInfo}>자료 누락 확인<Info label="수집 상태 읽는 법">관측 시작·종료는 수집 자료에 포함된 시각입니다. 그 사이 모든 기록이 수집됐다는 보장은 아닙니다. 식별 불확실은 응답 식별에 대체 값을 쓴 기록 수, 작업 충돌은 서로 다른 결과가 기록된 작업 수, 연결 모호는 여러 작업에 연결된 응답 수입니다.</Info></h3><p className={styles.note}>기기별 관측 종료가 기대한 시점까지 도달했는지 확인하세요. 보고된 문제가 없어도 자료가 완전하다는 뜻은 아닙니다.</p><p className={manage.scope}>{year.year}년 수집 자료 · 기간·작업 검색·필터와 무관</p></header>
-            <p className={manage.collectionSummary}>식별 불확실 <strong>{number(year.quality.fallback_identities)}</strong> · 작업 충돌 <strong>{number(year.quality.task_conflicts)}</strong> · 연결 모호 <strong>{number(year.quality.ambiguous_task_responses)}</strong></p>
-            <AiScroll className={manage.qualityTable} tabIndex={0} aria-label="기기별 자료 범위 스크롤"><table className={manage.deviceTable}><thead><tr><th>기기</th><th>관측 시작</th><th>관측 종료</th><th>수집 상태</th></tr></thead><tbody>{year.devices.map(d => {
+        <section className="aim-qualityPanel" aria-labelledby="quality-devices">
+            <header><h3 id="quality-devices" className="aim-titleWithInfo">자료 누락 확인<Info label="수집 상태 읽는 법">관측 시작·종료는 수집 자료에 포함된 시각입니다. 그 사이 모든 기록이 수집됐다는 보장은 아닙니다. 식별 불확실은 응답 식별에 대체 값을 쓴 기록 수, 작업 충돌은 서로 다른 결과가 기록된 작업 수, 연결 모호는 여러 작업에 연결된 응답 수입니다.</Info></h3><p className="ai-note">기기별 관측 종료가 기대한 시점까지 도달했는지 확인하세요. 보고된 문제가 없어도 자료가 완전하다는 뜻은 아닙니다.</p><p className="aim-scope">{year.year}년 수집 자료 · 기간·작업 검색·필터와 무관</p></header>
+            <p className="aim-collectionSummary">식별 불확실 <strong>{number(year.quality.fallback_identities)}</strong> · 작업 충돌 <strong>{number(year.quality.task_conflicts)}</strong> · 연결 모호 <strong>{number(year.quality.ambiguous_task_responses)}</strong></p>
+            <AiScroll className="aim-qualityTable" tabIndex={0} aria-label="기기별 자료 범위 스크롤"><table className="aim-deviceTable"><thead><tr><th>기기</th><th>관측 시작</th><th>관측 종료</th><th>수집 상태</th></tr></thead><tbody>{year.devices.map(d => {
                 const problems = year.quality.problems.filter(p => p.device === d.device);
-                return <tr key={d.device}><td data-label="기기">{d.device}</td><td data-label="관측 시작" data-center>{observedTime(d.since)}</td><td data-label="관측 종료" data-center>{observedTime(d.until)}</td><td data-label="수집 상태" data-meta data-center><span className={manage.badges}>{problems.length ? problems.map((p, i) => <AiBadge key={`${p.code}-${i}`} data-tone="warn">{collectionLabel(p.code)}</AiBadge>) : <AiBadge data-tone="ok">정상</AiBadge>}</span></td></tr>;
-            })}</tbody></table>{!year.devices.length && <p className={manage.empty}>수집된 기기 자료가 없습니다.</p>}</AiScroll>
-            {year.quality.problems.length > 0 && <ul className={manage.problemList} aria-label="수집 문제와 확인할 항목">{year.quality.problems.map((p, i) => <li key={i}><strong>{p.device ?? "전체 자료"} · {collectionLabel(p.code)}{p.count !== undefined ? ` (${number(p.count)}건)` : ""}</strong><span>{COLLECTION_PROBLEMS[p.code]?.[1] ?? "수집 로그에서 이 코드의 상세 내용을 확인하세요."}</span></li>)}</ul>}
+                return <tr key={d.device}><td data-label="기기">{d.device}</td><td data-label="관측 시작" data-center>{observedTime(d.since)}</td><td data-label="관측 종료" data-center>{observedTime(d.until)}</td><td data-label="수집 상태" data-meta data-center><span className="aim-badges">{problems.length ? problems.map((p, i) => <AiBadge key={`${p.code}-${i}`} data-tone="warn">{collectionLabel(p.code)}</AiBadge>) : <AiBadge data-tone="ok">정상</AiBadge>}</span></td></tr>;
+            })}</tbody></table>{!year.devices.length && <p className="aim-empty">수집된 기기 자료가 없습니다.</p>}</AiScroll>
+            {year.quality.problems.length > 0 && <ul className="aim-problemList" aria-label="수집 문제와 확인할 항목">{year.quality.problems.map((p, i) => <li key={i}><strong>{p.device ?? "전체 자료"} · {collectionLabel(p.code)}{p.count !== undefined ? ` (${number(p.count)}건)` : ""}</strong><span>{COLLECTION_PROBLEMS[p.code]?.[1] ?? "수집 로그에서 이 코드의 상세 내용을 확인하세요."}</span></li>)}</ul>}
         </section>
     </div>;
 }

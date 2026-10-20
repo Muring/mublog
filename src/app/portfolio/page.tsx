@@ -3,10 +3,10 @@ import Link from "next/link";
 import HeaderTitleSetter from "@/components/trackers/HeaderTitleTracker";
 import { portfolioProjects, portfolioSkills, PORTFOLIO_PATH } from "@/data/portfolio";
 import { baseOpenGraph } from "@/app/shared-metadata";
-import styles from "./portfolio.module.css";
 import ProjectGallery from "./ProjectGallery";
 import PortfolioNavigation from "./PortfolioNavigation";
 import { GitHubIcon, GlobeIcon, VideoIcon } from "./icons";
+import { PortfolioRoot } from "./Portfolio.styled";
 
 const title = "엄세현 포트폴리오";
 const description =
@@ -39,13 +39,13 @@ export const metadata: Metadata = {
 
 export default function PortfolioPage() {
     return (
-        <div className={styles.page} id="portfolio-top">
+        <PortfolioRoot className="pf-page" id="portfolio-top">
             <HeaderTitleSetter title={title} />
-            <header className={styles.hero}>
-                <div className={styles.eyebrow}>
-                    <span className={styles.dot} /> MURING · PORTFOLIO
+            <header className="pf-hero">
+                <div className="pf-eyebrow">
+                    <span className="pf-dot" /> MURING · PORTFOLIO
                 </div>
-                <p className={styles.greeting}>
+                <p className="pf-greeting">
                     안녕하세요, 개발자 엄세현입니다.
                 </p>
                 <h1>
@@ -53,12 +53,12 @@ export default function PortfolioPage() {
                     <br />
                     <span>경험을 연결합니다.</span>
                 </h1>
-                <p className={styles.intro}>
+                <p className="pf-intro">
                     사용자가 마주하는 화면부터 그 뒤의 업무 흐름까지.
-                    <br className={styles.desktopBreak} /> 웹 프론트엔드와
+                    <br className="pf-desktopBreak" /> 웹 프론트엔드와
                     Salesforce를 넘나들며 만든 프로젝트를 소개합니다.
                 </p>
-                <div className={styles.heroBottom}>
+                <div className="pf-heroBottom">
                     <span>프론트엔드에서 시작해, 더 넓은 개발 경험으로.</span>
                     <span>SCROLL TO EXPLORE ↓</span>
                 </div>
@@ -67,15 +67,15 @@ export default function PortfolioPage() {
             <PortfolioNavigation items={navigationItems} />
 
             <section
-                className={styles.expertise}
+                className="pf-expertise"
                 id="skills"
                 aria-labelledby="expertise-title"
             >
                 <div>
-                    <p className={styles.kicker}>TECHNICAL SKILLS</p>
+                    <p className="pf-kicker">TECHNICAL SKILLS</p>
                     <h2 id="expertise-title">Skills</h2>
                 </div>
-                <div className={styles.skills}>
+                <div className="pf-skills">
                     {portfolioSkills.map((skill) => (
                         <div key={skill.title}>
                             <h3>{skill.title}</h3>
@@ -85,8 +85,8 @@ export default function PortfolioPage() {
                                     <li key={highlight}>{highlight}</li>
                                 ))}
                             </ul>
-                            <div className={styles.skillProjects}>
-                                <span className={styles.skillProjectsLabel}>적용 프로젝트</span>
+                            <div className="pf-skillProjects">
+                                <span className="pf-skillProjectsLabel">적용 프로젝트</span>
                                 {skill.projects.map((id) => (
                                     <a key={id} href={`#${id}`}>{projectNames.get(id)}</a>
                                 ))}
@@ -97,20 +97,20 @@ export default function PortfolioPage() {
             </section>
 
             <section
-                className={styles.projects}
+                className="pf-projects"
                 id="projects"
                 aria-labelledby="projects-title"
             >
-                <div className={styles.sectionHeading}>
+                <div className="pf-sectionHeading">
                     <div>
-                        <p className={styles.kicker}>SELECTED WORK</p>
+                        <p className="pf-kicker">SELECTED WORK</p>
                         <h2 id="projects-title">
                             프로젝트
                         </h2>
                     </div>
                 </div>
                 <nav
-                    className={styles.projectNav}
+                    className="pf-projectNav"
                     aria-label="프로젝트 바로가기"
                 >
                     {portfolioProjects.map((project, index) => (
@@ -125,15 +125,15 @@ export default function PortfolioPage() {
                     <article
                         key={project.id}
                         id={project.id}
-                        className={styles.project}
+                        className="pf-project"
                     >
-                        <div className={styles.projectMeta}>
-                            <span className={styles.projectNumber}>
+                        <div className="pf-projectMeta">
+                            <span className="pf-projectNumber">
                                 0{index + 1}
                             </span>
-                            <p className={styles.kicker}>{project.category}</p>
+                            <p className="pf-kicker">{project.category}</p>
                             <h3>{project.name}</h3>
-                            <p className={styles.period}>{project.period}</p>
+                            <p className="pf-period">{project.period}</p>
                             <dl>
                                 <div>
                                     <dt>ROLE</dt>
@@ -144,9 +144,9 @@ export default function PortfolioPage() {
                                     <dd>{project.team}</dd>
                                 </div>
                             </dl>
-                            <div className={styles.projectLinks}>
+                            <div className="pf-projectLinks">
                                 <a
-                                    className={styles.animatedLink}
+                                    className="pf-animatedLink"
                                     href={project.repository}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -157,7 +157,7 @@ export default function PortfolioPage() {
                                 {project.links?.map((link) => (
                                     <a
                                         key={link.url}
-                                        className={styles.animatedLink}
+                                        className="pf-animatedLink"
                                         href={link.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -172,13 +172,13 @@ export default function PortfolioPage() {
                                 ))}
                             </div>
                         </div>
-                        <div className={styles.projectBody}>
+                        <div className="pf-projectBody">
                             <ProjectGallery project={project} />
-                            <p className={styles.summary}>{project.summary}</p>
-                            <h4 className={styles.detailHeading}>
+                            <p className="pf-summary">{project.summary}</p>
+                            <h4 className="pf-detailHeading">
                                 제가 맡은 일
                             </h4>
-                            <ul className={styles.contributions}>
+                            <ul className="pf-contributions">
                                 {project.contributions.map((item, i) => (
                                     <li key={item.title}>
                                         <span aria-hidden="true">0{i + 1}</span>
@@ -189,9 +189,9 @@ export default function PortfolioPage() {
                                     </li>
                                 ))}
                             </ul>
-                            <h4 className={styles.stackHeading}>사용한 기술</h4>
+                            <h4 className="pf-stackHeading">사용한 기술</h4>
                             <ul
-                                className={styles.tags}
+                                className="pf-tags"
                                 aria-label={`${project.name} 기술`}
                             >
                                 {project.stack.map((tech) => (
@@ -202,25 +202,25 @@ export default function PortfolioPage() {
                     </article>
                 ))}
             </section>
-            <section className={styles.contact} id="contact" aria-labelledby="contact-title">
-                <p className={styles.kicker}>KEEP IN TOUCH</p>
+            <section className="pf-contact" id="contact" aria-labelledby="contact-title">
+                <p className="pf-kicker">KEEP IN TOUCH</p>
                 <h2 id="contact-title">
                     다음 이야기도
                     <br />
                     함께 나누고 싶습니다.
                 </h2>
-                <a className={styles.email} href="mailto:esh5218@gmail.com">
+                <a className="pf-email" href="mailto:esh5218@gmail.com">
                     esh5218@gmail.com
                 </a>
-                <div className={styles.contactActions}>
-                    <Link href="/" className={styles.button}>
+                <div className="pf-contactActions">
+                    <Link href="/" className="pf-button">
                         블로그에서 더 읽기
                     </Link>
                 </div>
-                <div className={styles.contactBottom}>
+                <div className="pf-contactBottom">
                     <a href="#portfolio-top">맨 위로 ↑</a>
                 </div>
             </section>
-        </div>
+        </PortfolioRoot>
     );
 }

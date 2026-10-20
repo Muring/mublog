@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type MouseEvent } from "react";
-import styles from "./TableOfContents.module.css";
+import { TocNav } from "./TableOfContents.styled";
 
 export type NavigationItem = {
     id: string;
@@ -102,7 +102,7 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
     };
 
     const renderItems = (entries: NavigationItem[]) => (
-        <ol className={styles.navigationList}>
+        <ol className="toc-list">
             {entries.map((item) => (
                 <li key={item.id}>
                     <a
@@ -110,7 +110,7 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
                         onClick={(event) => handleNavigation(event, item.id)}
                         aria-current={activeId === item.id ? "location" : undefined}
                     >
-                        <span className={styles.navigationLabel}>{item.label}</span>
+                        <span className="toc-label">{item.label}</span>
                     </a>
                     {item.children?.length ? renderItems(item.children) : null}
                 </li>
@@ -119,11 +119,11 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
     );
 
     return (
-        <nav ref={navigationRef} className={styles.navigation} aria-label={label} data-toc>
-            <p className={styles.navigationTitle} data-toc-title>목차</p>
+        <TocNav ref={navigationRef} aria-label={label} data-toc>
+            <p className="toc-title" data-toc-title>목차</p>
             <button
                 type="button"
-                className={styles.navigationToggle}
+                className="toc-toggle"
                 data-toc-toggle
                 aria-expanded={open}
                 aria-controls={bodyId}
@@ -131,10 +131,10 @@ export default function TableOfContents({ items, topId, label = "목차" }: {
             >
                 목차
             </button>
-            <div id={bodyId} className={styles.navigationBody} data-toc-body data-collapsed={open ? undefined : ""}>
+            <div id={bodyId} className="toc-body" data-toc-body data-collapsed={open ? undefined : ""}>
                 {renderItems(items)}
-                <a className={styles.navigationTop} data-toc-top href={`#${topId}`} onClick={(event) => handleNavigation(event, topId)}>맨 위로</a>
+                <a className="toc-top" data-toc-top href={`#${topId}`} onClick={(event) => handleNavigation(event, topId)}>맨 위로</a>
             </div>
-        </nav>
+        </TocNav>
     );
 }

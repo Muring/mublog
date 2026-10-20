@@ -6,7 +6,6 @@ import { lineSegments, niceCeil } from "@/lib/admin-chart";
 import { Plot, Axis } from "./VisitorChart.styled";
 import { Column } from "./TagViewsChart.styled";
 import AnimatedChartPath from "./AnimatedChartPath";
-import styles from "./Analytics.module.css";
 
 export default function AnalyticsChart({ title, unit, points, since, range, today }: {
     title: string; unit: string; points: MetricPoint[]; since: string | null; range: AnalyticsRange; today: string;
@@ -23,9 +22,9 @@ export default function AnalyticsChart({ title, unit, points, since, range, toda
         setFocused(next);
         (event.currentTarget.parentElement?.querySelector(`[data-point="${next}"]`) as HTMLElement)?.focus();
     };
-    return <figure className={styles.chart} aria-label={`${title} 추이`}>
-        <figcaption>{title} <span className={styles.note}>({unit})</span></figcaption>
-        {known.length === 0 ? <div className={styles.empty}>선택 기간에 집계된 기록이 없습니다.</div> : <>
+    return <figure className="an-chart" aria-label={`${title} 추이`}>
+        <figcaption>{title} <span className="an-note">({unit})</span></figcaption>
+        {known.length === 0 ? <div className="an-empty">선택 기간에 집계된 기록이 없습니다.</div> : <>
             <Plot>
                 {[ceiling, ceiling / 2, 0].map(tick => <div key={tick} className="gridline" data-base={tick === 0} style={{ bottom: `calc(var(--plot-h) * ${tick / ceiling})` }} aria-hidden><span>{tick.toLocaleString("ko-KR")}</span></div>)}
                 <div className="series">
@@ -47,8 +46,8 @@ export default function AnalyticsChart({ title, unit, points, since, range, toda
                     })}
                 </div>
             </Plot>
-            <Axis className={styles.axisTransition}>{bars.map((bar, i) => <span key={i} data-show={i === 0 || i === bars.length - 1 || i % Math.max(1, Math.ceil((bars.length - 1) / 3)) === 0} data-edge={bars.length === 1 ? undefined : i === 0 ? "first" : i === bars.length - 1 ? "last" : undefined} style={{ "--x": `${xAt(i)}%` } as CSSProperties}>{range.bucket === "monthly" ? bar.key : bar.from.slice(5).replace("-", "/")}</span>)}</Axis>
+            <Axis className="an-axisTransition">{bars.map((bar, i) => <span key={i} data-show={i === 0 || i === bars.length - 1 || i % Math.max(1, Math.ceil((bars.length - 1) / 3)) === 0} data-edge={bars.length === 1 ? undefined : i === 0 ? "first" : i === bars.length - 1 ? "last" : undefined} style={{ "--x": `${xAt(i)}%` } as CSSProperties}>{range.bucket === "monthly" ? bar.key : bar.from.slice(5).replace("-", "/")}</span>)}</Axis>
         </>}
-        <p className={styles.note}>{known.length > 0 && "방향키로 구간 이동 · "}{known.length === 1 ? "한 구간의 기록만 있어 추세선은 표시하지 않습니다." : "기록 시작 전은 빈 구간으로 표시합니다."}</p>
+        <p className="an-note">{known.length > 0 && "방향키로 구간 이동 · "}{known.length === 1 ? "한 구간의 기록만 있어 추세선은 표시하지 않습니다." : "기록 시작 전은 빈 구간으로 표시합니다."}</p>
     </figure>;
 }

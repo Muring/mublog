@@ -33,6 +33,15 @@ export default [
                     caughtErrorsIgnorePattern: "^_",
                 },
             ],
+            /*
+             * 스타일은 Emotion(.styled.tsx · styles/*.ts) 으로만 쓴다. CSS 모듈은 styles/ 의 공용 조각
+             * (버튼·면·입력창·표 머리글)을 가져다 쓸 수 없어서, 같은 디자인이 손으로 한 벌 더 적히고
+             * 토큰을 바꿀 때 그쪽만 어긋났다. 2026-10 에 아홉 개를 전부 옮겼다.
+             */
+            "no-restricted-imports": [
+                "error",
+                { patterns: [{ group: ["*.module.css"], message: "CSS 모듈 대신 Emotion(.styled.tsx)으로 쓴다." }] },
+            ],
         },
     },
 

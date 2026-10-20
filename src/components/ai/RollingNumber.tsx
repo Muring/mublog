@@ -1,6 +1,5 @@
 "use client";
 import { useState, type CSSProperties, type TransitionEvent } from "react";
-import styles from "./AiDashboard.module.css";
 
 // Three 0-9 cycles so a digit can keep rolling one way past 9→0; it rests in the middle cycle.
 const STRIP = Array.from({ length: 30 }, (_, i) => i % 10);
@@ -22,9 +21,9 @@ function Digit({ digit, direction }: { digit: number; direction: Direction }) {
         if (event.target !== event.currentTarget) return;
         setState(s => s.pos === REST + s.digit ? s : { ...s, pos: REST + s.digit, still: true });
     };
-    return <span className={styles.digit}>
-        <span className={styles.digitSizer}>{digit}</span>
-        <span className={styles.digitStrip} data-still={state.still || undefined} style={{ "--pos": state.pos } as CSSProperties} onTransitionEnd={settle}>{STRIP.map((d, i) => <span key={i}>{d}</span>)}</span>
+    return <span className="ai-digit">
+        <span className="ai-digitSizer">{digit}</span>
+        <span className="ai-digitStrip" data-still={state.still || undefined} style={{ "--pos": state.pos } as CSSProperties} onTransitionEnd={settle}>{STRIP.map((d, i) => <span key={i}>{d}</span>)}</span>
     </span>;
 }
 
@@ -39,9 +38,9 @@ export default function RollingNumber({ value }: { value: string }) {
         setTrend({ value, numeric, direction });
     }
     const chars = Array.from(value);
-    return <span className={styles.rolling}>
-        <span className={styles.srOnly}>{value}</span>
-        <span className={styles.rollingChars} aria-hidden="true">{chars.map((char, index) => {
+    return <span className="ai-rolling">
+        <span className="ai-srOnly">{value}</span>
+        <span className="ai-rollingChars" aria-hidden="true">{chars.map((char, index) => {
             // Keyed from the right so ones stay ones when the number gains a digit.
             const place = chars.length - index;
             return /\d/.test(char)

@@ -4,33 +4,20 @@ import styled from "@emotion/styled";
 import { scrim, overlayPanel } from "@/styles/motion";
 import { dialogSurface, hoverSurface } from "@/styles/surface";
 import { mobile } from "@/styles/breakpoints";
+import { headerControl } from "@/styles/button";
+import { emptyNote } from "@/styles/text";
 
 /** 헤더의 검색 버튼. 아이콘 + "검색" 라벨. 오른쪽 로그인 영역과는 한 칸 띄운다. */
 export const SearchTrigger = styled.button`
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
     /* 헤더 왼쪽 메뉴·아이콘 링크(3rem 정사각형)와 높이를 맞추고, 아이콘만 남는 좁은 화면에서도 그보다 좁아지지 않는다 */
-    height: 3rem;
-    min-width: 3rem;
-    justify-content: center;
+    ${headerControl}
+    gap: 0.4rem;
     padding: 0 0.75rem;
     margin-right: 1rem;
-    border: 0;
-    border-radius: 0.5rem;
-    background: none;
-    color: var(--foreground);
-    font-family: inherit;
     font-size: 0.85rem;
     font-weight: 700;
-    cursor: pointer;
     flex-shrink: 0;
 
-    &:hover {
-        background-color: var(--hovercolor);
-        color: var(--hoverfontcolor);
-        transition: 0.1s ease-in-out;
-    }
     ${mobile} {
         padding: 0 0.5rem;
         margin-right: 0.5rem;
@@ -115,10 +102,8 @@ export const SearchPanel = styled.div`
         list-style: none;
     }
     .search-status {
+        ${emptyNote}
         padding: 1.5rem 1rem;
-        text-align: center;
-        font-size: 0.85rem;
-        color: var(--desccolor);
     }
 
     .search-hit + .search-hit {

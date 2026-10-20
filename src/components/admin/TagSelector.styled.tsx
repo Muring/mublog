@@ -2,6 +2,7 @@
 
 import styled from "@emotion/styled";
 import { surface } from "@/styles/surface";
+import { textField } from "@/styles/field";
 
 export const TagSelectorWrapper = styled.div`
     display: flex;
@@ -51,9 +52,9 @@ export const TagSelectorWrapper = styled.div`
         }
 
         &.active {
-            background-color: var(--foreground);
-            color: var(--background);
-            border-color: var(--foreground);
+            background-color: var(--activecolor);
+            color: var(--activefontcolor);
+            border-color: var(--activecolor);
         }
 
         /* 선택된 칩에만 체크를 붙여 색과 무관하게 구분되도록 한다 */
@@ -72,11 +73,9 @@ export const TagSelectorWrapper = styled.div`
     .new-tag input {
         width: 7rem;
         padding: 0.3rem 0.6rem;
-        border: 1px dashed var(--bordercolor);
-        border-radius: 999px;
-        background-color: var(--cardbackground);
-        color: var(--foreground);
-        font-family: inherit;
+        ${textField("999px")}
+        /* 새 태그 자리임을 드러내는 점선. 호버 색은 공용 칸과 같다 */
+        border-style: dashed;
         font-size: 0.78rem;
     }
 

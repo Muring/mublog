@@ -68,23 +68,17 @@ export const ToastItem = styled.div`
         font-size: inherit;
         text-decoration: none;
         white-space: nowrap;
-
-        &:focus-visible {
-            outline: 2px solid var(--linkhovercolor);
-            outline-offset: 2px;
-        }
     }
 
     .dismiss {
+        display: inline-flex;
         flex-shrink: 0;
         padding: 0;
         border: none;
         background: none;
         color: var(--desccolor);
-        font-family: inherit;
-        font-size: 0.9rem;
-        line-height: 1;
         cursor: pointer;
+        transition: color 0.15s ease;
 
         &:hover {
             color: var(--foreground);

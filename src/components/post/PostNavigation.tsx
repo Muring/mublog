@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import TableOfContents, { type NavigationItem } from "@/components/navigation/TableOfContents";
-import styles from "./PostNavigation.module.css";
+import { PostNavigationDock } from "./PostNavigation.styled";
 
 const HEADING = /<h([1-6])\b([^>]*)>([\s\S]*?)<\/h\1>/g;
 const ENTITIES: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
@@ -48,8 +48,8 @@ export default function PostNavigation({ html }: { html: string }) {
     if (!items.length) return null;
 
     return (
-        <div className={styles.postNavigation}>
+        <PostNavigationDock>
             <TableOfContents items={items} topId="post-top" label="본문 목차" />
-        </div>
+        </PostNavigationDock>
     );
 }

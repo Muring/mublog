@@ -3,7 +3,7 @@
 import styled from "@emotion/styled";
 import { buttonSubtle } from "@/styles/button";
 import { Article } from "@/components/post/PostContent.styled";
-import { surface } from "@/styles/surface";
+import { textField } from "@/styles/field";
 import { mobile } from "@/styles/breakpoints";
 
 export const EditorWrapper = styled.div`
@@ -93,9 +93,7 @@ export const MetaGrid = styled.div`
   input,
   select {
     padding: 0.5rem 0.6rem;
-    ${surface("0.4rem")}
-    color: var(--foreground);
-    font-family: inherit;
+    ${textField("0.4rem")}
     font-size: 0.875rem;
   }
 
@@ -392,14 +390,6 @@ export const EditorColumn = styled.div`
     gap: 0.25rem;
     flex-wrap: wrap;
     padding: 0.4rem;
-    border-bottom: 1px solid var(--bordercolor);
-  }
-
-  .pane-label {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--desccolor);
     border-bottom: 1px solid var(--bordercolor);
   }
 

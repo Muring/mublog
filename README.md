@@ -557,11 +557,13 @@ JS는 **몇 장 보일지**만 정하고, 폭은 `calc((100% - gap × (n-1)) / n
 
 | 파일 | 조각 |
 |---|---|
-| `button.ts` | `buttonBase` / `buttonSubtle` / `buttonQuiet` / `buttonGhost` / `buttonPrimary` / `buttonDanger` |
-| `surface.ts` | `surface(radius)` (카드·입력창 면) / `dialogSurface` (검색·확인창) / `hoverSurface` / `cardHoverLift` |
-| `text.ts` | `truncate` (한 줄 말줄임) / `clampLines(n)` |
+| `button.ts` | `buttonBase` / `buttonSubtle` / `buttonQuiet` / `buttonGhost` / `buttonPrimary` / `buttonDanger` / `headerControl` (헤더 메뉴·검색·계정 버튼) |
+| `surface.ts` | `surface(radius)` (카드 면) / `dialogSurface` (검색·확인창) / `hoverSurface` / `cardHoverLift` |
+| `field.ts` | `textField(radius)` (입력창 면·placeholder·호버 테두리) |
+| `text.ts` | `truncate` (한 줄 말줄임) / `clampLines(n)` / `emptyNote` (빈 목록 안내) |
 | `motion.ts` | `fadeSlide` |
-| `breakpoints.ts` | `mobile` (640px) |
+| `breakpoints.ts` | `mobile` (640px) / `desktop` (641px~) |
+| `link.ts` | `animatedLink` (호버하면 밑줄이 왼쪽에서 그어지는 링크) |
 
 크기처럼 자리마다 달라야 하는 값은 조각에 넣지 않고 쓰는 쪽에서 덧붙입니다.
 
@@ -597,7 +599,7 @@ src/
 │   ├── auth/             # OAuth 콜백 · 로그아웃
 │   ├── feed.xml/         # RSS
 │   ├── login/
-│   ├── portfolio/        # 포트폴리오. 페이지·갤러리·아이콘·CSS 모듈이 한 폴더에
+│   ├── portfolio/        # 포트폴리오. 페이지·갤러리·아이콘·스타일이 한 폴더에
 │   ├── privacy/          # 개인정보 처리방침
 │   └── globals.css       # 테마 토큰
 ├── components/           # X.tsx + X.styled.tsx 짝
@@ -611,7 +613,7 @@ src/
 │   ├── search/           # 헤더 검색 버튼·대화상자·강조
 │   ├── stats/            # 방문 집계: 세는 쪽(VisitTracker)과 보여주는 쪽(SiteStats)
 │   ├── trackers/         # 화면에 아무것도 그리지 않고 부수효과만 내는 null 컴포넌트
-│   ├── ui/               # Skeleton · Toast · ConfirmDialog · strokeIcon 같은 범용 조각
+│   ├── ui/               # Skeleton · Toast · ConfirmDialog · strokeIcon · CloseIcon 같은 범용 조각
 │   └── Profile.tsx       # 루트에는 두 영역 이상이 함께 쓰는 것만 둔다
 ├── lib/
 │   ├── markdown/         # 마크다운 → HTML 파이프라인
@@ -640,9 +642,11 @@ src/
 ├── styles/
 │   ├── button.ts         # 버튼 공통 조각
 │   ├── surface.ts        # 면·호버·카드 들어올림
+│   ├── field.ts          # 입력창 공통 조각
 │   ├── text.ts           # 말줄임·여러 줄 자르기
 │   ├── motion.ts         # 페이드·슬라이드 전환, 뒤를 가리는 막(scrim)
 │   ├── breakpoints.ts    # 공용 미디어 기준선
+│   ├── link.ts           # 밑줄이 그어지는 링크
 │   └── prism-notion-theme.css
 ├── types/                # post.ts / comment.ts
 ├── data/                 # about · portfolio 정적 데이터 (portfolio-images.json 은 이미지 치수)

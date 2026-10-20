@@ -11,7 +11,6 @@ import Info from "./Info";
 import ParagraphText from "./ParagraphText";
 import RollingNumber from "./RollingNumber";
 import { AiSegments, number } from "./AiControls";
-import styles from "./AiDashboard.module.css";
 
 const tools = ["Codex", "Claude"] as const;
 const metrics = [
@@ -100,29 +99,29 @@ export default function ToolComparison({ weeks, allWeeks = weeks }: { weeks: Pub
         (event.currentTarget.parentElement?.querySelector(`[data-point="${next}"]`) as HTMLElement)?.focus();
     };
     const flags = (p: Point) => [p.ongoing && "집계 중", p.partial && "부분 관측", p.clipped && "선택 기간 밖의 주 제외"].filter((f): f is string => !!f);
-    return <section className={`${styles.card} ${styles.comparison}`} aria-labelledby="tool-comparison-title">
-        <div className={styles.sectionHeading}>
-            <div className={styles.titleRow}><h3 id="tool-comparison-title">Codex와 Claude, {unit === "week" ? "주별로" : "월별로"} 비교하기</h3><Info><span className={styles.paragraph}>같은 기간의 사용량을 같은 눈금으로 나란히 봅니다. 월요일 시작 · KST.</span><span className={styles.paragraph}>월 단위는 주를 시작 월요일이 속한 달에 묶습니다.</span><span className={styles.paragraph}>숫자는 관측한 토큰 수이며, 도구의 성능이나 작업 효율 순위를 뜻하지 않습니다.</span></Info></div>
-            <div className={styles.comparisonControls}>
+    return <section className="ai-card ai-comparison" aria-labelledby="tool-comparison-title">
+        <div className="ai-sectionHeading">
+            <div className="ai-titleRow"><h3 id="tool-comparison-title">Codex와 Claude, {unit === "week" ? "주별로" : "월별로"} 비교하기</h3><Info><span className="ai-paragraph">같은 기간의 사용량을 같은 눈금으로 나란히 봅니다. 월요일 시작 · KST.</span><span className="ai-paragraph">월 단위는 주를 시작 월요일이 속한 달에 묶습니다.</span><span className="ai-paragraph">숫자는 관측한 토큰 수이며, 도구의 성능이나 작업 효율 순위를 뜻하지 않습니다.</span></Info></div>
+            <div className="ai-comparisonControls">
                 {/* 데이터를 바꾸는 선택만 제목 아래 한 줄에 둔다. 보는 방식(꺾은선·막대)은 차트 위 아이콘 토글로 뺐다 */}
                 <AiSegments aria-label="비교할 토큰 종류">{metrics.map(m => <button key={m.key} aria-pressed={metric === m.key} onClick={() => setMetric(m.key)}>{m.label}</button>)}</AiSegments>
                 <AiSegments aria-label="묶는 단위">{units.map(([value, label]) => <button key={value} aria-pressed={unit === value} onClick={() => setUnit(value)}>{label}</button>)}</AiSegments>
             </div>
         </div>
-        <p className={styles.note}><ParagraphText>{selected.description}</ParagraphText></p>
-        <div className={styles.toolTotals} aria-label={`선택 기간 ${selected.label} 합계`}>
-            {tools.map((tool, index) => <div key={tool} data-tool={tool}><span className={styles.toolName}><i aria-hidden="true" />{tool}</span><strong><RollingNumber value={known.length ? number(totals[index]) : "—"} /><small> 토큰</small></strong></div>)}
+        <p className="ai-note"><ParagraphText>{selected.description}</ParagraphText></p>
+        <div className="ai-toolTotals" aria-label={`선택 기간 ${selected.label} 합계`}>
+            {tools.map((tool, index) => <div key={tool} data-tool={tool}><span className="ai-toolName"><i aria-hidden="true" />{tool}</span><strong><RollingNumber value={known.length ? number(totals[index]) : "—"} /><small> 토큰</small></strong></div>)}
         </div>
-        <figure className={styles.lineChart} data-shape={shape} aria-label={`${unit === "week" ? "주별" : "월별"} ${selected.label} 추이`}>
+        <figure className="ai-lineChart" data-shape={shape} aria-label={`${unit === "week" ? "주별" : "월별"} ${selected.label} 추이`}>
             {/* 보는 방법 안내·점선 범례와 꺾은선·막대 토글을 차트 바로 위에 모은다 */}
-            <div className={styles.chartBar}>
-                <div className={styles.chartGuide}>
-                    <p className={styles.note}>{!known.length ? "" : bar ? "막대에 올리거나 방향키로 구간을 옮기면 값을 봅니다. 기록이 없는 구간은 비워 둡니다." : single ? "한 구간의 기록만 있어 추세선은 표시하지 않습니다." : "점에 올리거나 방향키로 구간을 옮기면 값을 봅니다."}</p>
-                    {!bar && bridged && <p className={styles.gapLegend}><i aria-hidden="true" />기록이 없는 주를 건너 이은 구간</p>}
+            <div className="ai-chartBar">
+                <div className="ai-chartGuide">
+                    <p className="ai-note">{!known.length ? "" : bar ? "막대에 올리거나 방향키로 구간을 옮기면 값을 봅니다. 기록이 없는 구간은 비워 둡니다." : single ? "한 구간의 기록만 있어 추세선은 표시하지 않습니다." : "점에 올리거나 방향키로 구간을 옮기면 값을 봅니다."}</p>
+                    {!bar && bridged && <p className="ai-gapLegend"><i aria-hidden="true" />기록이 없는 주를 건너 이은 구간</p>}
                 </div>
-                <div className={styles.chartToolbar}><AiSegments aria-label="그래프 모양">{shapes.map(([value, label, svg]) => <button key={value} aria-pressed={shape === value} aria-label={label} title={label} onClick={() => setShape(value)}>{svg}</button>)}</AiSegments></div>
+                <div className="ai-chartToolbar"><AiSegments aria-label="그래프 모양">{shapes.map(([value, label, svg]) => <button key={value} aria-pressed={shape === value} aria-label={label} title={label} onClick={() => setShape(value)}>{svg}</button>)}</AiSegments></div>
             </div>
-            {!known.length ? <p className={styles.emptyState}>선택 기간의 기록이 없습니다.</p> : <>
+            {!known.length ? <p className="ai-emptyState">선택 기간의 기록이 없습니다.</p> : <>
                 <Plot>
                     {[ceiling, ceiling / 2, 0].map(tick => <div key={tick} className="gridline" data-base={tick === 0} style={{ bottom: `calc(var(--plot-h) * ${tick / ceiling})` }} aria-hidden><span>{shortNumber(tick)}</span></div>)}
                     <div className="series">
@@ -139,14 +138,14 @@ export default function ToolComparison({ weeks, allWeeks = weeks }: { weeks: Pub
                                 data-edge={i < points.length / 3 ? "first" : i >= points.length * 2 / 3 ? "last" : undefined}
                                 style={{ "--x": `${xAt(i)}%`, ...slot(i) } as CSSProperties}>
                                 {bar
-                                    ? <span className={styles.barGroup} aria-hidden>{tools.map((tool, index) => <span key={tool} data-tool={tool} data-empty={p.values[index] === null || undefined} style={{ height: `${(p.values[index] ?? 0) / ceiling * 100}%` }} />)}</span>
+                                    ? <span className="ai-barGroup" aria-hidden>{tools.map((tool, index) => <span key={tool} data-tool={tool} data-empty={p.values[index] === null || undefined} style={{ height: `${(p.values[index] ?? 0) / ceiling * 100}%` }} />)}</span>
                                     : <><span className="rule" />{tools.map((tool, index) => p.values[index] !== null && <span key={tool} className="dot" data-tool={tool} data-show={marked || knownCount[index] === 1} style={{ "--y": `${100 - p.values[index]! / ceiling * 100}%` } as CSSProperties} />)}</>}
                                 <span className="tip"><span className="date">{p.label}</span>{tools.map((tool, index) => <span key={tool} className="row" data-tool={tool}><span className="swatch" />{tool}<span className="value">{p.values[index] === null ? "기록 없음" : number(p.values[index]!)}</span></span>)}{flags(p).map(f => <span key={f} className="row">{f}</span>)}</span>
                             </Column>;
                         })}
                     </div>
                 </Plot>
-                <Axis className={styles.lineAxis} data-dense={n > 6 || undefined}>{points.map((p, i) => <span key={p.key} data-show={n <= 12 || i === 0 || i === n - 1 || i % Math.ceil((n - 1) / 6) === 0} data-minor={i % 2 === 1 && i !== n - 1 || undefined} data-edge={points.length === 1 ? undefined : i === 0 ? "first" : i === points.length - 1 ? "last" : undefined} style={{ "--x": `${xAt(i)}%` } as CSSProperties}>{p.axis}</span>)}</Axis>
+                <Axis className="ai-lineAxis" data-dense={n > 6 || undefined}>{points.map((p, i) => <span key={p.key} data-show={n <= 12 || i === 0 || i === n - 1 || i % Math.ceil((n - 1) / 6) === 0} data-minor={i % 2 === 1 && i !== n - 1 || undefined} data-edge={points.length === 1 ? undefined : i === 0 ? "first" : i === points.length - 1 ? "last" : undefined} style={{ "--x": `${xAt(i)}%` } as CSSProperties}>{p.axis}</span>)}</Axis>
             </>}
         </figure>
     </section>;

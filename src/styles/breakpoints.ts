@@ -6,7 +6,7 @@
  * 화면마다 560·620·627·650px 로 따로 놀아서, 같은 폭에서 툴바는 모바일인데 표는 데스크톱인 상태가 있었다.
  *
  * 관리 화면도 컨테이너가 아니라 뷰포트로 본다 — 컨테이너 폭은 좌우 여백만큼 작아서 같은 숫자여도 어긋난다.
- * CSS 모듈(Management·Analytics)과 globals.css 는 이 파일을 못 불러오므로 같은 값을 적고 주석으로 가리킨다.
+ * globals.css 는 이 파일을 못 불러오므로 같은 값을 적고 주석으로 가리킨다.
  *
  * 여기 없는 값은 모바일 전환이 아니라 넓은 화면에서 열을 하나씩 접는 단계(관리 표의 열 숨김 등)다.
  */
@@ -14,3 +14,5 @@
 /** 좁은 화면. 위의 모바일 UI 전환이 모두 이 지점에서 함께 일어난다. */
 export const mobileQuery = "(max-width: 640px)";
 export const mobile = `@media ${mobileQuery}`;
+/** mobile 의 바로 위 폭부터. 넓은 화면에서만 켜는 규칙(관리 화면의 고정 골격 등)에 쓴다. */
+export const desktop = "@media (min-width: 641px)";

@@ -6,7 +6,6 @@ import Dropdown, { type DropdownOption } from "@/components/ui/Dropdown";
 import { splitMulti, withoutMulti } from "@/lib/multi-value";
 import { mobileQuery } from "@/styles/breakpoints";
 import { number } from "./AiControls";
-import manage from "./AiManagement.module.css";
 import { useImeInput } from "@/hooks/useImeInput";
 import { ALL_OPTION, NEWEST_OLDEST } from "@/lib/admin-filters";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -48,7 +47,7 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
     const isMobile = useMediaQuery(mobileQuery);
     const sheetFields = isMobile && view ? [{ key: "view", label: "표 구성", options: VIEW_OPTIONS }, ...fields] : fields;
     /*
-     * 좁은 화면에서 이 바는 헤더 아래에 붙고(AiManagement.module.css), 사용량 표 머리글은 그 아래에 붙는다.
+     * 좁은 화면에서 이 바는 헤더 아래에 붙고(Ai.styled 의 관리 쪽 규칙), 사용량 표 머리글은 그 아래에 붙는다.
      * 바 높이는 칩·검색 상태로 바뀌므로 바의 아래 끝을 --filter-bottom 으로 부모(workspace)에 알린다.
      * 표는 바의 형제 쪽에 있어 CSS 만으로는 이 높이를 알 수 없다.
      */
@@ -73,16 +72,16 @@ export default function AiFilterBar({ loading, period, onPeriod, view, sort, onS
             : [{ key: field.key, name: field.label, value: label(values[field.key]) }];
     });
 
-    return <div ref={wrapper} className={manage.filterBar}>
+    return <div ref={wrapper} className="aim-filterBar">
         <FilterBar
             loading={loading}
             status={<>
-                <div className={manage.periodControls}><div className="status-filters" role="group" aria-label="조회 기간">
+                <div className="aim-periodControls"><div className="status-filters" role="group" aria-label="조회 기간">
                     {[["4", "4주"], ["8", "8주"], ["12", "12주"], ["year", "연도 전체"]].map(([value, label]) => <button key={value} type="button" aria-pressed={period === value} onClick={() => onPeriod(value)}>
-                        {value === "year" ? <><span className={manage.wideLabel}>{label}</span><span className={manage.narrowLabel}>연도</span></> : label}
+                        {value === "year" ? <><span className="aim-wideLabel">{label}</span><span className="aim-narrowLabel">연도</span></> : label}
                     </button>)}
                 </div>
-                {view && <div className={`status-filters ${manage.viewToggle}`} role="group" aria-label="표 구성">
+                {view && <div className="status-filters aim-viewToggle" role="group" aria-label="표 구성">
                     {[["groups", "프로젝트별"], ["weeks", "주별"]].map(([value, label]) => <button key={value} type="button" aria-pressed={view.value === value} onClick={() => view.onChange(value)}>{label}</button>)}
                 </div>}
                 </div>
