@@ -1,5 +1,12 @@
 import styled from "@emotion/styled";
+import { keyframes } from "@emotion/react";
 import { hoverSurface } from "@/styles/surface";
+
+/*
+ * 본문 등장 페이드. 0 이 아니라 0.2 에서 시작한다 — 투명도 0 에서 출발하면 Chrome 이
+ * 본문을 hydration 이 끝난 뒤에야 "보였다" 고 기록해 모바일 LCP 가 7~10초로 밀렸다.
+ */
+const softFadeIn = keyframes`from { opacity: 0.2; }`;
 
 export const Article = styled.article`
   /* 기본 레이아웃 설정 */
@@ -10,8 +17,11 @@ export const Article = styled.article`
   margin: 0 auto;
   padding: 4rem 1rem;
   line-height: 2.5;
-  animation: fadeIn 1s ease forwards;
-  animation-fill-mode: forwards;
+  animation: ${softFadeIn} 400ms ease-out;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 
   /* 타이포그래피 기본 구조 */
   #post-body :is(h1, h2, h3, h4, h5, h6) {
