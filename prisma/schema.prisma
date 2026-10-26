@@ -177,3 +177,24 @@ model AiPublication {
   updatedAt    DateTime @updatedAt @map("updated_at")
   @@map("ai_publications")
 }
+
+/// Dice Dungeon: consented, replay-verified results. auth.users FK is managed by raw SQL.
+model DiceResult {
+  runId        String   @id @map("run_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  rulesVersion String   @map("rules_version")
+  difficulty   String
+  outcome      String
+  chapter      Int
+  depth        Int
+  turns        Int
+  hp           Int
+  relicCount   Int      @map("relic_count")
+  startedAt    DateTime @map("started_at") @db.Timestamptz(6)
+  finishedAt   DateTime @map("finished_at") @db.Timestamptz(6)
+  replayHash   String   @map("replay_hash")
+
+  @@index([userId, finishedAt(sort: Desc)], map: "dice_results_user_finished")
+  @@index([difficulty, rulesVersion, outcome], map: "dice_results_difficulty_version")
+  @@map("dice_results")
+}

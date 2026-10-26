@@ -12,6 +12,7 @@ import SideMenu from "./SideMenu";
 import { postsSummaryQuery } from "./SideList";
 import HeaderAuth from "./HeaderAuth";
 import SearchButton from "@/components/search/SearchButton";
+import { diceDungeonUrl } from "./gameLink";
 
 export default function Header() {
     const [scrollRatio, setScrollRatio] = useState(0);
@@ -90,6 +91,14 @@ export default function Header() {
                                 className="article-detail-icon auto-dark"
                             />
                         </Link>
+                        {diceDungeonUrl && <>
+                            <DiagonalLine />
+                            <a href={diceDungeonUrl} target="_blank" rel="noopener noreferrer"
+                                title="주사위 던전 플레이 · 새 탭" aria-label="주사위 던전 플레이 (새 탭)">
+                                <Image src="/icons/dice.svg" alt="" width={24} height={24}
+                                    className="article-detail-icon auto-dark" />
+                            </a>
+                        </>}
                     </div>
                 </div>
                 <div className="header-center-title" aria-label="Current post title">

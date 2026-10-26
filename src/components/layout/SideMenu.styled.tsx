@@ -70,6 +70,12 @@ export const MenuWrapper = styled.div`
     font-weight: bold !important;
   }
 
+  .game-menu-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
   .side-footer {
     width: 100%;
     display: flex;

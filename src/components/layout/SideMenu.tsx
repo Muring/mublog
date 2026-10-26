@@ -9,6 +9,7 @@ import Link from "next/link";
 import SideList from "./SideList";
 import ThemeSwitcher from "./ThemeSwitcher";
 import { useExitTransition, useScrollLock } from "@/hooks/useOverlay";
+import { diceDungeonUrl } from "./gameLink";
 
 export default function SideMenu({ onClose }: { onClose: () => void }) {
   // 밀려 들어오고 나가는 움직임·움직임 줄이기·닫힘 안전망·뒤 스크롤 잠금은 다른 창들과 같은 공용 동작이다
@@ -46,6 +47,11 @@ export default function SideMenu({ onClose }: { onClose: () => void }) {
             <h5>About me</h5>
           </Link>
           <Link href="/ai" onClick={handleClose} className="side-menu-link"><h5>AI 활용</h5></Link>
+          {diceDungeonUrl && <a href={diceDungeonUrl} target="_blank" rel="noopener noreferrer"
+            onClick={handleClose} className="side-menu-link" aria-label="주사위 던전 플레이 (새 탭)">
+            <h5 className="game-menu-label"><Image src="/icons/dice.svg" alt="" width={20} height={20}
+              className="auto-dark" />주사위 던전 <span aria-hidden="true">↗</span></h5>
+          </a>}
           <SideList type="latest" onLinkClick={handleClose} />
           <SideList type="recent" onLinkClick={handleClose} />
         </div>
