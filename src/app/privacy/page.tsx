@@ -19,7 +19,7 @@ export default function PrivacyPage() {
     return (
         <PrivacyWrapper>
             <h1>개인정보 처리방침</h1>
-            <p className="updated">최종 수정: 2026년 10월 14일</p>
+            <p className="updated">최종 수정: 2026년 10월 27일</p>
 
             <p className="lead">
                 개인이 운영하는 기술 블로그입니다. 광고도, 외부 분석 도구도 붙이지 않았습니다.
@@ -34,9 +34,10 @@ export default function PrivacyPage() {
             <ul>
                 <li>사용자명(GitHub) 또는 이름(Google)과 프로필 이미지 주소 — 댓글에 작성자를 표시하기 위해</li>
                 <li>계정 식별자 — 같은 사람이 다시 로그인했을 때 알아보기 위해</li>
+                <li>이메일 주소 — 로그인 처리를 맡은 Supabase Auth 가 계정을 구분하기 위해 저장합니다. 화면에 표시하거나 다른 용도로 쓰지 않습니다.</li>
             </ul>
             <p>
-                이 사이트의 데이터베이스에는 이메일 주소, 비밀번호, 저장소 목록 같은 것을 저장하지 않습니다.
+                비밀번호, 저장소 목록 같은 것은 받지도 저장하지도 않습니다.
                 로그인 자체는 Supabase Auth 가 처리하며, 비밀번호는 이 사이트를 거치지 않습니다.
             </p>
 

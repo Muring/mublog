@@ -81,8 +81,9 @@ export default function LoginForm() {
 
             {/* 무엇이 저장되는지는 누르기 전에 알아야 한다 */}
             <p className="notice">
-                로그인하면 사용자 이름과 프로필 이미지가 저장됩니다. 이메일과 비밀번호는
-                받지 않습니다. <Link href="/privacy">개인정보 처리방침</Link></p>
+                로그인하면 사용자 이름, 프로필 이미지, 이메일 주소가 저장됩니다. 이메일은
+                계정 확인에만 쓰고 공개하지 않습니다. 비밀번호는 받지 않습니다.{" "}
+                <Link href="/privacy">개인정보 처리방침</Link></p>
         </LoginWrapper>
     );
 }
