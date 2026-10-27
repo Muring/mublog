@@ -43,10 +43,20 @@ export const LoginWrapper = styled.div`
   }
 `;
 
-export const GithubButton = styled.button`
+export const ProviderList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 16rem;
+`;
+
+export const ProviderButton = styled.button`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
+  width: 100%;
   ${buttonBase}
   padding: 0.75rem 1.4rem;
   font-size: 0.95rem;

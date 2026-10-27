@@ -12,7 +12,7 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 글 하나를 올리려면 Notion에서 쓰고 → 마크다운으로 변환하고 → mdx 파일을 만들고 → 커밋하고 → 재배포해야 했습니다.
 지금은 **포스트가 DB에 있고, 브라우저에서 쓰고 발행하면 재배포 없이 반영**됩니다.
 
-글쓰기 권한은 소유자만 가지며, 다른 사용자는 GitHub으로 로그인해 **댓글**을 남길 수 있습니다.
+글쓰기 권한은 소유자만 가지며, 다른 사용자는 GitHub 또는 Google로 로그인해 **댓글**을 남길 수 있습니다.
 
 전환하면서 Contentlayer는 완전히 제거했고, 마크다운 → HTML 파이프라인을 직접 구성해
 기존 25개 글의 렌더 결과가 바뀌지 않도록 맞췄습니다.
@@ -39,7 +39,7 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 | 스타일링     | Emotion, CSS 변수 기반 테마, next-themes                     |
 | 데이터베이스 | Supabase (PostgreSQL)                                        |
 | ORM          | Prisma 7 (`@prisma/adapter-pg` 드라이버 어댑터)              |
-| 인증         | Supabase Auth (GitHub OAuth) + `@supabase/ssr`               |
+| 인증         | Supabase Auth (GitHub·Google OAuth) + `@supabase/ssr`      |
 | 파일 저장소  | Supabase Storage                                             |
 | 서버 상태    | TanStack Query 5                                             |
 | 검증         | Zod 4                                                        |
@@ -90,8 +90,8 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 
 ### 참여
 
-- [x] 🔐 **GitHub 로그인**
-- [x] ❤️ **좋아요** — 공개 글·댓글·답글에 GitHub 로그인 후 등록/취소. 본인 콘텐츠는 집계만 표시하며 카드·관리 목록에서도 개수를 확인. 요청당 이력 없이 사용자·대상별 한 행을 저장하고 수정일은 유지
+- [x] 🔐 **GitHub·Google 로그인**
+- [x] ❤️ **좋아요** — 공개 글·댓글·답글에 로그인 후 등록/취소. 본인 콘텐츠는 집계만 표시하며 카드·관리 목록에서도 개수를 확인. 요청당 이력 없이 사용자·대상별 한 행을 저장하고 수정일은 유지
 - [x] 💬 **댓글 · 답글** (2단, 낙관적 갱신)
 - [x] 📊 **방문자 수 · 조회수 집계**
 - [x] 🔒 **개인정보 처리방침** (`/privacy`) — 저장하는 것과 쿠키 세 개를 그대로 적음

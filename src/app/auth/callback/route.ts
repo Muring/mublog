@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-/** GitHub OAuth 콜백. 인가 코드를 세션으로 교환한다. */
+/** OAuth 콜백(GitHub·Google 공용). 인가 코드를 세션으로 교환한다. */
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url);
     const code = searchParams.get("code");
