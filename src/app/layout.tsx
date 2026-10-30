@@ -6,6 +6,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import RootProvider from "@/providers/RootProvider";
 import VisitTracker from "@/components/stats/VisitTracker";
+import WebAnalytics from "@/components/stats/WebAnalytics";
 import { SITE_URL } from "@/lib/site";
 import { SITE_DESCRIPTION, SITE_NAME, baseOpenGraph } from "./shared-metadata";
 
@@ -73,6 +74,7 @@ export default function RootLayout({
             <body>
                 <RootProvider>
                     <VisitTracker />
+                    <WebAnalytics />
                     <Header />
                     <main>{children}</main>
                     <Footer />
