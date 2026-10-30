@@ -193,6 +193,8 @@ model DiceResult {
   startedAt    DateTime @map("started_at") @db.Timestamptz(6)
   finishedAt   DateTime @map("finished_at") @db.Timestamptz(6)
   replayHash   String   @map("replay_hash")
+  heroClass    String?  @map("hero_class")
+  heroLook     Json?    @map("hero_look")
 
   @@index([userId, finishedAt(sort: Desc)], map: "dice_results_user_finished")
   @@index([difficulty, rulesVersion, outcome], map: "dice_results_difficulty_version")
