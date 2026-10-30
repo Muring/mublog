@@ -359,7 +359,14 @@ secret key는 서버에서만 쓰이며 버킷에는 insert 정책이 없습니�
 페이지 URL의 쿼리·해시를 제거합니다. 개발 모드는 외부 수집 없이 디버그 로그로 확인합니다.
 Vercel 프로젝트에서 Web Analytics를 활성화하고 이 코드를 배포해야 실제 수집이 시작됩니다.
 블로그 자체 조회수와는 집계 기준이 달라 숫자가 일치하지 않을 수 있습니다.
-Analytics 데이터의 정기 백업은 아직 연결하지 않았습니다.
+Analytics 집계는 매일 정오 시간대(KST)에 Supabase 비공개 `analytics-backups` 버킷으로 백업합니다.
+글·유입 도메인, 시간대·글, 국가·기기의 세 보고서를 JSON으로 저장합니다.
+완료된 날짜는 `daily/YYYY-MM/YYYY-MM-DD.json`, 당일 중간 집계는 `latest.json`이며,
+최근 3일은 다시 조회해 갱신하고 최근 28일 내 더 오래된 누락은 실행마다 하루씩 보완합니다.
+수집 시작일 이전과 Vercel 조회 기간 밖의 데이터는 복원하지 못합니다.
+API 집계의 상위 100개 제한 밖 항목은 `Others`로 묶일 수 있고, 그룹별 방문자를 합산하면 중복됩니다.
+파일은 자동 삭제하지 않으며 Supabase 대시보드의 비공개 Storage에서 다운로드할 수 있습니다.
+일부 보고서라도 조회에 실패한 날짜는 기존 파일을 덮어쓰지 않습니다.
 
 <br>
 
@@ -738,6 +745,9 @@ $ yarn dev
 | `NEXT_PUBLIC_SITE_URL`                 | OAuth 콜백 URL 구성                           |
 | `NEXT_PUBLIC_DICE_DUNGEON_URL`        | 선택. 게임의 HTTPS 주소, 변경 후 재빌드 필요 |
 | `CRON_SECRET`                          | cron 라우트 보호                              |
+| `VERCEL_ANALYTICS_TOKEN`                | 분석 백업용 Vercel API 토큰(서버 전용) |
+| `ANALYTICS_VERCEL_PROJECT_ID` · `ANALYTICS_VERCEL_TEAM_ID` | 분석을 조회할 프로젝트·팀 |
+| `ANALYTICS_BACKUP_START_DATE`           | Analytics 수집 시작일(KST, `YYYY-MM-DD`) |
 
 > ⚠️ `?pgbouncer=true`를 빠뜨리면 **동시 요청 시에만** `prepared statement "s0" already exists`가
 > 간헐적으로 납니다. 로컬에서는 재현되지 않고 프로덕션에서만 터집니다.
@@ -755,6 +765,7 @@ $ yarn dev
 | ----------------------- | ----------------------------------------------- |
 | `yarn check:db`         | DB 접속과 환경변수 점검 (비밀값은 출력하지 않음) |
 | `yarn backup:posts`     | DB 포스트를 mdx로 내보내기 (백업)               |
+| `yarn backup:analytics` | 이미지 정리 없이 Analytics 집계만 비공개 Storage에 백업 |
 | `yarn migrate:posts`    | mdx를 DB로 가져오기 (복구·최초 이전)            |
 | `yarn verify:migration` | 백업과 DB 대조                                  |
 | `yarn verify:analytics` | 관리 통계 날짜·집계·비교·순위 회귀 검사 (DB 접속 없음) |
@@ -781,13 +792,20 @@ $ yarn dev
 직전 배포 커밋이 저장소에 없으면(강제 push 로 지워진 경우 등) 비교하지 않고 빌드합니다.
 
 
-`vercel.json`의 cron이 하루 한 번(`0 3 * * *`) 도는 동안 두 가지를 처리합니다.
+`vercel.json`의 cron이 하루 한 번(`0 3 * * *`, KST 정오 시간대) 도는 동안 아래 작업을 처리합니다.
+Hobby에서는 정확한 분을 보장하지 않아 정오부터 12시 59분 사이에 실행될 수 있습니다.
 
 - **Supabase 깨우기** (`SELECT 1`) — 무료 프로젝트는 7일 무활동 시 정지되고,
   정지되면 빌드타임 `generateStaticParams`까지 실패합니다
 - **고아 이미지 정리** — 본문에서 지웠거나, 저장 없이 창을 닫았거나,
   글이 삭제되어 참조를 잃은 파일. 24시간 유예를 둡니다(`GRACE_HOURS`).
   공개 주소뿐 아니라 변환(`/render/image/`)·서명(`/object/sign/`) 주소도 "쓰는 중" 으로 셉니다
+- **Analytics 백업** — 다른 유지보수와 병렬 실행하며 40초 제한을 둡니다. 백업 실패 시 cron은 503과
+  실패 날짜·오류 코드를 반환합니다. API 오류 응답과 비밀값은 로그에 남기지 않습니다.
+
+백업 준비 시 Supabase에 `analytics-backups` 비공개 버킷(JSON 허용)을 만들고 위 Analytics 환경변수를
+Vercel Production에 설정합니다. 버킷이 공개 상태이거나 토큰이 없으면 백업하지 않습니다.
+수동 보완은 `yarn backup:analytics`로 실행하며, 자동 정리 작업을 함께 실행하지 않습니다.
 
 <br>
 

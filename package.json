@@ -17,6 +17,7 @@
         "audit:render": "tsx scripts/audit-render.mts",
         "sweep:images": "tsx scripts/sweep-images.mts",
         "backup:posts": "tsx scripts/backup-posts.mts",
+        "backup:analytics": "tsx scripts/backup-analytics.mts",
         "draft:post": "tsx scripts/draft-post.mts",
         "migrate:images": "tsx scripts/migrate-images.mts",
         "migrate:public-images": "tsx scripts/migrate-public-images.mts",
