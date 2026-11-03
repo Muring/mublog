@@ -33,7 +33,8 @@ export const MenuWrapper = styled.div`
     border-radius: 0;
   }
 
-  a:hover {
+  a:hover,
+  button.side-menu-link:hover {
     ${hoverSurface}
 
     /*
@@ -68,6 +69,16 @@ export const MenuWrapper = styled.div`
     height: 2rem;
     padding: 0 1rem;
     font-weight: bold !important;
+  }
+
+  /* 게임 고르기는 이동이 아니라 창을 여는 버튼이다. 링크와 같은 모양으로 맞춘다 */
+  button.side-menu-link {
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
   }
 
   .game-menu-label {

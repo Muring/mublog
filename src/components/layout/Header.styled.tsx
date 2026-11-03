@@ -111,7 +111,8 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
         font-weight: bold;
     }
 
-    a {
+    a,
+    .route-button {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -127,6 +128,15 @@ export const HeaderWrapper = styled.header<{ scrollRatio: number }>`
         html.dark &:hover .auto-dark {
             filter: invert(0) brightness(1) !important;
         }
+    }
+
+    /* 게임 고르기는 창을 여는 버튼이라 링크 아이콘과 같은 모양으로 기본 단추 스타일을 지운다 */
+    .route-button {
+        padding: 0;
+        border: none;
+        background: none;
+        color: inherit;
+        cursor: pointer;
     }
 `;
 

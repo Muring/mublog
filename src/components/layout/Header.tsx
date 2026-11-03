@@ -12,11 +12,13 @@ import SideMenu from "./SideMenu";
 import { postsSummaryQuery } from "./SideList";
 import HeaderAuth from "./HeaderAuth";
 import SearchButton from "@/components/search/SearchButton";
-import { diceDungeonUrl } from "./gameLink";
+import { games } from "./gameLink";
+import GamePicker from "./GamePicker";
 
 export default function Header() {
     const [scrollRatio, setScrollRatio] = useState(0);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [gamesOpen, setGamesOpen] = useState(false);
     const pathname = usePathname();
     const { title } = useHeaderTitle();
     const queryClient = useQueryClient();
@@ -57,7 +59,8 @@ export default function Header() {
                         </button>
                     </ButtonWrapper>
 
-                    {menuOpen && <SideMenu onClose={() => setMenuOpen(false)} />}
+                    {menuOpen && <SideMenu onClose={() => setMenuOpen(false)} onOpenGames={() => setGamesOpen(true)} />}
+                    {gamesOpen && <GamePicker onClose={() => setGamesOpen(false)} />}
 
                     <div className="fast-route-container">
                         <Link href={`/`}>
@@ -91,13 +94,13 @@ export default function Header() {
                                 className="article-detail-icon auto-dark"
                             />
                         </Link>
-                        {diceDungeonUrl && <>
+                        {games.length > 0 && <>
                             <DiagonalLine />
-                            <a href={diceDungeonUrl} target="_blank" rel="noopener noreferrer"
-                                title="주사위 던전 플레이 · 새 탭" aria-label="주사위 던전 플레이 (새 탭)">
-                                <Image src="/icons/dice.svg" alt="" width={24} height={24}
+                            <button type="button" className="route-button" onClick={() => setGamesOpen(true)}
+                                title="게임" aria-label="게임 고르기" aria-haspopup="dialog">
+                                <Image src="/icons/game.svg" alt="" width={24} height={24}
                                     className="article-detail-icon auto-dark" />
-                            </a>
+                            </button>
                         </>}
                     </div>
                 </div>
