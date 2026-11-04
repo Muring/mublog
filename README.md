@@ -25,7 +25,7 @@ Mublog는 **Next.js App Router 기반 기술 블로그**입니다.
 
 [주사위 던전](https://muring-dice-dungeon.vercel.app)은 [독립 저장소](https://github.com/Muring/dice-dungeon)와 별도 Vercel 프로젝트로 운영합니다. [불멍](https://muring-bulmeong.vercel.app)도 [독립 저장소](https://github.com/Muring/muring-bulmeong)와 별도 Vercel 프로젝트입니다. `NEXT_PUBLIC_DICE_DUNGEON_URL`·`NEXT_PUBLIC_BULMEONG_URL`을 게임 주소로 설정하고 빌드하면 데스크톱 AI 버튼 옆 게임 아이콘과 모바일 메뉴의 "게임" 항목이 나타나고, 누르면 확인 대화상자와 같은 모양의 선택 창에서 게임을 골라 새 탭으로 엽니다. 운영 환경에서 값이 없는 게임은 목록에서 빠지고 둘 다 없으면 버튼을 숨기며, 개발 환경의 기본값은 각각 `http://localhost:4173`·`http://localhost:5173`입니다.
 
-게임은 mublog의 Supabase 계정을 공유하며, 사용자가 종료 후 동의한 결과만 서버 검증을 거쳐 저장합니다. 이 저장소의 `DiceResult` 모델과 `20261026000000_dice_results`·`20261026000100_dice_results_service_privileges`·`20261030000000_dice_results_hero` 마이그레이션이 게임 테이블을 관리합니다. 테이블은 RLS를 켜고 클라이언트 정책 없이 서버 전용으로 두며, `service_role`에는 SELECT·INSERT만 허용합니다. 게임 서버 환경변수와 OAuth 콜백은 게임 프로젝트에서 별도 설정합니다.
+게임은 mublog의 Supabase 계정을 공유하며, 사용자가 종료 후 동의한 결과만 서버 검증을 거쳐 저장합니다. 이 저장소의 `DiceResult`·`DiceAchievement`·`DiceAchievementProfile` 모델과 `20261026000000_dice_results`·`20261026000100_dice_results_service_privileges`·`20261028030000_dice_achievements`·`20261030000000_dice_results_hero`·`20261030120000_dice_results_v3_campaign`·`20261030130000_dice_results_hero_name` 마이그레이션이 게임 테이블을 관리합니다. 업적은 서버가 `service_role` 전용 `dice_award_achievements` 함수로만 기록합니다. 테이블은 RLS를 켜고 클라이언트 정책 없이 서버 전용으로 두며, `service_role`에는 `dice_results`의 SELECT·INSERT와 업적 두 테이블의 전체 권한만 허용합니다. 게임 서버 환경변수와 OAuth 콜백은 게임 프로젝트에서 별도 설정합니다.
 
 <br>
 

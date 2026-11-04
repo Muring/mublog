@@ -193,10 +193,32 @@ model DiceResult {
   startedAt    DateTime @map("started_at") @db.Timestamptz(6)
   finishedAt   DateTime @map("finished_at") @db.Timestamptz(6)
   replayHash   String   @map("replay_hash")
+  achievementTitle String? @map("achievement_title")
   heroClass    String?  @map("hero_class")
   heroLook     Json?    @map("hero_look")
+  heroName     String?  @map("hero_name")
+  startingRelic String? @map("starting_relic")
 
   @@index([userId, finishedAt(sort: Desc)], map: "dice_results_user_finished")
   @@index([difficulty, rulesVersion, outcome], map: "dice_results_difficulty_version")
   @@map("dice_results")
+}
+
+/// Server-verified Dice Dungeon achievements. auth.users FK is managed in SQL.
+model DiceAchievement {
+  userId String @map("user_id") @db.Uuid
+  achievementId String @map("achievement_id")
+  earnedAt DateTime @default(now()) @map("earned_at") @db.Timestamptz(6)
+  rulesVersion String @map("rules_version")
+  conditionVersion Int @map("condition_version")
+  runId String @map("run_id") @db.Uuid
+  @@id([userId, achievementId])
+  @@map("dice_achievements")
+}
+
+model DiceAchievementProfile {
+  userId String @id @map("user_id") @db.Uuid
+  selectedTitle String? @map("selected_title")
+  fullKit Int @default(0) @map("full_kit")
+  @@map("dice_achievement_profiles")
 }
