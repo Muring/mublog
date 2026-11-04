@@ -50,11 +50,12 @@ export const Column = styled.div`
         opacity: 1;
     }
 
+    /* 툴팁은 그 칸의 가장 높은 점 바로 위에 띄운다. 점·선을 가리지 않는다 */
     .tip {
         position: absolute;
-        top: 0;
+        top: var(--tip-y, var(--y, 0%));
         left: var(--marker-x, 50%);
-        transform: translate(-50%, -0.4rem);
+        transform: translate(-50%, calc(-100% - 10px));
         z-index: 5;
         display: none;
         padding: 0.35rem 0.55rem;
@@ -94,11 +95,11 @@ export const Column = styled.div`
     /* 왼쪽·오른쪽 끝 칸은 툴팁이 카드 밖으로 나가지 않게 안쪽으로 붙인다 */
     &[data-edge="first"] .tip {
         left: 0;
-        transform: translate(0, -0.4rem);
+        transform: translate(0, calc(-100% - 10px));
     }
     &[data-edge="last"] .tip {
         left: auto;
         right: 0;
-        transform: translate(0, -0.4rem);
+        transform: translate(0, calc(-100% - 10px));
     }
 `;

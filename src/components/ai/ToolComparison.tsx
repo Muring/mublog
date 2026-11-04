@@ -136,7 +136,7 @@ export default function ToolComparison({ weeks, allWeeks = weeks }: { weeks: Pub
                             const rows = tools.map((tool, index) => `${tool} ${p.values[index] === null ? "기록 없음" : number(p.values[index]!)}`);
                             return <Column key={p.key} data-point={i} tabIndex={i === Math.min(focused, points.length - 1) ? 0 : -1} role="img" aria-label={`${p.label}: ${rows.join(", ")}${flags(p).map(f => ` · ${f}`).join("")}`} onKeyDown={e => navigate(e, i)}
                                 data-edge={i < points.length / 3 ? "first" : i >= points.length * 2 / 3 ? "last" : undefined}
-                                style={{ "--x": `${xAt(i)}%`, ...slot(i) } as CSSProperties}>
+                                style={{ "--x": `${xAt(i)}%`, "--tip-y": `${100 - Math.max(0, ...p.values.map(v => v ?? 0)) / ceiling * 100}%`, ...slot(i) } as CSSProperties}>
                                 {bar
                                     ? <span className="ai-barGroup" aria-hidden>{tools.map((tool, index) => <span key={tool} data-tool={tool} data-empty={p.values[index] === null || undefined} style={{ height: `${(p.values[index] ?? 0) / ceiling * 100}%` }} />)}</span>
                                     : <><span className="rule" />{tools.map((tool, index) => p.values[index] !== null && <span key={tool} className="dot" data-tool={tool} data-show={marked || knownCount[index] === 1} style={{ "--y": `${100 - p.values[index]! / ceiling * 100}%` } as CSSProperties} />)}</>}
