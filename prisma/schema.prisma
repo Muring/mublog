@@ -222,3 +222,11 @@ model DiceAchievementProfile {
   fullKit Int @default(0) @map("full_kit")
   @@map("dice_achievement_profiles")
 }
+
+/// muring-bulmeong camp save, one row per account (server-only). auth.users FK is managed in SQL.
+model BulmeongSave {
+  userId    String   @id @map("user_id") @db.Uuid
+  data      Json
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  @@map("bulmeong_saves")
+}
