@@ -25,10 +25,25 @@ export const getUser = cache(async () => {
 });
 
 /** 현재 사용자의 profiles 행 (역할 포함) */
+async function applicationProfile(authId: string): Promise<Profile | null> {
+    if (process.env.ACCOUNT_UNIFICATION_ENABLED !== "true")
+        return prisma.profile.findUnique({ where: { id: authId } });
+    // Resolve ownership and fetch permissions in one DB query; no cross-request cache.
+    const rows = await prisma.$queryRaw<Profile[]>`
+        SELECT p.id, p.github_id AS "githubId", p.username, p.avatar_url AS "avatarUrl",
+               p.role, p.created_at AS "createdAt", p.primary_email AS "primaryEmail",
+               p.account_version AS "accountVersion"
+        FROM public.account_memberships m JOIN public.profiles p ON p.id=m.profile_id
+        WHERE m.auth_user_id=${authId}::uuid
+        LIMIT 1
+    `;
+    return rows[0] ?? null;
+}
+
 export const getProfile = cache(async (): Promise<Profile | null> => {
     const user = await getUser();
     if (!user) return null;
-    return prisma.profile.findUnique({ where: { id: user.id } });
+    return applicationProfile(user.id);
 });
 
 /**
@@ -50,7 +65,7 @@ export const getDisplayProfile = cache(async (): Promise<Profile | null> => {
     const id = data?.claims?.sub;
     if (!id) return null;
 
-    return prisma.profile.findUnique({ where: { id } });
+    return applicationProfile(id);
 });
 
 export async function isAdmin(): Promise<boolean> {

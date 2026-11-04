@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
+import AccountConnections from "./AccountConnections";
 import { usePathname } from "next/navigation";
 import { AuthWrapper } from "./HeaderAuth.styled";
 import { Skeleton } from "@/components/ui/Skeleton.styled";
@@ -69,8 +70,13 @@ function AccountMenu({ user, isAdmin }: { user: { username: string; avatarUrl?: 
         return () => document.removeEventListener("pointerdown", close);
     }, [open]);
 
+    useEffect(() => {
+        if (new URLSearchParams(window.location.search).has("link")) queueMicrotask(() => setOpenedAt(pathname));
+    }, [pathname]);
+
     const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
         if (event.key === "Escape" && open) { event.preventDefault(); setOpen(false); trigger.current?.focus(); return; }
+        if ((event.target as HTMLElement).closest("[data-account-settings]")) return;
         if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
         event.preventDefault();
         if (!open) { setOpen(true); requestAnimationFrame(() => items()[event.key === "ArrowUp" || event.key === "End" ? items().length - 1 : 0]?.focus()); return; }
@@ -91,6 +97,7 @@ function AccountMenu({ user, isAdmin }: { user: { username: string; avatarUrl?: 
             </button>
             {open && (
                 <div id={menuId} className="account-menu" role="menu" aria-label="계정">
+                    <AccountConnections />
                     {isAdmin && <>
                         <Link href="/admin" role="menuitem" className="account-item" onClick={() => setOpen(false)}>관리</Link>
                         <Link href="/ai/manage" role="menuitem" className="account-item" onClick={() => setOpen(false)}>AI 관리</Link>

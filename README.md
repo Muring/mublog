@@ -886,3 +886,8 @@ icn1 (현재)         0.15~0.20s   0.14s
 
 
 작업 기록은 프로젝트 그룹 없이 단일 표를 사용합니다. 프로젝트는 열과 필터 창의 프로젝트 조건으로 구분하며 개별 행만 펼칩니다. 확인된 수행일 순으로 정렬하고 수행일 미확인 기록은 같은 표 아래에 표시합니다. 필터 바는 블로그 관리 목록과 같은 한 줄(기간·보기 방식, 내용 검색, 필터, 정렬)입니다. 좁은 모바일에서도 블로그 목록과 같이 기간·검색·필터·정렬을 한 줄에 두며, 보기 방식(프로젝트별·주별)은 필터 창에서 바꿉니다. 내용 검색은 프로젝트 이름도 찾습니다.
+
+
+### Account connections
+
+The existing account panel supports Google/GitHub connection and shared profiles across all three apps. The server flags `ACCOUNT_UNIFICATION_ENABLED` and `ACCOUNT_LINKING_ENABLED` default to off. Apply the shared database migrations and deploy compatible versions of all three apps before enabling linking. The migration order, OAuth callbacks, verification and rollback procedure are documented in `mublog/docs/account-unification.md`. No production migration is run automatically by this feature.

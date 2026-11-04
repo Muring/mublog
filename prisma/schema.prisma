@@ -24,6 +24,8 @@ enum PostStatus {
 /// FK 와 트리거는 raw SQL 마이그레이션에서 추가해 Prisma Migrate 를 public 에만 가둔다.
 model Profile {
   id        String   @id @db.Uuid
+  primaryEmail String? @map("primary_email")
+  accountVersion Int @default(0) @map("account_version")
   githubId  String?  @unique @map("github_id")
   username  String
   avatarUrl String?  @map("avatar_url")
@@ -229,4 +231,50 @@ model BulmeongSave {
   data      Json
   updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
   @@map("bulmeong_saves")
+}
+
+/// Auth ownership mappings and merge operations; SQL migrations own FKs and private ACLs.
+model AccountMembership {
+  authUserId String @id @map("auth_user_id") @db.Uuid
+  profileId String @map("profile_id") @db.Uuid
+  @@index([profileId], map: "account_memberships_profile")
+  @@map("account_memberships")
+}
+model AccountConnection {
+  id String @id @db.Uuid
+  initiator String @db.Uuid
+  sessionId String @map("session_id")
+  origin String
+  provider String
+  binding String
+  target String? @db.Uuid
+  expiresAt DateTime @default(dbgenerated("(now() + '00:10:00'::interval)")) @map("expires_at") @db.Timestamptz(6)
+  fingerprint String?
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  resultProfile String? @map("result_profile") @db.Uuid
+  @@index([expiresAt], map: "account_connections_expiry")
+  @@index([initiator,expiresAt], map: "account_connections_initiator")
+  @@map("account_connections")
+}
+model AccountMergeAudit {
+  operationId String @id @map("operation_id") @db.Uuid
+  profileId String @map("profile_id") @db.Uuid
+  sourceProfileId String @map("source_profile_id") @db.Uuid
+  completedAt DateTime @default(now()) @map("completed_at") @db.Timestamptz(6)
+  saveChoice String? @map("save_choice")
+  @@map("account_merge_audit")
+}
+model BulmeongRecordTotal {
+  userId String @id @map("user_id") @db.Uuid
+  totals Json @default("{}")
+  legacy Json @default("{}")
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+  @@map("bulmeong_record_totals")
+}
+model BulmeongRecordBatch {
+  userId String @map("user_id") @db.Uuid
+  batchId String @map("batch_id") @db.Uuid
+  counts Json
+  @@id([userId,batchId])
+  @@map("bulmeong_record_batches")
 }

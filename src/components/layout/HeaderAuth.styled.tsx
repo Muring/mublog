@@ -78,11 +78,13 @@ export const AuthWrapper = styled.div`
         right: 0;
         z-index: 60;
         display: grid;
+        width: min(320px, calc(100vw - 24px));
         min-width: 9rem;
         padding: 6px;
         ${surface("0.4rem")}
         box-shadow: 0 8px 24px var(--shadowcolor);
     }
+    .account-menu .account-settings { padding: 10px; white-space: normal; }
     .account-menu hr { margin: 4px 2px; border: 0; border-top: var(--border-width) solid var(--bordercolor); }
     /* HeaderWrapper 의 a { width/height: 3rem } 을 되돌린다 */
     && .account-item {
