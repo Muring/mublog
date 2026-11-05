@@ -125,6 +125,9 @@ Supabase의 PostgreSQL 하나를 씁니다. `public` 스키마만 Prisma가 관�
 `multiSchema`로 모델링하면 `prisma migrate`가 Supabase 소유 스키마에 손댑니다.
 대신 FK와 동기화 트리거(`on_auth_user_created`)를 **raw SQL 마이그레이션**으로 넣어,
 제약은 DB에 두고 Prisma Migrate는 `public`에만 가둡니다.
+프로필은 가입할 때 한 번 만들고, 이후 이름·아바타는 사용자가 고칠 수 없는 제공자 `identity_data`가
+바뀐 경우에만 `on_auth_identity_updated`가 반영합니다. mublog 테이블에는 `anon`·`authenticated` 권한을 주지 않습니다.
+GitHub·Google은 로그인 사용자별로 따로 구분하며, 같은 인증 이메일이면 Supabase 기본 동작으로 한 사용자에 연결됩니다.
 
 **태그는 `String[]` 컬럼이고 조인 테이블이 아닙니다.**
 포스트 25개·태그 6종·작성자 1명이며 태그에 별도 메타데이터가 없습니다.
@@ -886,8 +889,3 @@ icn1 (현재)         0.15~0.20s   0.14s
 
 
 작업 기록은 프로젝트 그룹 없이 단일 표를 사용합니다. 프로젝트는 열과 필터 창의 프로젝트 조건으로 구분하며 개별 행만 펼칩니다. 확인된 수행일 순으로 정렬하고 수행일 미확인 기록은 같은 표 아래에 표시합니다. 필터 바는 블로그 관리 목록과 같은 한 줄(기간·보기 방식, 내용 검색, 필터, 정렬)입니다. 좁은 모바일에서도 블로그 목록과 같이 기간·검색·필터·정렬을 한 줄에 두며, 보기 방식(프로젝트별·주별)은 필터 창에서 바꿉니다. 내용 검색은 프로젝트 이름도 찾습니다.
-
-
-### Account connections
-
-The existing account panel supports Google/GitHub connection and shared profiles across all three apps. The server flags `ACCOUNT_UNIFICATION_ENABLED` and `ACCOUNT_LINKING_ENABLED` default to off. Apply the shared database migrations and deploy compatible versions of all three apps before enabling linking. The migration order, OAuth callbacks, verification and rollback procedure are documented in `mublog/docs/account-unification.md`. No production migration is run automatically by this feature.
