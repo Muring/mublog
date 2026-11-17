@@ -111,3 +111,70 @@ assert.equal(postPatchSchema.parse({ contentMd: "본문" }).tags, undefined);
 assert.deepEqual(postPatchSchema.parse({ tags: ["a"] }).tags, ["a"]);
 assert.deepEqual(postInputSchema.parse({ slug: "a", title: "t", contentMd: "", status: "DRAFT" }).tags, []);
 console.log("patch schema keeps omitted tags");
+
+// 발행은 내용 수정이 아니다. 실제 PATCH 를 실행하고 Prisma 의 @updatedAt 동작만 대체한다.
+const originalDate = new Date("2026-11-01T00:00:00Z");
+const saveDate = new Date("2026-11-17T00:00:00Z");
+const originalPost = {
+    id: "post", slug: "post", title: "Post", description: null, thumbnail: null,
+    series: "Series", seriesOrder: 2, tags: ["project"], contentMd: "Original body",
+    contentHtml: "<p>Original body</p>", readingTime: 1,
+    status: "DRAFT", publishedAt: null as Date | null, updatedAt: originalDate,
+};
+let storedPost = { ...originalPost };
+let renders = 0;
+const invalidated: string[][] = [];
+const { PATCH } = isolated<typeof import("../src/app/api/admin/posts/[id]/route")>("src/app/api/admin/posts/[id]/route.ts", {
+    "next/server": { NextResponse: { json: (body: unknown) => body } },
+    "@/lib/prisma": { prisma: { post: {
+        findUnique: async () => ({ ...storedPost }),
+        update: async ({ data }: { data: Partial<typeof storedPost> }) => {
+            storedPost = { ...storedPost, updatedAt: saveDate, ...data };
+            return storedPost;
+        },
+    } } },
+    "@/lib/auth": { requireAdminApi: async () => {} },
+    "@/lib/api": {
+        parseBody: async (request: { json: () => Promise<unknown> }) => postPatchSchema.parse(await request.json()),
+        handleApiError: (error: unknown) => { throw error; },
+    },
+    "@/lib/validation": { postPatchSchema },
+    "@/lib/post-write": {
+        isSlugTaken: async () => false,
+        renderedContent: async (contentMd: string) => { renders++; return { contentMd, contentHtml: `<p>${contentMd}</p>`, readingTime: 1 }; },
+    },
+    "@/lib/revalidate": { revalidatePost: (...slugs: string[]) => invalidated.push(slugs) },
+});
+const patch = (input: unknown) => PATCH({ json: async () => input } as Parameters<typeof PATCH>[0], { params: Promise.resolve({ id: "post" }) });
+const fullPayload = {
+    slug: "post", title: "Post", description: null, thumbnail: null,
+    series: "Series", seriesOrder: 2, tags: ["project"], contentMd: "Original body", publishedAt: null,
+};
+await patch({ ...fullPayload, status: "PUBLISHED" });
+assert.equal(storedPost.updatedAt, originalDate, "Publishing unchanged editor content must preserve modified time");
+assert.ok(storedPost.publishedAt, "First publication must still set publication time");
+assert.equal(renders, 0, "Unchanged Markdown does not need rendering");
+const firstPublishedAt = storedPost.publishedAt;
+await patch({ status: "DRAFT" });
+await patch({ status: "PUBLISHED" });
+assert.equal(storedPost.updatedAt, originalDate);
+assert.equal(storedPost.publishedAt, firstPublishedAt);
+assert.equal(invalidated.length, 3, "Publishing and unpublishing still invalidate the public page");
+await patch({ publishedAt: "2026-11-02T00:00:00Z" });
+assert.equal(storedPost.updatedAt, originalDate);
+await patch({ ...fullPayload, publishedAt: storedPost.publishedAt?.toISOString(), status: "PUBLISHED" });
+await patch({});
+assert.equal(storedPost.updatedAt, originalDate, "No-op saves must preserve modified time");
+for (const change of [
+    { contentMd: "Edited body" }, { title: "Edited title" }, { slug: "edited-post" },
+    { description: "Description" }, { thumbnail: "/thumb.jpg" }, { tags: ["backend"] },
+    { series: "Other series" }, { seriesOrder: 3 }, { series: null },
+]) {
+    storedPost = { ...originalPost };
+    await patch({ ...change, status: "PUBLISHED" });
+    assert.equal(storedPost.updatedAt, saveDate, `Actual edit must update modified time: ${JSON.stringify(change)}`);
+}
+assert.equal(storedPost.seriesOrder, null, "Clearing a series also clears its order");
+assert.equal(renders, 1);
+assert.ok(invalidated.some(([slug, previous]) => slug === "edited-post" && previous === "post"));
+console.log("PASS: publication/no-op saves preserve modified time; actual content/metadata edits update it");

@@ -1,0 +1,38 @@
+Episode 2: /home/muring/dev/mublog/output/blog-drafts/bulmeong-development-2.mdx
+Source commit: /home/muring/dev/bulmeong HEAD 41f461c
+Scope: charcoal shelter progression, saved-data migration, owner isolation/guest adoption, personal records/high-water retry semantics. No source mutations or DB writes.
+
+Primary code checked:
+- src/save.ts: SAVE_VERSION5; version1 shelter shift with tent insertion; v3 first4 trees retained; v5 append tree array preserving first12. shelterView is distinct from highest built shelter. mergeSaves compares shelter/campfire/charcoal and maxes campfire tier, does not sum inventory; owner-specific local slot.
+- src/tree-layout.ts: LEGACY_TREE_SPOTS first12 preserved; new near-forest trees appended.
+- src/state.ts: build consumes charcoal and unlocks/selects shelter; match trade; campfire and record actions.
+- src/account.ts: connect logout/switch slots, same-owner merge, remote-load failure fallback, conditional guest adoption, owner check on returned upload, snapshot acknowledgement.
+- src/records.ts: confirmed/legacy/pending batches; UUID per execution; max merging; acknowledgement of sent snapshot only; known legacy playSeconds/logsBurned and historical charcoal1:1 conversion, other historical actions unknown.
+- server/account.ts: capProgress elapsed-time inventory cap before RPC, limited authority.
+- migrations/20261104_personal_records.sql: per-user FOR UPDATE lock, per-batch componentwise max/delta, atomic totals + save, retained batch IDs for late retries.
+- tests/records.test.mjs: legacy arrays, migrations, records, identity slots and snapshot assertions. Not executed by this child; root separately reports passing run.
+
+Commit evidence:
+594107b add charcoal-built shelter (2026-11-04)
+23ecef2 add account save (2026-11-04)
+7a8435c isolate user saves (2026-11-04)
+00abfde shelter tiers (2026-11-04)
+a18d66d operational schema source moved to mublog, game SQL fixture compared (2026-11-05)
+a0d46fb progress cap tests (2026-11-05)
+d71be1e linked-account unification attempt
+14823ae revert linked-account unification: separate-account approach restored, no real account merge occurred; do not report successful unification.
+
+Writing sources:
+output/blog-drafts/bulmeong-development-1.mdx (prior loop, opening continuity)
+backup/posts/muring-kb-development-3.mdx (style)
+594107b:README.md historic shelter local-save rationale.
+Current uncommitted README/CHANGELOG are not treated as primary or edited.
+
+Validation:
+Child checked file existence, frontmatter, length (~8620 chars), 6 H2 sections, links ep1->ep2->ep3, 2 reflection quotes. No app/browser/DB/SQL fixture execution by child.
+Root reports current node tests/records.test.mjs passing: /tmp/bounded-run-cp54gt46/output.log. Root also reports all15 Node suites passing /tmp/bounded-run-5tl6bugh/output.log (draft only claims personal records suite).
+Actual DB/RPC and browser account tests: not_run.
+SQL fixture test: not_run.
+Suggested verification if needed: node tests/records.test.mjs; inspect package script/dependencies before SQL fixture execution; progress-cap node suite is already covered by root per message, do not repeat without cause.
+
+Illustrative count5 -> retry5 ->8 -> late5 is explicitly example, not real user measurements.

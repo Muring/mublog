@@ -46,7 +46,19 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         if (input.publishedAt !== undefined) {
             data.publishedAt = input.publishedAt ? new Date(input.publishedAt) : null;
         }
-        if (input.contentMd !== undefined) Object.assign(data, await renderedContent(input.contentMd));
+        if (input.contentMd !== undefined && input.contentMd !== existing.contentMd) {
+            Object.assign(data, await renderedContent(input.contentMd));
+        }
+
+        // 발행 버튼도 전체 필드를 보내므로 필드의 존재가 아니라 실제 값의 변화를 본다.
+        // 발행 상태·발행일만 바꾸거나 같은 글을 다시 저장하면 수정일은 유지한다.
+        const contentFields = ["slug", "title", "description", "thumbnail", "series", "seriesOrder", "contentMd"] as const;
+        const contentChanged = contentFields.some((field) =>
+            data[field] !== undefined && (data[field] ?? "") !== (existing[field] ?? "")
+        ) || (input.tags !== undefined && (
+            input.tags.length !== existing.tags.length || input.tags.some((tag, index) => tag !== existing.tags[index])
+        ));
+        if (!contentChanged) data.updatedAt = existing.updatedAt;
 
         // 초안을 처음 발행할 때 발행일이 비어 있으면 지금으로 채운다
         if (input.status === "PUBLISHED" && !existing.publishedAt && !input.publishedAt) {

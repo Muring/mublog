@@ -1,0 +1,49 @@
+Drafts: output/blog-drafts/bulmeong-development-{4,6}.mdx
+Reference date 2026-11-17 / bulmeong HEAD41f461c; no source edits, no registration, no image generation, no git mutations by this agent.
+Tone: backup/posts/muring-kb-development-3.mdx and existing bulmeong-development-1.mdx.
+
+EP4 primary evidence
+6fdacd8 fixed-length arm reach: target clamp, elbow hint, forward log pickup and slower pickup.
+eb3952b baked 3D campers (initially doll + SD), pose/timing adapter, old body loading fallback.
+6dcbab9 separated sweater sleeves, seams/hips/seat/knees, hairline and hair-only mirror.
+7854952 intermediate SD head work; historical step, NOT current selectable style.
+8f1754f SD removal and compatibility.
+220a3ad forward reach head alignment, leanBack/leanFwd separated, sip yaw and pitch limit current source.
+1f6444c male head rescale Nov12 (only documented extent, no invented motivation).
+src/arm-pose.ts: fixed upper/fore lengths via reachable hand target and elbow geometry.
+src/camper-blanket.ts: elbow following cloth, torso/sleeve/seat clearance. Historical old-body treatment explicitly placed before model rebuild; not presented as full physics simulation.
+src/character-redesign/{bake.ts,mesher.ts,simplify.ts,packed.ts,runtime.ts,game-camper.ts}: SDF -> Surface Nets -> simplification -> binary blueprint -> runtime rig; runtime excludes SDF; mirror vertices/normals/indices/bones/eyes.
+scripts/bake-characters.mjs: current doll male/female, checks after simplify.
+src/character-appearance.ts: version1, style only doll, gender and valid slot IDs, SD ignored -> doll, legacy gender; malformed fallback.
+src/cave.ts: pendingAppearance during gesture, apply after gesture; head mapping.
+Current test execution reported by root: arm-pose and appearance in /tmp/bounded-run-5tl6bugh/output.log PASS. No browser execution claimed.
+
+EP6 primary evidence
+c718a94 forest ambience/time/distant landscape/aurora/puddles.
+ef97800 distinct seasonal landscapes Nov10.
+81f1195 seasonal scenery/fire smoke refinement.
+43087b7 save-and-exit Nov10.
+ecf3fa3 seasonal wildlife/footsteps Nov12.
+src/seasons.ts: 7 game days per season, override, daylight spring13 summer18 autumn11 winter6, solarHour mapping.
+src/{seasonal-nature.ts,seasonal-trees.ts,distant-landscape.ts,world.ts}: season scenery and trees; source tracked commits primary over README.
+src/aurora.ts: multiple continuous curtains, low frequency folding and fine rays, fwidth filtering; palette choices.
+src/env-state.ts172+: winter, daylight<.15, cloud<.45, rain/snow<.01, weather !=rain/snow; random delay/duration, smooth intensity. No claim exactly weather enum clear (cloudy low-cloud transition also technically can qualify).
+src/seasonal-wildlife.ts: seasonal species, visible entry and walk exit, far/offscreen cleanup, family path following, feet timing, snowCover>.3 else autumn leaves elsegrass.
+src/rain-puddles.ts: low/slope checks, clear callback, 4-6 blobs/cluster, ground-follow mesh, advance separate update, rain fill and dry, snow suppresses visible.
+src/puddle.ts: separate wet-log-stack puddle, explained distinction.
+src/{time-save.ts,environment-save.ts,fire-save.ts}: per owner localStorage, version/validation, snapshot, no offline sim. Cloud account progress distinction.
+src/main.ts1193+: tick then inactive saveSceneTime/saveCamp/account upload, pause background/sound/media, reload; start explicitly activates session after audio; sessionActive tick guard.
+Root current saves tests PASS in /tmp/bounded-run-5tl6bugh/output.log and aurora PASS /tmp/bounded-run-ao1_8gmg/output.log. No browser/actual listening claim.
+
+Contradictions/limits
+README has evolving/uncommitted changes by others, not edited or treated as final truth.
+SD is historical only; no current SD selector or full wardrobe acquisition feature implied.
+No measured FPS/visual QA/performance improvement numbers invented.
+No all-device sync claim for environment/fire snapshots; no offline burn.
+No actual screen/listening validation claimed. Automated current tests credit root execution.
+Potential review: ep6 spring deer/fawn and puddle exclusions source inspected across previous reads; ensure current source and latest root edits still align before registration.
+No new reusable KB candidate; task is editorial synthesis of repository evidence.
+
+Suggested visual checks (NOT executed by this agent)
+Character: gesture and seat browser tests, sip mouth/hand contact, forward reach head, blanket/clothing clearance, old appearance migration.
+Environment: season-appearance.browser.mjs, aurora-continuity.browser.mjs, aurora-motion.browser.mjs, seasonal-wildlife.browser.mjs, wildlife-audio.browser.mjs, rain-puddles.browser.mjs, environment-exit and fire-reopen checks; inspect actual Orca tab/site identity first.

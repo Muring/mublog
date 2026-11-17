@@ -1,0 +1,99 @@
+{
+  "sourceCommit": "41f461c",
+  "asOf": "2026-11-17",
+  "status": "registered_drafts_backed_up",
+  "posts": [
+    {
+      "order": 1,
+      "title": "불멍 개발기 1 (시작 편)",
+      "draft": "output/blog-drafts/bulmeong-development-1.mdx",
+      "characters": 7462,
+      "sha256": "0a9852c475fc94cb4ec8b1e1d82e34c39ed201aff608cea987ae76f930ae669a",
+      "thumbnail": "output/imagegen/blog-development-thumbnails/bulmeong-development-1-start.png",
+      "thumbnailApproval": "approved",
+      "thumbnailUrl": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/bulmeong-development-1/illustration-c71d88283bc2.jpg"
+    },
+    {
+      "order": 2,
+      "title": "불멍 개발기 2 (진행 편)",
+      "draft": "output/blog-drafts/bulmeong-development-2.mdx",
+      "characters": 8423,
+      "sha256": "40da210d8cb059d9e17060059cd728fbe53402d4e4ecfceeccc98691c95946d2",
+      "thumbnail": "output/imagegen/blog-development-thumbnails/bulmeong-development-2.png",
+      "thumbnailApproval": "approved",
+      "thumbnailUrl": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/bulmeong-development-2/illustration-4f2444e7f1bd.jpg"
+    },
+    {
+      "order": 3,
+      "title": "불멍 개발기 3 (브라우저 편)",
+      "draft": "output/blog-drafts/bulmeong-development-3.mdx",
+      "characters": 8734,
+      "sha256": "7c0a403b7e31a2bbc8f49a1b7c6114d18976b7efb3ee6ab689f0b9122906178d",
+      "thumbnail": "output/imagegen/blog-development-thumbnails/bulmeong-development-3.png",
+      "thumbnailApproval": "approved",
+      "thumbnailUrl": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/bulmeong-development-3/illustration-80a2c78a7970.jpg"
+    },
+    {
+      "order": 4,
+      "title": "불멍 개발기 4 (캐릭터 편)",
+      "draft": "output/blog-drafts/bulmeong-development-4.mdx",
+      "characters": 6354,
+      "sha256": "0392c651facfb8f7f5a0704e993ef4d94dfca230225467e10eea2d8ad7549c5c",
+      "thumbnail": "output/imagegen/blog-development-thumbnails/bulmeong-development-4.png",
+      "thumbnailApproval": "approved",
+      "thumbnailUrl": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/bulmeong-development-4/illustration-cfc3918a0bbf.jpg"
+    },
+    {
+      "order": 5,
+      "title": "불멍 개발기 5 (불과 소리 편)",
+      "draft": "output/blog-drafts/bulmeong-development-5.mdx",
+      "characters": 8163,
+      "sha256": "4ab38629294d72a515ebb80b9579915f5440d0239f7c32d309a5cdc3d6cccd12",
+      "thumbnail": "output/imagegen/blog-development-thumbnails/bulmeong-development-5.png",
+      "thumbnailApproval": "approved",
+      "thumbnailUrl": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/bulmeong-development-5/illustration-e8c436b6b8db.jpg"
+    },
+    {
+      "order": 6,
+      "title": "불멍 개발기 6 (계절 편)",
+      "draft": "output/blog-drafts/bulmeong-development-6.mdx",
+      "characters": 6786,
+      "sha256": "03d563dc1f423372145303f38d75de064f3d638a1f8528dad107a82dc4d31943",
+      "thumbnail": "output/imagegen/blog-development-thumbnails/bulmeong-development-6.png",
+      "thumbnailApproval": "approved",
+      "thumbnailUrl": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/bulmeong-development-6/illustration-995cf18d50c5.jpg"
+    },
+    {
+      "order": 7,
+      "title": "불멍 개발기 7 (쉼터 편)",
+      "draft": "output/blog-drafts/bulmeong-development-7.mdx",
+      "characters": 7436,
+      "sha256": "8857723c9abb84f21183dc4b1bbdab063c583101f1f02106a6ce0237f95bf052",
+      "thumbnail": "output/imagegen/blog-development-thumbnails/bulmeong-development-7.png",
+      "thumbnailApproval": "approved",
+      "thumbnailUrl": "https://qzheelrrsgtlzufhcszl.supabase.co/storage/v1/object/public/post-images/thumbnails/bulmeong-development-7/illustration-b55d9e1d1e07.jpg"
+    }
+  ],
+  "verification": {
+    "metadataAndSeriesLinks": "pass",
+    "draftPostDryRun": "7/7 pass",
+    "nodeTests": "36/36 pass",
+    "records": "pass, including SQL copy sync",
+    "aurora": "pass",
+    "kindlingBirds": "pass",
+    "browserAndListening": "not run",
+    "databaseRegistration": "7/7 DRAFT, unpublished, content/render/metadata/order/thumbnail match",
+    "backup": "7 drafts exported with existing backup script, isolated full DB snapshot, only requested seven copied into repository",
+    "adminBrowser": "not verified: Orca browser_owner_unavailable",
+    "backupEquality": "7/7 frontmatter and body match"
+  },
+  "kb": {
+    "consulted": [
+      "/home/muring/dev/muring-kb/START-HERE.md",
+      "/home/muring/dev/muring-kb/preferences/ai-efficiency.md"
+    ],
+    "newCandidate": null,
+    "reason": "프로젝트 원본의 개발 이력 정리이며 새 재사용 지식 확정 없음"
+  },
+  "backupSnapshot": "/tmp/mublog-backup-bulmeong-u0l4f74h/backup/posts"
+}

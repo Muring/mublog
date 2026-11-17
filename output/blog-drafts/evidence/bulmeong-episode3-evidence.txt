@@ -1,0 +1,22 @@
+Episode 3 evidence / review handoff
+Draft: output/blog-drafts/bulmeong-development-3.mdx (8844 chars; 6 H2)
+Source repo HEAD reviewed: 41f461c. README was modified by another session; primary assertions checked against source/git. No code, git, DB or upload mutations.
+
+Chronology and source mapping
+- 8b745c0 mobile controls; f114c9a one mobile menu. Current src/menu-bar.ts provides one-open menu, click path close, ResizeObserver height.
+- c239a58 landscape low-height panels: historical 844x390 settings top -133px; 740x360 shelter -25px. Width >=720 override fixed with low-height max and internal scroll. These are historical measurements, not current browser checks.
+- 3b4b590 account/settings UI split from main; d3aca1b shelter rendering split with game/save responsibility retained in main; bbd4a40 menu-bar split; b026957 CSS consolidation. Commit notes contain before/after browser comparisons, scoped as historical.
+- 00abfde PWA; af68a64 install help; b0c8da5 automatic banner fading. Current src/install.ts beforeinstallprompt versus instructions, standalone suppression, interaction pause/fade, snooze. Avoid timeless unsupported platform claims.
+- 63ded31 restored Media Session and quiet audio loop after opt-in ordinary notifications broke hidden playback. Current src/background.ts quiet10s wav + WebAudio actual audio, user action start, notifying based on real audio play state.
+- eaa8c78 Infinity setPositionState accepted by headless Chromium, not proof of phone notification layout.
+- dece6de/b8a50eb MediaStream experiment and source preference; 243e487 reverted after actual phone notifications disappeared. Final looping file retained; timeline UI cannot be guaranteed hidden.
+- f64d2a2 state/weather/time metadata; f992626 title/subtitle adjustment for Samsung combined line.
+- Current src/background-audio.ts classifies mobile separately from touch desktops. tests/background-audio.test.mjs is policy unit coverage, not device playback proof.
+- 80e80a0 2026-11-03 introduced ?fixedres adaptive rendering control. Current src/main.ts:1284 adaptive resolution averages frames, skips >200ms gaps, lowers/raises pixel ratio. :1582 fps overlay includes fps/worst/draw/pixel ratio. Draft explicitly backtracks to Nov3 before Nov4–6 browser work; no measured performance claims.
+- 162313c vendor splitting: historical test game code changes only game hash, vendor hash stable. Current vite.config.ts vendor chunk. Historical bundle size deliberately omitted.
+- 2f62be0 prune stale same-cache hashed assets. Current public/sw.js HTML network-first; assets/icons cache-first; ignores API/external/nonGET; traversal cached JS/CSS preserves indirect references; no built asset references => no deletes. tests/sw-cache.test.mjs covers current assets / indirect asset / dev no-delete.
+
+Validation
+- This child did NOT run build, typecheck, browser, phone installation/background checks or test suite. Only inspected source, commits, output metadata and headings.
+- Parent reported full15 Node suites + records/aurora/kindling-birds checks PASS. Draft keeps historical verification distinct and says current device install/lockscreen not re-executed. Parent may add exact fresh test scope from its logs.
+- Suggested parent checks: YAML tags/status/date/order; references /bulmeong-development-2; no assertion MediaStream current; no infinite duration guarantees; series ep2 overlap and ep4 transition. Existing repeated broad caveats in result may be tightened editorially without broadening claims.
