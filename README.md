@@ -285,7 +285,8 @@ remarkParse → remarkGfm → remarkRehype(allowDangerousHtml)
   MDX는 이를 JSX flow element로 파싱해 내부 마크다운을 처리했지만,
   CommonMark는 다음 빈 줄까지 전부 raw HTML로 삼켜 `**굵게**`가 문자 그대로 렌더됩니다.
 
-`yarn verify:render`가 이 12가지를 회귀 검사합니다.
+Markdown·Python과 Prisma 스키마 코드블록도 등록해 처리합니다. `text` 블록은 색칠 없이 표시합니다.
+`yarn verify:render`는 파이프라인과 언어별 토큰 생성을 회귀 검사하며, `yarn audit:render`는 각 코드블록의 문법 등록과 토큰을 따로 검사합니다. 한 블록이 정상이어도 다른 블록의 문법 누락을 가리지 않습니다.
 
 ### 권한과 보안
 
@@ -774,7 +775,7 @@ $ yarn dev
 | `yarn migrate:posts`    | mdx를 DB로 가져오기 (복구·최초 이전)            |
 | `yarn verify:migration` | 백업과 DB 대조                                  |
 | `yarn verify:analytics` | 관리 통계 날짜·집계·비교·순위 회귀 검사 (DB 접속 없음) |
-| `yarn verify:render`    | 마크다운 파이프라인 회귀 검사 (12가지)          |
+| `yarn verify:render`    | 마크다운 파이프라인·언어 등록·하이라이팅 감사 회귀 검사 |
 | `yarn tsx scripts/verify-admin-filters.mts` | 관리 필터의 날짜·용량 경계, 형식 통합, URL 복원, 조건 조합 검사 |
 | `yarn tsx scripts/verify-storage-list.mts` | 목록 메타데이터 단일 조회·삭제 전 Storage 재확인·깊은 폴더·페이지네이션·병렬 상한·조회 실패 시 삭제 차단 검사 (외부 접속 없음) |
 | `yarn tsx scripts/verify-image-pagination.mts` | 실제 PostgreSQL의 가상 800개 행으로 페이지·정렬·필터·전체 집계·커서 검증 (DB 연결 필요, 데이터 쓰기 없음) |

@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { fetchPostViews, queryKeys } from "@/lib/queries";
+import { useHydratedValue } from "@/hooks/useHydratedValue";
 
 /**
  * 포스트 조회수.
@@ -18,5 +19,6 @@ export default function PostViews({ slug, initialViews }: { slug: string; initia
         staleTime: 0,
     });
 
-    return <>조회 {data.toLocaleString("ko-KR")}</>;
+    const views = useHydratedValue(data, initialViews);
+    return <>조회 {views.toLocaleString("ko-KR")}</>;
 }

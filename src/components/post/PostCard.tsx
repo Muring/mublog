@@ -8,6 +8,7 @@ import TagChips from "@/components/ui/TagChips";
 import type { PostSummary } from "@/types/post";
 import { formatCardDate } from "@/lib/date";
 import { fetchPostViewCounts, queryKeys } from "@/lib/queries";
+import { useHydratedValue } from "@/hooks/useHydratedValue";
 
 /**
  * 목록·캐러셀에서 쓰는 포스트 카드.
@@ -62,7 +63,7 @@ export default function PostCard({
         queryFn: fetchPostViewCounts,
         staleTime: 0,
     });
-    const viewCount = liveViews?.[post.slug] ?? post.viewCount;
+    const viewCount = useHydratedValue(liveViews?.[post.slug] ?? post.viewCount, post.viewCount);
 
     const formattedDate = formatCardDate(post.publishedAt);
 

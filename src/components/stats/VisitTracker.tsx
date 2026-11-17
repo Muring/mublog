@@ -19,7 +19,8 @@ function postSlugFrom(pathname: string): string | null {
 /**
  * 방문 집계 비콘. 화면에 아무것도 그리지 않는다.
  *
- * 하이드레이션 이후에 호출하므로 렌더 경로에 전혀 영향을 주지 않는다.
+ * 이 컴포넌트의 이펙트가 실행돼도 다른 스트리밍 영역은 아직 하이드레이션 중일 수 있다.
+ * 이 캐시를 표시하는 컴포넌트는 첫 하이드레이션 값을 서버 HTML과 맞춰야 한다.
  * keepalive 를 붙여 사용자가 곧바로 페이지를 떠나도 요청이 살아남게 한다.
  */
 export default function VisitTracker() {

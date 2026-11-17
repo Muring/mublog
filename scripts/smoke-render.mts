@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import matter from "gray-matter";
 import { renderMarkdown, normalizeCallouts } from "../src/lib/markdown/render";
+import { checkCodeHighlighting } from "./highlight-check.mjs";
 
 const checks: { name: string; pass: boolean; detail: string }[] = [];
 function check(name: string, pass: boolean, detail = "") {
@@ -90,6 +91,21 @@ check(
         sourceImages.every((src, index) => renderedImages[index] === src),
     `source=${sourceImages.length} rendered=${renderedImages.length}`
 );
+
+const kbHtml = await renderMarkdown(read("muring-kb-development-1"));
+check("Markdown 문법 토큰 생성", /class="token /.test(await renderMarkdown("```md\n# heading\n**bold**\n```")));
+check("Python 문법 토큰 생성", /token keyword/.test(await renderMarkdown("```python\ndef example():\n    return True\n```")));
+const prismaHtml = await renderMarkdown('```prisma\nmodel Post {\n  title String @db.VarChar(60)\n  slug String @map("post_slug")\n  @@index([title])\n}\n```');
+check("Prisma 스키마의 선언·타입·속성·문자열 토큰 생성", ["keyword", "class-name", "annotation", "string"].every((token) => prismaHtml.includes(`token ${token}`)));
+for (const language of ["text", "plaintext", "plain", "txt", "js"]) {
+    check(`${language} 무토큰 코드블록 허용`, (await checkCodeHighlighting(await renderMarkdown(`\`\`\`${language}\nidentifier\n\`\`\``))).length === 0);
+}
+const mixed = await renderMarkdown("```js\nconst n = 1;\n```\n\n~~~unknown-language\nconst n = 1;\n~~~");
+check("정상 블록 옆 미등록 언어도 검출", (await checkCodeHighlighting(mixed)).some((issue) => issue.includes("unknown-language")));
+const missing = '<pre><code class="language-js">const n = 1;</code></pre>';
+check("언어 클래스만 있고 토큰이 빠진 블록 검출", (await checkCodeHighlighting(missing)).length === 1);
+check("등록된 Markdown·Python 블록 감사 통과", (await checkCodeHighlighting(kbHtml)).length === 0);
+check("Prisma 블록 감사 통과", (await checkCodeHighlighting(prismaHtml)).length === 0);
 
 let failed = 0;
 for (const c of checks) {

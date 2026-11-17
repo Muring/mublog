@@ -46,6 +46,7 @@
         "src/lib/markdown/*",
         "backup/posts/*",
         "scripts/smoke-render.mts",
+        "scripts/highlight-check.mts",
         "package.json",
         "yarn.lock"
       ],
@@ -77,6 +78,7 @@
         "backup/posts/*",
         "public/images/*",
         "scripts/audit-render.mts",
+        "scripts/highlight-check.mts",
         "package.json",
         "yarn.lock",
         "scripts/local-image-check.mts",
