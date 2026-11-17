@@ -122,6 +122,20 @@
         "scripts/verify-likes.mts"
       ],
       "timeout": 120
+    },
+    {
+      "name": "post-dates",
+      "command": [
+        "yarn",
+        "exec",
+        "tsx",
+        "scripts/verify-post-dates.mts"
+      ],
+      "paths": [
+        "src/lib/date.ts",
+        "scripts/verify-post-dates.mts"
+      ],
+      "timeout": 120
     }
   ]
 }
